@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>CuHalide Atlas</title>
+  <style>
+    html,body{height:100%;margin:0;background:#f5f8fa;color:#102838;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+    body{display:grid;place-items:center}
+    main{width:min(560px,calc(100% - 40px));background:#fff;border:1px solid #d6e1e7;border-radius:18px;padding:28px;box-shadow:0 18px 50px rgba(8,38,60,.10)}
+    strong{display:block;font-size:20px;margin-bottom:8px}p{margin:0;color:#647987;font-size:13px;line-height:1.6}
+  </style>
+</head>
+<body>
+  <main id="boot"><strong>CuHalide Atlas</strong><p>Loading frozen release 3.0.0…</p></main>
+  <script>
+  (()=>{
+    const url='/api/site?render=html&v=20260809-2&t='+Date.now();
+    fetch(url,{cache:'no-store',headers:{accept:'text/html'}})
+      .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+      .then(html=>{
+        if(!/^\s*<!doctype html>/i.test(html)&&!/^\s*<html\b/i.test(html))throw new Error('Invalid HTML payload');
+        document.open();document.write(html);document.close();
+      })
+      .catch(err=>{
+        const n=document.getElementById('boot');
+        if(n)n.innerHTML='<strong>CuHalide Atlas could not load.</strong><p>'+String(err.message||err).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))+'</p>';
+      });
+  })();
+  </script>
+</body>
+</html>
