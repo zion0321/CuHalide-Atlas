@@ -27,7 +27,9 @@ function sleep(ms) {
 async function fetchUpstream(req) {
   const incoming = new URL(req.url, PUBLIC_ORIGIN);
   const upstream = new URL(UPSTREAM);
-  for (const [key, value] of incoming.searchParams.entries()) upstream.searchParams.append(key, value);
+  for (const [key, value] of incoming.searchParams.entries()) {
+    if (!['render', 'v', 't'].includes(key)) upstream.searchParams.append(key, value);
+  }
 
   let lastError;
   for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -38,7 +40,7 @@ async function fetchUpstream(req) {
         method: req.method,
         headers: {
           accept: 'text/html,application/xhtml+xml,text/plain;q=0.9',
-          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Proxy/2.0',
+          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Proxy/3.0',
         },
         redirect: 'follow',
         signal: controller.signal,
@@ -76,6 +78,10 @@ export default async function handler(req, res) {
 
     res.statusCode = response.status;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Content-Disposition', 'inline; filename="index.html"');
+    res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.setHeader('Content-Security-Policy', CSP);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
@@ -85,7 +91,7 @@ export default async function handler(req, res) {
     res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
     res.setHeader('X-Robots-Tag', response.headers.get('x-robots-tag') || 'index, follow, max-image-preview:large');
 
-    for (const header of ['cache-control', 'etag', 'x-cuhalide-site-version', 'x-cuhalide-site-snapshot']) {
+    for (const header of ['x-cuhalide-site-version', 'x-cuhalide-site-snapshot']) {
       const value = response.headers.get(header);
       if (value) res.setHeader(header, value);
     }
