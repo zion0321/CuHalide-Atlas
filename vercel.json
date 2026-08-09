@@ -23,7 +23,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-site"
+      "destination": "/api/site"
     }
   ],
   "headers": [
@@ -49,10 +49,6 @@
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=63072000; includeSubDomains; preload"
-        },
-        {
-          "key": "x-vercel-enable-rewrite-caching",
-          "value": "1"
         }
       ]
     }
