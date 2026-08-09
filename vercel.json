@@ -1,0 +1,60 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/robots.txt",
+      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta?asset=robots"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta?asset=sitemap"
+    },
+    {
+      "source": "/release-manifest.json",
+      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta?asset=manifest"
+    },
+    {
+      "source": "/citation.txt",
+      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta?asset=citation"
+    },
+    {
+      "source": "/health.json",
+      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta?asset=health"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-site"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "x-vercel-enable-rewrite-caching",
+          "value": "1"
+        }
+      ]
+    }
+  ]
+}
