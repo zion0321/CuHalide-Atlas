@@ -1,16 +1,68 @@
 const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-site';
 const SUPABASE_ORIGIN = 'https://tyxnyjyrfzspwcfjpzus.supabase.co';
+const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
+
+const DATA_UPSTREAM = `${SUPABASE_ORIGIN}/functions/v1/cuhalide-atlas-data-stable`;
+const AGENT_UPSTREAM = `${SUPABASE_ORIGIN}/functions/v1/cuhalide-atlas-smart-rag`;
+const META_UPSTREAM = `${SUPABASE_ORIGIN}/functions/v1/cuhalide-atlas-meta`;
+const DATA_PROXY = `${PUBLIC_ORIGIN}/api/data`;
+const AGENT_PROXY = `${PUBLIC_ORIGIN}/api/agent`;
+const META_PROXY = `${PUBLIC_ORIGIN}/api/meta`;
 
 const CSP = [
   "default-src 'self' data:",
   "img-src 'self' data: https:",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline'",
-  `connect-src 'self' ${SUPABASE_ORIGIN}`,
+  "connect-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
 ].join('; ');
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchUpstream(req) {
+  const incoming = new URL(req.url, PUBLIC_ORIGIN);
+  const upstream = new URL(UPSTREAM);
+  for (const [key, value] of incoming.searchParams.entries()) upstream.searchParams.append(key, value);
+
+  let lastError;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+    try {
+      const response = await fetch(upstream, {
+        method: req.method,
+        headers: {
+          accept: 'text/html,application/xhtml+xml,text/plain;q=0.9',
+          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Proxy/2.0',
+        },
+        redirect: 'follow',
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      return response;
+    } catch (error) {
+      clearTimeout(timer);
+      lastError = error;
+      if (attempt === 0) await sleep(250);
+    }
+  }
+  throw lastError || new Error('Upstream request failed');
+}
+
+function rewriteBrowserDependencies(body) {
+  return body
+    .split(DATA_UPSTREAM).join(DATA_PROXY)
+    .split(AGENT_UPSTREAM).join(AGENT_PROXY)
+    .split(META_UPSTREAM).join(META_PROXY)
+    .replace(/<link rel="preconnect" href="https:\/\/tyxnyjyrfzspwcfjpzus\.supabase\.co" crossorigin>\s*/g, '')
+    .replace(/<link rel="dns-prefetch" href="\/\/tyxnyjyrfzspwcfjpzus\.supabase\.co">\s*/g, '')
+    .replace(/connect-src 'self' https:\/\/tyxnyjyrfzspwcfjpzus\.supabase\.co/g, "connect-src 'self'");
+}
 
 export default async function handler(req, res) {
   if (!['GET', 'HEAD'].includes(req.method)) {
@@ -20,20 +72,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const incoming = new URL(req.url, 'https://cuhalide-atlas-v3.vercel.app');
-    const upstream = new URL(UPSTREAM);
-    for (const [key, value] of incoming.searchParams.entries()) {
-      upstream.searchParams.append(key, value);
-    }
-
-    const response = await fetch(upstream, {
-      method: req.method,
-      headers: {
-        accept: 'text/html,application/xhtml+xml,text/plain;q=0.9',
-        'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Proxy/1.0',
-      },
-      redirect: 'follow',
-    });
+    const response = await fetchUpstream(req);
 
     res.statusCode = response.status;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -52,9 +91,16 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'HEAD') return res.end();
-    const body = await response.text();
-    if (response.ok && !/^\s*<!doctype html>/i.test(body) && !/^\s*<html\b/i.test(body)) {
+    const upstreamBody = await response.text();
+    if (response.ok && !/^\s*<!doctype html>/i.test(upstreamBody) && !/^\s*<html\b/i.test(upstreamBody)) {
       throw new Error('Upstream did not return an HTML document');
+    }
+
+    const body = rewriteBrowserDependencies(upstreamBody);
+    if (response.ok) {
+      for (const required of [DATA_PROXY, AGENT_PROXY, META_PROXY]) {
+        if (!body.includes(required)) throw new Error(`Same-origin rewrite missing: ${required}`);
+      }
     }
     return res.end(body);
   } catch (error) {
