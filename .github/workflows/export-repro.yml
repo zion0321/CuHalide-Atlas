@@ -73,7 +73,7 @@ jobs:
           mkdir -p export/api
           cp api/site.js export/api/site.js
           if [ -d supabase ]; then cp -R supabase export/supabase; fi
-          (cd export && find . -type f -print0 | sort -z | xargs -0 sha256sum) > export/CHECKSUMS_SHA256.txt
+          (cd export && find . -type f ! -name 'CHECKSUMS_SHA256.txt' -print0 | sort -z | xargs -0 sha256sum) > export/CHECKSUMS_SHA256.txt
           (cd export && zip -9 -r ../CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip .)
           sha256sum CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip > CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip.sha256
 
