@@ -29,19 +29,14 @@ export default async function handler(req, res) {
     const response = await fetch(upstream, {
       method: req.method,
       headers: {
-        accept: 'text/html,application/xhtml+xml',
+        accept: 'text/html,application/xhtml+xml,text/plain;q=0.9',
         'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Proxy/1.0',
       },
       redirect: 'follow',
     });
 
-    const contentType = response.headers.get('content-type') || 'text/html; charset=utf-8';
-    if (response.ok && !contentType.toLowerCase().includes('text/html')) {
-      throw new Error(`Unexpected upstream content type: ${contentType}`);
-    }
-
     res.statusCode = response.status;
-    res.setHeader('Content-Type', contentType.toLowerCase().includes('text/html') ? contentType : 'text/html; charset=utf-8');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Content-Security-Policy', CSP);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
@@ -58,6 +53,9 @@ export default async function handler(req, res) {
 
     if (req.method === 'HEAD') return res.end();
     const body = await response.text();
+    if (response.ok && !/^\s*<!doctype html>/i.test(body) && !/^\s*<html\b/i.test(body)) {
+      throw new Error('Upstream did not return an HTML document');
+    }
     return res.end(body);
   } catch (error) {
     console.error('[cuhalide-site-proxy]', error);
