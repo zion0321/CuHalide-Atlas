@@ -25,13 +25,13 @@ jobs:
           mkdir -p export/data export/site export/meta export/qa
           SB='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1'
           PUBLIC='https://cuhalide-atlas-v3.vercel.app'
-          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=articles"   -o export/data/articles.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=articles" -o export/data/articles.json
           curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=structures" -o export/data/structures.json
-          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=verified"   -o export/data/verified.json
-          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=polar"      -o export/data/polar.json
-          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=bootstrap"  -o export/data/bootstrap.json
-          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=health"     -o export/data/data-health.json
-          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=status"     -o export/data/monitor-status.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=verified" -o export/data/verified.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=polar" -o export/data/polar.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=bootstrap" -o export/data/bootstrap.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=health" -o export/data/data-health.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=status" -o export/data/monitor-status.json
           curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=candidates&limit=200" -o export/data/monitor-candidates.json
           curl --fail --silent --show-error --location "$SB/cuhalide-atlas-site" -o export/site/site-v36.html
           curl --fail --silent --show-error --location "$PUBLIC/" -o export/site/public-root.html
@@ -63,7 +63,6 @@ jobs:
           jq -e '.ok == true and ([.tests[] | select(.pass == true)] | length) == 14' export/qa/smart-rag-selftest.json >/dev/null
           grep -q '^Sitemap: https://cuhalide-atlas-v3.vercel.app/sitemap.xml$' export/meta/robots.txt
           test "$(grep -o '<entry>' export/meta/sitemap.atom.xml | wc -l)" -eq 1225
-          (cd export && find . -type f -print0 | sort -z | xargs -0 sha256sum) > export/CHECKSUMS_SHA256.txt
 
       - name: Package snapshot
         shell: bash
@@ -73,6 +72,8 @@ jobs:
           cp vercel.json export/vercel.json
           mkdir -p export/api
           cp api/site.js export/api/site.js
+          if [ -d supabase ]; then cp -R supabase export/supabase; fi
+          (cd export && find . -type f -print0 | sort -z | xargs -0 sha256sum) > export/CHECKSUMS_SHA256.txt
           (cd export && zip -9 -r ../CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip .)
           sha256sum CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip > CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip.sha256
 
