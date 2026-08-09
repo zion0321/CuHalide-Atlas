@@ -3,23 +3,23 @@
   "rewrites": [
     {
       "source": "/robots.txt",
-      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta?asset=robots"
+      "destination": "/api/meta?asset=robots"
     },
     {
       "source": "/sitemap.xml",
-      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta?asset=sitemap"
+      "destination": "/api/meta?asset=sitemap"
     },
     {
       "source": "/release-manifest.json",
-      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta?asset=manifest"
+      "destination": "/api/meta?asset=manifest"
     },
     {
       "source": "/citation.txt",
-      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta?asset=citation"
+      "destination": "/api/meta?asset=citation"
     },
     {
       "source": "/health.json",
-      "destination": "https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta?asset=health"
+      "destination": "/api/meta?asset=health"
     },
     {
       "source": "/(.*)",
