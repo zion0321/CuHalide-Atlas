@@ -1,0 +1,87 @@
+name: Export reproducibility snapshot
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/export-repro.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download immutable public release views
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p export/data export/site export/meta export/qa
+          SB='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1'
+          PUBLIC='https://cuhalide-atlas-v3.vercel.app'
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=articles"   -o export/data/articles.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=structures" -o export/data/structures.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=verified"   -o export/data/verified.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=polar"      -o export/data/polar.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=bootstrap"  -o export/data/bootstrap.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=health"     -o export/data/data-health.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=status"     -o export/data/monitor-status.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-data-stable?action=candidates&limit=200" -o export/data/monitor-candidates.json
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-site" -o export/site/site-v36.html
+          curl --fail --silent --show-error --location "$PUBLIC/" -o export/site/public-root.html
+          curl --fail --silent --show-error --location "$PUBLIC/release-manifest.json" -o export/meta/release-manifest.json
+          curl --fail --silent --show-error --location "$PUBLIC/health.json" -o export/meta/health.json
+          curl --fail --silent --show-error --location "$PUBLIC/robots.txt" -o export/meta/robots.txt
+          curl --fail --silent --show-error --location "$PUBLIC/sitemap.xml" -o export/meta/sitemap.atom.xml
+          curl --fail --silent --show-error --location "$PUBLIC/citation.txt" -o export/meta/citation.txt
+          curl --fail --silent --show-error --location "$SB/cuhalide-atlas-smart-rag?selftest=1" -o export/qa/smart-rag-selftest.json
+
+      - name: Verify immutable hashes and invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s  %s\n' 'aaf5ee702cd5768c26c871f3bcac65064f67c00e0f45953ea16a9a18f4f277b8' 'export/data/articles.json' > /tmp/checks
+          printf '%s  %s\n' 'baa54613cdac9e37332019b9103af2cd59399a3fffdd62e5eab17e7e281240d1' 'export/data/structures.json' >> /tmp/checks
+          printf '%s  %s\n' '02d1fe0b8e48797eb1ebed28b224c191e03fad1424c64b23d7b697b0f237a77e' 'export/data/verified.json' >> /tmp/checks
+          printf '%s  %s\n' 'eef897a423e6737b98e17ddfc7d5c816f435a47613fd3b03bb0a9007a43bc4c9' 'export/data/polar.json' >> /tmp/checks
+          printf '%s  %s\n' '53ac7dc76be175b673bda76bc217031280bff4353da12a10066def6e74f7d478' 'export/data/bootstrap.json' >> /tmp/checks
+          printf '%s  %s\n' '450f9deb74050dbd5c26403224d2bf943488e052241084dcde41644274b42891' 'export/site/site-v36.html' >> /tmp/checks
+          printf '%s  %s\n' '450f9deb74050dbd5c26403224d2bf943488e052241084dcde41644274b42891' 'export/site/public-root.html' >> /tmp/checks
+          printf '%s  %s\n' 'db469b374237fe4783570b7640e194b40a393897d824ca0b236637bb6abaed8b' 'export/meta/sitemap.atom.xml' >> /tmp/checks
+          sha256sum --check /tmp/checks
+          jq -e '.count == 346 and (.items|length) == 346' export/data/articles.json >/dev/null
+          jq -e '.count == 878 and (.items|length) == 878' export/data/structures.json >/dev/null
+          jq -e '.count == 625 and (.items|length) == 625' export/data/verified.json >/dev/null
+          jq -e '.count == 67 and (.items|length) == 67' export/data/polar.json >/dev/null
+          jq -e '.ok == true and .meta_version == "1.13.0" and .warnings == [] and .public_site.ok == true and .smart_rag.selftest_passed == 14' export/meta/health.json >/dev/null
+          jq -e '.ok == true and ([.tests[] | select(.pass == true)] | length) == 14' export/qa/smart-rag-selftest.json >/dev/null
+          grep -q '^Sitemap: https://cuhalide-atlas-v3.vercel.app/sitemap.xml$' export/meta/robots.txt
+          test "$(grep -o '<entry>' export/meta/sitemap.atom.xml | wc -l)" -eq 1225
+          (cd export && find . -type f -print0 | sort -z | xargs -0 sha256sum) > export/CHECKSUMS_SHA256.txt
+
+      - name: Package snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp README.md export/REPOSITORY_README.md 2>/dev/null || true
+          cp vercel.json export/vercel.json
+          mkdir -p export/api
+          cp api/site.js export/api/site.js
+          (cd export && zip -9 -r ../CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip .)
+          sha256sum CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip > CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip.sha256
+
+      - name: Upload verified snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: CuHalide-Atlas-public-repro-v3.0.0
+          path: |
+            CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip
+            CuHalide_Atlas_Public_Repro_Snapshot_v3_0.zip.sha256
+          if-no-files-found: error
+          retention-days: 90
