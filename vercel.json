@@ -20,6 +20,14 @@
     {
       "source": "/health.json",
       "destination": "/api/meta?asset=health"
+    },
+    {
+      "source": "/",
+      "destination": "/api/site"
+    },
+    {
+      "source": "/index.html",
+      "destination": "/api/site"
     }
   ],
   "headers": [
@@ -27,8 +35,24 @@
       "source": "/",
       "headers": [
         {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "inline; filename=\"index.html\""
+        },
+        {
           "key": "Cache-Control",
-          "value": "no-store, max-age=0"
+          "value": "no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
         }
       ]
     },
@@ -36,8 +60,24 @@
       "source": "/index.html",
       "headers": [
         {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "inline; filename=\"index.html\""
+        },
+        {
           "key": "Cache-Control",
-          "value": "no-store, max-age=0"
+          "value": "no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
         }
       ]
     },
