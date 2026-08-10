@@ -5,11 +5,11 @@
 - Public website: https://cuhalide-atlas-v3.vercel.app/
 - Public release: **3.0.1** — 10 August 2026
 - Scientific parent: **3.0.0**
-- Literature inclusion cutoff for the frozen corpus: **June 2026 (2026-06)**
-- Public site: **v46**
-- Public data contract: **2.2.1**
-- Smart RAG public gateway: **9.9.7**
-- Public metadata/health contract: **46.0**
+- Frozen literature cutoff: **June 2026 (2026-06)**
+- Public site: **v47**
+- Public data contract: **2.4.0**
+- Smart RAG public gateway: **9.9.9**
+- Public metadata/health contract: **47.0**
 - Known errata: [`ERRATA.md`](ERRATA.md)
 
 ## Frozen scientific corpus
@@ -27,7 +27,7 @@
 | Strict polar rows | 67 |
 | Strict polar articles | 42 |
 
-Release 3.0.1 is a bibliographic-only patch over the scientific 3.0.0 parent. The patch changed bibliographic title presentation without changing frozen scientific denominators.
+Release 3.0.1 is a bibliographic-only patch over scientific parent 3.0.0. The patch changed bibliographic title presentation without changing frozen scientific denominators.
 
 ## Public access model
 
@@ -54,15 +54,29 @@ Kept in the private research corpus:
 
 If a manuscript requires a reproducibility deposit, a **manuscript-specific minimal dataset** should be prepared for that analysis rather than publishing the complete internal knowledge base.
 
+## Public query architecture
+
+Public data 2.4.0 no longer reconstructs the complete 346-row article or 878-row structure snapshot for every list/search request. Instead it uses private, release-specific, field-whitelisted query projections derived from the immutable 3.0.1 snapshot:
+
+- `cuhalide_atlas_public_articles_v301`
+- `cuhalide_atlas_public_structures_v301`
+
+Normal list/search/filter/pagination requests are executed through server-side SQL query functions. The projection tables and query functions are not directly readable/executable by `anon` or `authenticated`; the public read-only Edge Function invokes them with the service role and returns only the public contract.
+
+The immutable release snapshot remains the release-integrity source. Projection rows apply only explicitly documented effective overlays such as the Record 13 dimensionality erratum.
+
 ## Structure-grain evidence boundary
 
-Public structure records now enforce an explicit evidence-grain boundary:
+Public structure records enforce an explicit evidence-grain boundary:
 
-1. structure halogen identity is derived from the explicit structure formula where possible, with Cu(I) oxidation-state notation excluded from halogen parsing;
-2. compact formula forms such as `Cu2I4` and bridging notation such as `μ2-I` are handled as iodide rather than falling back to an article-level mixed-halogen label;
-3. article-level photophysical values are not assigned to an individual structure/phase unless an independent structure-grain evidence mapping exists;
-4. structure search does not use article-level emission text or article-title photophysics as structure evidence;
-5. the bounded-claims service receives structure crystallography/identity fields but excludes structure-level motif and photophysics when no independent mapping has been established.
+1. structure halogen identity is derived from explicit Cu–halide formula/connectivity notation where possible, with Cu(I) oxidation-state notation excluded from halogen parsing;
+2. compact formula forms such as `Cu2I4` and bridging notation such as `μ2-I` are handled as iodide;
+3. ligand-bound halogen atoms do not by themselves reclassify the Cu–halide identity;
+4. single-letter halogen searches are tokenized rather than substring matched;
+5. article-level photophysical values are not assigned to an individual structure/phase unless an independent structure-grain evidence mapping exists;
+6. structure search excludes article titles, article-level photophysics and unmapped motif text;
+7. public structure detail does not infer a motif from an article-level series summary;
+8. bounded-claims structure context excludes motif and photophysics unless independently mapped.
 
 These rules affect public presentation and retrieval safety only; they do not silently rewrite the immutable 3.0.1 archive.
 
@@ -82,21 +96,22 @@ The erratum does not alter article counts, structure counts, crystallographic co
 The public Smart RAG interface separates database truth from model interpretation:
 
 1. exact denominators, protected crystallographic rules, unresolved values and key scientific boundaries are deterministic;
-2. retrieval combines structured/lexical and semantic ranking when the external AI service is available;
+2. retrieval combines structured/lexical and semantic ranking when external AI capacity is available;
 3. bounded model interpretation is accepted only when claims pass source-level evidence constraints;
-4. the claims context is loaded from a JWT-protected internal scientific contract rather than the minimized public data API;
-5. an independent contract-health probe verifies that the bounded-claims scientific context remains populated after public API changes;
+4. claims context is loaded from a JWT-protected internal scientific contract rather than the minimized public data API;
+5. an independent contract-health probe verifies that bounded-claims scientific context remains populated after public-API changes;
 6. Live Literature Watch candidates remain separate from frozen release evidence;
-7. when external AI capacity is unavailable, the public service enters **SAFE_FALLBACK** and uses evidence retrieval instead of fabricating synthesis;
-8. structure-grain photophysics are suppressed from ordinary photophysics answers unless an explicit structure-grain mapping or a protected same-record boundary route applies;
-9. browser traffic is given a one-way per-client fingerprint by the Vercel proxy so anonymous users do not share one fixed RAG rate bucket; raw client IPs are not forwarded into the internal chain;
-10. public POST bodies and chat history are bounded at both Vercel and Supabase gateway layers.
+7. provider degradation enters **SAFE_FALLBACK** and uses evidence retrieval instead of fabricating synthesis;
+8. explicit structure-ID questions about motif or photophysics are routed through a deterministic evidence-grain boundary that separates structure crystallography from article-grain evidence;
+9. generic motif/photophysics responses receive a second public outer guard that removes unmapped structure sources;
+10. browser traffic receives a one-way per-client fingerprint so anonymous users do not share one fixed RAG rate bucket; raw client IPs are not forwarded into the internal chain;
+11. public POST bodies and chat history are bounded at both Vercel and Supabase gateway layers.
 
-The current public gateway reports provider degradation explicitly. Paid Workers AI overage is not authorized. Internal provider configuration, retrieval scores, hidden traces and service credentials are not part of the public response contract.
+Internal provider configuration, retrieval scores, hidden traces and service credentials are not part of the public response contract.
 
 ### Validation boundary
 
-The frozen `rag-benchmark-v1.3` scientific baseline passed **70/70**, but it predates the final Smart RAG v9 orchestration and must not be presented as a fresh **9.9.7** benchmark. The v9 deployment sequence separately passed deterministic exact/anchor and hybrid-retrieval regressions. A new full Qwen-enabled benchmark is required after external free-provider capacity is available again.
+The frozen `rag-benchmark-v1.3` scientific baseline passed **70/70**, but it predates the final Smart RAG v9 orchestration and must not be presented as a fresh **9.9.9** benchmark. The v9 deployment sequence separately passed deterministic exact/anchor and hybrid-retrieval regressions. A new full Qwen-enabled benchmark is required before a current-runtime 70-case result can be claimed.
 
 ## Important scientific boundaries
 
@@ -132,5 +147,7 @@ See [`CITATION.cff`](CITATION.cff) and [`ERRATA.md`](ERRATA.md). A permanent rep
 No blanket permission is asserted for copyrighted third-party article content. Primary articles, SI and CIF files are not redistributed through the public website. See [`LICENSE_STATUS.md`](LICENSE_STATUS.md).
 
 ## Security and contributions
+
+The release-specific public projections use RLS plus explicit deny policies for untrusted roles. Direct `anon`/`authenticated` table reads and query-function execution are disabled; the service role has SELECT-only access to the projection tables. Supabase security lint is required to remain clear after schema changes.
 
 See [`SECURITY.md`](SECURITY.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md). Scientific corrections require a DOI, exact compound/phase identity and source-level evidence. Literature Watch candidates are never merged directly into a frozen release.
