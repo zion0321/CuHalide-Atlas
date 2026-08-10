@@ -1,5 +1,8 @@
+import crypto from 'node:crypto';
+
 const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-smart-rag';
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
+const MAX_BODY_BYTES = 20_000;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function requestBody(req) {
@@ -8,10 +11,35 @@ function requestBody(req) {
   return JSON.stringify(req.body);
 }
 
+function clientFingerprint(req) {
+  const ip = String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '')
+    .split(',')[0]
+    .trim()
+    .slice(0, 96);
+  const ua = String(req.headers['user-agent'] || '').slice(0, 240);
+  return crypto.createHash('sha256').update(`cuhalide-v46|${ip}|${ua}`).digest('hex');
+}
+
+function bodyContract(body) {
+  if (body == null) return { ok: true };
+  const raw = Buffer.isBuffer(body) ? body : Buffer.from(typeof body === 'string' ? body : JSON.stringify(body));
+  if (raw.byteLength > MAX_BODY_BYTES) return { ok: false, error: 'Request body too large.' };
+  let parsed;
+  try { parsed = typeof body === 'object' && !Buffer.isBuffer(body) ? body : JSON.parse(raw.toString('utf8')); }
+  catch { return { ok: false, error: 'Invalid JSON request body.' }; }
+  const messages = Array.isArray(parsed?.messages) ? parsed.messages : [];
+  if (messages.length > 12) return { ok: false, error: 'Too many chat messages.' };
+  if (messages.some((m) => typeof m?.content !== 'string' || m.content.length > 4000)) {
+    return { ok: false, error: 'Message content exceeds the public query limit.' };
+  }
+  return { ok: true };
+}
+
 async function upstreamRequest(req, upstream) {
   const headers = {
     accept: req.headers.accept || 'application/json',
-    'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Agent-Proxy/2.0',
+    'user-agent': 'CuHalide-Atlas-Vercel-Agent-Proxy/3.0',
+    'x-cuhalide-client': clientFingerprint(req),
   };
   if (req.method === 'POST') headers['content-type'] = req.headers['content-type'] || 'application/json';
 
@@ -56,6 +84,16 @@ export default async function handler(req, res) {
     res.statusCode = 405;
     res.setHeader('Allow', 'GET, HEAD, POST, OPTIONS');
     return res.end('Method Not Allowed');
+  }
+
+  if (req.method === 'POST') {
+    const contract = bodyContract(req.body);
+    if (!contract.ok) {
+      res.statusCode = 413;
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-store');
+      return res.end(JSON.stringify({ error: contract.error, release: '3.0.1' }));
+    }
   }
 
   try {
