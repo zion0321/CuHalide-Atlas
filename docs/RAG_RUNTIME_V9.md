@@ -4,12 +4,14 @@ This document describes the **runtime** serving CuHalide Atlas release 3.0.1. Ru
 
 ## Production version
 
-- Public runtime: **9.9.7**
+- Public runtime: **9.9.9**
 - Public endpoint: `https://cuhalide-atlas-v3.vercel.app/api/agent`
 - Internal quota gateway: **9.9.4-public-internal**
 - Final internal orchestrator: **9.10.1-final-internal**
 - Bounded-claims service: **qwen-claims-v9-1.3.0**
-- Public data contract: **2.2.1**
+- Public data contract: **2.4.0**
+- Public site: **v47**
+- Public metadata/health contract: **47.0**
 - Frozen scientific release: **3.0.1**
 - Scientific parent: **3.0.0**
 - Frozen literature cutoff: **2026-06**
@@ -22,6 +24,12 @@ The public browser path is:
 `browser` → `Vercel /api/agent` → `public Smart RAG wrapper` → `JWT quota gateway` → `JWT final orchestrator` → `JWT retrieval core`
 
 Separate JWT-protected services provide bounded claims, candidate metadata, lexical fallback and a scientific-context contract probe.
+
+The public data path is separately minimized:
+
+`browser` → `Vercel /api/public-data` → `public read-only Edge Function` → `service-role-only release projection/query functions`
+
+The public data path does not expose the private release projection tables or their query RPCs directly to anonymous/authenticated Supabase roles.
 
 ### 1. Deterministic scientific guards
 
@@ -37,7 +45,7 @@ When external Workers AI capacity is available, retrieval combines:
 4. reciprocal-rank fusion over structured/lexical/semantic candidates;
 5. BGE reranking (`@cf/baai/bge-reranker-base`).
 
-The internal retrieval core contains no free-form LLM reasoning. Record 13 effective-dimensionality corrections are applied in the query/presentation layer without rewriting the frozen archive.
+The internal retrieval core contains no free-form LLM reasoning. Record 13 effective-dimensionality corrections are applied in the effective query/presentation layer without rewriting the frozen archive.
 
 ### 3. Bounded Qwen interpretation
 
@@ -55,39 +63,53 @@ The server validates source identity, support-fragment presence, numbers, concep
 
 A production regression identified that an earlier bounded-claims implementation was reading the minimized public `/api/data` contract while still expecting legacy field names. Retrieval remained available, but the claims context could become effectively empty without a hard failure.
 
-This has been repaired:
+This was repaired by decoupling model context from public presentation:
 
-- the bounded-claims service now loads exact article/structure sources directly from the JWT-protected `cuhalide_atlas_rag_documents` store;
-- article scientific context and public-lite presentation are decoupled;
+- bounded claims load exact article/structure sources from the JWT-protected `cuhalide_atlas_rag_documents` store;
+- article scientific context and public-lite presentation are independent contracts;
 - structure context is restricted to safe identity/crystallographic fields unless an independent structure-grain mapping exists;
-- a JWT-protected `cuhalide-atlas-rag-contract-health-internal` probe checks that representative article photophysics and structure crystallography remain populated;
-- public `/health.json` fails if that scientific-context contract fails.
-
-This prevents a future public-API minimization change from silently emptying the bounded-claims context.
+- JWT-protected `cuhalide-atlas-rag-contract-health-internal` checks representative article photophysics and structure crystallography;
+- public `/health.json` fails if this scientific-context contract fails.
 
 ### 5. Evidence-grain safety
 
 Article- and structure-grain evidence are not interchangeable.
 
-- Article-level photophysics remains available at article grain.
-- Structure-level public search does not use article-level emission text or article-title photophysics as structure evidence.
-- Structure-level bounded-claims context excludes motif and photophysics unless independently mapped.
-- Ordinary public photophysics responses suppress structure sources unless the query explicitly targets a structure ID or a protected same-record/specialized route establishes the intended boundary.
-- Same-record coexistence is not treated as automatic same-phase causality.
+The current public runtime applies multiple independent layers:
 
-### 6. Client-isolated public rate path
+1. **Public data search isolation.** Structure search uses structure identity/crystallography fields only. Article title, article-level photophysics and unmapped motif text are excluded.
+2. **Structure detail boundary.** Public structure details do not infer motif text from article-level series descriptions and do not assign article-grain emission values to the structure row.
+3. **Bounded-claims whitelist.** Structure Qwen context excludes motif/photophysics unless independently mapped.
+4. **Explicit-ID deterministic boundary.** If a query names `CUH-xxx-Sxx` and asks about motif/photophysics, public runtime separates structure identity/crystallography from the article-grain evidence of the associated record and states that the latter is not independently mapped to the named phase.
+5. **Generic outer guard.** Generic motif/photophysics responses remove unmapped structure sources and structure-labelled answer lines before returning to the browser.
+6. **Causality boundary.** Same-record coexistence is not treated as automatic same-phase causality.
 
-The Vercel proxy derives a one-way SHA-256 fingerprint from the incoming client IP and user agent and forwards only the hash as `x-cuhalide-client`; raw IPs are not forwarded into the RAG chain.
+The explicit and generic public guards remain active independently of model-provider availability.
 
-The token is propagated through the public wrapper and internal orchestration path so site users no longer share a single fixed proxy-user-agent rate bucket. Public request bodies and chat histories are bounded at both Vercel and Supabase layers.
+### 6. Public structure semantics
 
-The low-level public Supabase wrapper remains read-only and directly reachable; global/day rate limits and payload limits remain safety backstops. A future infrastructure pass may further restrict this endpoint to the Vercel gateway if a dedicated server-to-server secret is provisioned.
+Public data 2.4.0 uses release-specific server-side projections and semantic normalization functions.
 
-### 7. Literature Watch isolation
+- `Cu(I)` oxidation-state notation is excluded from iodide parsing.
+- Compact Cu–halide notation such as `Cu2I4` and bridging `μ2-I` is recognized.
+- Ligand-bound halogens do not by themselves redefine Cu–halide identity.
+- Single-letter halogen searches are tokenized instead of substring matched.
+- Short scientific tokens such as `STE` are tokenized, preventing false matches inside unrelated words such as `system`.
+- Record 13 effective dimensionality is materialized only in the release-specific public projection; the immutable 3.0.1 source snapshot is preserved.
+
+### 7. Client-isolated public rate path
+
+The Vercel proxy derives a one-way SHA-256 fingerprint from incoming client identity signals and forwards only the hash as `x-cuhalide-client`; raw client IPs are not forwarded into the RAG chain.
+
+The token is propagated through the public wrapper and internal quota path so site users no longer share a single fixed proxy-user-agent rate bucket. Public request bodies and chat histories are bounded at both Vercel and Supabase layers.
+
+### 8. Literature Watch isolation
 
 Research mode retrieves frozen release evidence and candidate metadata through separate paths. Candidate metadata does not support frozen scientific claims and never receives automatic release inclusion.
 
-## Free-provider circuit breaker
+The scheduled discovery job is active at `17 2 * * *` (02:17 UTC daily). The latest checked cron executions on 8–10 August 2026 all completed successfully.
+
+## Provider circuit breaker
 
 Paid Workers AI overage is not authorized. If the free daily allocation is unavailable:
 
@@ -97,37 +119,60 @@ Paid Workers AI overage is not authorized. If the free daily allocation is unava
 - the public status reports **SAFE_FALLBACK**;
 - after cooldown, the provider is probed for recovery.
 
-The current public health contract intentionally distinguishes provider degradation from database/retrieval failure.
+Provider state is an operational dependency and is intentionally separated from database integrity, deterministic scientific rules and evidence-grain safety.
 
 ## Validation
 
 ### Current production contract checks
 
-The current public health gate verifies:
+The public v47 health gate verifies:
 
-- site v46 production marker;
-- public-data 2.2.1 availability and minimized access policy;
+- site v47 production marker;
+- public-data 2.4.0 availability;
+- server-side projection query and minimized public access;
+- 346 article-audit rows, 878 structure rows and strict-polar 67 projection integrity;
 - compact iodide parsing and Cu(I)-oxidation-state separation;
-- structure-search photophysics/title isolation;
-- structure-grain motif/photophysics guards;
+- ligand-halogen false-positive guard;
+- tokenized single-letter halogen search;
+- structure-search exclusion of article-title photophysics and unmapped motif/photophysics evidence;
+- explicit and generic structure-grain RAG guards;
 - bounded-claims scientific-context contract;
-- known Record 13 errata registry.
+- four known Record 13 errata rows.
+
+Final live smoke checks on the v47/2.4.0/9.9.9 stack confirmed:
+
+- canonical articles: **332**;
+- article audit records: **346**;
+- Core-Included structures: **816**;
+- all structure/phase rows: **878**;
+- strict-polar rows: **67**;
+- `CUH-008-S01` halogen: **I**;
+- `CUH-162-S01`: **Cl/Br/I**, not falsely parsed as iodide from Cu(I);
+- `CUH-013-S01`: **Unresolved** dimensionality with the erratum flag;
+- structure search `STE`: **0** rows;
+- structure search `luminescence`: **0** rows;
+- tokenized structure search `I`: **671** rows;
+- legacy bulk `/api/export`: **HTTP 410**;
+- sitemap MIME: **application/xml**.
+
+The release-specific projection tables have RLS enabled with explicit deny policies for `anon` and `authenticated`; those roles have neither direct SELECT privilege nor query-RPC EXECUTE privilege. `service_role` has SELECT-only table privilege. Supabase security advisor returned **zero findings** after this hardening.
+
+Recent projection-backed public-data requests generally executed in a few hundred milliseconds in Supabase Edge Function logs; health/bootstrap remain slower because they deliberately retain immutable snapshot and cross-service integrity checks.
 
 ### Prior v9 regression suites
 
 - Deterministic exact/anchor regression: **33/33 PASS**.
 - Real BGE-M3 + BGE-reranker retrieval regression: **25/25 PASS**.
 - Public/internal-chain smoke tests passed during the v9 deployment sequence.
-- Supabase security advisor: **0 security findings** after the current repair.
 
 ### Legacy scientific baseline
 
-`rag-benchmark-v1.3` passed **70/70** on release 3.0.1, but it predates the final v9 orchestration and the current 9.9.7 repair. It remains a frozen scientific regression baseline, **not** a fresh 9.9.7 benchmark.
+`rag-benchmark-v1.3` passed **70/70** on release 3.0.1, but it predates the final v9 orchestration and the current 9.9.9 hardening. It remains a frozen scientific regression baseline, **not** a fresh 9.9.9 benchmark.
 
-A new full Qwen-enabled benchmark must not be claimed until it is actually rerun and archived after external free-provider capacity is available. Paid overage is intentionally not enabled for this purpose.
+A new full Qwen-enabled benchmark must not be claimed until it is actually rerun and archived.
 
 ## Methodological reporting boundary
 
-A manuscript describing the current runtime should report the exact runtime version, deterministic routes, embedding/reranker models, bounded-claim schema, internal scientific-context contract, structure/article evidence-grain separation, candidate isolation, provider fallback, client-isolated rate path and the distinction between current runtime checks and the legacy 70/70 scientific baseline.
+A manuscript describing the current runtime should report the exact runtime version, deterministic routes, embedding/reranker models, bounded-claim schema, internal scientific-context contract, structure/article evidence-grain separation, server-side public projection architecture, candidate isolation, provider fallback, client-isolated rate path and the distinction between current runtime checks and the legacy 70/70 scientific baseline.
 
-Do not state that Smart RAG 9.9.7 itself passed the legacy 70-case suite unless a fresh frozen run is executed and archived.
+Do not state that Smart RAG 9.9.9 itself passed the legacy 70-case suite unless a fresh frozen run is executed and archived.
