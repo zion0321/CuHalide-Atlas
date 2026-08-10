@@ -1,4 +1,4 @@
-const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v1';
+const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v2';
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -13,7 +13,7 @@ async function fetchWithRetry(url, req) {
         method: req.method,
         headers: {
           accept: req.headers.accept || 'application/json',
-          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Public-Data/1.0',
+          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Public-Data/2.0',
         },
         redirect: 'follow',
         signal: controller.signal,
