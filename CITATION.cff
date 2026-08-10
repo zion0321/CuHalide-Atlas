@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use CuHalide Atlas, cite the versioned resource and include the access date."
+title: "CuHalide Atlas"
+version: "3.0.1"
+date-released: "2026-08-10"
+type: dataset
+authors:
+  - name: "CuHalide Atlas Project"
+url: "https://cuhalide-atlas-v3.vercel.app/"
+repository-code: "https://github.com/zion0321/CuHalide-Atlas"
+abstract: >-
+  Evidence-first, structure-resolved literature database and scientific
+  retrieval system for organic-containing Cu(I) chlorides, bromides and
+  iodides. Release 3.0.1 is a bibliographic-only patch over the scientifically
+  unchanged 3.0.0 parent corpus. Coverage and candidate metadata remain
+  isolated from the frozen release until primary article, SI and/or CIF review
+  is complete.
+keywords:
+  - copper(I) halide
+  - Cu(I)-I
+  - copper iodide
+  - crystallography
+  - luminescence
+  - self-trapped exciton
+  - scientific database
+  - retrieval-augmented generation
