@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use CuHalide Atlas, cite the versioned resource, include the access date, and consult ERRATA.md / the public known-errata metadata."
+message: "If you use CuHalide Atlas, cite the versioned public resource, include the access date when required, and consult the known-errata notice."
 title: "CuHalide Atlas"
 version: "3.0.1"
 date-released: "2026-08-10"
@@ -9,15 +9,15 @@ authors:
 url: "https://cuhalide-atlas-v3.vercel.app/"
 repository-code: "https://github.com/zion0321/CuHalide-Atlas"
 abstract: >-
-  Evidence-first, structure-resolved literature database and scientific
-  retrieval system for organic-containing Cu(I) chlorides, bromides and
-  iodides. Release 3.0.1 is an immutable bibliographic-only patch over the
-  3.0.0 scientific parent. A disclosed Record 13 structure-dimensionality
-  mapping erratum affects four structure-grain cells but does not alter release
-  counts, space-group denominators or polar subsets. The public website/API
-  exposes explicit effective correction fields pending scientific hotfix
-  3.0.2. Coverage and candidate metadata remain isolated from the frozen
-  release until primary article, SI and/or CIF review is complete.
+  Evidence-grounded, structure-resolved public knowledge portal for
+  organic-containing Cu(I) chlorides, bromides and iodides. Release 3.0.1 is a
+  bibliographic-only patch over the 3.0.0 scientific parent. Public access is
+  query-and-view through selected bibliographic, structural, crystallographic
+  and photophysical fields plus evidence-grounded Smart RAG. Complete
+  normalized tables, exact stored publisher abstracts, primary PDF/SI/CIF
+  files and internal curation/audit artifacts are not distributed through the
+  public website. A disclosed Record 13 dimensionality erratum is transparently
+  corrected in the public effective display pending scientific hotfix 3.0.2.
 keywords:
   - copper(I) halide
   - Cu(I)-I
@@ -25,5 +25,5 @@ keywords:
   - crystallography
   - luminescence
   - self-trapped exciton
-  - scientific database
+  - scientific knowledge portal
   - retrieval-augmented generation
