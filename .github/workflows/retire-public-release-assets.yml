@@ -1,0 +1,34 @@
+name: Retire public bulk release assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/retire-public-release-assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  retire-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove bulk archive assets and update release notice
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete-asset v3.0.1 CuHalide_Atlas_3.0.1_release_package.zip --repo "$GITHUB_REPOSITORY" -y || true
+          gh release delete-asset v3.0.1 CuHalide_Atlas_3.0.1_release_package.zip.sha256 --repo "$GITHUB_REPOSITORY" -y || true
+          cat > /tmp/release-note.md <<'EOF'
+          # CuHalide Atlas 3.0.1
+
+          Release 3.0.1 remains the frozen bibliographic release identifier for the public CuHalide Atlas knowledge portal.
+
+          The former full normalized release archive has been withdrawn from public distribution. Public access is now **query-and-view** through the website, selected server-side record fields, citation metadata and evidence-grounded Smart RAG.
+
+          Complete normalized tables, exact stored publisher abstracts, primary PDF/SI/CIF files, field-evidence excerpts/locators, internal QA artifacts and candidate-screening internals remain private research assets.
+
+          A known four-cell Record 13 dimensionality erratum is described in `ERRATA.md`; public effective values are corrected pending scientific hotfix 3.0.2.
+          EOF
+          gh release edit v3.0.1 --repo "$GITHUB_REPOSITORY" --title "CuHalide Atlas 3.0.1" --notes-file /tmp/release-note.md
