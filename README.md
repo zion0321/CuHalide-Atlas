@@ -6,10 +6,10 @@
 - Public release: **3.0.1** — 10 August 2026
 - Scientific parent: **3.0.0**
 - Literature inclusion cutoff for the frozen corpus: **June 2026 (2026-06)**
-- Public site: **v45**
+- Public site: **v46**
 - Public data contract: **2.2.1**
-- Smart RAG public gateway: **9.9.6**
-- Public metadata/health contract: **45.8**
+- Smart RAG public gateway: **9.9.7**
+- Public metadata/health contract: **46.0**
 - Known errata: [`ERRATA.md`](ERRATA.md)
 
 ## Frozen scientific corpus
@@ -88,13 +88,15 @@ The public Smart RAG interface separates database truth from model interpretatio
 5. an independent contract-health probe verifies that the bounded-claims scientific context remains populated after public API changes;
 6. Live Literature Watch candidates remain separate from frozen release evidence;
 7. when external AI capacity is unavailable, the public service enters **SAFE_FALLBACK** and uses evidence retrieval instead of fabricating synthesis;
-8. structure-grain photophysics are suppressed from ordinary photophysics answers unless an explicit structure-grain mapping or a protected same-record boundary route applies.
+8. structure-grain photophysics are suppressed from ordinary photophysics answers unless an explicit structure-grain mapping or a protected same-record boundary route applies;
+9. browser traffic is given a one-way per-client fingerprint by the Vercel proxy so anonymous users do not share one fixed RAG rate bucket; raw client IPs are not forwarded into the internal chain;
+10. public POST bodies and chat history are bounded at both Vercel and Supabase gateway layers.
 
 The current public gateway reports provider degradation explicitly. Paid Workers AI overage is not authorized. Internal provider configuration, retrieval scores, hidden traces and service credentials are not part of the public response contract.
 
 ### Validation boundary
 
-The frozen `rag-benchmark-v1.3` scientific baseline passed **70/70**, but it predates the final Smart RAG v9 orchestration and must not be presented as a fresh 9.9.6 benchmark. The v9 deployment sequence separately passed deterministic exact/anchor and hybrid-retrieval regressions. A new full Qwen-enabled benchmark is required after external free-provider capacity is available again.
+The frozen `rag-benchmark-v1.3` scientific baseline passed **70/70**, but it predates the final Smart RAG v9 orchestration and must not be presented as a fresh **9.9.7** benchmark. The v9 deployment sequence separately passed deterministic exact/anchor and hybrid-retrieval regressions. A new full Qwen-enabled benchmark is required after external free-provider capacity is available again.
 
 ## Important scientific boundaries
 
