@@ -5,7 +5,6 @@
     {"source": "/sitemap.xml", "destination": "/api/meta?asset=sitemap"},
     {"source": "/release-manifest.json", "destination": "/api/meta?asset=manifest"},
     {"source": "/manifest.json", "destination": "/api/meta?asset=manifest"},
-    {"source": "/manifest.webmanifest", "destination": "/api/meta?asset=manifest"},
     {"source": "/citation.txt", "destination": "/api/meta?asset=citation"},
     {"source": "/citation.cff", "destination": "/api/meta?asset=citation"},
     {"source": "/CITATION.cff", "destination": "/api/meta?asset=citation"},
