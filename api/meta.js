@@ -13,7 +13,7 @@ async function fetchWithRetry(url, req) {
         method: req.method,
         headers: {
           accept: req.headers.accept || '*/*',
-          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Meta-Proxy/2.0',
+          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Meta-Proxy/3.0',
         },
         redirect: 'follow',
         signal: controller.signal,
@@ -33,6 +33,15 @@ async function fetchWithRetry(url, req) {
   throw lastError || new Error('Metadata backend request failed');
 }
 
+function contentTypeFor(requested, upstreamType) {
+  if (requested === 'sitemap' || requested === 'sitemap.xml') return 'application/xml; charset=utf-8';
+  if (requested === 'robots' || requested === 'robots.txt') return 'text/plain; charset=utf-8';
+  if (requested === 'citation' || requested === 'citation.cff' || requested === 'cff') return 'text/plain; charset=utf-8';
+  if (requested === 'manifest' || requested === 'manifest.json' || requested === 'manifest.webmanifest' || requested === 'release-manifest.json') return 'application/json; charset=utf-8';
+  if (requested === 'health' || requested === 'health.json') return 'application/json; charset=utf-8';
+  return upstreamType || 'application/octet-stream';
+}
+
 export default async function handler(req, res) {
   if (!['GET', 'HEAD'].includes(req.method)) {
     res.statusCode = 405;
@@ -44,12 +53,12 @@ export default async function handler(req, res) {
     const incoming = new URL(req.url, PUBLIC_ORIGIN);
     const upstream = new URL(UPSTREAM);
     for (const [key, value] of incoming.searchParams.entries()) upstream.searchParams.append(key, value);
+    const requested = (incoming.searchParams.get('action') || incoming.searchParams.get('asset') || 'health').toLowerCase();
 
     const response = await fetchWithRetry(upstream, req);
     res.statusCode = response.status;
-    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/octet-stream');
+    res.setHeader('Content-Type', contentTypeFor(requested, response.headers.get('content-type')));
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    const requested = (incoming.searchParams.get('action') || incoming.searchParams.get('asset') || 'health').toLowerCase();
     res.setHeader('Cache-Control', requested === 'health' || requested === 'health.json' ? 'no-store' : (response.headers.get('cache-control') || 'public, max-age=300, s-maxage=3600'));
     for (const header of ['etag', 'x-cuhalide-release', 'x-cuhalide-site-version', 'x-cuhalide-meta-version', 'x-cuhalide-rag-version']) {
       const value = response.headers.get(header);
