@@ -1,4 +1,4 @@
-const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v1';
+const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v2';
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -13,7 +13,7 @@ async function fetchWithRetry(url, req) {
         method: req.method,
         headers: {
           accept: req.headers.accept || 'application/json',
-          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Legacy-Data/3.0',
+          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Legacy-Data/4.0',
         },
         redirect: 'follow',
         signal: controller.signal,
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
     res.setHeader('X-CuHalide-Public-Access', 'query-and-view');
-    res.setHeader('Warning', '299 - Legacy /api/data route now exposes only the public-lite query layer.');
+    res.setHeader('Warning', '299 - Legacy /api/data route exposes only the minimized public query contract.');
     if (req.method === 'HEAD') return res.end();
     return res.end(await response.text());
   } catch (error) {
