@@ -7,9 +7,9 @@
 - Scientific parent: **3.0.0**
 - Frozen literature cutoff: **June 2026 (2026-06)**
 - Public site: **v47**
-- Public data contract: **2.4.0**
+- Public data contract: **2.4.1**
 - Smart RAG public gateway: **9.9.9**
-- Public metadata/health contract: **47.0**
+- Public metadata/health contract: **47.1**
 - Known errata: [`ERRATA.md`](ERRATA.md)
 
 ## Frozen scientific corpus
@@ -56,7 +56,7 @@ If a manuscript requires a reproducibility deposit, a **manuscript-specific mini
 
 ## Public query architecture
 
-Public data 2.4.0 no longer reconstructs the complete 346-row article or 878-row structure snapshot for every list/search request. Instead it uses private, release-specific, field-whitelisted query projections derived from the immutable 3.0.1 snapshot:
+Public data 2.4.1 does not reconstruct the complete 346-row article or 878-row structure snapshot for every list/search request. Instead it uses private, release-specific, field-whitelisted query projections derived from the immutable 3.0.1 snapshot:
 
 - `cuhalide_atlas_public_articles_v301`
 - `cuhalide_atlas_public_structures_v301`
@@ -64,6 +64,8 @@ Public data 2.4.0 no longer reconstructs the complete 346-row article or 878-row
 Normal list/search/filter/pagination requests are executed through server-side SQL query functions. The projection tables and query functions are not directly readable/executable by `anon` or `authenticated`; the public read-only Edge Function invokes them with the service role and returns only the public contract.
 
 The immutable release snapshot remains the release-integrity source. Projection rows apply only explicitly documented effective overlays such as the Record 13 dimensionality erratum.
+
+A service-role-only projection health contract continuously checks frozen row counts, strict-polar and erratum counts, deterministic projection checksums, RLS/ACL invariants and selected query semantics. In release 3.0.1 it also protects the article-halogen contract: the canonical `I` filter includes mixed-I records (**247** articles), while an explicit mixed label such as `Cl/Br/I` remains an exact category (**27** articles).
 
 ## Structure-grain evidence boundary
 
@@ -148,6 +150,6 @@ No blanket permission is asserted for copyrighted third-party article content. P
 
 ## Security and contributions
 
-The release-specific public projections use RLS plus explicit deny policies for untrusted roles. Direct `anon`/`authenticated` table reads and query-function execution are disabled; the service role has SELECT-only access to the projection tables. Supabase security lint is required to remain clear after schema changes.
+The release-specific public projections use RLS plus explicit deny policies for untrusted roles. Direct `anon`/`authenticated` table reads and query-function execution are disabled; the service role has SELECT-only access to the projection tables. Projection integrity/ACL invariants are part of the production health contract, and Supabase security lint is required to remain clear after schema changes.
 
 See [`SECURITY.md`](SECURITY.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md). Scientific corrections require a DOI, exact compound/phase identity and source-level evidence. Literature Watch candidates are never merged directly into a frozen release.
