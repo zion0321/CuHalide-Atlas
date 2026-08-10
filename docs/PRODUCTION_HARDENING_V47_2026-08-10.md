@@ -14,9 +14,9 @@ Current production matrix after this pass:
 | Component | Version |
 |---|---:|
 | Public site | 47 |
-| Public data contract | 2.4.0 |
+| Public data contract | 2.4.1 |
 | Smart RAG public gateway | 9.9.9 |
-| Public metadata / health | 47.0 |
+| Public metadata / health | 47.1 |
 | Internal quota gateway | 9.9.4-public-internal |
 | Final internal orchestrator | 9.10.1-final-internal |
 | Bounded claims | qwen-claims-v9-1.3.0 |
@@ -55,11 +55,30 @@ The public Edge Function is the sole public query contract and remains read-only
 
 Supabase security advisor after these changes: **0 findings**.
 
-## 2. Structure-halogen semantics
+### Continuous projection contract
 
-A release-specific SQL semantic function now derives effective structure halogen identity while protecting against several false-positive classes.
+A service-role-only health function, `cuhalide_atlas_public_projection_health_v301()`, now verifies the projection itself rather than trusting deployment state alone. It checks:
 
-Validated behaviors:
+- article rows = 346;
+- canonical articles = 332;
+- structure rows = 878;
+- Core-Included structures = 816;
+- strict-polar rows = 67;
+- Record 13 erratum overlays = 4;
+- deterministic ordered projection checksums;
+- RLS deny policies;
+- no direct `anon`/`authenticated` table SELECT;
+- no direct `anon`/`authenticated` projection-query RPC execution;
+- service-role SELECT available while service-role UPDATE remains disabled;
+- selected article-halogen query semantics.
+
+Public data health exposes only boolean pass/fail contract state, not the private projection rows or credentials.
+
+## 2. Structure- and article-halogen semantics
+
+A release-specific SQL semantic function derives effective structure halogen identity while protecting against several false-positive classes.
+
+Validated structure behaviors:
 
 - `Cu2I4` → I;
 - bridging `μ2-I` is recognized as iodide;
@@ -67,10 +86,22 @@ Validated behaviors:
 - a ligand formula containing iodine, e.g. `Cu(PPh3)2(C6H4I)`, does not by itself reclassify a fallback Cu–Cl record as Cu–I;
 - unresolved/series-level material labels retain their curated fallback rather than being over-inferred.
 
-Live examples:
+Live structure examples:
 
 - `CUH-008-S01` → **I**;
 - `CUH-162-S01` → **Cl/Br/I**, not false I from `Cu(I)`.
+
+Article filters preserve a distinct categorical rule:
+
+- a single-halogen filter such as `I` means the article-level curated halogen set **contains I**, including mixed-I records;
+- an explicit mixed label such as `Cl/Br/I` remains an exact category.
+
+Release-3.0.1 canonical query contract:
+
+- `I` containment → **247** articles;
+- exact `Cl/Br/I` → **27** articles.
+
+These values are included in the continuous projection-health contract.
 
 ## 3. Tokenized short scientific search
 
@@ -130,8 +161,13 @@ Live public checks after v47 deployment:
 | Check | Result |
 |---|---:|
 | `/health.json` | PASS |
+| Public data | 2.4.1 |
+| Smart RAG | 9.9.9 |
+| Meta / health | 47.1 |
 | Canonical articles | 332 |
 | Article audit records | 346 |
+| Canonical article filter `I` | 247 |
+| Exact canonical article `Cl/Br/I` | 27 |
 | Core-Included structures | 816 |
 | All structure/phase rows | 878 |
 | Strict-polar rows | 67 |
@@ -141,9 +177,9 @@ Live public checks after v47 deployment:
 | Structure `STE` search | 0 |
 | Structure `luminescence` search | 0 |
 | Structure `I` search | 671 |
+| Projection integrity/ACL contract | PASS |
 | `/api/export` | HTTP 410 |
 | `/sitemap.xml` MIME | application/xml |
-| Smart RAG GET | 200 / 9.9.9 |
 | Supabase security advisor | 0 findings |
 | Vercel runtime errors, checked post-v47 window | none |
 
