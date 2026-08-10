@@ -9,9 +9,9 @@ This document describes the **runtime** serving CuHalide Atlas release 3.0.1. Ru
 - Internal quota gateway: **9.9.4-public-internal**
 - Final internal orchestrator: **9.10.1-final-internal**
 - Bounded-claims service: **qwen-claims-v9-1.3.0**
-- Public data contract: **2.4.0**
+- Public data contract: **2.4.1**
 - Public site: **v47**
-- Public metadata/health contract: **47.0**
+- Public metadata/health contract: **47.1**
 - Frozen scientific release: **3.0.1**
 - Scientific parent: **3.0.0**
 - Frozen literature cutoff: **2026-06**
@@ -86,9 +86,9 @@ The current public runtime applies multiple independent layers:
 
 The explicit and generic public guards remain active independently of model-provider availability.
 
-### 6. Public structure semantics
+### 6. Public structure and query semantics
 
-Public data 2.4.0 uses release-specific server-side projections and semantic normalization functions.
+Public data 2.4.1 uses release-specific server-side projections and semantic normalization functions.
 
 - `Cu(I)` oxidation-state notation is excluded from iodide parsing.
 - Compact Cu–halide notation such as `Cu2I4` and bridging `μ2-I` is recognized.
@@ -96,6 +96,10 @@ Public data 2.4.0 uses release-specific server-side projections and semantic nor
 - Single-letter halogen searches are tokenized instead of substring matched.
 - Short scientific tokens such as `STE` are tokenized, preventing false matches inside unrelated words such as `system`.
 - Record 13 effective dimensionality is materialized only in the release-specific public projection; the immutable 3.0.1 source snapshot is preserved.
+- Article single-halogen filters are containment filters across mixed labels: canonical `I` returns **247** records.
+- Explicit mixed article labels remain exact categories: canonical `Cl/Br/I` returns **27** records.
+
+A service-role-only projection-health function continuously verifies release-specific row counts, strict-polar/erratum counts, deterministic projection checksums, RLS/ACL invariants and these selected query semantics. The public health API exposes only pass/fail contract booleans, not internal projection rows or service credentials.
 
 ### 7. Client-isolated public rate path
 
@@ -128,24 +132,28 @@ Provider state is an operational dependency and is intentionally separated from 
 The public v47 health gate verifies:
 
 - site v47 production marker;
-- public-data 2.4.0 availability;
+- public-data 2.4.1 availability;
 - server-side projection query and minimized public access;
-- 346 article-audit rows, 878 structure rows and strict-polar 67 projection integrity;
+- projection checksum/ACL contract;
+- 346 article-audit rows, 332 canonical articles, 878 structure rows, 816 Core-Included structure rows and strict-polar 67 projection integrity;
+- four Record 13 erratum overlay rows;
+- canonical article `I` containment count 247 and exact `Cl/Br/I` category count 27;
 - compact iodide parsing and Cu(I)-oxidation-state separation;
 - ligand-halogen false-positive guard;
 - tokenized single-letter halogen search;
 - structure-search exclusion of article-title photophysics and unmapped motif/photophysics evidence;
 - explicit and generic structure-grain RAG guards;
-- bounded-claims scientific-context contract;
-- four known Record 13 errata rows.
+- bounded-claims scientific-context contract.
 
-Final live smoke checks on the v47/2.4.0/9.9.9 stack confirmed:
+Final live smoke checks on the v47/2.4.1/9.9.9 stack confirmed:
 
 - canonical articles: **332**;
 - article audit records: **346**;
 - Core-Included structures: **816**;
 - all structure/phase rows: **878**;
 - strict-polar rows: **67**;
+- canonical article filter `I`: **247**;
+- canonical exact article category `Cl/Br/I`: **27**;
 - `CUH-008-S01` halogen: **I**;
 - `CUH-162-S01`: **Cl/Br/I**, not falsely parsed as iodide from Cu(I);
 - `CUH-013-S01`: **Unresolved** dimensionality with the erratum flag;
@@ -157,7 +165,7 @@ Final live smoke checks on the v47/2.4.0/9.9.9 stack confirmed:
 
 The release-specific projection tables have RLS enabled with explicit deny policies for `anon` and `authenticated`; those roles have neither direct SELECT privilege nor query-RPC EXECUTE privilege. `service_role` has SELECT-only table privilege. Supabase security advisor returned **zero findings** after this hardening.
 
-Recent projection-backed public-data requests generally executed in a few hundred milliseconds in Supabase Edge Function logs; health/bootstrap remain slower because they deliberately retain immutable snapshot and cross-service integrity checks.
+Recent projection-backed public-data requests generally executed in a few hundred milliseconds in Supabase Edge Function logs; health/bootstrap remain slower because they deliberately retain immutable-snapshot and cross-service integrity checks.
 
 ### Prior v9 regression suites
 
@@ -173,6 +181,6 @@ A new full Qwen-enabled benchmark must not be claimed until it is actually rerun
 
 ## Methodological reporting boundary
 
-A manuscript describing the current runtime should report the exact runtime version, deterministic routes, embedding/reranker models, bounded-claim schema, internal scientific-context contract, structure/article evidence-grain separation, server-side public projection architecture, candidate isolation, provider fallback, client-isolated rate path and the distinction between current runtime checks and the legacy 70/70 scientific baseline.
+A manuscript describing the current runtime should report the exact runtime version, deterministic routes, embedding/reranker models, bounded-claim schema, internal scientific-context contract, structure/article evidence-grain separation, server-side public projection architecture, projection integrity/ACL health contract, candidate isolation, provider fallback, client-isolated rate path and the distinction between current runtime checks and the legacy 70/70 scientific baseline.
 
 Do not state that Smart RAG 9.9.9 itself passed the legacy 70-case suite unless a fresh frozen run is executed and archived.
