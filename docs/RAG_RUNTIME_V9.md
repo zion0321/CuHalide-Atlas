@@ -4,10 +4,11 @@ This document describes the **runtime** serving CuHalide Atlas release 3.0.1. It
 
 ## Production version
 
-- Public runtime: **9.9.1**
+- Public runtime: **9.9.2**
 - Public endpoint: `https://cuhalide-atlas-v3.vercel.app/api/agent`
 - Frozen scientific release: **3.0.1**
 - Explicit rollback target: **8.3.0**
+- Anonymous RAG entrypoints: **exactly one** (`/api/agent`)
 
 ## Architecture
 
@@ -27,6 +28,8 @@ When the free Workers AI provider is available, retrieval uses:
 
 The release-3.0.1 effective query layer applies the public Record 13 erratum overlay before dimensionality filters are interpreted.
 
+The internal retrieval core contains **no free-form LLM reasoning**. It performs deterministic science rules and retrieval only.
+
 ### 3. Bounded Qwen interpretation
 
 Model: `@cf/qwen/qwen3-30b-a3b-fp8`.
@@ -38,6 +41,8 @@ The model is not allowed to return unconstrained scientific prose as the authori
 - a short verbatim support fragment from the same source.
 
 The server then validates source identity, support-fragment presence, numbers, concepts, language, claim type, duplicate similarity and scientific wording. Unsupported speculation, recommendations, universal causality, cross-paper mechanism stitching and unsupported strong structural roles are rejected.
+
+Qwen exists only in the JWT-protected internal `submit_claims` service. The retrieval core cannot independently invoke a second, less-constrained reasoning path.
 
 ### 4. Scientific-field context whitelist
 
@@ -55,6 +60,16 @@ This prevents bibliographic provenance fields from being misinterpreted as scien
 ### 5. Live Monitor isolation
 
 Research mode retrieves frozen release evidence and candidate metadata through separate paths. `candidate-screen-v4` records are explicitly marked as unreviewed metadata with incomplete primary-evidence review. They do not support frozen release claims and do not receive automatic release inclusion.
+
+### 6. Internal-chain isolation
+
+The production chain is:
+
+`public /api/agent` → `JWT quota gateway` → `JWT final orchestrator` → `JWT deterministic/retrieval core`
+
+with separate JWT-protected Qwen-claim, candidate-search and lexical-fallback services.
+
+The old public v9 core has been retired. Anonymous requests to the internal core, final orchestrator, quota gateway and retired legacy core were tested and all returned **HTTP 401**. The production wrapper uses the server-side Supabase service role to invoke these internal stages; credentials are never returned to the browser.
 
 ## Free-provider circuit breaker
 
@@ -83,8 +98,10 @@ Provider degradation is therefore observable and is not silently masked.
 - Deterministic exact/anchor regression: **33/33 PASS**.
 - Real BGE-M3 + BGE-reranker retrieval regression: **25/25 PASS**.
 - Initial public Vercel v9 production smoke: **6/6 PASS**.
-- Post-circuit-patch production 9.9.1 smoke: **3/3 PASS**.
-- Public meta health: **PASS** with all current health checks true.
+- Post-circuit-patch production smoke: **3/3 PASS**.
+- Internal-chain hardening smoke: **7/7 PASS** — four internal anonymous requests returned 401 while production health, exact statistics and fallback remained available.
+- Public meta health on production 9.9.2: **PASS**, including `internal_rag_chain_security=true`.
+- Supabase security advisor after hardening: **0 findings**.
 
 ### Legacy scientific baseline
 
@@ -94,6 +111,6 @@ A new full 70-case Qwen-enabled run was not executed after the final orchestrati
 
 ## Methodological reporting boundary
 
-A manuscript describing the current runtime should report the exact runtime version, deterministic routes, embedding/reranker models, claim-function schema, context whitelist, support-fragment validation, candidate isolation, provider fallback and the distinction between the v9-specific regressions and the legacy 70/70 scientific baseline.
+A manuscript describing the current runtime should report the exact runtime version, deterministic routes, embedding/reranker models, claim-function schema, scientific-field context whitelist, support-fragment validation, candidate isolation, JWT-isolated internal chain, provider fallback and the distinction between the v9-specific regressions and the legacy 70/70 scientific baseline.
 
-Do not state that the final v9.9.1 orchestration itself passed the legacy 70-case suite unless a fresh frozen run is actually executed and archived.
+Do not state that the final v9.9.2 orchestration itself passed the legacy 70-case suite unless a fresh frozen run is actually executed and archived.
