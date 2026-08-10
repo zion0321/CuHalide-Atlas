@@ -17,14 +17,9 @@ jobs:
         shell: bash
         run: |
           set -u
-          urls=(
-            "https://cuhalide-atlas-v3.vercel.app/"
-            "https://cuhalide-atlas-v3-canto0ccf-3297465039-4630s-projects.vercel.app/"
-            "https://cuhalide-atlas-v3-canto0ccf-3297465039-4630s-projects.vercel.app/api/data?action=articles&limit=1"
-            "https://cuhalide-atlas-v3-canto0ccf-3297465039-4630s-projects.vercel.app/api/export?action=package-index"
-          )
-          for url in "${urls[@]}"; do
-            code=$(curl -sS -o /tmp/body -w '%{http_code}' --max-time 30 "$url" || true)
-            echo "URL=$url STATUS=$code"
-            head -c 180 /tmp/body | tr '\n' ' '; echo
+          old="https://cuhalide-atlas-v3-canto0ccf-3297465039-4630s-projects.vercel.app"
+          for path in "/" "/api/data?action=articles&limit=1" "/api/export?action=package-index"; do
+            echo "=== $old$path ==="
+            curl -sS -D - -o /tmp/body --max-time 30 "$old$path" | grep -Ei '^(HTTP/|location:|x-vercel-|set-cookie:)' || true
+            head -c 120 /tmp/body | tr '\n' ' '; echo
           done
