@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/build-release-package.yml"
       - "scripts/build_release_package.py"
+      - "scripts/build_release_package_runner.py"
       - "api/export.js"
   workflow_dispatch:
 
@@ -31,7 +32,7 @@ jobs:
           python-version: "3.12"
 
       - name: Build and validate package
-        run: python scripts/build_release_package.py
+        run: python scripts/build_release_package_runner.py
 
       - name: Verify ZIP checksum
         run: |
