@@ -53,37 +53,57 @@ The public website was deliberately changed from a bulk-download database to a *
 
 The public runtime was re-audited at article, structure, crystallographic, RAG, security and frontend-contract levels. The repair changes runtime/presentation behavior only and does not rewrite the frozen 3.0.1 archive.
 
-- Public site advanced to **v46**; public data contract to **2.2.1**; public metadata/health to **46.0**; Smart RAG public wrapper to **9.9.7**.
+- Public site advanced to v46.
 - Restored the frozen literature cutoff as **2026-06** and display label `2026.06` for the partial 2026 publication year.
-- Article Explorer now defaults to the 332 `Core - Verified` articles while retaining explicit audit views.
-- Structure Register now defaults to the 816 `Core - Included` structure/phase rows while retaining explicit all/boundary/pending/excluded views.
-- Dashboard visualizations now state their denominators instead of mixing article, core-structure, resolved-space-group and verified-mapping populations implicitly.
+- Article Explorer defaults to the 332 `Core - Verified` articles while retaining explicit audit views.
+- Structure Register defaults to the 816 `Core - Included` structure/phase rows while retaining explicit all/boundary/pending/excluded views.
+- Dashboard visualizations state their denominators instead of mixing article, core-structure, resolved-space-group and verified-mapping populations implicitly.
 - Corrected structure-halogen parsing for compact iodide formulas and bridging iodide notation while preventing `Cu(I)` oxidation-state notation from being treated as an iodide token.
-- Removed article-grain photophysics and article-title photophysical terms from structure-grain search; short scientific acronyms use token-aware matching.
-- Public structure details now suppress article-grain photophysical values unless a future independent structure-grain evidence object establishes the mapping.
-- Bounded-Qwen claims no longer consume the minimized public data schema. Exact scientific context is loaded from JWT-protected internal RAG documents.
-- Added a JWT-protected scientific-context contract probe and made public health fail if the claims context becomes unavailable or structurally empty.
-- Bounded-claims structure context excludes unverified structure-grain motif/photophysics; fallback and public response guards suppress structure sources for ordinary photophysics queries where the evidence grain is not established.
-- Vercel now derives a one-way per-client RAG fingerprint and forwards only the hash, avoiding a single shared proxy rate bucket while not forwarding raw client IPs.
-- Added public POST body/message/history limits at both Vercel and Supabase gateway layers.
-- Added shareable hash deep links for article/structure records, modal accessibility semantics, focus trapping/restoration, table captions, `aria-live` service states, stale-request cancellation and bootstrap-failure recovery.
-- Public release metadata is exposed as `release-manifest.json`; sitemap/citation/manifest MIME handling was hardened.
-- Production health reports provider degradation explicitly. The current free Workers AI state is **SAFE_FALLBACK**, so evidence retrieval and deterministic rules remain available while bounded model synthesis is temporarily disabled.
+- Removed article-grain photophysics and article-title photophysical terms from structure-grain search.
+- Public structure details suppress article-grain photophysical values unless an independent structure-grain evidence object establishes the mapping.
+- Bounded-Qwen claims no longer consume the minimized public data schema; scientific context is loaded from JWT-protected internal RAG documents.
+- Added a JWT-protected scientific-context contract probe and made public health fail if claims context becomes unavailable or structurally empty.
+- Added client-isolated RAG fingerprinting, POST/body/history limits, deep-linked record views and frontend accessibility/reliability hardening.
 
-See `docs/PRODUCTION_REPAIR_V46_2026-08-10.md` and `docs/RAG_RUNTIME_V9.md` for the detailed runtime and validation boundaries.
+### Production hardening v47
+
+A second adversarial pass focused on residual query semantics, evidence-grain leakage, public data latency, least privilege and interface consistency. The current production matrix is **site v47 / public-data 2.4.0 / Smart RAG 9.9.9 / meta 47.0**.
+
+- Replaced per-request reconstruction/filtering of the complete release arrays with private, release-specific, field-whitelisted article and structure projection tables derived from the immutable 3.0.1 snapshot.
+- Added service-role-only SQL query functions for server-side filtering, counting, sorting and pagination; `anon` and `authenticated` have neither direct projection SELECT privilege nor query-RPC EXECUTE privilege.
+- Enabled RLS on both projection tables with explicit deny policies and reduced `service_role` table privilege to SELECT only.
+- Added semantic normalization helpers for dimensionality and Cu–halide identity.
+- Prevented halogenated organic ligands from being misread as the Cu–halide identity solely because the ligand formula contains Cl/Br/I.
+- Tokenized one-letter halogen searches and short scientific terms, eliminating substring artifacts such as `I` matching arbitrary text and `STE` matching unrelated words.
+- Removed article titles from structure search entirely, not only article-title photophysical terms.
+- Removed unmapped motif text from the public structure-search/detail evidence surface; structure detail now states an explicit motif-grain boundary rather than heuristically extracting a motif from article-level summaries.
+- Smart RAG 9.9.9 adds deterministic explicit-structure boundaries and a second generic outer guard for motif/photophysics, providing defense in depth independently of model availability.
+- Public RAG source cards now expose an evidence-scope label, and deterministic evidence-boundary responses are represented separately from provider fallback.
+- Publication-growth display is intentionally limited to **2006–2026.06** while explicitly stating that earlier canonical records remain indexed.
+- Improved safe Markdown rendering, nested record-modal history, focus restoration, reduced-motion handling and client-side RAG timeout behavior.
+- Removed the unused `/manifest.webmanifest` alias so the release manifest is not misrepresented as a PWA web-app manifest.
+- Verified the daily Literature Watch cron is active at **02:17 UTC** and the checked 8–10 August runs succeeded.
+
+See `docs/PRODUCTION_HARDENING_V47_2026-08-10.md` and `docs/RAG_RUNTIME_V9.md`.
 
 ### Validation history
 
-- Frozen scientific RAG regression baseline: **70/70** (`rag-benchmark-v1.3`), predating final v9 orchestration and therefore not represented as a fresh 9.9.7 benchmark.
+- Frozen scientific RAG regression baseline: **70/70** (`rag-benchmark-v1.3`), predating final v9 orchestration and therefore not represented as a fresh 9.9.9 benchmark.
 - Smart RAG v9 deterministic exact/anchor regression: **33/33**.
 - Smart RAG v9 hybrid retrieval regression: **25/25**.
-- Production `/health.json` after the v46 repair: **PASS**, including structure semantics, public minimization, bounded-claims context contract and known-errata checks.
-- Supabase security advisor after the v46 repair: **0 security findings**.
+- Current production `/health.json`: **PASS** for v47 / public-data 2.4.0 / Smart RAG 9.9.9 / meta 47.0.
+- Final live public counts: 332 canonical articles, 346 audit articles, 816 Core-Included structures, 878 total structures and 67 strict-polar rows.
+- Final live semantic checks: `CUH-008-S01` → I; `CUH-162-S01` remains Cl/Br/I rather than false I; `CUH-013-S01` → Unresolved with erratum; structure searches `STE` and `luminescence` → 0; tokenized `I` search → 671 rows.
+- Legacy bulk `/api/export` remains **HTTP 410**.
+- Public sitemap returns **application/xml**.
+- Supabase security advisor after v47 projection/RLS hardening: **0 findings**.
+- Recent projection-backed public-data list/search/detail requests observed in Edge logs generally complete in a few hundred milliseconds; health/bootstrap deliberately remain slower because they retain cross-service and immutable-snapshot integrity checks.
+- Vercel production runtime-error query after v47 deployment returned no errors in the checked window.
 - Coverage-v1: **210/210** pre-registered page-0 query cells completed; this does not establish exhaustive external-corpus completeness.
 - Candidate-screen-v4: **1,788/1,788** DOI-unique candidates adjudicated, with zero automatic release inclusions.
 - AI expert-surrogate audit: 80 article samples, 200 structure samples and 6,600 field/rule checks; this is not independent-human extraction accuracy.
 
-A fresh full Qwen-enabled current-runtime benchmark remains intentionally unclaimed until free provider capacity recovers and a new versioned run is executed and archived. Paid overage is not enabled for validation.
+A fresh full Qwen-enabled current-runtime benchmark remains intentionally unclaimed until provider capacity is available and a new versioned run is executed and archived.
 
 ## 3.0.0 — 2026-08-08
 
