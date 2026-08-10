@@ -1,0 +1,30 @@
+name: Verify historical Vercel deployment access
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/check-old-vercel-access.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test unauthenticated deployment URLs
+        shell: bash
+        run: |
+          set -u
+          urls=(
+            "https://cuhalide-atlas-v3.vercel.app/"
+            "https://cuhalide-atlas-v3-canto0ccf-3297465039-4630s-projects.vercel.app/"
+            "https://cuhalide-atlas-v3-canto0ccf-3297465039-4630s-projects.vercel.app/api/data?action=articles&limit=1"
+            "https://cuhalide-atlas-v3-canto0ccf-3297465039-4630s-projects.vercel.app/api/export?action=package-index"
+          )
+          for url in "${urls[@]}"; do
+            code=$(curl -sS -o /tmp/body -w '%{http_code}' --max-time 30 "$url" || true)
+            echo "URL=$url STATUS=$code"
+            head -c 180 /tmp/body | tr '\n' ' '; echo
+          done
