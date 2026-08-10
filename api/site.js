@@ -20,9 +20,7 @@ const CSP = [
   "frame-ancestors 'none'",
 ].join('; ');
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function fetchUpstream(req) {
   const incoming = new URL(req.url, PUBLIC_ORIGIN);
@@ -32,27 +30,32 @@ async function fetchUpstream(req) {
   }
 
   let lastError;
+  let lastResponse;
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 12000);
+    const timer = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(upstream, {
         method: req.method,
         headers: {
           accept: 'text/html,application/xhtml+xml,text/plain;q=0.9',
-          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Proxy/3.0',
+          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Proxy/4.0',
         },
         redirect: 'follow',
         signal: controller.signal,
       });
       clearTimeout(timer);
-      return response;
+      lastResponse = response;
+      if (response.status < 500 || attempt === 1) return response;
+      try { await response.body?.cancel(); } catch {}
+      await sleep(250);
     } catch (error) {
       clearTimeout(timer);
       lastError = error;
       if (attempt === 0) await sleep(250);
     }
   }
+  if (lastResponse) return lastResponse;
   throw lastError || new Error('Upstream request failed');
 }
 
@@ -91,7 +94,7 @@ export default async function handler(req, res) {
     res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
     res.setHeader('X-Robots-Tag', response.headers.get('x-robots-tag') || 'index, follow, max-image-preview:large');
 
-    for (const header of ['x-cuhalide-site-version', 'x-cuhalide-site-snapshot']) {
+    for (const header of ['x-cuhalide-site-version', 'x-cuhalide-site-sha256']) {
       const value = response.headers.get(header);
       if (value) res.setHeader(header, value);
     }
@@ -105,13 +108,14 @@ export default async function handler(req, res) {
     const body = rewriteBrowserDependencies(upstreamBody);
     if (response.ok) {
       for (const required of [DATA_PROXY, AGENT_PROXY, META_PROXY]) {
-        if (!body.includes(required)) throw new Error(`Same-origin rewrite missing: ${required}`);
+        if (!body.includes(required)) throw new Error(`Same-origin dependency missing: ${required}`);
       }
+      if (body.includes(SUPABASE_ORIGIN)) throw new Error('Direct backend origin leaked into public HTML');
     }
     return res.end(body);
   } catch (error) {
     console.error('[cuhalide-site-proxy]', error);
-    res.statusCode = 502;
+    res.statusCode = error?.name === 'AbortError' ? 504 : 502;
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
     return res.end('CuHalide Atlas upstream is temporarily unavailable.');
