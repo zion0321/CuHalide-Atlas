@@ -5,7 +5,8 @@
 - Public website: https://cuhalide-atlas-v3.vercel.app/
 - Current release: **3.0.1** — 10 August 2026
 - Scientific parent: **3.0.0**
-- Current public site snapshot: **v43**
+- Current public site snapshot: **v44**
+- Current Smart RAG runtime: **9.9.1**
 - Release archive: https://github.com/zion0321/CuHalide-Atlas/releases/tag/v3.0.1
 - Release ZIP SHA-256: `f299b0872ec9b3a022741833b41ee4702848ec7c570afaac3f9e8a976deb4477`
 - Known errata: [`ERRATA.md`](ERRATA.md)
@@ -39,20 +40,38 @@ A fresh post-publication QA pass identified an **inherited Record 13 structure-d
 
 The error does not alter article counts, structure counts, space-group counts, verified/polar/strict-polar subsets or canonical denominators. The archived 3.0.1 ZIP remains immutable. Public website, API, downloads and Smart RAG expose transparent effective/erratum fields; formal snapshot-level correction is planned for scientific hotfix **3.0.2**. See [`ERRATA.md`](ERRATA.md).
 
+## Smart RAG v9 production architecture
+
+Smart RAG **9.9.1** separates scientific rules, retrieval and model interpretation instead of asking the LLM to decide database truth.
+
+1. **Deterministic scientific layer** handles exact denominators, record properties, unresolved values, scope boundaries, false premises, Record 13 effective dimensionality, Evidence-D exclusion, polarity/ferroelectric boundaries and material-specific STE–Cu···Cu relation guards.
+2. **Retrieval layer** uses the release-3.0.1 effective index, precision search, full-text search, pgvector/BGE-M3 reciprocal-rank fusion and `@cf/baai/bge-reranker-base` reranking when the free Workers AI provider is available.
+3. **Interpretation layer** uses `@cf/qwen/qwen3-30b-a3b-fp8` only for bounded scientific interpretation. Qwen must call `submit_claims`; each accepted claim has one source, one allowed claim type and a short verbatim support fragment from that same source. The server rejects unsupported numbers, cross-paper mechanism stitching, speculation, recommendation language, universal causality and unsupported mechanism assignments.
+4. **Scientific-context whitelist** prevents title aliases, DOI title variants, title-adjudication records, search text and review/version metadata from entering Qwen's scientific context.
+5. **Live Monitor isolation** keeps `candidate-screen-v4` metadata separate from frozen scientific evidence. Candidate records never support release-3.0.1 claims and never receive automatic release inclusion.
+6. **Free-provider circuit breaker** does not purchase paid Workers AI overage. If the free daily allocation is unavailable, the public RAG automatically uses deterministic `precision_search_v9` lexical/metadata retrieval while preserving exact scientific rules and the normal public rate limit. After cooldown, the first ordinary scientific request automatically probes provider recovery and returns the circuit to full-AI mode if successful.
+
+The public health endpoint reports `FULL_AI`, `DEGRADED_SAFE_FALLBACK` or `PROBE_DUE_SAFE_FALLBACK` rather than hiding provider degradation.
+
 ## Validation gates
 
-- Frozen RAG benchmark: **70/70** (`rag-benchmark-v1.3`)
-- Original public production smoke: **17/17** (`production-smoke-v3.0.0`)
-- Current full-stack frontend/production regression: **15/15** (`frontend-selftest-v43.0`)
-- Public health gate: **PASS**, including browser bootstrap contract and public structure-erratum overlay
-- Coverage protocol: **210/210** pre-registered page-0 query cells completed
-- Candidate metadata screen: **1,788/1,788** DOI-unique candidates adjudicated
-- Candidate decisions: 293 screened in scope, 357 boundary, 877 excluded, 261 rejected, 0 pending
-- Automatic candidate inclusions into release 3.0.1: **0**
-- AI expert-surrogate audit: 80 articles, 200 structures and 6,600 field/rule checks
-- Supabase security advisor: no current security findings
+- Legacy frozen scientific RAG benchmark: **70/70** (`rag-benchmark-v1.3`). This run predates the final v9 orchestration layer and is retained as a scientific regression baseline; it is **not represented as a fresh final-v9 benchmark**.
+- Smart RAG v9 deterministic exact/anchor regression: **33/33**.
+- Smart RAG v9 real BGE-M3 + reranker retrieval regression: **25/25**.
+- Smart RAG v9 public production smoke: **6/6**, plus **3/3** post-circuit-patch smoke on runtime 9.9.1.
+- Original v8 public production smoke: **17/17**, retained as rollback-history evidence.
+- Frontend/production regression before the v44 runtime disclosure update: **15/15** (`frontend-selftest-v43.0`); the v44 site retains the same executable frontend and adds the v9 disclosure/health contract.
+- Public health gate: **PASS**, including browser bootstrap contract, candidate counts, Record 13 public erratum overlay, RAG 9.9.1 contract, safe provider circuit, production smoke and site-snapshot integrity.
+- Coverage protocol: **210/210** pre-registered page-0 query cells completed.
+- Candidate metadata screen: **1,788/1,788** DOI-unique candidates adjudicated.
+- Candidate decisions: 293 screened in scope, 357 boundary, 877 excluded, 261 rejected, 0 pending.
+- Primary-evidence acquisition queue: **650** screened-in/boundary candidates.
+- Automatic candidate inclusions into release 3.0.1: **0**.
+- AI expert-surrogate audit: 80 articles, 200 structures and 6,600 field/rule checks.
 
-The expert-surrogate audit is an internal consistency/evidence audit; it is not independent-human extraction accuracy and is **not proof that every field is error-free**. The Record 13 erratum is the reason this boundary is now stated explicitly.
+The expert-surrogate audit is an internal consistency/evidence audit; it is not independent-human extraction accuracy and is **not proof that every field is error-free**. The Record 13 erratum is the reason this boundary is stated explicitly.
+
+Because the controlled v9 validation exhausted the free Workers AI allocation on 10 August 2026, a fresh full 70-case Qwen-enabled run was not executed after the final orchestration patch. Paid overage was deliberately not enabled. The production runtime instead passed its quota-exhausted fallback tests and exposes that operational state publicly.
 
 ## Important interpretation boundaries
 
@@ -63,6 +82,9 @@ The expert-surrogate audit is an internal consistency/evidence audit; it is not 
 5. Missing and unresolved values are never imputed from analogous compounds.
 6. Primary PDF/SI/CIF files remain private provenance sources and are not redistributed as a public full-text corpus.
 7. For a structure with a disclosed erratum, public API consumers should use `Structural Dimensionality (Effective)` for current presentation while retaining `Structural Dimensionality` as the reproducible archived 3.0.1 value.
+8. A polar or non-centrosymmetric structure is not evidence of ferroelectricity unless direct ferroelectric evidence is stored.
+9. Retrieval absence is not equivalent to literature absence.
+10. LLM output cannot override frozen database fields, deterministic denominators or source-level evidence boundaries.
 
 ## Public interfaces
 
@@ -91,7 +113,7 @@ The immutable `v3.0.1` GitHub release contains:
 - methods, release, coverage, evaluation, security, contribution and DOI-deposition documentation;
 - per-file and archive SHA-256 checksums.
 
-Because the archive is immutable, its Record 13 raw dimensionality cells remain as originally published. The public erratum register and effective API fields must be consulted when using those four cells.
+Because the archive is immutable, its Record 13 raw dimensionality cells remain as originally published. The public erratum register and effective API fields must be consulted when using those four cells. Runtime v9 changes are operational software changes and do not rewrite the immutable 3.0.1 scientific archive.
 
 ## Citation
 
