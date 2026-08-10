@@ -67,14 +67,16 @@ The public runtime was re-audited at article, structure, crystallographic, RAG, 
 
 ### Production hardening v47
 
-A second adversarial pass focused on residual query semantics, evidence-grain leakage, public data latency, least privilege and interface consistency. The current production matrix is **site v47 / public-data 2.4.0 / Smart RAG 9.9.9 / meta 47.0**.
+A second adversarial pass focused on residual query semantics, evidence-grain leakage, public data latency, least privilege and interface consistency. The current production matrix is **site v47 / public-data 2.4.1 / Smart RAG 9.9.9 / meta 47.1**.
 
 - Replaced per-request reconstruction/filtering of the complete release arrays with private, release-specific, field-whitelisted article and structure projection tables derived from the immutable 3.0.1 snapshot.
 - Added service-role-only SQL query functions for server-side filtering, counting, sorting and pagination; `anon` and `authenticated` have neither direct projection SELECT privilege nor query-RPC EXECUTE privilege.
 - Enabled RLS on both projection tables with explicit deny policies and reduced `service_role` table privilege to SELECT only.
+- Added a service-role-only projection integrity/ACL contract that verifies release row counts, strict-polar/erratum counts, deterministic projection checksums, RLS/privilege invariants and selected query semantics on every public health check.
 - Added semantic normalization helpers for dimensionality and Cu–halide identity.
 - Prevented halogenated organic ligands from being misread as the Cu–halide identity solely because the ligand formula contains Cl/Br/I.
 - Tokenized one-letter halogen searches and short scientific terms, eliminating substring artifacts such as `I` matching arbitrary text and `STE` matching unrelated words.
+- Article single-halogen filters use containment across mixed labels: canonical `I` returns **247** records; explicit mixed `Cl/Br/I` remains an exact category with **27** canonical records.
 - Removed article titles from structure search entirely, not only article-title photophysical terms.
 - Removed unmapped motif text from the public structure-search/detail evidence surface; structure detail now states an explicit motif-grain boundary rather than heuristically extracting a motif from article-level summaries.
 - Smart RAG 9.9.9 adds deterministic explicit-structure boundaries and a second generic outer guard for motif/photophysics, providing defense in depth independently of model availability.
@@ -91,9 +93,11 @@ See `docs/PRODUCTION_HARDENING_V47_2026-08-10.md` and `docs/RAG_RUNTIME_V9.md`.
 - Frozen scientific RAG regression baseline: **70/70** (`rag-benchmark-v1.3`), predating final v9 orchestration and therefore not represented as a fresh 9.9.9 benchmark.
 - Smart RAG v9 deterministic exact/anchor regression: **33/33**.
 - Smart RAG v9 hybrid retrieval regression: **25/25**.
-- Current production `/health.json`: **PASS** for v47 / public-data 2.4.0 / Smart RAG 9.9.9 / meta 47.0.
+- Current production `/health.json`: **PASS** for v47 / public-data 2.4.1 / Smart RAG 9.9.9 / meta 47.1.
 - Final live public counts: 332 canonical articles, 346 audit articles, 816 Core-Included structures, 878 total structures and 67 strict-polar rows.
-- Final live semantic checks: `CUH-008-S01` → I; `CUH-162-S01` remains Cl/Br/I rather than false I; `CUH-013-S01` → Unresolved with erratum; structure searches `STE` and `luminescence` → 0; tokenized `I` search → 671 rows.
+- Final live article-halogen semantic checks: canonical `I` containment = 247; exact canonical `Cl/Br/I` category = 27.
+- Final live structure semantic checks: `CUH-008-S01` → I; `CUH-162-S01` remains Cl/Br/I rather than false I; `CUH-013-S01` → Unresolved with erratum; structure searches `STE` and `luminescence` → 0; tokenized `I` search → 671 rows.
+- Projection integrity/ACL health contract: PASS.
 - Legacy bulk `/api/export` remains **HTTP 410**.
 - Public sitemap returns **application/xml**.
 - Supabase security advisor after v47 projection/RLS hardening: **0 findings**.
