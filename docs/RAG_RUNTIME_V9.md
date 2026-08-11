@@ -1,84 +1,86 @@
-# Smart RAG v9 runtime
+# Smart RAG runtime — release 3.0.2
 
-This document describes the production runtime serving CuHalide Atlas release **3.0.1**. Runtime/index hardening does not rewrite the immutable 3.0.1 scientific archive.
+This document describes the current production Smart RAG serving CuHalide Atlas frozen scientific release **3.0.2**. Historical v9 components remain in the dependency chain, but the public release contract is now 9.12.0.
 
 ## Production matrix
 
-- Public Smart RAG: **9.10.0**
+- Public Smart RAG: **9.12.0**
 - Public endpoint: `https://cuhalide-atlas-v3.vercel.app/api/agent`
+- Release-3.0.2 internal gateway: **9.12.0-public-internal**
+- Release-3.0.2 core adapter: **9.12.0-v302-core-adapter-internal**
+- Scientific-context health: **rag-contract-health-v1.1.0**
 - Internal quota/exact gateway: **9.9.6-public-internal**
 - Deterministic exact/anchor service: **10.2.2-exact-anchor-internal**
-- Final internal orchestrator: **9.11.3-final-internal**
+- Final evidence-grain orchestrator: **9.11.3-final-internal**
 - Evidence-grain-safe retrieval core: **9.11.0-safe-core-internal**
-- Bounded claims: **qwen-claims-v9-1.3.0**
-- Public data: **2.6.0**
-- Public site: **v47**
-- Public metadata/health: **47.6**
-- Frozen release / cutoff: **3.0.1 / 2026-06**
+- Bounded claims: **qwen-claims-v9-1.3.3**
+- Public data / site / meta: **2.7.0 / v48 / 48.0**
+- Frozen release / cutoff: **3.0.2 / 2026-06**
 
 ## Architecture
 
-`browser` → `Vercel /api/agent` → `public Smart RAG wrapper` → `JWT quota/exact gateway` → either `JWT deterministic exact/anchor service` or `JWT final orchestrator` → `JWT evidence-grain-safe retrieval core`
+The public request path is:
 
-Separate JWT-protected services provide bounded claims, candidate metadata, lexical fallback and scientific-context health checks.
+`browser → Vercel /api/agent → public Smart RAG 9.12.0 → release-3.0.2 internal gateway → deterministic protected path or evidence-grain-safe retrieval/reasoning path`
 
-The public data path is independently minimized:
-
-`browser` → `Vercel /api/public-data` → `public read-only Edge Function` → `service-role-only release projection/query functions`
+Release 3.0.2 is a narrow hotfix over 3.0.1. A release-compatibility contract verifies that all article RAG documents and all unchanged structure documents are content-hash equivalent to 3.0.1; only the four physically corrected Record 13 structure documents differ. The adapter therefore reuses validated internal retrieval/orchestration logic only where the indexed content contract proves equivalence, while v302 structure projections are authoritative for current structure identity.
 
 ## Deterministic scientific guards
 
-Protected questions are resolved before bounded model interpretation. These include exact denominators, direct record fields, unresolved values, frozen scope decisions, false-premise correction, Record 13 effective dimensionality, Evidence-D exclusion, symmetry/polarity/ferroelectric boundaries and selected material-specific relation constraints.
+Protected questions are resolved before bounded model interpretation when appropriate. These include exact denominators, direct record fields, unresolved values, frozen scope decisions, false-premise correction, symmetry/polarity/ferroelectric boundaries, Record 13 correction-state facts and selected same-source material relations.
 
-The Record 101 same-source route remains deterministic and returns Cu···Cu = **2.574 Å** and STE emission = **527 nm** from `A:101`, with no embedding or LLM use.
+Record 101 remains deterministic at Cu···Cu = **2.574 Å** and STE emission = **527 nm**. Exact/anchor service **10.2.2** prevents the Record 95 single-record boundary from intercepting multi-record comparisons such as Records 95/135.
 
-Exact/anchor service **10.2.2** also prevents a single-record Record 95 boundary from intercepting multi-record comparison questions. Comparisons such as Records 95 and 135 now pass through to evidence-grounded retrieval/reasoning.
+## Physical RAG index and evidence grain
 
-## Retrieval and physical evidence-grain separation
+The 3.0.2 index contains **1,224/1,224 embedded documents**:
 
-When free Workers AI capacity is available, retrieval combines:
+- 346 article-grain scientific documents;
+- 878 structure identity/crystallography documents.
+
+All structure documents are physically cleaned, not merely output-filtered. They exclude copied article-level motif and photophysical fields unless a future independently mapped structure-grain evidence object establishes such a relation.
+
+Release-transition integrity checks:
+
+- article content-SHA mismatches vs 3.0.1: **0**;
+- unchanged structure content-SHA mismatches vs 3.0.1: **0**;
+- intentionally changed Record 13 structure documents: **4**;
+- Record 13 corrected dimensions in v302 RAG: **4/4**;
+- current-release Record 13 erratum flags removed: **4/4**;
+- forbidden structure `llm_context` science keys: **0**;
+- explicit copied article/motif/emission fields in structure documents: **0**.
+
+The four Record 13 structure documents were regenerated from the v302 projection and re-embedded with `@cf/baai/bge-m3` (1024 dimensions).
+
+## Retrieval
+
+When free Workers AI capacity is available, ordinary evidence retrieval combines:
 
 1. precision/entity anchors and metadata filters;
-2. full-text search;
-3. BGE-M3 embeddings (`@cf/baai/bge-m3`, 1024 dimensions);
+2. lexical/full-text search;
+3. BGE-M3 semantic embeddings;
 4. reciprocal-rank fusion;
 5. BGE reranking (`@cf/baai/bge-reranker-base`).
 
-Soft scientific concepts such as photophysics, stability, transport and unmapped structural motifs are retrieved at **article grain** unless an independent structure-grain mapping exists.
+Soft scientific concepts such as photophysics, stability, transport and unmapped structural motifs are retrieved at **article grain** unless independently mapped at structure grain. Structure records emitted through the public path use the release-3.0.2 safe structure projection.
 
-### Physical structure-index rebuild
+## Bounded model interpretation
 
-The previous runtime already guarded public outputs, but legacy structure documents in the private RAG store still contained copied article-level titles/motif/photophysics. This residual contamination has now been removed physically.
+The model is `@cf/qwen/qwen3-30b-a3b-fp8`. Model-generated scientific prose is not accepted as an unconstrained authority. The claims layer requires structured source-constrained claims and validates source identity, support fragments, numerical support, scientific concepts, claim type and prohibited wording.
 
-All **878** structure RAG documents were rebuilt from `cuhalide_atlas_public_structures_v301` using identity/crystallography-only fields and then re-embedded with BGE-M3.
+Unsupported speculation, recommendations, universal causality and cross-paper mechanism stitching are rejected. Missing values remain unresolved. Polar/non-centrosymmetric evidence is not converted into a ferroelectric claim.
 
-Final post-swap checks:
+The claims service uses a preferred-language policy rather than rejecting otherwise valid science solely because the model produced an English claim for a Chinese question.
 
-- structure RAG documents: **878**;
-- valid 1024-dimensional BGE-M3 embeddings: **878/878**;
-- copied `Article:` fields: **0**;
-- copied `Structural motif:` fields: **0**;
-- copied `Emission:` / `Emission assignment` fields: **0**;
-- forbidden structure `llm_context` keys (`motif`, `emission_nm`, `emission_assignment`, `article_title`): **0**;
-- content SHA mismatches: **0**.
+## Candidate isolation
 
-The complete index remains **1,224/1,224 embedded documents**: 346 article-grain scientific documents and 878 structure identity/crystallography documents.
+Literature Watch / Live Monitor candidates are metadata-only discovery objects. They are not frozen evidence and are not allowed to become model-supported frozen scientific claims.
 
-Structure documents may include identity, composition, phase, effective Cu–halide identity and evidence scope, dimensionality, symmetry, polarity classification, confidence, eligibility, determination method, CCDC/CIF identifier, unit-cell fields, erratum metadata and crystallographic evidence metadata. They do not carry copied article-level photophysics or unmapped motif assignments.
+This boundary is explicitly represented in `rag-benchmark-v1.6`: case RS08 is intentionally deterministic when the task is to distinguish frozen evidence from candidate metadata. Candidate information can prompt primary-source review, but it cannot satisfy release-level scientific support requirements.
 
-## Bounded Qwen interpretation
+## Structure-grain defense in depth
 
-Model: `@cf/qwen/qwen3-30b-a3b-fp8`.
-
-Model interpretation is accepted only through `submit_claims`. Each accepted claim must name exactly one source, use an allowed claim type and provide a same-source support fragment. The server validates source identity, support text, numbers, concepts, claim type, duplicate similarity and prohibited scientific wording. Unsupported speculation, recommendations, universal causality and cross-paper mechanism stitching are rejected.
-
-## Scientific-context contract
-
-Bounded claims do not depend on the minimized public `/api/data` schema. Internal scientific context is loaded from JWT-protected RAG documents, and a separate JWT-protected contract probe checks representative article photophysics and structure crystallography. Public `/health.json` fails if this context contract fails.
-
-## Defense in depth at structure grain
-
-1. Public structure search uses structure identity/crystallography fields only.
+1. Public structure search uses identity/crystallography fields only.
 2. Public structure detail does not infer article-level motif/photophysics.
 3. Bounded-claims structure context excludes unmapped science fields.
 4. The physical structure RAG index is identity/crystallography-only.
@@ -86,46 +88,35 @@ Bounded claims do not depend on the minimized public `/api/data` schema. Interna
 6. Generic motif/photophysics responses pass through an outer structure-source guard.
 7. Same-record coexistence is not treated as automatic same-phase causality.
 
-These guards remain active independently of model-provider availability.
-
 ## Structure-halogen semantics
 
-Public data 2.6.0 and the physical structure index use the same conservative structure-grain semantics:
+Public data 2.7.0 and the structure index use `structure-halogen-v6` semantics:
 
-- `Cu(I)` oxidation-state notation is excluded from iodide parsing;
-- compact `Cu2I4` and bridging `μ2-I` notation are recognized;
+- `Cu(I)` oxidation-state notation does not imply iodide;
+- compact `Cu2I4` and bridging `μ2-I` are recognized;
 - ligand-bound halogens do not by themselves redefine Cu–halide identity;
-- series/variable-X records retain series-level identity rather than false one-phase assignment;
-- one-letter halogen searches and short scientific tokens use token-aware matching.
+- variable-X/series records remain series-level rather than falsely phase-specific;
+- short scientific tokens use token-aware search.
 
-Representative effective values include `CUH-008-S01 → I`, `CUH-162-S01 → Cl/Br/I`, and Record 13 effective dimensionality `CUH-013-S01 → Unresolved` with S02–S04 → 0D.
-
-Two exact structure-grain statistics are now explicitly protected by the post-reindex benchmark:
-
-- 2025 + 0D + effective halogen contains I → **57 rows / 28 articles**;
-- effective halogen contains Br → **232 rows / 133 articles**.
-
-These are structure-grain counts and should not be replaced by article-level halogen inheritance.
+Current v302 classification counts are **803 structure-specific / 45 series-level / 30 unresolved / 4 source-conflict**.
 
 ## Provider circuit breaker
 
-Paid Workers AI overage is not authorized. If the free allocation is unavailable:
+Paid Workers AI overage is not authorized. If free provider capacity is unavailable:
 
 - deterministic exact/protected rules continue;
-- ordinary retrieval uses deterministic lexical/precision fallback;
-- bounded model interpretation is omitted;
-- public status reports **SAFE_FALLBACK**;
+- deterministic lexical/precision retrieval remains available;
+- bounded model synthesis is omitted rather than fabricated;
+- the public service reports **SAFE_FALLBACK**;
 - recovery is probed after cooldown.
 
-At the final 11 August 2026 validation, the public endpoint reported **FULL** with bounded scientific interpretation available.
+The checked release-finalization state was **FULL**.
 
-## Final benchmark: rag-benchmark-v1.5
+## Fresh release-3.0.2 benchmark
 
-Final post-reindex run:
+`rag-benchmark-v1.6`:
 
-- Evaluation: **rag-benchmark-v1.5**
-- Run ID: `cdfd61ae-b382-433c-b877-6465a93a93b9`
-- Code label: **smart-rag-v9.11.3-evidence-grain-v2-structure-reindex-v2+exact-10.2.2**
+- Run ID: `04bd93ec-cc3a-424b-9d8d-a1b08cec58ff`
 - Exact/deterministic: **25/25**
 - Retrieval: **25/25**
 - Reasoning/scientific-boundary: **20/20**
@@ -133,27 +124,19 @@ Final post-reindex run:
 - Release gate: **PASS**
 - Paid overage authorized: **false**
 
-A first post-reindex diagnostic reused historical v1.4 gold and scored **66/70**. It was retained rather than overwritten. It exposed one genuine runtime overmatch (fixed in exact service 10.2.2) and three stale expectations tied to pre-clean structure semantics. Benchmark **v1.5** is a versioned clone of v1.4 that changes only EX16, EX18 and RT25, with case-level provenance. Historical v1.4 cases/results remain unchanged.
+Historical v1.5 remains immutable. v1.6 rebases literal release identity to 3.0.2 without changing frozen scientific fact/count targets. The only benchmark-policy adjustment is the documented RS08 candidate-isolation strengthening described above.
 
-See [`RAG_BENCHMARK_V15_2026-08-11.md`](RAG_BENCHMARK_V15_2026-08-11.md) and historical [`RAG_BENCHMARK_V14_2026-08-11.md`](RAG_BENCHMARK_V14_2026-08-11.md).
+See [`RAG_BENCHMARK_V16_2026-08-11.md`](RAG_BENCHMARK_V16_2026-08-11.md).
 
-## Production validation
+## Current production validation
 
-Final checked production state:
+At finalization:
 
 - `/health.json`: **HTTP 200 / PASS**;
-- public site/data/RAG/meta: **47 / 2.6.0 / 9.10.0 / 47.6**;
-- Smart RAG mode: **FULL**;
-- bounded scientific interpretation: available;
-- scientific-context contract: **PASS**;
-- `/sitemap.xml`: **application/xml; charset=utf-8**;
-- live Chromium desktop/tablet/mobile production gate: **PASS**;
-- Supabase security advisor after final cleanup: **0 findings**.
+- public site / data / RAG / meta: **48 / 2.7.0 / 9.12.0 / 48.0**;
+- Current Curated: **base 3.0.2 / revision 0 / ready**;
+- live release-specific Chromium production gate: **PASS**;
+- Supabase security advisor: **0 findings**;
+- temporary benchmark, re-embedding and debug endpoints: retired or removed.
 
-The temporary benchmark evaluator and structure-reembedding endpoint were retired and returned to `verify_jwt=true`. Their staging/rollback tables and staging/apply RPCs were removed after the final 70/70 gate.
-
-## Reporting boundary
-
-A manuscript describing the current runtime should report the deterministic routes, embedding/reranker models, bounded-claim schema, scientific-context contract, physical article/structure evidence-grain separation, server-side public projection architecture, candidate isolation, provider fallback, client-isolated rate path and benchmark version.
-
-The current runtime may be reported as having passed **rag-benchmark-v1.5, 70/70**, with the run ID above and the explicit note that v1.5 is a versioned post-reindex revision of v1.4. This result establishes conformance to that 70-case suite; it does not establish exhaustive literature completeness or general-purpose scientific reasoning accuracy.
+The benchmark demonstrates conformance to the registered release/runtime suite; it does not establish exhaustive literature completeness, independent-human extraction accuracy or general-purpose scientific reasoning accuracy.
