@@ -201,7 +201,9 @@ test.describe('release 3.0.2 HTTP, scientific, privacy and security contracts', 
     expect(articleHtml).toContain('rel="canonical"');
     expect(articleHtml).toContain('/article/13');
     expect(articleHtml).toContain('application/ld+json');
-    expect(articleHtml).not.toContain('primary PDF');
+    expect(articleHtml).not.toContain('field_evidence');
+    expect(articleHtml).not.toContain('candidate_score');
+    expect(articleHtml).not.toContain('evidence excerpt');
     expect(article.headers()['x-cuhalide-release']).toBe('3.0.2');
 
     const structure = await request.get('/structure/CUH-013-S01');
