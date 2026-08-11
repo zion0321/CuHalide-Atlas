@@ -1,0 +1,53 @@
+name: Production Lighthouse QA
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '53 3 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-lighthouse-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CUHALIDE_BASE_URL: https://cuhalide-atlas-v3.vercel.app
+      CI: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked QA dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Install Chromium and system dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Lighthouse production gate
+        run: npm run qa:lighthouse
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-lighthouse-qa-${{ github.run_id }}
+          path: lighthouse-report/
+          if-no-files-found: warn
+          retention-days: 30
