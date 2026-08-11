@@ -56,7 +56,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; img-src 'self' data: https:; style-src-elem 'self' 'sha256-mIuk1nX3LSYPgU3Lt3qcFnf9xG3hB+DWhft7+kBpCjs='; style-src-attr 'unsafe-inline'; script-src 'self' 'sha256-uFXhSRoZ75s2BGnCiTMRJisW/hDqdJXlwVpHizdo8EM=' 'sha256-KUMm933pSgPGTRhSaY8ODO9wyOouc1jFksUSCpSlw7Y='; script-src-attr 'none'; connect-src 'self'; font-src 'self' data:; object-src 'none'; media-src 'none'; worker-src 'none'; child-src 'none'; manifest-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; img-src 'self' data: https:; style-src-elem 'self' 'sha256-mIuk1nX3LSYPgU3Lt3qcFnf9xG3hB+DWhft7+kBpCjs='; style-src-attr 'unsafe-inline'; script-src 'self' 'sha256-uFXhSRoZ75s2BGnCiTMRJisW/hDqdJXlwVpHizdo8EM=' 'sha256-z0lkTE2fU9D3YwR4O2OoV/K/x/gqKH3p9Kwv5maikJE='; script-src-attr 'none'; connect-src 'self'; font-src 'self' data:; object-src 'none'; media-src 'none'; worker-src 'none'; child-src 'none'; manifest-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
         }
       ]
     },
@@ -85,7 +85,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; img-src 'self' data: https:; style-src-elem 'self' 'sha256-mIuk1nX3LSYPgU3Lt3qcFnf9xG3hB+DWhft7+kBpCjs='; style-src-attr 'unsafe-inline'; script-src 'self' 'sha256-uFXhSRoZ75s2BGnCiTMRJisW/hDqdJXlwVpHizdo8EM=' 'sha256-KUMm933pSgPGTRhSaY8ODO9wyOouc1jFksUSCpSlw7Y='; script-src-attr 'none'; connect-src 'self'; font-src 'self' data:; object-src 'none'; media-src 'none'; worker-src 'none'; child-src 'none'; manifest-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; img-src 'self' data: https:; style-src-elem 'self' 'sha256-mIuk1nX3LSYPgU3Lt3qcFnf9xG3hB+DWhft7+kBpCjs='; style-src-attr 'unsafe-inline'; script-src 'self' 'sha256-uFXhSRoZ75s2BGnCiTMRJisW/hDqdJXlwVpHizdo8EM=' 'sha256-z0lkTE2fU9D3YwR4O2OoV/K/x/gqKH3p9Kwv5maikJE='; script-src-attr 'none'; connect-src 'self'; font-src 'self' data:; object-src 'none'; media-src 'none'; worker-src 'none'; child-src 'none'; manifest-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
         }
       ]
     },
