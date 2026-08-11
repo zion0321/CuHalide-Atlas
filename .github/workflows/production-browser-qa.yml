@@ -76,6 +76,20 @@ jobs:
             '<dt>Halogen evidence</dt>'
           );
 
+          const pagers = [
+            ['apager', 'Article pages'],
+            ['spager', 'Structure pages'],
+            ['ppager', 'Strict-polar pages']
+          ];
+          for (const [id, label] of pagers) {
+            replaceIfPresent(
+              `<div class="pager" id="${id}" aria-label="${label}"></div>`,
+              `<div class="pager" id="${id}" role="navigation" aria-label="${label}"></div>`,
+              `${id} navigation semantics`,
+              `<div class="pager" id="${id}" role="navigation" aria-label="${label}"></div>`
+            );
+          }
+
           fs.writeFileSync(indexPath, html);
 
           const sha = (s) => `'sha256-${crypto.createHash('sha256').update(s).digest('base64')}'`;
@@ -109,7 +123,7 @@ jobs:
           if ! git diff --cached --quiet; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'Fix accessibility contrast and expose halogen evidence scope'
+            git commit -m 'Fix pager navigation semantics'
             git push origin HEAD:main
           fi
           git checkout --detach "$MERGE_SHA"
@@ -121,7 +135,7 @@ jobs:
           set -euo pipefail
           for i in $(seq 1 72); do
             body="$(curl --fail --silent --show-error --location "$CUHALIDE_BASE_URL/" || true)"
-            if [[ "$body" == *"--muted:#5c7079"* && "$body" == *"Halogen evidence"* ]]; then
+            if [[ "$body" == *"--muted:#5c7079"* && "$body" == *"Halogen evidence"* && "$body" == *"id=\"apager\" role=\"navigation\""* ]]; then
               echo 'Corrected production HTML is live.'
               exit 0
             fi
