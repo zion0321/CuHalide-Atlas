@@ -1,3 +1,5 @@
+const RELEASE = '3.0.2';
+
 export default async function handler(req, res) {
   if (!['GET', 'HEAD'].includes(req.method)) {
     res.statusCode = 405;
@@ -9,11 +11,11 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  res.setHeader('X-CuHalide-Release', '3.0.1');
+  res.setHeader('X-CuHalide-Release', RELEASE);
   if (req.method === 'HEAD') return res.end();
   return res.end(JSON.stringify({
     error: 'Bulk release exports are not publicly distributed.',
-    release: '3.0.1',
+    release: RELEASE,
     public_access: 'query-and-view',
     guidance: 'Use the CuHalide Atlas search, record pages, Smart RAG, citation metadata and manuscript-specific data-availability process.'
   }));
