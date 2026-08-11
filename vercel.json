@@ -3,9 +3,6 @@
   "functions": {
     "api/site.js": {
       "includeFiles": "public/index.html"
-    },
-    "api/site-probe.js": {
-      "includeFiles": "public/index.html"
     }
   },
   "rewrites": [
