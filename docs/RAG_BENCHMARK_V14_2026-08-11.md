@@ -2,14 +2,13 @@
 
 Date: 2026-08-11  
 Scientific release: **3.0.1**  
-Frozen literature cutoff: **2026-06**  
 Evaluation version: **rag-benchmark-v1.4**  
-Current-runtime code label: **smart-rag-v9.11.3-evidence-grain-v2**  
-Run ID: `81eeab9f-3efb-4d19-bab0-7768acebfc4b`
+Runtime code label: **smart-rag-v9.11.3-evidence-grain-v2**  
+Completed run ID: `81eeab9f-3efb-4d19-bab0-7768acebfc4b`
 
-## Result
+> **Historical status.** This 70/70 run is the evidence-grain-safe **pre-physical-reindex** baseline. After all 878 structure RAG documents were physically rebuilt and re-embedded, the final current-runtime gate became [`rag-benchmark-v1.5`](RAG_BENCHMARK_V15_2026-08-11.md), run `cdfd61ae-b382-433c-b877-6465a93a93b9`, which passed 70/70. Historical v1.4 cases/results were not rewritten.
 
-The fresh current-runtime benchmark completed successfully with **70/70 PASS**.
+## Completed v1.4 result
 
 | Suite | Passed | Failed | Mean latency (ms) |
 |---|---:|---:|---:|
@@ -18,53 +17,55 @@ The fresh current-runtime benchmark completed successfully with **70/70 PASS**.
 | Reasoning / scientific boundaries | 20 / 20 | 0 | 3954.6 |
 | **Total** | **70 / 70** | **0** | — |
 
-The run is stored as `completed` with `release_gate=true`, `complete=true`, 70 result cases and an empty failure list.
+The completed run used the free Workers AI allocation only; paid overage was not authorized.
 
-## Runtime represented by this benchmark
-
-The public production contract at validation time was:
+## Runtime represented by the completed v1.4 run
 
 - public site: **v47**;
-- public data contract: **2.6.0**;
-- public Smart RAG gateway: **9.10.0**;
-- public metadata / health: **47.6**;
-- final evidence-grain-safe orchestrator code label: **9.11.3**;
-- deterministic exact/anchor service used by protected routes: **10.2.1-exact-anchor-internal**;
+- public data: **2.6.0**;
+- public Smart RAG: **9.10.0**;
+- public metadata/health: **47.6**;
+- final orchestrator: **9.11.3**;
+- exact/anchor service at completion: **10.2.1-exact-anchor-internal**;
 - scientific release: **3.0.1**.
 
-The public health endpoint reported PASS and the public Smart RAG endpoint reported `operational_mode=FULL`, evidence-grounded retrieval available, deterministic protected boundaries available, bounded scientific interpretation available and the scientific-context contract passing.
+This run already enforced public evidence-grain guards: scientific properties and photophysics were grounded at article grain unless independently mapped, structure cards were limited to safe fields, explicit structure-ID questions preserved the article/structure boundary, and same-record coexistence was not treated as automatic same-phase causality.
 
-## Evidence-grain policy represented by v1.4
+## Deterministic fixes exercised by v1.4
 
-Benchmark v1.4 evaluates the post-hardening evidence-grain contract rather than rewarding legacy structure-document leakage.
+The completed run closed two narrow protected-route issues:
 
-- Scientific properties, photophysics, stability, transport and structural-motif concepts are grounded at article grain unless an independent structure-grain mapping exists.
-- Structure cards support identity and crystallography unless a separate mapped evidence object establishes a structure-level scientific property.
-- Explicit structure-ID questions about motif or photophysics preserve the structure/article boundary instead of copying article-level values into a phase row.
-- Same-record coexistence is not treated as automatic same-phase causality.
-- Exact denominators, frozen scope adjudication, false-premise correction and selected material-specific relation constraints remain deterministic.
+1. Record 101 same-source STE–Cu···Cu relation: **2.574 Å** and **527 nm**, deterministic, source `A:101`.
+2. Record 267 human scope adjudication: the record remains **Boundary** because it is a copper(I) hypophosphite rather than a canonical Cu(I) halide.
 
-## Final deterministic fixes exercised by the gate
+## Post-reindex diagnostic using unchanged v1.4 gold
 
-The fresh run identified and then closed two narrow deterministic contract mismatches before completion:
+After the physical structure-index rebuild, v1.4 was deliberately rerun **without changing its gold**. Diagnostic run ID:
 
-1. **Record 101 same-source STE–Cu···Cu relation.** The protected route now returns the material-specific same-source values directly: Cu···Cu = **2.574 Å** and STE emission = **527 nm**, with a deterministic relation trace and no embedding or LLM use.
-2. **Record 267 human scope adjudication.** The deterministic Boundary response retains the hypophosphite scope reason while avoiding wording that could be misread by the evaluator as an affirmative canonical-reclassification recommendation.
+`504d7921-20fd-46ff-b436-5223bb56903e`
 
-Both cases passed after the deterministic exact/anchor service advanced to `10.2.1-exact-anchor-internal`.
+Result: **66/70**.
 
-## Provider and cost boundary
+This diagnostic was retained as a failed run because it revealed useful information:
 
-Free Workers AI capacity was verified as available before the completed run. **Paid overage was not authorized or used.** Provider availability is an operational dependency only; it cannot alter frozen database values, deterministic counts, scope adjudication or evidence-grain safety rules.
+- **RS02** exposed a genuine deterministic overmatch: a Record 95 single-record boundary intercepted a Records 95/135 comparison. This was fixed in exact/anchor service **10.2.2**.
+- **EX16** and **EX18** used historical structure-halogen counts that inherited pre-clean semantics rather than the corrected structure-safe `halogen_effective` projection.
+- **RT25** required structure sources even though the query explicitly asks to find the **article** containing the TMPA series; after physical evidence-grain cleanup, article `A:58` is the correct relevance grain.
 
-## Security cleanup
+These three benchmark expectations were **not edited in v1.4**. Instead, a new versioned v1.5 suite was created with case-level provenance for the three changes.
 
-The temporary versioned evaluation endpoint used for the controlled run was retired immediately after validation and returned to JWT-required status. It is not a public production interface.
+## Why v1.5 supersedes v1.4 for the current runtime claim
 
-## Relation to earlier benchmark history
+The physical structure-index rebuild changed the retrieval corpus itself: all 878 structure documents were rebuilt as identity/crystallography-only documents and re-embedded. A benchmark completed before that swap cannot be the final evidence for the post-swap runtime.
 
-The earlier `rag-benchmark-v1.3` run also passed 70/70 on release 3.0.1, but it represents an older pre-final-v9 runtime. It remains a historical regression baseline. The current-runtime claim is supported specifically by the **v1.4** run documented here.
+Therefore:
 
-## Interpretation
+- v1.4 completed 70/70 remains a valid historical pre-reindex baseline;
+- the post-reindex v1.4 diagnostic remains a transparent 66/70 diagnostic;
+- **v1.5 70/70 is the final current-runtime validation**.
 
-A 70/70 benchmark result establishes conformance to this pre-registered 70-case scientific/runtime test set. It does **not** establish exhaustive literature coverage, general-purpose scientific reasoning accuracy, independent-human extraction accuracy, or correctness outside the frozen CuHalide Atlas scope.
+See [`RAG_BENCHMARK_V15_2026-08-11.md`](RAG_BENCHMARK_V15_2026-08-11.md) for the final post-reindex run, physical index integrity checks and versioned gold rationale.
+
+## Interpretation boundary
+
+Benchmark results establish conformance to their versioned test suites. They do not establish exhaustive literature coverage, general-purpose scientific reasoning accuracy, independent-human extraction accuracy, or correctness outside the frozen CuHalide Atlas scope.
