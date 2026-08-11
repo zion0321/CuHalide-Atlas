@@ -121,7 +121,7 @@ jobs:
           set -euo pipefail
           for i in $(seq 1 72); do
             body="$(curl --fail --silent --show-error --location "$CUHALIDE_BASE_URL/" || true)"
-            if printf '%s' "$body" | grep -q -- '--muted:#5c7079' && printf '%s' "$body" | grep -q 'Halogen evidence'; then
+            if [[ "$body" == *"--muted:#5c7079"* && "$body" == *"Halogen evidence"* ]]; then
               echo 'Corrected production HTML is live.'
               exit 0
             fi
