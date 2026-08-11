@@ -49,7 +49,7 @@ test.describe('production HTTP and scientific contracts', () => {
     expect(health.status).toBe('PASS');
     expect(health.release).toBe('3.0.1');
     expect(health.site_version).toBe('47');
-    expect(health.meta_version).toBe('47.5');
+    expect(health.meta_version).toBe('47.6');
     expect(health.public_data.version).toBe('2.6.0');
     expect(health.checks.csp_hardened).toBe(true);
     expect(health.checks.rag_context_contract).toBe(true);
