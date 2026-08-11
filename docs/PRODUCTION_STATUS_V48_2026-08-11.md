@@ -125,6 +125,22 @@ Supabase security advisor returned **0 findings** after the final schema hardeni
 
 The production root is served through `middleware.js` → `api/site.js`. `api/site.js` treats `public/index.html` as a version-controlled scientific-interface shell, applies the release-3.0.2/v48 contract with invariant checks, and computes SHA-256 CSP hashes from the final HTML before serving it. The shell is therefore an implementation template, not an independent release-identity source.
 
+## Final hardening closure
+
+The final v48 hardening pass adds operational reproducibility and public-discovery improvements without changing the frozen 3.0.2 scientific corpus:
+
+- GitHub canonical Supabase wrappers and release-specific v302 services are synchronized with production; required internal RAG dependencies are snapshotted and inventoried.
+- `package-lock.json` locks the QA dependency graph; browser and Lighthouse workflows use `npm ci`.
+- A scheduled production Lighthouse gate complements Playwright/Axe with mobile/desktop performance, accessibility, best-practices, SEO, LCP and CLS thresholds.
+- Stable public record URLs and a dynamic sitemap make canonical article and structure records crawlable without exposing private provenance.
+- Homepage structured/social metadata is release-aligned; article halogen filtering states its containment-versus-exact-category semantics explicitly.
+- The retired bulk export route remains 410 and identifies release 3.0.2 consistently.
+- Daily machine literature discovery is protected by platform JWT verification plus a separate private cron token, scans a 30-day rolling window with multiple Crossref/OpenAlex query families, and remains metadata-only.
+- Obsolete debug/temp/ephemeral/export Edge Functions were replaced with JWT-required 410 retirement stubs; no required production dependency was retired.
+- Production health accepts future Current Curated revisions while preserving frozen release denominators.
+
+The machine discovery hardening was validated by a successful JWT+token pg_cron-style invocation on 2026-08-11. The resulting records remain candidate metadata only and do not modify Frozen Release or Current Curated.
+
 ## Archival boundary
 
 The final repository/Zenodo DOI, creator/ORCID/funder metadata, blanket project licensing decision and archival deposit remain a separate final-freeze stage. No permanent DOI is asserted here, and no third-party primary PDF/SI/CIF redistribution is authorized by this production release.

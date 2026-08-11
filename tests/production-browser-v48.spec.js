@@ -53,7 +53,7 @@ test.describe('release 3.0.2 HTTP, scientific, privacy and security contracts', 
     expect(health.public_data.version).toBe('2.7.0');
     expect(health.smart_rag.version).toBe('9.12.0');
     expect(health.current_curated.base_release).toBe('3.0.2');
-    expect(health.current_curated.live_revision).toBe(0);
+    expect(Number(health.current_curated.live_revision)).toBeGreaterThanOrEqual(0);
     expect(health.current_curated.status).toBe('ready');
     expect(health.current_errata_count).toBe(0);
     expect(health.historical_corrections_count).toBe(4);
@@ -68,6 +68,10 @@ test.describe('release 3.0.2 HTTP, scientific, privacy and security contracts', 
     expect(html).toContain('Display window 2006–2026');
     expect(html).not.toContain('2026.06');
     expect(html).toContain('Current Curated');
+    expect(html).toContain('"dateModified":"2026-08-11"');
+    expect(html).toContain('/og-image.svg');
+    expect(html).toContain('Halogen set');
+    expect(html).toContain('Single-halogen filters include mixed records containing that halogen');
     const csp = root.headers()['content-security-policy'] || '';
     expect(csp).toContain("script-src 'self' 'sha256-");
     expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
@@ -96,9 +100,12 @@ test.describe('release 3.0.2 HTTP, scientific, privacy and security contracts', 
     expect(manifest.structure_halogen_runtime.unresolved_rows).toBe(30);
     expect(manifest.structure_halogen_runtime.source_conflict_rows).toBe(4);
     expect(manifest.current_curated.base_release).toBe('3.0.2');
-    expect(manifest.current_curated.live_revision).toBe(0);
+    expect(Number(manifest.current_curated.live_revision)).toBeGreaterThanOrEqual(0);
 
-    expect((await request.get('/api/export')).status()).toBe(410);
+    const exportResponse = await request.get('/api/export');
+    expect(exportResponse.status()).toBe(410);
+    expect(exportResponse.headers()['x-cuhalide-release']).toBe('3.0.2');
+    expect((await json(exportResponse)).release).toBe('3.0.2');
     expect((await request.get('/manifest.json')).status()).toBe(404);
     expect((await request.get('/manifest.webmanifest')).status()).toBe(404);
 
@@ -115,9 +122,11 @@ test.describe('release 3.0.2 HTTP, scientific, privacy and security contracts', 
     expect(currentResponse.status()).toBe(200);
     const current = await json(currentResponse);
     expect(current.current_curated.base_release).toBe('3.0.2');
-    expect(current.current_curated.current_curated_through).toBe('2026-08-11');
-    expect(current.current_curated.live_revision).toBe(0);
+    expect(current.current_curated.current_curated_through).toMatch(/^2026-\d{2}-\d{2}$/);
+    expect(Number(current.current_curated.live_revision)).toBeGreaterThanOrEqual(0);
     expect(current.current_curated.status).toBe('ready');
+    expect(Number(current.current_curated.canonical_verified_articles)).toBeGreaterThanOrEqual(332);
+    expect(Number(current.current_curated.structure_phase_rows)).toBeGreaterThanOrEqual(878);
 
     const ragResponse = await request.get('/api/agent');
     expect(ragResponse.status()).toBe(200);
@@ -183,6 +192,36 @@ test.describe('release 3.0.2 HTTP, scientific, privacy and security contracts', 
     expect(history.history_release).toBe('3.0.1');
     expect(history.items.every((x) => x.resolved_in_release === '3.0.2')).toBe(true);
   });
+
+  test('stable crawlable article and structure pages expose only public record metadata', async ({ request }) => {
+    test.skip(process.env.CUHALIDE_PREMERGE_PRODUCTION === 'true', 'Stable record routes are verified by post-merge production QA.');
+    const article = await request.get('/article/13');
+    expect(article.status()).toBe(200);
+    const articleHtml = await article.text();
+    expect(articleHtml).toContain('Article record 13');
+    expect(articleHtml).toContain('rel="canonical"');
+    expect(articleHtml).toContain('/article/13');
+    expect(articleHtml).toContain('application/ld+json');
+    expect(articleHtml).not.toContain('field_evidence');
+    expect(articleHtml).not.toContain('candidate_score');
+    expect(articleHtml).not.toContain('evidence excerpt');
+    expect(article.headers()['x-cuhalide-release']).toBe('3.0.2');
+
+    const structure = await request.get('/structure/CUH-013-S01');
+    expect(structure.status()).toBe(200);
+    const structureHtml = await structure.text();
+    expect(structureHtml).toContain('CUH-013-S01');
+    expect(structureHtml).toContain('Unresolved');
+    expect(structureHtml).toContain('/structure/CUH-013-S01');
+    expect(structureHtml).toContain('application/ld+json');
+    expect(structure.headers()['x-cuhalide-release']).toBe('3.0.2');
+
+    const sitemap = await request.get('/sitemap.xml');
+    expect(sitemap.status()).toBe(200);
+    const sitemapText = await sitemap.text();
+    expect(sitemapText).toContain('/article/13');
+    expect(sitemapText).toContain('/structure/CUH-013-S01');
+  });
 });
 
 test.describe('release 3.0.2 live Chromium interaction, responsive and visual QA', () => {
@@ -200,15 +239,25 @@ test.describe('release 3.0.2 live Chromium interaction, responsive and visual QA
     expect(runtime.consoleErrors, `Console errors: ${runtime.consoleErrors.join('\n')}`).toEqual([]);
   });
 
-  test('Current Curated, year display, data loading, modal focus, deep links and responsive navigation work', async ({ page }, testInfo) => {
+  test('Current Curated, year display, data loading, modal focus, deep links and responsive navigation work', async ({ page, request }, testInfo) => {
     const runtime = captureRuntimeErrors(page);
+    const current = await json(await request.get('/api/public-data?action=current-curated'));
+    const liveRevision = Number(current.current_curated.live_revision || 0);
+    const curatedThrough = current.current_curated.current_curated_through;
 
     await page.goto('/#home', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('#currentCuratedText')).toContainText('Current Curated through 2026-08-11');
-    await expect(page.locator('#currentCuratedText')).toContainText('live revision 0');
+    await expect(page.locator('#currentCuratedText')).toContainText(`Current Curated through ${curatedThrough}`);
+    await expect(page.locator('#currentCuratedText')).toContainText(`live revision ${liveRevision}`);
     await expect(page.locator('#yearChart')).toContainText('2026');
     await expect(page.locator('#yearChart')).not.toContainText('2026.06');
     await expect(page.locator('.release .ver')).toHaveText('Release 3.0.2');
+
+    const frozenCanonical = Number((await json(await request.get('/api/public-data?action=bootstrap'))).release.canonical_verified_articles);
+    expect(frozenCanonical).toBe(332);
+    if (liveRevision > 0) {
+      expect(Number(current.current_curated.canonical_verified_articles)).toBeGreaterThanOrEqual(frozenCanonical);
+      await expect(page.locator('#currentCuratedText')).toContainText('Frozen base 3.0.2');
+    }
 
     const viewportWidth = page.viewportSize()?.width || 1440;
     if (viewportWidth <= 1120) {
@@ -220,6 +269,7 @@ test.describe('release 3.0.2 live Chromium interaction, responsive and visual QA
 
     await page.goto('/#articles', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#acount')).toContainText('332 records');
+    await expect(page.locator('#articleHalogenNote')).toContainText('mixed records containing that halogen');
 
     await page.goto('/#structures', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#scount')).toContainText('816 rows');
