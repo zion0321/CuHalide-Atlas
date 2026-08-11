@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-smart-rag';
+const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-smart-rag-v302-public';
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
 const MAX_BODY_BYTES = 20_000;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -12,12 +12,9 @@ function requestBody(req) {
 }
 
 function clientFingerprint(req) {
-  const ip = String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '')
-    .split(',')[0]
-    .trim()
-    .slice(0, 96);
+  const ip = String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '').split(',')[0].trim().slice(0, 96);
   const ua = String(req.headers['user-agent'] || '').slice(0, 240);
-  return crypto.createHash('sha256').update(`cuhalide-v46|${ip}|${ua}`).digest('hex');
+  return crypto.createHash('sha256').update(`cuhalide-v48|${ip}|${ua}`).digest('hex');
 }
 
 function bodyContract(body) {
@@ -29,36 +26,26 @@ function bodyContract(body) {
   catch { return { ok: false, error: 'Invalid JSON request body.' }; }
   const messages = Array.isArray(parsed?.messages) ? parsed.messages : [];
   if (messages.length > 12) return { ok: false, error: 'Too many chat messages.' };
-  if (messages.some((m) => typeof m?.content !== 'string' || m.content.length > 4000)) {
-    return { ok: false, error: 'Message content exceeds the public query limit.' };
-  }
+  if (messages.some((m) => typeof m?.content !== 'string' || m.content.length > 4000)) return { ok: false, error: 'Message content exceeds the public query limit.' };
   return { ok: true };
 }
 
 async function upstreamRequest(req, upstream) {
   const headers = {
     accept: req.headers.accept || 'application/json',
-    'user-agent': 'CuHalide-Atlas-Vercel-Agent-Proxy/3.0',
+    'user-agent': 'CuHalide-Atlas-Vercel-Agent-Proxy/9.12.0',
     'x-cuhalide-client': clientFingerprint(req),
   };
   if (req.method === 'POST') headers['content-type'] = req.headers['content-type'] || 'application/json';
-
   const attempts = req.method === 'POST' ? 1 : 2;
   const timeoutMs = req.method === 'POST' ? 120000 : 20000;
   let lastError;
   let lastResult;
-
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(upstream, {
-        method: req.method,
-        headers,
-        body: req.method === 'POST' ? requestBody(req) : undefined,
-        redirect: 'follow',
-        signal: controller.signal,
-      });
+      const response = await fetch(upstream, { method: req.method, headers, body: req.method === 'POST' ? requestBody(req) : undefined, redirect: 'follow', signal: controller.signal });
       const body = req.method === 'HEAD' ? '' : await response.text();
       clearTimeout(timer);
       lastResult = { response, body };
@@ -85,22 +72,19 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'GET, HEAD, POST, OPTIONS');
     return res.end('Method Not Allowed');
   }
-
   if (req.method === 'POST') {
     const contract = bodyContract(req.body);
     if (!contract.ok) {
       res.statusCode = 413;
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.setHeader('Cache-Control', 'no-store');
-      return res.end(JSON.stringify({ error: contract.error, release: '3.0.1' }));
+      return res.end(JSON.stringify({ error: contract.error, release: '3.0.2' }));
     }
   }
-
   try {
     const incoming = new URL(req.url, PUBLIC_ORIGIN);
     const upstream = new URL(UPSTREAM);
     for (const [key, value] of incoming.searchParams.entries()) upstream.searchParams.append(key, value);
-
     const { response, body } = await upstreamRequest(req, upstream);
     res.statusCode = response.status;
     res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json; charset=utf-8');
@@ -110,7 +94,6 @@ export default async function handler(req, res) {
       const value = response.headers.get(header);
       if (value) res.setHeader(header, value);
     }
-
     if (req.method === 'HEAD') return res.end();
     return res.end(body);
   } catch (error) {
@@ -118,9 +101,6 @@ export default async function handler(req, res) {
     res.statusCode = error?.name === 'AbortError' ? 504 : 502;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
-    return res.end(JSON.stringify({
-      error: error?.name === 'AbortError' ? 'CuHalide Atlas Smart RAG backend timed out.' : 'CuHalide Atlas Smart RAG backend is temporarily unavailable.',
-      release: '3.0.1',
-    }));
+    return res.end(JSON.stringify({ error: error?.name === 'AbortError' ? 'CuHalide Atlas Smart RAG backend timed out.' : 'CuHalide Atlas Smart RAG backend is temporarily unavailable.', release: '3.0.2' }));
   }
 }
