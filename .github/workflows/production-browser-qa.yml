@@ -32,10 +32,10 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: package.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install pinned QA dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Install locked QA dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Install Chromium and system dependencies
         run: npx playwright install --with-deps chromium
