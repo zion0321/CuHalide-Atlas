@@ -1,6 +1,7 @@
 # CuHalide Atlas production hardening — v47
 
 Date: 2026-08-10  
+Validation addendum: 2026-08-11  
 Scientific release: 3.0.1  
 Scientific parent: 3.0.0  
 Frozen literature cutoff: 2026-06
@@ -9,16 +10,18 @@ Frozen literature cutoff: 2026-06
 
 This hardening pass addressed residual production risks after the v46 repair. It changes the public query/runtime/presentation layer only and does **not** rewrite the immutable release-3.0.1 scientific snapshot.
 
-Current production matrix after this pass:
+Current production matrix after the 11 August validation addendum:
 
 | Component | Version |
 |---|---:|
 | Public site | 47 |
-| Public data contract | 2.4.1 |
-| Smart RAG public gateway | 9.9.9 |
-| Public metadata / health | 47.1 |
-| Internal quota gateway | 9.9.4-public-internal |
-| Final internal orchestrator | 9.10.1-final-internal |
+| Public data contract | 2.6.0 |
+| Smart RAG public gateway | 9.10.0 |
+| Public metadata / health | 47.6 |
+| Internal quota/exact gateway | 9.9.6-public-internal |
+| Deterministic exact/anchor service | 10.2.1-exact-anchor-internal |
+| Final internal orchestrator | 9.11.3-final-internal |
+| Evidence-grain-safe retrieval core | 9.11.0-safe-core-internal |
 | Bounded claims | qwen-claims-v9-1.3.0 |
 
 ## 1. Public data query architecture
@@ -57,7 +60,7 @@ Supabase security advisor after these changes: **0 findings**.
 
 ### Continuous projection contract
 
-A service-role-only health function, `cuhalide_atlas_public_projection_health_v301()`, now verifies the projection itself rather than trusting deployment state alone. It checks:
+A service-role-only health function, `cuhalide_atlas_public_projection_health_v301()`, verifies the projection itself rather than trusting deployment state alone. It checks:
 
 - article rows = 346;
 - canonical articles = 332;
@@ -105,9 +108,9 @@ These values are included in the continuous projection-health contract.
 
 ## 3. Tokenized short scientific search
 
-Short scientific strings were previously vulnerable to substring artifacts. The release-specific query functions now tokenize one-to-four-character alphanumeric terms and treat one-letter halogens as explicit tokens.
+Short scientific strings were previously vulnerable to substring artifacts. The release-specific query functions tokenize one-to-four-character alphanumeric terms and treat one-letter halogens as explicit tokens.
 
-Final live checks:
+Validated checks include:
 
 - structure search `STE` → **0** rows;
 - structure search `luminescence` → **0** rows because article title is not a structure-search field;
@@ -121,18 +124,20 @@ Article title, article-grain photophysics and unmapped motif text are excluded f
 
 ### Public structure detail
 
-Public structure detail no longer heuristically extracts a motif from an article-level series summary. Without an independently mapped structure-grain motif, it returns an explicit boundary statement and directs interpretation back to article-level summary / primary evidence.
+Public structure detail does not heuristically extract a motif from an article-level series summary. Without an independently mapped structure-grain motif, it returns an explicit boundary statement and directs interpretation back to article-level summary / primary evidence.
 
 Article-grain emission values remain blank at structure grain unless a future independent structure-grain evidence mapping is created.
 
 ### Smart RAG defense in depth
 
-Smart RAG 9.9.9 applies four relevant layers:
+The current Smart RAG family applies multiple relevant layers:
 
 1. bounded-claims structure context excludes motif/photophysics unless independently mapped;
 2. public data structure search/detail excludes unmapped motif/photophysics;
-3. explicit `CUH-xxx-Sxx` motif/photophysics questions use a deterministic boundary response separating structure crystallography from article-grain evidence;
-4. generic motif/photophysics answers pass through a second outer guard that removes unmapped structure sources and structure-labelled answer lines.
+3. soft scientific concepts are routed to article-grain evidence by the evidence-grain-safe retrieval core;
+4. structure cards emitted by the RAG path are reconstructed from safe identity/crystallography projections;
+5. explicit `CUH-xxx-Sxx` motif/photophysics questions use a deterministic boundary response separating structure crystallography from article-grain evidence;
+6. generic motif/photophysics answers pass through a second outer guard that removes unmapped structure sources and structure-labelled answer lines.
 
 This evidence-grain safety remains active independently of model-provider state.
 
@@ -150,20 +155,25 @@ v47 retains the scientific visual language introduced during the portal redesign
 - original focus target is preserved across nested modal navigation;
 - focus-visible behavior is restored for unset-style link buttons;
 - reduced-motion preference is respected;
-- client-side RAG calls have an explicit timeout and a bounded failure message.
+- client-side RAG calls have an explicit timeout and a bounded failure message;
+- table scroll regions are keyboard-focusable on constrained viewports;
+- pager regions expose navigation semantics;
+- method-step number contrast satisfies the automated serious/critical accessibility gate.
 
-The unused `/manifest.webmanifest` alias was removed because the release manifest is scientific release metadata, not a PWA application manifest.
+The unused `/manifest.webmanifest` alias is not exposed as a valid PWA manifest because the release manifest is scientific release metadata, not a web-app manifest.
 
 ## 6. Final production smoke matrix
 
-Live public checks after v47 deployment:
+Live public checks after the 11 August completion pass:
 
 | Check | Result |
 |---|---:|
-| `/health.json` | PASS |
-| Public data | 2.4.1 |
-| Smart RAG | 9.9.9 |
-| Meta / health | 47.1 |
+| `/health.json` | HTTP 200 / PASS |
+| Public site | 47 |
+| Public data | 2.6.0 |
+| Smart RAG | 9.10.0 |
+| Smart RAG mode at final check | FULL |
+| Meta / health | 47.6 |
 | Canonical articles | 332 |
 | Article audit records | 346 |
 | Canonical article filter `I` | 247 |
@@ -179,11 +189,10 @@ Live public checks after v47 deployment:
 | Structure `I` search | 671 |
 | Projection integrity/ACL contract | PASS |
 | `/api/export` | HTTP 410 |
-| `/sitemap.xml` MIME | application/xml |
-| Supabase security advisor | 0 findings |
-| Vercel runtime errors, checked post-v47 window | none |
+| `/sitemap.xml` MIME | application/xml; charset=utf-8 |
+| Supabase security advisor after projection/RLS hardening | 0 findings |
 
-Recent projection-backed public-data requests observed in Supabase Edge Function logs were generally a few hundred milliseconds; representative requests included approximately 0.24–0.47 s for search/detail responses. Health/bootstrap remain intentionally slower because they retain immutable-snapshot and cross-service integrity checks.
+Projection-backed public-data requests remain server-side and field-minimized. Health/bootstrap is intentionally heavier because it retains immutable-snapshot and cross-service integrity checks.
 
 ## 7. Literature Watch scheduler
 
@@ -211,18 +220,43 @@ The hardening did not change frozen scientific denominators:
 - strict-polar rows: 67;
 - strict-polar articles: 42.
 
-## 9. Validation boundary
+## 9. Current-runtime RAG validation
 
-`rag-benchmark-v1.3` remains a frozen **70/70** scientific regression baseline that predates the final Smart RAG v9 orchestration. The current 9.9.9 runtime must not be described as having passed a fresh 70-case Qwen-enabled benchmark unless such a run is actually executed and archived.
+A fresh versioned benchmark was executed after free Workers AI capacity recovered:
 
-Prior v9-specific validation remains:
+- evaluation: **rag-benchmark-v1.4**;
+- run ID: `81eeab9f-3efb-4d19-bab0-7768acebfc4b`;
+- runtime code label: **smart-rag-v9.11.3-evidence-grain-v2**;
+- exact/deterministic: **25/25**;
+- retrieval: **25/25**;
+- reasoning/scientific-boundary: **20/20**;
+- total: **70/70 PASS**;
+- paid overage authorized: **false**.
 
-- deterministic exact/anchor regression: 33/33;
-- BGE-M3 + reranker retrieval regression: 25/25.
+The final two deterministic contract repairs were the Record 101 same-source STE–Cu···Cu route and the Record 267 human-scope wording guard. Both passed with no LLM or embedding use. The exact/anchor service version for the completed run is `10.2.1-exact-anchor-internal`.
 
-Provider-capacity state is an operational dependency and is not allowed to change frozen data, deterministic scientific rules or evidence-grain boundaries.
+The temporary evaluator was retired immediately after the controlled run and restored to JWT-required status.
 
-## 10. Public/private boundary
+The earlier `rag-benchmark-v1.3` 70/70 result remains a historical baseline for an older runtime. See `RAG_BENCHMARK_V14_2026-08-11.md` for the current-runtime archive note.
+
+## 10. Real browser QA
+
+A repository-retained Playwright/Chromium production gate was run against the live v47 website and passed across desktop, tablet and mobile viewports. The validated gate covers:
+
+- all public routes;
+- serious/critical axe accessibility findings;
+- page and console errors;
+- page-wide horizontal overflow;
+- responsive navigation;
+- modal focus trapping, Escape close and focus restoration;
+- hash deep links;
+- frozen scientific denominators;
+- structure-halogen and evidence-grain semantics;
+- CSP hardening and retired routes.
+
+The QA gate was merged into `main` after its successful run. This does not claim exhaustive Safari/Firefox or manual pixel-perfect coverage.
+
+## 11. Public/private boundary
 
 Public website:
 
