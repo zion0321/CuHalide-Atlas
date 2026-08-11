@@ -22,6 +22,7 @@ jobs:
     timeout-minutes: 30
     env:
       CUHALIDE_BASE_URL: https://cuhalide-atlas-v3.vercel.app
+      CUHALIDE_PREMERGE_PRODUCTION: ${{ github.event_name == 'pull_request' }}
       CI: 'true'
     steps:
       - name: Checkout
