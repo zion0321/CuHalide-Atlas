@@ -63,6 +63,13 @@ jobs:
           );
 
           replaceIfPresent(
+            '.method .no{position:absolute;right:18px;top:12px;color:#dbe5ea;font:28px Georgia,serif}',
+            '.method .no{position:absolute;right:18px;top:12px;color:var(--muted);font:28px Georgia,serif}',
+            'methods step-number contrast',
+            '.method .no{position:absolute;right:18px;top:12px;color:var(--muted);font:28px Georgia,serif}'
+          );
+
+          replaceIfPresent(
             "<td>${esc(s.halogen||'Unresolved')}</td><td>${esc(s.dimensionality_class)}${s.known_erratum?' †':''}</td>",
             "<td>${esc(s.halogen||'Unresolved')}<br><small>${esc(s.halogen_scope||'unresolved')} · ${esc(s.halogen_confidence||'Unresolved')}</small></td><td>${esc(s.dimensionality_class)}${s.known_erratum?' †':''}</td>",
             'structure halogen table evidence',
@@ -88,6 +95,14 @@ jobs:
               `${id} navigation semantics`,
               `<div class="pager" id="${id}" role="navigation" aria-label="${label}"></div>`
             );
+          }
+
+          if (!html.includes('<div class="table-wrap" tabindex="0">')) {
+            const old = '<div class="table-wrap">';
+            const count = html.split(old).length - 1;
+            if (count < 1) throw new Error('No table-wrap containers found for keyboard accessibility patch');
+            html = html.split(old).join('<div class="table-wrap" tabindex="0">');
+            console.log(`Made ${count} table-wrap containers keyboard focusable`);
           }
 
           fs.writeFileSync(indexPath, html);
@@ -123,7 +138,7 @@ jobs:
           if ! git diff --cached --quiet; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'Fix pager navigation semantics'
+            git commit -m 'Finish production accessibility hardening'
             git push origin HEAD:main
           fi
           git checkout --detach "$MERGE_SHA"
@@ -135,7 +150,11 @@ jobs:
           set -euo pipefail
           for i in $(seq 1 72); do
             body="$(curl --fail --silent --show-error --location "$CUHALIDE_BASE_URL/" || true)"
-            if [[ "$body" == *"--muted:#5c7079"* && "$body" == *"Halogen evidence"* && "$body" == *"id=\"apager\" role=\"navigation\""* ]]; then
+            if [[ "$body" == *"--muted:#5c7079"* \
+              && "$body" == *"Halogen evidence"* \
+              && "$body" == *"id=\"apager\" role=\"navigation\""* \
+              && "$body" == *"color:var(--muted);font:28px Georgia,serif"* \
+              && "$body" == *"class=\"table-wrap\" tabindex=\"0\""* ]]; then
               echo 'Corrected production HTML is live.'
               exit 0
             fi
