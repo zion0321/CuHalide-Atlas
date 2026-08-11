@@ -1,0 +1,50 @@
+name: Apply release 3.0.2 production switch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-v302-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply deterministic v48 patch
+        run: node scripts/apply-v302-production.js
+
+      - name: Validate patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'content="3.0.2"' public/index.html
+          grep -q 'content="48"' public/index.html
+          grep -q 'CUHALIDE_SITE_V48_CURRENT_CURATED' public/index.html
+          grep -q 'Current Curated' public/index.html
+          grep -q 'Display window 2006–2026' public/index.html
+          ! grep -q '2026.06' public/index.html
+          grep -q "expect(health.release).toBe('3.0.2')" tests/production-browser.spec.js
+          grep -q "expect(health.site_version).toBe('48')" tests/production-browser.spec.js
+          grep -q 'Public release: \*\*3.0.2\*\*' README.md
+          git diff --check
+
+      - name: Commit release switch and remove one-time runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/apply-v302-release.yml scripts/apply-v302-production.js
+          git add public/index.html vercel.json tests/production-browser.spec.js .github/workflows/production-browser-qa.yml README.md CHANGELOG.md docs/PRODUCTION_STATUS_V48_2026-08-11.md
+          git diff --cached --check
+          git commit -m 'Publish release 3.0.2 and rolling Current Curated portal'
+          git push origin HEAD:main
