@@ -194,6 +194,7 @@ test.describe('release 3.0.2 HTTP, scientific, privacy and security contracts', 
   });
 
   test('stable crawlable article and structure pages expose only public record metadata', async ({ request }) => {
+    test.skip(process.env.CUHALIDE_PREMERGE_PRODUCTION === 'true', 'Stable record routes are verified by post-merge production QA.');
     const article = await request.get('/article/13');
     expect(article.status()).toBe(200);
     const articleHtml = await article.text();
