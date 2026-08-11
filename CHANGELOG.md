@@ -67,7 +67,7 @@ The public runtime was re-audited at article, structure, crystallographic, RAG, 
 
 ### Production hardening v47
 
-A second adversarial pass focused on residual query semantics, evidence-grain leakage, public data latency, least privilege and interface consistency. The current production matrix is **site v47 / public-data 2.4.1 / Smart RAG 9.9.9 / meta 47.1**.
+A second adversarial pass focused on residual query semantics, evidence-grain leakage, public data latency, least privilege and interface consistency. The current production family is **site v47 / public-data 2.6.0 / Smart RAG 9.10.0 / meta 47.6**.
 
 - Replaced per-request reconstruction/filtering of the complete release arrays with private, release-specific, field-whitelisted article and structure projection tables derived from the immutable 3.0.1 snapshot.
 - Added service-role-only SQL query functions for server-side filtering, counting, sorting and pagination; `anon` and `authenticated` have neither direct projection SELECT privilege nor query-RPC EXECUTE privilege.
@@ -79,8 +79,9 @@ A second adversarial pass focused on residual query semantics, evidence-grain le
 - Article single-halogen filters use containment across mixed labels: canonical `I` returns **247** records; explicit mixed `Cl/Br/I` remains an exact category with **27** canonical records.
 - Removed article titles from structure search entirely, not only article-title photophysical terms.
 - Removed unmapped motif text from the public structure-search/detail evidence surface; structure detail now states an explicit motif-grain boundary rather than heuristically extracting a motif from article-level summaries.
-- Smart RAG 9.9.9 adds deterministic explicit-structure boundaries and a second generic outer guard for motif/photophysics, providing defense in depth independently of model availability.
-- Public RAG source cards now expose an evidence-scope label, and deterministic evidence-boundary responses are represented separately from provider fallback.
+- Smart RAG adds deterministic explicit-structure boundaries and a second generic outer guard for motif/photophysics, providing defense in depth independently of model availability.
+- The evidence-grain-safe RAG core routes soft scientific concepts to article-grain evidence and reconstructs structure sources from identity/crystallography-only projections.
+- Public RAG source cards expose an evidence-scope label, and deterministic evidence-boundary responses are represented separately from provider fallback.
 - Publication-growth display is intentionally limited to **2006–2026.06** while explicitly stating that earlier canonical records remain indexed.
 - Improved safe Markdown rendering, nested record-modal history, focus restoration, reduced-motion handling and client-side RAG timeout behavior.
 - Removed the unused `/manifest.webmanifest` alias so the release manifest is not misrepresented as a PWA web-app manifest.
@@ -88,26 +89,37 @@ A second adversarial pass focused on residual query semantics, evidence-grain le
 
 See `docs/PRODUCTION_HARDENING_V47_2026-08-10.md` and `docs/RAG_RUNTIME_V9.md`.
 
+### 2026-08-11 production completion and validation
+
+- Workers AI free capacity recovered and was verified as available; **paid overage remained unauthorized**.
+- The public Smart RAG endpoint returned **FULL** with evidence-grounded retrieval, deterministic protected boundaries, bounded scientific interpretation and the scientific-context contract all available.
+- A fresh `rag-benchmark-v1.4` run (`81eeab9f-3efb-4d19-bab0-7768acebfc4b`) evaluated `smart-rag-v9.11.3-evidence-grain-v2` against release 3.0.1 and passed **70/70**: exact 25/25, retrieval 25/25, reasoning/scientific-boundary 20/20.
+- The deterministic exact/anchor service advanced to `10.2.1-exact-anchor-internal` to close the final Record 101 same-source STE–Cu···Cu contract and Record 267 human-scope wording guard. Both protected cases use no LLM or embedding.
+- The temporary v1.4 evaluation endpoint was retired immediately after the completed run and restored to JWT-required status.
+- The live `/health.json` check returned **HTTP 200 / PASS** for site v47, public-data 2.6.0, Smart RAG 9.10.0 and meta 47.6.
+- `/sitemap.xml` returned `application/xml; charset=utf-8`.
+- The real Playwright/Chromium production QA gate passed on desktop, tablet and mobile and was merged into `main`. It checks public routes, serious/critical accessibility findings, page/console errors, horizontal overflow, responsive navigation, modal keyboard behavior, deep links, scientific denominators, evidence-grain boundaries, structure-halogen semantics, CSP hardening and retired public routes.
+
+See `docs/RAG_BENCHMARK_V14_2026-08-11.md`.
+
 ### Validation history
 
-- Frozen scientific RAG regression baseline: **70/70** (`rag-benchmark-v1.3`), predating final v9 orchestration and therefore not represented as a fresh 9.9.9 benchmark.
-- Smart RAG v9 deterministic exact/anchor regression: **33/33**.
-- Smart RAG v9 hybrid retrieval regression: **25/25**.
-- Current production `/health.json`: **PASS** for v47 / public-data 2.4.1 / Smart RAG 9.9.9 / meta 47.1.
-- Final live public counts: 332 canonical articles, 346 audit articles, 816 Core-Included structures, 878 total structures and 67 strict-polar rows.
+- **Current runtime:** `rag-benchmark-v1.4` = **70/70 PASS** on `smart-rag-v9.11.3-evidence-grain-v2`.
+- Historical frozen scientific baseline: `rag-benchmark-v1.3` = **70/70 PASS** on the older pre-final-v9 runtime.
+- Smart RAG v9 deterministic exact/anchor regression during deployment: **33/33**.
+- Smart RAG v9 hybrid retrieval regression during deployment: **25/25**.
+- Current production `/health.json`: **PASS** for v47 / public-data 2.6.0 / Smart RAG 9.10.0 / meta 47.6.
+- Current Smart RAG operational mode at the final check: **FULL**.
+- Final live public counts remain 332 canonical articles, 346 audit articles, 816 Core-Included structures, 878 total structures and 67 strict-polar rows.
 - Final live article-halogen semantic checks: canonical `I` containment = 247; exact canonical `Cl/Br/I` category = 27.
-- Final live structure semantic checks: `CUH-008-S01` → I; `CUH-162-S01` remains Cl/Br/I rather than false I; `CUH-013-S01` → Unresolved with erratum; structure searches `STE` and `luminescence` → 0; tokenized `I` search → 671 rows.
+- Final live structure semantic checks include `CUH-008-S01` → I; `CUH-162-S01` remains Cl/Br/I rather than false I; `CUH-013-S01` → Unresolved with erratum; structure searches `STE` and `luminescence` → 0; tokenized `I` search → 671 rows.
 - Projection integrity/ACL health contract: PASS.
 - Legacy bulk `/api/export` remains **HTTP 410**.
 - Public sitemap returns **application/xml**.
-- Supabase security advisor after v47 projection/RLS hardening: **0 findings**.
-- Recent projection-backed public-data list/search/detail requests observed in Edge logs generally complete in a few hundred milliseconds; health/bootstrap deliberately remain slower because they retain cross-service and immutable-snapshot integrity checks.
-- Vercel production runtime-error query after v47 deployment returned no errors in the checked window.
+- Supabase security advisor after the projection/RLS hardening pass: **0 findings**.
 - Coverage-v1: **210/210** pre-registered page-0 query cells completed; this does not establish exhaustive external-corpus completeness.
 - Candidate-screen-v4: **1,788/1,788** DOI-unique candidates adjudicated, with zero automatic release inclusions.
 - AI expert-surrogate audit: 80 article samples, 200 structure samples and 6,600 field/rule checks; this is not independent-human extraction accuracy.
-
-A fresh full Qwen-enabled current-runtime benchmark remains intentionally unclaimed until provider capacity is available and a new versioned run is executed and archived.
 
 ## 3.0.0 — 2026-08-08
 
