@@ -5,11 +5,9 @@
 - Public website: https://cuhalide-atlas-v3.vercel.app/
 - Public release: **3.0.1** — 10 August 2026
 - Scientific parent: **3.0.0**
-- Frozen literature cutoff: **June 2026 (2026-06)**
-- Public site: **v47**
-- Public data contract: **2.6.0**
-- Smart RAG public gateway: **9.10.0**
-- Public metadata/health contract: **47.6**
+- Frozen literature cutoff: **2026-06**
+- Public site / data / Smart RAG / meta: **v47 / 2.6.0 / 9.10.0 / 47.6**
+- Deterministic exact/anchor service: **10.2.2-exact-anchor-internal**
 - Known errata: [`ERRATA.md`](ERRATA.md)
 
 ## Frozen scientific corpus
@@ -26,106 +24,89 @@
 | Verified polar rows | 87 |
 | Strict polar rows | 67 |
 | Strict polar articles | 42 |
+| RAG documents / embeddings | 1,224 / 1,224 |
 
-Release 3.0.1 is a bibliographic-only patch over scientific parent 3.0.0. The patch changed bibliographic title presentation without changing frozen scientific denominators.
+Release 3.0.1 is a bibliographic-only patch over scientific parent 3.0.0 and does not change the frozen scientific denominators.
 
-## Public access model
+## Public/private access model
 
-The website is intentionally a **query-and-view scientific interface**, not a bulk redistribution endpoint.
+The website is a **query-and-view scientific interface**, not a bulk redistribution endpoint. Public access is limited to selected bibliographic, structural, crystallographic and article-grain scientific fields; strict-polar queries; source-linked Smart RAG; metadata-only Literature Watch; methods; citation metadata; release identity; and errata.
 
-Publicly available:
-
-- server-side search of selected article fields;
-- server-side search of selected structure/phase fields;
-- single-record bibliographic, structural and crystallographic views plus selected article-grain photophysics;
-- the strict-polar subset through paginated query results;
-- evidence-grounded Smart RAG answers with source-linked records;
-- recent Literature Watch titles, years, journals and DOIs under review;
-- methods, citation metadata, release identity and known errata.
-
-Kept in the private research corpus:
-
-- complete normalized CSV/JSON/XLSX tables;
-- exact stored publisher abstracts and internal search-helper fields;
-- primary article PDFs, supporting information and CIF payloads;
-- field-evidence excerpts and source locators;
-- complete QA logs, adjudication artifacts and candidate-screening internals;
-- candidate abstracts, relevance scores and screening reason codes.
-
-If a manuscript requires a reproducibility deposit, a **manuscript-specific minimal dataset** should be prepared for that analysis rather than publishing the complete internal knowledge base.
+The private research layer retains the complete normalized corpus, exact stored publisher abstracts, primary PDFs/SI/CIF payloads, field-evidence excerpts and locators, internal QA/adjudication artifacts, and candidate abstracts/scores/reason codes. The legacy bulk `/api/export` route remains retired. A manuscript-specific minimal reproducibility dataset should be prepared later if publication requirements make that necessary.
 
 ## Public query architecture
 
-Public data 2.6.0 does not reconstruct the complete 346-row article or 878-row structure snapshot for every list/search request. Instead it uses private, release-specific, field-whitelisted query projections derived from the immutable 3.0.1 snapshot:
+Public data 2.6.0 uses release-specific, field-whitelisted projections derived from the immutable 3.0.1 snapshot:
 
 - `cuhalide_atlas_public_articles_v301`
 - `cuhalide_atlas_public_structures_v301`
 
-Normal list/search/filter/pagination requests are executed through server-side SQL query functions. The projection tables and query functions are not directly readable/executable by `anon` or `authenticated`; the public read-only Edge Function invokes them with the service role and returns only the public contract.
-
-The immutable release snapshot remains the release-integrity source. Projection rows apply only explicitly documented effective overlays such as the Record 13 dimensionality erratum.
-
-A service-role-only projection health contract continuously checks frozen row counts, strict-polar and erratum counts, deterministic projection checksums, RLS/ACL invariants and selected query semantics. In release 3.0.1 it also protects the article-halogen contract: the canonical `I` filter includes mixed-I records (**247** articles), while an explicit mixed label such as `Cl/Br/I` remains an exact category (**27** articles).
+Filtering, counting, sorting and pagination are server-side. Direct projection-table reads and projection-query RPC execution are disabled for `anon` and `authenticated`; the public read-only Edge Function returns only the public contract. A service-role-only health contract verifies frozen counts, checksums, RLS/ACL invariants, errata overlays and selected query semantics.
 
 ## Structure-grain evidence boundary
 
-Public structure records enforce an explicit evidence-grain boundary:
+Structure identity is resolved conservatively. `Cu(I)` oxidation-state notation is not treated as iodide; compact `Cu2I4` and bridging `μ2-I` notation are recognized; ligand-bound halogens do not by themselves redefine the Cu–halide identity; and short scientific tokens use token-aware search.
 
-1. structure halogen identity is derived from explicit Cu–halide formula/connectivity notation where possible, with Cu(I) oxidation-state notation excluded from halogen parsing;
-2. compact formula forms such as `Cu2I4` and bridging notation such as `μ2-I` are handled as iodide;
-3. ligand-bound halogen atoms do not by themselves reclassify the Cu–halide identity;
-4. single-letter halogen searches are tokenized rather than substring matched;
-5. article-level photophysical values are not assigned to an individual structure/phase unless an independent structure-grain evidence mapping exists;
-6. structure search excludes article titles, article-level photophysics and unmapped motif text;
-7. public structure detail does not infer a motif from an article-level series summary;
-8. bounded-claims structure context excludes motif and photophysics unless independently mapped.
+Article-level photophysics and unmapped motif text are not assigned to a structure/phase row. Public structure search/detail, bounded-claims context, explicit structure-ID boundaries and generic RAG output guards all enforce this separation.
 
-These rules affect public presentation and retrieval safety only; they do not silently rewrite the immutable 3.0.1 archive.
+The internal RAG corpus now enforces the same rule **physically**. All **878 structure RAG documents** were rebuilt from the structure-safe projection and re-embedded with BGE-M3 as identity/crystallography-only documents. Post-swap checks found:
 
-## Known Record 13 erratum
+- 878/878 valid 1024-dimensional structure embeddings;
+- 0 copied `Article:` fields;
+- 0 copied `Structural motif:` fields;
+- 0 copied `Emission:` / `Emission assignment` fields;
+- 0 forbidden structure `llm_context` science keys;
+- 0 content-SHA mismatches.
 
-A post-publication QA pass identified an inherited `Structural Dimensionality` list-position mapping error in four Record 13 structure rows. Effective public values are:
+The complete index remains **1,224/1,224 embedded documents**: 346 article-grain documents plus 878 structure identity/crystallography documents. This runtime/index hardening does not silently rewrite the immutable 3.0.1 scientific archive.
+
+## Record 13 erratum
+
+Effective public values are:
 
 - `CUH-013-S01` / pip6Cu10I16 → **Unresolved**;
 - `CUH-013-S02` / pyr4Cu4Br8 → **0D**;
 - `CUH-013-S03` / pyr4Cu4I8 → **0D**;
 - `CUH-013-S04` / pyrCu2Br3 → **0D**.
 
-The erratum does not alter article counts, structure counts, crystallographic counts, verified/polar/strict-polar subsets or canonical denominators. The immutable 3.0.1 scientific archive is not silently rewritten; formal snapshot correction is reserved for scientific hotfix 3.0.2.
+The erratum changes none of the frozen denominators above. Formal corrected scientific snapshot handling is reserved for 3.0.2.
 
 ## Smart RAG
 
-The public Smart RAG interface separates database truth from model interpretation:
+The public Smart RAG separates deterministic database truth from bounded model interpretation. Exact counts, protected record fields, frozen scope decisions and key scientific boundaries are deterministic. Retrieval uses lexical/structured and semantic ranking with BGE-M3 plus BGE reranking when free external AI capacity is available. Model interpretation is accepted only through source-constrained claim validation. Candidate literature remains isolated from release evidence, and provider degradation enters **SAFE_FALLBACK** rather than fabricating synthesis.
 
-1. exact denominators, protected crystallographic rules, unresolved values and key scientific boundaries are deterministic;
-2. retrieval combines structured/lexical and semantic ranking when external AI capacity is available;
-3. bounded model interpretation is accepted only when claims pass source-level evidence constraints;
-4. claims context is loaded from a JWT-protected internal scientific contract rather than the minimized public data API;
-5. an independent contract-health probe verifies that bounded-claims scientific context remains populated after public-API changes;
-6. Live Literature Watch candidates remain separate from frozen release evidence;
-7. provider degradation enters **SAFE_FALLBACK** and uses evidence retrieval instead of fabricating synthesis;
-8. explicit structure-ID questions about motif or photophysics are routed through a deterministic evidence-grain boundary that separates structure crystallography from article-grain evidence;
-9. generic motif/photophysics responses receive a second public outer guard that removes unmapped structure sources;
-10. browser traffic receives a one-way per-client fingerprint so anonymous users do not share one fixed RAG rate bucket; raw client IPs are not forwarded into the internal chain;
-11. public POST bodies and chat history are bounded at both Vercel and Supabase gateway layers.
+### Final post-reindex validation
 
-Internal provider configuration, retrieval scores, hidden traces and service credentials are not part of the public response contract.
-
-### Current-runtime validation
-
-A fresh **`rag-benchmark-v1.4`** run was completed on 11 August 2026 after free Workers AI capacity recovered. It evaluates the current evidence-grain-safe Smart RAG stack (`smart-rag-v9.11.3-evidence-grain-v2`) against release 3.0.1 and passed **70/70**:
+The final versioned **`rag-benchmark-v1.5`** run passed **70/70** after the physical structure-index rebuild:
 
 - exact/deterministic: **25/25**;
 - retrieval: **25/25**;
-- reasoning and scientific-boundary cases: **20/20**.
+- reasoning/scientific-boundary: **20/20**.
 
-Run ID: `81eeab9f-3efb-4d19-bab0-7768acebfc4b`. The run used the free provider allocation only; paid overage was not authorized. The earlier `rag-benchmark-v1.3` 70/70 result remains a historical baseline, not the evidence for this current-runtime claim. See [`docs/RAG_BENCHMARK_V14_2026-08-11.md`](docs/RAG_BENCHMARK_V14_2026-08-11.md).
+Run ID: `cdfd61ae-b382-433c-b877-6465a93a93b9`  
+Runtime label: `smart-rag-v9.11.3-evidence-grain-v2-structure-reindex-v2+exact-10.2.2`
+
+The run used the free provider allocation only; paid overage was not authorized. A first post-reindex v1.4 diagnostic was retained as 66/70 because it exposed one real deterministic multi-record overmatch and three stale benchmark expectations inherited from pre-clean structure semantics. Historical v1.4 gold was not silently edited; v1.5 is an explicit versioned revision with case-level provenance.
+
+See [`docs/RAG_BENCHMARK_V15_2026-08-11.md`](docs/RAG_BENCHMARK_V15_2026-08-11.md), [`docs/RAG_RUNTIME_V9.md`](docs/RAG_RUNTIME_V9.md) and the historical [`docs/RAG_BENCHMARK_V14_2026-08-11.md`](docs/RAG_BENCHMARK_V14_2026-08-11.md).
 
 ## Browser-level production QA
 
-A Playwright/Chromium production gate is now retained in the repository and has passed against the live v47 portal across desktop, tablet and mobile viewports. The gate checks public routes, serious/critical accessibility findings, page/console errors, horizontal overflow, responsive navigation, modal keyboard focus behavior, hash deep links, frozen scientific denominators, evidence-grain boundaries, structure-halogen semantics, CSP hardening and retired public routes. This is automated Chromium QA; it is not a claim of exhaustive Safari/Firefox or manual pixel-perfect review.
+A repository-retained Playwright/Chromium production gate has passed against the live v47 portal across desktop, tablet and mobile viewports. It checks public routes, serious/critical accessibility findings, page/console errors, horizontal overflow, responsive navigation, modal keyboard behavior, hash deep links, frozen scientific denominators, evidence-grain boundaries, structure-halogen semantics, CSP hardening and retired routes. This does not claim exhaustive Safari/Firefox or manual pixel-perfect review.
 
-## Important scientific boundaries
+## Current production checks
+
+At the final completion check:
+
+- `/health.json`: **HTTP 200 / PASS**;
+- Smart RAG operational mode: **FULL**;
+- scientific-context contract: **PASS**;
+- `/sitemap.xml`: **application/xml; charset=utf-8**;
+- Supabase security advisor: **0 findings**;
+- temporary evaluator and structure-reembedding endpoints: **retired + JWT-required**;
+- temporary reindex staging/rollback tables and staging/apply RPCs: **removed**.
+
+## Scientific boundaries
 
 1. Missing or unresolved values are never inferred from analogous compounds.
 2. Non-centrosymmetric does not automatically mean polar.
@@ -135,31 +116,8 @@ A Playwright/Chromium production gate is now retained in the repository and has 
 6. Model output cannot override frozen fields, deterministic counts or evidence boundaries.
 7. Same-article or same-record coexistence is not automatically same-phase causality.
 
-## Public interfaces
-
-| Interface | Endpoint |
-|---|---|
-| Website | https://cuhalide-atlas-v3.vercel.app/ |
-| Public health | https://cuhalide-atlas-v3.vercel.app/health.json |
-| Public release manifest | https://cuhalide-atlas-v3.vercel.app/release-manifest.json |
-| Citation metadata | https://cuhalide-atlas-v3.vercel.app/citation.cff |
-| Public-lite query API | https://cuhalide-atlas-v3.vercel.app/api/public-data |
-| Smart RAG | https://cuhalide-atlas-v3.vercel.app/api/agent |
-
-The legacy `/api/data` route is compatibility-only and returns the same minimized public contract. The former bulk `/api/export` route is retired.
-
-## Citation
+## Citation and rights
 
 > CuHalide Atlas. Release 3.0.1 (10 August 2026). https://cuhalide-atlas-v3.vercel.app/
 
-See [`CITATION.cff`](CITATION.cff) and [`ERRATA.md`](ERRATA.md). A permanent repository DOI has not been minted.
-
-## License and third-party content
-
-No blanket permission is asserted for copyrighted third-party article content. Primary articles, SI and CIF files are not redistributed through the public website. See [`LICENSE_STATUS.md`](LICENSE_STATUS.md).
-
-## Security and contributions
-
-The release-specific public projections use RLS plus explicit deny policies for untrusted roles. Direct `anon`/`authenticated` table reads and query-function execution are disabled; the service role has SELECT-only access to the projection tables. Projection integrity/ACL invariants are part of the production health contract, and Supabase security lint is required to remain clear after schema changes.
-
-See [`SECURITY.md`](SECURITY.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md). Scientific corrections require a DOI, exact compound/phase identity and source-level evidence. Literature Watch candidates are never merged directly into a frozen release.
+See [`CITATION.cff`](CITATION.cff), [`ERRATA.md`](ERRATA.md), [`LICENSE_STATUS.md`](LICENSE_STATUS.md), [`SECURITY.md`](SECURITY.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md). A permanent repository DOI has not yet been minted. No blanket permission is asserted for copyrighted third-party article content, and primary article/SI/CIF files are not redistributed through the public website.
