@@ -102,11 +102,29 @@ Run ID: `04bd93ec-cc3a-424b-9d8d-a1b08cec58ff`. Paid Workers AI overage was not 
 
 See [`docs/RAG_BENCHMARK_V16_2026-08-11.md`](docs/RAG_BENCHMARK_V16_2026-08-11.md) and [`docs/PRODUCTION_STATUS_V48_2026-08-11.md`](docs/PRODUCTION_STATUS_V48_2026-08-11.md).
 
+## Final production hardening and reproducible operations
+
+The v48 production hardening pass closes deployment and long-term maintenance gaps separately from the frozen scientific corpus:
+
+- canonical GitHub Supabase sources match the deployed **3.0.2 / 2.7.0 / 9.12.0 / 48.0** public runtime, and the release-specific v302 compatibility services plus required validated internal RAG dependencies are versioned for disaster recovery;
+- QA dependencies are locked by `package-lock.json`, and both browser and Lighthouse workflows install with `npm ci`;
+- a scheduled Lighthouse gate covers mobile/desktop performance, accessibility, best practices, SEO, LCP and CLS in addition to the Playwright/Axe scientific browser gate;
+- stable crawlable record URLs are defined as `/article/<record_id>` and `/structure/<structure_id>`, with canonical metadata, schema.org JSON-LD and a release-aware dynamic sitemap;
+- the retired `/api/export` route remains **410 Gone** and carries the current frozen release identity;
+- the article halogen filter explicitly distinguishes single-halogen containment semantics from exact mixed-halogen categories;
+- the daily machine discovery monitor is JWT-gated plus a separate private cron-token factor, uses a 30-day rolling lookback and multiple Crossref/OpenAlex query families, and writes only to the metadata candidate queue;
+- obsolete debug, temporary, ephemeral and bulk-export Edge Functions have been neutralized as JWT-required `410 Gone` stubs; required runtime dependencies are enumerated in [`docs/SUPABASE_EDGE_FUNCTION_INVENTORY_V48_2026-08-11.md`](docs/SUPABASE_EDGE_FUNCTION_INVENTORY_V48_2026-08-11.md);
+- health and browser regression allow future **Current Curated revision > 0** while keeping frozen 3.0.2 counts independently fixed.
+
+The public portal therefore has two distinct notions of freshness: immutable frozen-release provenance and a separately tracked rolling Current Curated layer. New metadata candidates never cross that boundary automatically.
+
 ## Browser-level production QA
 
 A repository-retained **read-only Playwright/Chromium production gate** passed against the live release-3.0.2/v48 portal across desktop, tablet and mobile configurations. The release-specific gate validates public routes, health/manifest/RAG/public-data contracts, Current Curated presentation, Record 13 physical corrections, scientific denominators, structure-halogen semantics, serious/critical accessibility findings, page/console errors, horizontal overflow, responsive navigation, modal keyboard behavior, hash deep links, CSP hardening and retired routes.
 
-This is current automated Chromium production QA; it is not a claim of exhaustive Safari/Firefox or manual pixel-perfect certification.
+A separate production **Lighthouse gate** runs against desktop and mobile profiles with pinned dependencies. It enforces explicit thresholds for performance, accessibility, best practices and SEO, plus LCP and CLS regression limits. Both QA workflows use the committed lockfile and `npm ci`.
+
+This automated coverage is substantial but is not a claim of exhaustive Safari/Firefox or manual pixel-perfect certification.
 
 ## Current production checks
 
