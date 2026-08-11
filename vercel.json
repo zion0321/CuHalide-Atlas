@@ -8,8 +8,10 @@
   "rewrites": [
     { "source": "/", "destination": "/api/site" },
     { "source": "/index.html", "destination": "/api/site" },
+    { "source": "/article/:id", "destination": "/api/record?kind=article&id=:id" },
+    { "source": "/structure/:id", "destination": "/api/record?kind=structure&id=:id" },
     { "source": "/robots.txt", "destination": "/api/meta?asset=robots" },
-    { "source": "/sitemap.xml", "destination": "/api/meta?asset=sitemap" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/release-manifest.json", "destination": "/api/meta?asset=manifest" },
     { "source": "/citation.txt", "destination": "/api/meta?asset=citation" },
     { "source": "/citation.cff", "destination": "/api/meta?asset=citation" },
