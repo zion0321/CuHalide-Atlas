@@ -1,0 +1,97 @@
+name: Apply v47 accessibility and halogen evidence fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-v47-a11y-halogen-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply exact production patch and recompute CSP hashes
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const indexPath = 'public/index.html';
+          const vercelPath = 'vercel.json';
+          let html = fs.readFileSync(indexPath, 'utf8');
+
+          function once(from, to, label) {
+            const first = html.indexOf(from);
+            if (first < 0) throw new Error(`Missing expected ${label} source`);
+            if (html.indexOf(from, first + from.length) >= 0) throw new Error(`Expected one ${label} source, found multiple`);
+            html = html.replace(from, to);
+          }
+
+          once(
+            ':root{--ink:#102b3b;--muted:#607681;--navy:#09283c;--navy2:#123e56;--teal:#238d81;',
+            ':root{--ink:#102b3b;--muted:#5c7079;--navy:#09283c;--navy2:#123e56;--teal:#1f7e74;',
+            'accessible palette'
+          );
+
+          once(
+            "<td>${esc(s.halogen||'Unresolved')}</td><td>${esc(s.dimensionality_class)}${s.known_erratum?' †':''}</td>",
+            "<td>${esc(s.halogen||'Unresolved')}<br><small>${esc(s.halogen_scope||'unresolved')} · ${esc(s.halogen_confidence||'Unresolved')}</small></td><td>${esc(s.dimensionality_class)}${s.known_erratum?' †':''}</td>",
+            'structure halogen table evidence'
+          );
+
+          once(
+            "<dt>Halogen</dt><dd>${esc(x.halogen)}</dd><dt>Dimension</dt>",
+            "<dt>Halogen</dt><dd>${esc(x.halogen)}</dd><dt>Halogen evidence</dt><dd>${esc(x.halogen_scope||'unresolved')} · ${esc(x.halogen_confidence||'Unresolved')}</dd><dt>Halogen basis</dt><dd>${esc(x.halogen_basis||'Not resolved')}</dd><dt>Dimension</dt>",
+            'structure modal halogen evidence'
+          );
+
+          fs.writeFileSync(indexPath, html);
+
+          const sha = (s) => `'sha256-${crypto.createHash('sha256').update(s).digest('base64')}'`;
+          const styles = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map(m => sha(m[1]));
+          const scripts = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)]
+            .filter(m => !/\bsrc\s*=/i.test(m[1] || ''))
+            .map(m => sha(m[2]));
+          if (styles.length !== 1) throw new Error(`Expected one inline style block, found ${styles.length}`);
+          if (scripts.length < 1) throw new Error('Expected at least one inline script block');
+
+          const config = JSON.parse(fs.readFileSync(vercelPath, 'utf8'));
+          let changed = 0;
+          for (const rule of config.headers || []) {
+            if (!['/', '/index.html'].includes(rule.source)) continue;
+            const h = (rule.headers || []).find(x => x.key === 'Content-Security-Policy');
+            if (!h) throw new Error(`Missing CSP header for ${rule.source}`);
+            h.value = h.value
+              .replace(/style-src-elem [^;]+;/, `style-src-elem 'self' ${styles.join(' ')};`)
+              .replace(/script-src [^;]+;/, `script-src 'self' ${scripts.join(' ')};`);
+            changed++;
+          }
+          if (changed !== 2) throw new Error(`Expected two CSP header rules, changed ${changed}`);
+          fs.writeFileSync(vercelPath, JSON.stringify(config, null, 2) + '\n');
+
+          console.log(JSON.stringify({styles, scripts, muted:'#5c7079', teal:'#1f7e74'}, null, 2));
+          NODE
+
+          grep -q -- '--muted:#5c7079' public/index.html
+          grep -q -- '--teal:#1f7e74' public/index.html
+          grep -q 'Halogen evidence' public/index.html
+          grep -q 'halogen_scope' public/index.html
+
+      - name: Commit patch and remove one-time workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/apply-v47-a11y-halogen-fix.yml
+          git add public/index.html vercel.json
+          git diff --cached --check
+          git commit -m 'Fix accessibility contrast and expose halogen evidence scope'
+          git push origin HEAD:main
