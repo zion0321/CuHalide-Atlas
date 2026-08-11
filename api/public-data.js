@@ -1,4 +1,4 @@
-const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v2';
+const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -13,7 +13,7 @@ async function fetchWithRetry(url, req) {
         method: req.method,
         headers: {
           accept: req.headers.accept || 'application/json',
-          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Public-Data/2.0',
+          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Public-Data/2.7.0',
         },
         redirect: 'follow',
         signal: controller.signal,
@@ -50,8 +50,10 @@ export default async function handler(req, res) {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
     res.setHeader('X-CuHalide-Public-Access', 'query-and-view');
-    const version = response.headers.get('x-cuhalide-public-data-version');
-    if (version) res.setHeader('X-CuHalide-Public-Data-Version', version);
+    for (const h of ['x-cuhalide-release', 'x-cuhalide-public-data-version']) {
+      const v = response.headers.get(h);
+      if (v) res.setHeader(h, v);
+    }
     if (req.method === 'HEAD') return res.end();
     return res.end(await response.text());
   } catch (error) {
@@ -61,7 +63,7 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
     return res.end(JSON.stringify({
       error: error?.name === 'AbortError' ? 'CuHalide Atlas public data backend timed out.' : 'CuHalide Atlas public data backend is temporarily unavailable.',
-      release: '3.0.1',
+      release: '3.0.2',
     }));
   }
 }
