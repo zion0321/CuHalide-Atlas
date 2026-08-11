@@ -1,0 +1,13 @@
+{
+  "name": "cuhalide-atlas-production-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production browser and accessibility quality gates for CuHalide Atlas.",
+  "scripts": {
+    "qa:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.12.1",
+    "@playwright/test": "1.62.0"
+  }
+}
