@@ -1,8 +1,8 @@
 cff-version: 1.2.0
-message: "If you use CuHalide Atlas, cite the versioned public resource, include the access date when required, and consult the known-errata notice."
+message: "If you use CuHalide Atlas, cite the versioned frozen release and include the access date when required. Current Curated additions are separately identified and do not rewrite the frozen release."
 title: "CuHalide Atlas"
-version: "3.0.1"
-date-released: "2026-08-10"
+version: "3.0.2"
+date-released: "2026-08-11"
 type: dataset
 authors:
   - name: "CuHalide Atlas Project"
@@ -10,14 +10,17 @@ url: "https://cuhalide-atlas-v3.vercel.app/"
 repository-code: "https://github.com/zion0321/CuHalide-Atlas"
 abstract: >-
   Evidence-grounded, structure-resolved public knowledge portal for
-  organic-containing Cu(I) chlorides, bromides and iodides. Release 3.0.1 is a
-  bibliographic-only patch over the 3.0.0 scientific parent. Public access is
+  organic-containing Cu(I) chlorides, bromides and iodides. Release 3.0.2 is a
+  scientific hotfix over 3.0.1 that physically incorporates four confirmed
+  Record 13 structural-dimensionality corrections while preserving all frozen
+  scientific denominators and adding no new literature. Public access is
   query-and-view through selected bibliographic, structural, crystallographic
-  and photophysical fields plus evidence-grounded Smart RAG. Complete
+  and article-grain scientific fields plus evidence-grounded Smart RAG. A
+  separate Current Curated layer may advance after primary article/SI/CIF
+  curation and quality control without mutating this frozen release. Complete
   normalized tables, exact stored publisher abstracts, primary PDF/SI/CIF
   files and internal curation/audit artifacts are not distributed through the
-  public website. A disclosed Record 13 dimensionality erratum is transparently
-  corrected in the public effective display pending scientific hotfix 3.0.2.
+  public website.
 keywords:
   - copper(I) halide
   - Cu(I)-I
