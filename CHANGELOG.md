@@ -2,7 +2,7 @@
 
 ## 3.0.1 — 2026-08-10
 
-Release 3.0.1 is a bibliographic-only patch over the scientific 3.0.0 parent. The patch itself changed zero frozen scientific fields and preserved all release denominators.
+Release 3.0.1 is a bibliographic-only patch over scientific parent 3.0.0. Frozen scientific denominators were preserved.
 
 ### Bibliographic patch
 
@@ -11,115 +11,108 @@ Release 3.0.1 is a bibliographic-only patch over the scientific 3.0.0 parent. Th
 - Retained 145 clean title variants.
 - Reconstructed chemical notation in 12 complex titles.
 
-### Post-publication scientific QA
+### Record 13 post-publication erratum
 
-A confirmed Record 13 `Structural Dimensionality` list-position mapping error affects four archived structure rows. Effective public values are:
+Effective public dimensionality values:
 
 - `CUH-013-S01` / pip6Cu10I16 → **Unresolved**;
 - `CUH-013-S02` / pyr4Cu4Br8 → **0D**;
 - `CUH-013-S03` / pyr4Cu4I8 → **0D**;
 - `CUH-013-S04` / pyrCu2Br3 → **0D**.
 
-The erratum does not change article/structure counts, space-group counts, verified/polar/strict-polar subsets or canonical denominators. Formal corrected scientific snapshots are reserved for hotfix 3.0.2; the immutable 3.0.1 archive is not silently rewritten.
+The erratum changes no article/structure, crystallographic, verified, polar or strict-polar denominators. The immutable 3.0.1 archive is not silently rewritten; formal snapshot correction is reserved for 3.0.2.
 
-### Smart RAG v9
+### Public knowledge portal v45–v47
 
-- Deterministic rules protect exact counts, record properties, unresolved values, scope, false-premise correction, Evidence-D exclusion, symmetry/polarity/ferroelectric boundaries and selected material-specific relation constraints.
-- Retrieval uses structured/lexical and semantic ranking with reranking when external AI capacity is available.
-- Bounded model interpretation is accepted only through source-constrained claim validation.
-- Live Literature Watch candidates remain isolated from frozen release evidence.
-- Safe evidence-retrieval fallback remains available when external AI capacity is unavailable.
-- The anonymous public gateway omits provider configuration, hidden retrieval traces and internal service diagnostics.
+- Replaced bulk-download presentation with a query-and-view scientific portal.
+- Retired public bulk `/api/export` with HTTP 410.
+- Kept complete normalized tables, publisher abstracts, primary PDF/SI/CIF payloads, field-evidence excerpts/locators, QA/adjudication internals and candidate-screening internals private.
+- Added release-specific, field-whitelisted server-side article/structure projections and paginated SQL query functions.
+- Enabled RLS and denied direct `anon`/`authenticated` projection-table reads and projection-query RPC execution.
+- Added projection checksum/ACL/semantic health contracts.
+- Restored explicit literature cutoff **2026-06** and partial-year display `2026.06`.
+- Article Explorer defaults to 332 Core-Verified records; Structure Register defaults to 816 Core-Included rows.
+- Publication-growth display is explicitly limited to 2006–2026.06 while earlier indexed records remain searchable.
+- Added stable SPA hash deep links, modal keyboard focus handling, reduced-motion support, table scroll focusability, pager navigation semantics and accessibility contrast fixes.
+- Hardened CSP and metadata handling; `/sitemap.xml` now returns `application/xml; charset=utf-8`.
+- Real Playwright/Chromium production QA passed across desktop, tablet and mobile and was merged into `main`.
 
-### Public knowledge portal v45
+### Structure-halogen and evidence-grain hardening
 
-The public website was deliberately changed from a bulk-download database to a **query-and-view scientific knowledge portal**.
+- Prevented `Cu(I)` oxidation-state notation from being parsed as iodide.
+- Recognized compact `Cu2I4` and bridging `μ2-I` notation.
+- Prevented ligand-bound halogens from redefining Cu–halide identity without Cu–halide evidence.
+- Tokenized one-letter halogen and short scientific search terms.
+- Article `I` containment returns 247 canonical articles; exact `Cl/Br/I` category returns 27.
+- Structure search excludes article titles, article-grain photophysics and unmapped motif text.
+- Public structure detail no longer assigns article-grain emission/motif values to a phase row without independent mapping.
+- Smart RAG adds explicit structure-ID evidence boundaries, generic outer guards and an evidence-grain-safe retrieval core.
+- Bounded claims use JWT-protected internal scientific context and a separate scientific-context health contract.
 
-- Removed the public Downloads page and bulk JSON/CSV generation controls.
-- Removed `DataDownload` declarations from public structured metadata.
-- Added a field-whitelisted, server-side paginated public data API.
-- Public article pages no longer redistribute exact stored publisher abstracts or internal review/search-helper fields.
-- Public Literature Watch no longer exposes candidate abstracts, relevance scores, screening reason codes or internal adjudication details.
-- Complete normalized CSV/JSON/XLSX tables, primary PDF/SI/CIF files, field-evidence excerpts/locators, QA logs and candidate-screening internals remain private research assets.
-- Legacy `/api/data` now resolves to the same public-lite contract.
-- Legacy `/api/export` is retired with HTTP 410.
-- Legacy dynamic `/api/site` redirects to the current static public portal.
-- Raw Supabase data/candidate endpoints and historical export/evaluation/canary services were moved behind JWT or retired.
-- The scheduled Crossref/OpenAlex discovery function remains token-authenticated but no longer exposes anonymous candidate/status reads.
-- The former GitHub Release bulk ZIP and checksum assets were withdrawn from public distribution; the release tag remains as a version notice.
-- The public manifest/health contract was simplified to release identity, scientific counts, high-level service status, access policy and known errata.
+### Smart RAG current production family
 
-### Production scientific-interface repair v46
+- Public Smart RAG: **9.10.0**
+- Internal quota/exact gateway: **9.9.6-public-internal**
+- Final orchestrator: **9.11.3-final-internal**
+- Evidence-grain-safe core: **9.11.0-safe-core-internal**
+- Deterministic exact/anchor service: **10.2.2-exact-anchor-internal**
+- Bounded claims: **qwen-claims-v9-1.3.0**
 
-The public runtime was re-audited at article, structure, crystallographic, RAG, security and frontend-contract levels. The repair changes runtime/presentation behavior only and does not rewrite the frozen 3.0.1 archive.
+Protected exact counts, record fields, frozen scope decisions, polarity/ferroelectric boundaries and selected material-specific relations remain deterministic. Provider degradation enters SAFE_FALLBACK; paid Workers AI overage is not authorized.
 
-- Public site advanced to v46.
-- Restored the frozen literature cutoff as **2026-06** and display label `2026.06` for the partial 2026 publication year.
-- Article Explorer defaults to the 332 `Core - Verified` articles while retaining explicit audit views.
-- Structure Register defaults to the 816 `Core - Included` structure/phase rows while retaining explicit all/boundary/pending/excluded views.
-- Dashboard visualizations state their denominators instead of mixing article, core-structure, resolved-space-group and verified-mapping populations implicitly.
-- Corrected structure-halogen parsing for compact iodide formulas and bridging iodide notation while preventing `Cu(I)` oxidation-state notation from being treated as an iodide token.
-- Removed article-grain photophysics and article-title photophysical terms from structure-grain search.
-- Public structure details suppress article-grain photophysical values unless an independent structure-grain evidence object establishes the mapping.
-- Bounded-Qwen claims no longer consume the minimized public data schema; scientific context is loaded from JWT-protected internal RAG documents.
-- Added a JWT-protected scientific-context contract probe and made public health fail if claims context becomes unavailable or structurally empty.
-- Added client-isolated RAG fingerprinting, POST/body/history limits, deep-linked record views and frontend accessibility/reliability hardening.
+### 2026-08-11 physical structure RAG rebuild
 
-### Production hardening v47
+The remaining legacy structure-document contamination was removed from the underlying RAG corpus, not only hidden at the public-output layer.
 
-A second adversarial pass focused on residual query semantics, evidence-grain leakage, public data latency, least privilege and interface consistency. The current production family is **site v47 / public-data 2.6.0 / Smart RAG 9.10.0 / meta 47.6**.
+- Rebuilt all **878** structure RAG documents from the release-specific structure-safe projection.
+- Re-embedded all **878/878** with `@cf/baai/bge-m3` at 1024 dimensions.
+- Final structure-index checks: 0 copied `Article:` fields, 0 copied `Structural motif:` fields, 0 copied `Emission:` / `Emission assignment` fields, 0 forbidden structure `llm_context` science keys and 0 content-SHA mismatches.
+- Complete RAG index remains **1,224/1,224 embedded documents**: 346 article-grain documents + 878 structure identity/crystallography documents.
+- Representative Record 13 structure documents preserve the effective erratum overlay without modifying the immutable release archive.
 
-- Replaced per-request reconstruction/filtering of the complete release arrays with private, release-specific, field-whitelisted article and structure projection tables derived from the immutable 3.0.1 snapshot.
-- Added service-role-only SQL query functions for server-side filtering, counting, sorting and pagination; `anon` and `authenticated` have neither direct projection SELECT privilege nor query-RPC EXECUTE privilege.
-- Enabled RLS on both projection tables with explicit deny policies and reduced `service_role` table privilege to SELECT only.
-- Added a service-role-only projection integrity/ACL contract that verifies release row counts, strict-polar/erratum counts, deterministic projection checksums, RLS/privilege invariants and selected query semantics on every public health check.
-- Added semantic normalization helpers for dimensionality and Cu–halide identity.
-- Prevented halogenated organic ligands from being misread as the Cu–halide identity solely because the ligand formula contains Cl/Br/I.
-- Tokenized one-letter halogen searches and short scientific terms, eliminating substring artifacts such as `I` matching arbitrary text and `STE` matching unrelated words.
-- Article single-halogen filters use containment across mixed labels: canonical `I` returns **247** records; explicit mixed `Cl/Br/I` remains an exact category with **27** canonical records.
-- Removed article titles from structure search entirely, not only article-title photophysical terms.
-- Removed unmapped motif text from the public structure-search/detail evidence surface; structure detail now states an explicit motif-grain boundary rather than heuristically extracting a motif from article-level summaries.
-- Smart RAG adds deterministic explicit-structure boundaries and a second generic outer guard for motif/photophysics, providing defense in depth independently of model availability.
-- The evidence-grain-safe RAG core routes soft scientific concepts to article-grain evidence and reconstructs structure sources from identity/crystallography-only projections.
-- Public RAG source cards expose an evidence-scope label, and deterministic evidence-boundary responses are represented separately from provider fallback.
-- Publication-growth display is intentionally limited to **2006–2026.06** while explicitly stating that earlier canonical records remain indexed.
-- Improved safe Markdown rendering, nested record-modal history, focus restoration, reduced-motion handling and client-side RAG timeout behavior.
-- Removed the unused `/manifest.webmanifest` alias so the release manifest is not misrepresented as a PWA web-app manifest.
-- Verified the daily Literature Watch cron is active at **02:17 UTC** and the checked 8–10 August runs succeeded.
+### Benchmark history and final gate
 
-See `docs/PRODUCTION_HARDENING_V47_2026-08-10.md` and `docs/RAG_RUNTIME_V9.md`.
+- Historical `rag-benchmark-v1.3`: **70/70 PASS** on an older runtime.
+- Completed pre-physical-reindex `rag-benchmark-v1.4`, run `81eeab9f-3efb-4d19-bab0-7768acebfc4b`: **70/70 PASS**.
+- First post-reindex diagnostic with unchanged v1.4 gold, run `504d7921-20fd-46ff-b436-5223bb56903e`: **66/70**. This run was retained as failed rather than overwritten.
+- The diagnostic exposed one real deterministic overmatch and three stale benchmark expectations after evidence-grain correction.
+- Exact service **10.2.2** fixed the Record 95 single-record rule so it no longer intercepts multi-record comparisons such as Records 95/135.
+- Historical v1.4 gold was preserved. A versioned **rag-benchmark-v1.5** clone changed only EX16, EX18 and RT25, with case-level provenance.
+- Final post-reindex v1.5 run `cdfd61ae-b382-433c-b877-6465a93a93b9`: **70/70 PASS** — exact 25/25, retrieval 25/25, reasoning/scientific-boundary 20/20.
+- Final structure-grain exact semantics include 2025 + 0D + contains-I = **57 rows / 28 articles**, and contains-Br = **232 rows / 133 articles**.
+- Record 101 same-source protected route remains **2.574 Å / 527 nm**, deterministic.
+- Record 267 remains Boundary under frozen human scope adjudication.
+- TMPA article-finding query is scored at article grain (`A:58`) rather than requiring structure documents.
 
-### 2026-08-11 production completion and validation
+See `docs/RAG_BENCHMARK_V15_2026-08-11.md`, historical `docs/RAG_BENCHMARK_V14_2026-08-11.md`, `docs/RAG_RUNTIME_V9.md` and `docs/PRODUCTION_HARDENING_V47_2026-08-10.md`.
 
-- Workers AI free capacity recovered and was verified as available; **paid overage remained unauthorized**.
-- The public Smart RAG endpoint returned **FULL** with evidence-grounded retrieval, deterministic protected boundaries, bounded scientific interpretation and the scientific-context contract all available.
-- A fresh `rag-benchmark-v1.4` run (`81eeab9f-3efb-4d19-bab0-7768acebfc4b`) evaluated `smart-rag-v9.11.3-evidence-grain-v2` against release 3.0.1 and passed **70/70**: exact 25/25, retrieval 25/25, reasoning/scientific-boundary 20/20.
-- The deterministic exact/anchor service advanced to `10.2.1-exact-anchor-internal` to close the final Record 101 same-source STE–Cu···Cu contract and Record 267 human-scope wording guard. Both protected cases use no LLM or embedding.
-- The temporary v1.4 evaluation endpoint was retired immediately after the completed run and restored to JWT-required status.
-- The live `/health.json` check returned **HTTP 200 / PASS** for site v47, public-data 2.6.0, Smart RAG 9.10.0 and meta 47.6.
-- `/sitemap.xml` returned `application/xml; charset=utf-8`.
-- The real Playwright/Chromium production QA gate passed on desktop, tablet and mobile and was merged into `main`. It checks public routes, serious/critical accessibility findings, page/console errors, horizontal overflow, responsive navigation, modal keyboard behavior, deep links, scientific denominators, evidence-grain boundaries, structure-halogen semantics, CSP hardening and retired public routes.
+### Final operational/security checks
 
-See `docs/RAG_BENCHMARK_V14_2026-08-11.md`.
+At the final completion check:
 
-### Validation history
+- `/health.json`: **HTTP 200 / PASS**;
+- public site/data/RAG/meta: **47 / 2.6.0 / 9.10.0 / 47.6**;
+- Smart RAG mode: **FULL**;
+- scientific-context contract: **PASS**;
+- public sitemap MIME: **application/xml; charset=utf-8**;
+- legacy bulk `/api/export`: **HTTP 410**;
+- Supabase security advisor after final cleanup: **0 findings**;
+- Vercel checked production 5xx window: no 5xx logs;
+- temporary benchmark and structure-reembedding endpoints: retired and JWT-required;
+- temporary structure-rebuild staging/rollback tables and staging/apply RPCs: removed.
 
-- **Current runtime:** `rag-benchmark-v1.4` = **70/70 PASS** on `smart-rag-v9.11.3-evidence-grain-v2`.
-- Historical frozen scientific baseline: `rag-benchmark-v1.3` = **70/70 PASS** on the older pre-final-v9 runtime.
-- Smart RAG v9 deterministic exact/anchor regression during deployment: **33/33**.
-- Smart RAG v9 hybrid retrieval regression during deployment: **25/25**.
-- Current production `/health.json`: **PASS** for v47 / public-data 2.6.0 / Smart RAG 9.10.0 / meta 47.6.
-- Current Smart RAG operational mode at the final check: **FULL**.
-- Final live public counts remain 332 canonical articles, 346 audit articles, 816 Core-Included structures, 878 total structures and 67 strict-polar rows.
-- Final live article-halogen semantic checks: canonical `I` containment = 247; exact canonical `Cl/Br/I` category = 27.
-- Final live structure semantic checks include `CUH-008-S01` → I; `CUH-162-S01` remains Cl/Br/I rather than false I; `CUH-013-S01` → Unresolved with erratum; structure searches `STE` and `luminescence` → 0; tokenized `I` search → 671 rows.
-- Projection integrity/ACL health contract: PASS.
-- Legacy bulk `/api/export` remains **HTTP 410**.
-- Public sitemap returns **application/xml**.
-- Supabase security advisor after the projection/RLS hardening pass: **0 findings**.
-- Coverage-v1: **210/210** pre-registered page-0 query cells completed; this does not establish exhaustive external-corpus completeness.
-- Candidate-screen-v4: **1,788/1,788** DOI-unique candidates adjudicated, with zero automatic release inclusions.
-- AI expert-surrogate audit: 80 article samples, 200 structure samples and 6,600 field/rule checks; this is not independent-human extraction accuracy.
+### Frozen denominators retained
+
+- article audit: 346;
+- chemically included articles: 335;
+- canonical verified articles: 332;
+- structure/phase rows: 878;
+- Core-Included structure rows: 816;
+- resolved space-group rows: 650;
+- verified one-to-one mappings: 625;
+- verified polar rows: 87;
+- strict-polar rows: 67;
+- strict-polar articles: 42.
 
 ## 3.0.0 — 2026-08-08
 
