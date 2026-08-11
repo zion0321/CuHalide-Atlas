@@ -1,278 +1,206 @@
 # CuHalide Atlas production hardening — v47
 
 Date: 2026-08-10  
-Validation addendum: 2026-08-11  
-Scientific release: 3.0.1  
-Scientific parent: 3.0.0  
-Frozen literature cutoff: 2026-06
+Final validation addendum: 2026-08-11  
+Scientific release: **3.0.1**  
+Scientific parent: **3.0.0**  
+Frozen literature cutoff: **2026-06**
 
-## Scope
-
-This hardening pass addressed residual production risks after the v46 repair. It changes the public query/runtime/presentation layer only and does **not** rewrite the immutable release-3.0.1 scientific snapshot.
-
-Current production matrix after the 11 August validation addendum:
+## Final production matrix
 
 | Component | Version |
 |---|---:|
 | Public site | 47 |
-| Public data contract | 2.6.0 |
-| Smart RAG public gateway | 9.10.0 |
+| Public data | 2.6.0 |
+| Public Smart RAG | 9.10.0 |
 | Public metadata / health | 47.6 |
 | Internal quota/exact gateway | 9.9.6-public-internal |
-| Deterministic exact/anchor service | 10.2.1-exact-anchor-internal |
+| Deterministic exact/anchor service | 10.2.2-exact-anchor-internal |
 | Final internal orchestrator | 9.11.3-final-internal |
 | Evidence-grain-safe retrieval core | 9.11.0-safe-core-internal |
 | Bounded claims | qwen-claims-v9-1.3.0 |
 
-## 1. Public data query architecture
+This hardening changes the public query/runtime/index/presentation layer only. It does **not** rewrite the immutable 3.0.1 scientific archive.
 
-### Previous residual issue
+## Public data architecture and least privilege
 
-The public API already returned minimized fields and server-side pagination, but its Edge Function still reconstructed complete release arrays for list/search requests before applying filters. That preserved privacy but added unnecessary latency and kept a large all-record object in the request path.
+Public data uses private release-specific projections:
 
-### v47 solution
+- `cuhalide_atlas_public_articles_v301`
+- `cuhalide_atlas_public_structures_v301`
 
-Two release-specific private query projections were created from the immutable 3.0.1 payload:
+List/search/filter/count/pagination are performed server-side. Projection tables use RLS and explicit deny policies for `anon` and `authenticated`; those roles have neither direct SELECT nor projection-query RPC execution. `service_role` is limited to the access needed by the public read-only Edge Function.
 
-- `public.cuhalide_atlas_public_articles_v301`
-- `public.cuhalide_atlas_public_structures_v301`
+A service-role-only health contract verifies frozen counts, Record 13 overlays, deterministic projection checksums, RLS/ACL invariants and selected query semantics.
 
-They contain only fields required for the public query/detail contract. Public list/filter/count/pagination requests now execute through service-role-only SQL functions:
+## Evidence-aware structure semantics
 
-- `cuhalide_atlas_public_articles_query_v301(...)`
-- `cuhalide_atlas_public_structures_query_v301(...)`
+Structure-level Cu–halide identity is derived conservatively:
 
-The immutable snapshot remains the source for release-integrity health/bootstrap checks. Record 13 uses its documented effective display overlay in the release-specific structure projection and does not mutate the archive.
+- `Cu(I)` oxidation state does not imply iodide;
+- compact `Cu2I4` and bridging `μ2-I` are recognized;
+- ligand-bound halogens do not by themselves redefine the Cu–halide framework;
+- unresolved/series-level variable-X records remain series-level rather than falsely phase-specific;
+- single-letter halogen and short scientific search terms use token-aware matching.
 
-### Access control
-
-Both projection tables:
-
-- have RLS enabled;
-- have explicit deny policies for `anon` and `authenticated`;
-- are not directly SELECT-readable by those roles;
-- expose no query-RPC EXECUTE privilege to those roles;
-- grant `service_role` SELECT only at table level.
-
-The public Edge Function is the sole public query contract and remains read-only/field-whitelisted.
-
-Supabase security advisor after these changes: **0 findings**.
-
-### Continuous projection contract
-
-A service-role-only health function, `cuhalide_atlas_public_projection_health_v301()`, verifies the projection itself rather than trusting deployment state alone. It checks:
-
-- article rows = 346;
-- canonical articles = 332;
-- structure rows = 878;
-- Core-Included structures = 816;
-- strict-polar rows = 67;
-- Record 13 erratum overlays = 4;
-- deterministic ordered projection checksums;
-- RLS deny policies;
-- no direct `anon`/`authenticated` table SELECT;
-- no direct `anon`/`authenticated` projection-query RPC execution;
-- service-role SELECT available while service-role UPDATE remains disabled;
-- selected article-halogen query semantics.
-
-Public data health exposes only boolean pass/fail contract state, not the private projection rows or credentials.
-
-## 2. Structure- and article-halogen semantics
-
-A release-specific SQL semantic function derives effective structure halogen identity while protecting against several false-positive classes.
-
-Validated structure behaviors:
-
-- `Cu2I4` → I;
-- bridging `μ2-I` is recognized as iodide;
-- `Cu(I)` oxidation-state notation is not itself parsed as an iodide ligand;
-- a ligand formula containing iodine, e.g. `Cu(PPh3)2(C6H4I)`, does not by itself reclassify a fallback Cu–Cl record as Cu–I;
-- unresolved/series-level material labels retain their curated fallback rather than being over-inferred.
-
-Live structure examples:
+Representative public values:
 
 - `CUH-008-S01` → **I**;
-- `CUH-162-S01` → **Cl/Br/I**, not false I from `Cu(I)`.
+- `CUH-162-S01` → **Cl/Br/I**;
+- `CUH-013-S01` → **Unresolved** + erratum;
+- `CUH-013-S02/S03/S04` → **0D**.
 
-Article filters preserve a distinct categorical rule:
+Article-level halogen filtering remains a separate article-grain contract: canonical `I` containment = **247**; exact canonical `Cl/Br/I` category = **27**.
 
-- a single-halogen filter such as `I` means the article-level curated halogen set **contains I**, including mixed-I records;
-- an explicit mixed label such as `Cl/Br/I` remains an exact category.
+## Physical structure RAG cleanup
 
-Release-3.0.1 canonical query contract:
+The final hardening pass removed the last residual mismatch between public evidence-grain guards and the underlying private RAG corpus.
 
-- `I` containment → **247** articles;
-- exact `Cl/Br/I` → **27** articles.
+Before this pass, legacy structure documents still contained copied article-level titles, motif text and photophysical fields. Public guards prevented most leakage, but the stored index itself was not clean.
 
-These values are included in the continuous projection-health contract.
+All **878** structure RAG documents were rebuilt from the structure-safe release projection and re-embedded with `@cf/baai/bge-m3` (1024 dimensions). Structure documents now contain identity/crystallography and evidence metadata only.
 
-## 3. Tokenized short scientific search
+Final post-swap integrity checks:
 
-Short scientific strings were previously vulnerable to substring artifacts. The release-specific query functions tokenize one-to-four-character alphanumeric terms and treat one-letter halogens as explicit tokens.
+| Check | Result |
+|---|---:|
+| Structure RAG docs | 878 |
+| Valid 1024-d embeddings | 878 / 878 |
+| Copied `Article:` fields | 0 |
+| Copied `Structural motif:` fields | 0 |
+| Copied `Emission:` / `Emission assignment` fields | 0 |
+| Forbidden structure `llm_context` science keys | 0 |
+| Content SHA mismatches | 0 |
 
-Validated checks include:
+The complete RAG index remains **1,224/1,224 embedded documents**: 346 article-grain scientific documents plus 878 structure identity/crystallography documents.
 
-- structure search `STE` → **0** rows;
-- structure search `luminescence` → **0** rows because article title is not a structure-search field;
-- structure search `I` → **671** rows, not all 878 rows.
+This is a physical index cleanup, not merely a runtime display filter.
 
-The structure search surface is restricted to structure identity/crystallographic fields: structure ID, label, formula, phase, space group, point group, crystal system, DOI and CCDC/CIF identifier.
+## Smart RAG defense in depth
 
-Article title, article-grain photophysics and unmapped motif text are excluded from structure search.
+Current evidence-grain controls are cumulative:
 
-## 4. Structure-grain motif and photophysics boundary
+1. public structure search is identity/crystallography-only;
+2. public structure detail does not infer article-level motif/photophysics;
+3. bounded-claims structure context excludes unmapped science fields;
+4. the physical structure RAG corpus is identity/crystallography-only;
+5. explicit structure-ID motif/photophysics questions preserve the structure/article boundary;
+6. generic motif/photophysics answers pass through an outer structure-source guard;
+7. same-record coexistence is not treated as automatic same-phase causality.
 
-### Public structure detail
+The Record 101 same-source protected route remains deterministic at **2.574 Å / 527 nm**. Exact service 10.2.2 additionally prevents the Record 95 single-record boundary from intercepting multi-record comparison questions.
 
-Public structure detail does not heuristically extract a motif from an article-level series summary. Without an independently mapped structure-grain motif, it returns an explicit boundary statement and directs interpretation back to article-level summary / primary evidence.
+## Frontend and browser QA
 
-Article-grain emission values remain blank at structure grain unless a future independent structure-grain evidence mapping is created.
+v47 includes:
 
-### Smart RAG defense in depth
+- publication-growth window labelled **2006–2026.06** with earlier indexed records explicitly retained;
+- structure-search scope and motif-boundary language;
+- evidence-scope labels on RAG source cards;
+- safe Markdown rendering with escaped arbitrary HTML;
+- nested modal history/focus restoration;
+- reduced-motion handling;
+- focusable table scroll regions and semantic pager navigation;
+- accessible method-step contrast;
+- bounded client-side RAG timeout behavior.
 
-The current Smart RAG family applies multiple relevant layers:
+A retained Playwright/Chromium production gate passed the live site on desktop, tablet and mobile. It checks public routes, serious/critical accessibility findings, page/console errors, horizontal overflow, responsive navigation, modal keyboard behavior, deep links, frozen denominators, evidence-grain boundaries, structure-halogen semantics, CSP and retired routes.
 
-1. bounded-claims structure context excludes motif/photophysics unless independently mapped;
-2. public data structure search/detail excludes unmapped motif/photophysics;
-3. soft scientific concepts are routed to article-grain evidence by the evidence-grain-safe retrieval core;
-4. structure cards emitted by the RAG path are reconstructed from safe identity/crystallography projections;
-5. explicit `CUH-xxx-Sxx` motif/photophysics questions use a deterministic boundary response separating structure crystallography from article-grain evidence;
-6. generic motif/photophysics answers pass through a second outer guard that removes unmapped structure sources and structure-labelled answer lines.
+This is automated Chromium QA, not exhaustive Safari/Firefox/manual pixel-perfect certification.
 
-This evidence-grain safety remains active independently of model-provider state.
+## Final benchmark sequence
 
-## 5. Frontend v47
+### Historical pre-reindex v1.4
 
-v47 retains the scientific visual language introduced during the portal redesign and adds interface correctness/reliability fixes:
+Completed run `81eeab9f-3efb-4d19-bab0-7768acebfc4b`:
 
-- publication-growth display window is explicitly **2006–2026.06**; earlier canonical records remain indexed and are not implied to be absent;
-- structure-search scope is stated directly in the interface;
-- structure detail labels the motif field as a **structure-grain motif boundary**;
-- RAG source cards show evidence scope;
-- deterministic evidence-boundary status is distinguished from provider fallback;
-- safe Markdown rendering supports headings, lists, blockquotes, bold and interactive `[A:id]` / `[S:id]` source links while escaping arbitrary HTML;
-- nested article/structure modal navigation replaces modal hashes rather than building incorrect modal-return history;
-- original focus target is preserved across nested modal navigation;
-- focus-visible behavior is restored for unset-style link buttons;
-- reduced-motion preference is respected;
-- client-side RAG calls have an explicit timeout and a bounded failure message;
-- table scroll regions are keyboard-focusable on constrained viewports;
-- pager regions expose navigation semantics;
-- method-step number contrast satisfies the automated serious/critical accessibility gate.
+- exact 25/25;
+- retrieval 25/25;
+- reasoning 20/20;
+- **70/70 PASS**.
 
-The unused `/manifest.webmanifest` alias is not exposed as a valid PWA manifest because the release manifest is scientific release metadata, not a web-app manifest.
+### Post-reindex v1.4 diagnostic
 
-## 6. Final production smoke matrix
+Run `504d7921-20fd-46ff-b436-5223bb56903e` intentionally reused unchanged v1.4 gold and scored **66/70**. It was retained as failed diagnostic evidence.
 
-Live public checks after the 11 August completion pass:
+Findings:
+
+- RS02 exposed one genuine deterministic single-record overmatch, fixed in exact service **10.2.2**;
+- EX16 and EX18 retained pre-clean structure-halogen count semantics;
+- RT25 retained structure-document relevance for a query that explicitly asks to find an article.
+
+Historical v1.4 gold was not edited.
+
+### Final post-reindex v1.5
+
+A versioned v1.5 suite cloned v1.4 and changed only EX16, EX18 and RT25, each with case-level provenance.
+
+Final run `cdfd61ae-b382-433c-b877-6465a93a93b9`:
+
+- exact/deterministic: **25/25**;
+- retrieval: **25/25**;
+- reasoning/scientific-boundary: **20/20**;
+- **70/70 PASS**;
+- release gate: **PASS**;
+- paid overage authorized: **false**.
+
+Revised structure-grain exact semantics:
+
+- 2025 + 0D + `halogen_effective contains I` → **57 rows / 28 articles**;
+- `halogen_effective contains Br` → **232 rows / 133 articles**.
+
+RT25 now scores `A:58` at article grain for the article-finding query.
+
+See [`RAG_BENCHMARK_V15_2026-08-11.md`](RAG_BENCHMARK_V15_2026-08-11.md) for the full rationale and historical [`RAG_BENCHMARK_V14_2026-08-11.md`](RAG_BENCHMARK_V14_2026-08-11.md).
+
+## Temporary infrastructure cleanup
+
+After the final v1.5 gate:
+
+- temporary benchmark evaluator → retired response + `verify_jwt=true`;
+- temporary structure-reembedding endpoint → retired response + `verify_jwt=true`;
+- structure-rebuild staging table → removed;
+- pre-swap rollback table → removed after successful gate;
+- staging/apply RPCs → removed;
+- Supabase security advisor → **0 findings**.
+
+## Final live smoke matrix
 
 | Check | Result |
 |---|---:|
 | `/health.json` | HTTP 200 / PASS |
 | Public site | 47 |
 | Public data | 2.6.0 |
-| Smart RAG | 9.10.0 |
-| Smart RAG mode at final check | FULL |
+| Public Smart RAG | 9.10.0 |
+| Smart RAG mode | FULL |
 | Meta / health | 47.6 |
+| Scientific-context contract | PASS |
 | Canonical articles | 332 |
 | Article audit records | 346 |
-| Canonical article filter `I` | 247 |
-| Exact canonical article `Cl/Br/I` | 27 |
 | Core-Included structures | 816 |
-| All structure/phase rows | 878 |
+| All structure rows | 878 |
 | Strict-polar rows | 67 |
-| `CUH-008-S01` halogen | I |
-| `CUH-162-S01` halogen | Cl/Br/I |
-| `CUH-013-S01` dimensionality | Unresolved + erratum |
 | Structure `STE` search | 0 |
 | Structure `luminescence` search | 0 |
 | Structure `I` search | 671 |
 | Projection integrity/ACL contract | PASS |
 | `/api/export` | HTTP 410 |
 | `/sitemap.xml` MIME | application/xml; charset=utf-8 |
-| Supabase security advisor after projection/RLS hardening | 0 findings |
+| Supabase security advisor | 0 findings |
 
-Projection-backed public-data requests remain server-side and field-minimized. Health/bootstrap is intentionally heavier because it retains immutable-snapshot and cross-service integrity checks.
-
-## 7. Literature Watch scheduler
-
-Database cron verification:
-
-- job: `cuhalide-atlas-daily-discovery`;
-- schedule: `17 2 * * *` = 02:17 UTC daily;
-- active: true;
-- checked runs on 2026-08-08, 2026-08-09 and 2026-08-10: succeeded.
-
-Candidate metadata remains outside frozen release statistics and never receives automatic release inclusion.
-
-## 8. Scientific denominators preserved
-
-The hardening did not change frozen scientific denominators:
+## Frozen scientific denominators preserved
 
 - article audit: 346;
 - chemically included articles: 335;
 - canonical verified articles: 332;
 - structure/phase rows: 878;
-- Core-Included structure rows: 816;
+- Core-Included structures: 816;
 - resolved space-group rows: 650;
 - verified one-to-one mappings: 625;
 - verified polar rows: 87;
 - strict-polar rows: 67;
 - strict-polar articles: 42.
 
-## 9. Current-runtime RAG validation
+## Public/private boundary
 
-A fresh versioned benchmark was executed after free Workers AI capacity recovered:
-
-- evaluation: **rag-benchmark-v1.4**;
-- run ID: `81eeab9f-3efb-4d19-bab0-7768acebfc4b`;
-- runtime code label: **smart-rag-v9.11.3-evidence-grain-v2**;
-- exact/deterministic: **25/25**;
-- retrieval: **25/25**;
-- reasoning/scientific-boundary: **20/20**;
-- total: **70/70 PASS**;
-- paid overage authorized: **false**.
-
-The final two deterministic contract repairs were the Record 101 same-source STE–Cu···Cu route and the Record 267 human-scope wording guard. Both passed with no LLM or embedding use. The exact/anchor service version for the completed run is `10.2.1-exact-anchor-internal`.
-
-The temporary evaluator was retired immediately after the controlled run and restored to JWT-required status.
-
-The earlier `rag-benchmark-v1.3` 70/70 result remains a historical baseline for an older runtime. See `RAG_BENCHMARK_V14_2026-08-11.md` for the current-runtime archive note.
-
-## 10. Real browser QA
-
-A repository-retained Playwright/Chromium production gate was run against the live v47 website and passed across desktop, tablet and mobile viewports. The validated gate covers:
-
-- all public routes;
-- serious/critical axe accessibility findings;
-- page and console errors;
-- page-wide horizontal overflow;
-- responsive navigation;
-- modal focus trapping, Escape close and focus restoration;
-- hash deep links;
-- frozen scientific denominators;
-- structure-halogen and evidence-grain semantics;
-- CSP hardening and retired routes.
-
-The QA gate was merged into `main` after its successful run. This does not claim exhaustive Safari/Firefox or manual pixel-perfect coverage.
-
-## 11. Public/private boundary
-
-Public website:
-
-- query-and-view curated fields;
-- strict-polar query interface;
-- source-linked Smart RAG;
-- metadata-only Literature Watch;
-- methods, citation, release identity and errata.
-
-Private research layer:
-
-- complete normalized CSV/JSON/XLSX corpus;
-- exact stored publisher abstracts;
-- primary article PDF/SI/CIF files;
-- field-evidence excerpts and source locators;
-- internal QA/adjudication artifacts;
-- candidate abstracts, scores and reason codes.
-
-The former bulk public export route remains retired with HTTP 410.
+The public portal remains query-and-view. Complete normalized tables, exact stored publisher abstracts, primary PDF/SI/CIF files, field-evidence excerpts/locators, complete QA/adjudication artifacts and candidate abstracts/scores/reason codes remain private. No public bulk export was reintroduced.
