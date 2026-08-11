@@ -7,9 +7,9 @@
 - Scientific parent: **3.0.0**
 - Frozen literature cutoff: **June 2026 (2026-06)**
 - Public site: **v47**
-- Public data contract: **2.4.1**
-- Smart RAG public gateway: **9.9.9**
-- Public metadata/health contract: **47.1**
+- Public data contract: **2.6.0**
+- Smart RAG public gateway: **9.10.0**
+- Public metadata/health contract: **47.6**
 - Known errata: [`ERRATA.md`](ERRATA.md)
 
 ## Frozen scientific corpus
@@ -56,7 +56,7 @@ If a manuscript requires a reproducibility deposit, a **manuscript-specific mini
 
 ## Public query architecture
 
-Public data 2.4.1 does not reconstruct the complete 346-row article or 878-row structure snapshot for every list/search request. Instead it uses private, release-specific, field-whitelisted query projections derived from the immutable 3.0.1 snapshot:
+Public data 2.6.0 does not reconstruct the complete 346-row article or 878-row structure snapshot for every list/search request. Instead it uses private, release-specific, field-whitelisted query projections derived from the immutable 3.0.1 snapshot:
 
 - `cuhalide_atlas_public_articles_v301`
 - `cuhalide_atlas_public_structures_v301`
@@ -111,9 +111,19 @@ The public Smart RAG interface separates database truth from model interpretatio
 
 Internal provider configuration, retrieval scores, hidden traces and service credentials are not part of the public response contract.
 
-### Validation boundary
+### Current-runtime validation
 
-The frozen `rag-benchmark-v1.3` scientific baseline passed **70/70**, but it predates the final Smart RAG v9 orchestration and must not be presented as a fresh **9.9.9** benchmark. The v9 deployment sequence separately passed deterministic exact/anchor and hybrid-retrieval regressions. A new full Qwen-enabled benchmark is required before a current-runtime 70-case result can be claimed.
+A fresh **`rag-benchmark-v1.4`** run was completed on 11 August 2026 after free Workers AI capacity recovered. It evaluates the current evidence-grain-safe Smart RAG stack (`smart-rag-v9.11.3-evidence-grain-v2`) against release 3.0.1 and passed **70/70**:
+
+- exact/deterministic: **25/25**;
+- retrieval: **25/25**;
+- reasoning and scientific-boundary cases: **20/20**.
+
+Run ID: `81eeab9f-3efb-4d19-bab0-7768acebfc4b`. The run used the free provider allocation only; paid overage was not authorized. The earlier `rag-benchmark-v1.3` 70/70 result remains a historical baseline, not the evidence for this current-runtime claim. See [`docs/RAG_BENCHMARK_V14_2026-08-11.md`](docs/RAG_BENCHMARK_V14_2026-08-11.md).
+
+## Browser-level production QA
+
+A Playwright/Chromium production gate is now retained in the repository and has passed against the live v47 portal across desktop, tablet and mobile viewports. The gate checks public routes, serious/critical accessibility findings, page/console errors, horizontal overflow, responsive navigation, modal keyboard focus behavior, hash deep links, frozen scientific denominators, evidence-grain boundaries, structure-halogen semantics, CSP hardening and retired public routes. This is automated Chromium QA; it is not a claim of exhaustive Safari/Firefox or manual pixel-perfect review.
 
 ## Important scientific boundaries
 
