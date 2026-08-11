@@ -3,7 +3,9 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 const RELEASE = '3.0.2';
+const RELEASE_DATE = '2026-08-11';
 const SITE_VERSION = '48';
+const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
 const TEMPLATE_PATH = path.join(process.cwd(), 'public', 'index.html');
 
 function one(text, from, to, label) {
@@ -25,6 +27,17 @@ function buildPortal() {
   let html = fs.readFileSync(TEMPLATE_PATH, 'utf8');
   html = one(html, '<meta name="cuhalide-release" content="3.0.1">', '<meta name="cuhalide-release" content="3.0.2">', 'release meta');
   html = one(html, '<meta name="cuhalide-site-version" content="47">', '<meta name="cuhalide-site-version" content="48">', 'site meta');
+  html = regexOne(html, /"dateModified":"[^"]+"/, `"dateModified":"${RELEASE_DATE}"`, 'JSON-LD dateModified');
+  if (!html.includes('property="og:image"')) {
+    html = one(html,
+      `<meta property="og:url" content="${PUBLIC_ORIGIN}/">`,
+      `<meta property="og:url" content="${PUBLIC_ORIGIN}/">\n<meta property="og:image" content="${PUBLIC_ORIGIN}/og-image.svg">\n<meta property="og:image:alt" content="CuHalide Atlas — evidence-grounded Cu(I) halide knowledge portal">`,
+      'Open Graph image');
+  }
+  html = one(html,
+    '<meta name="twitter:card" content="summary">',
+    `<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="${PUBLIC_ORIGIN}/og-image.svg">`,
+    'Twitter card image');
   if (/<!-- CUHALIDE_SITE_V\d+_[^>]+ -->/.test(html)) html = html.replace(/<!-- CUHALIDE_SITE_V\d+_[^>]+ -->/, '<!-- CUHALIDE_SITE_V48_CURRENT_CURATED -->');
   else html = html.replace('</body>', '<!-- CUHALIDE_SITE_V48_CURRENT_CURATED -->\n</body>');
   html = one(html, '<span class="ver">Release 3.0.1</span>', '<span class="ver">Release 3.0.2</span>', 'release badge');
@@ -33,6 +46,10 @@ function buildPortal() {
   html = one(html,
     '<article class="panel"><p class="eyebrow">Interpretation note</p><h2>Denominators are explicit</h2><p class="fine">Article, structure, resolved-space-group and verified one-to-one subsets answer different questions. The interface labels each denominator rather than presenting them as interchangeable corpus sizes.</p></article>',
     '<article class="panel"><p class="eyebrow">Rolling curation</p><h2>Current Curated</h2><p class="fine" id="currentCuratedText">Loading current curated status…</p><p class="fine">New literature enters this layer only after primary article/SI/CIF review and QC. Frozen releases remain immutable.</p></article>', 'Current Curated panel');
+  html = one(html,
+    '<label class="field"><span>Halogen</span><select id="ahal"><option value="">All</option></select></label><label class="field"><span>Dimensionality</span><select id="adim">',
+    '<label class="field"><span>Halogen set</span><select id="ahal"><option value="">All</option></select></label><p class="fine" id="articleHalogenNote">Single-halogen filters include mixed records containing that halogen; mixed labels are exact curated categories.</p><label class="field"><span>Dimensionality</span><select id="adim">',
+    'article halogen filter semantics');
   html = one(html,
     '<p>A read-only view of recently discovered publications that may fall within scope. Candidate metadata remains outside the frozen release until primary-source verification is complete.</p>',
     '<p>A read-only discovery queue for newly indexed publications. Candidates remain outside both the Frozen Release and Current Curated until primary article/SI/CIF evidence is reviewed and quality control passes.</p>', 'Literature Watch intro');
@@ -55,6 +72,9 @@ function buildPortal() {
   if (html.includes('2026.06')) throw new Error('Stale 2026.06 display found');
   if (!html.includes('Display window 2006–2026')) throw new Error('2026 publication-growth display missing');
   if (!html.includes('CUHALIDE_SITE_V48_CURRENT_CURATED')) throw new Error('v48 marker missing');
+  if (!html.includes(`"dateModified":"${RELEASE_DATE}"`)) throw new Error('JSON-LD release date drift');
+  if (!html.includes('Single-halogen filters include mixed records')) throw new Error('Article halogen filter semantics missing');
+  if (!html.includes(`${PUBLIC_ORIGIN}/og-image.svg`)) throw new Error('Open Graph image metadata missing');
 
   const styles = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map(m => sha(m[1]));
   const scripts = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)].filter(m => !/\bsrc\s*=/i.test(m[1] || '')).map(m => sha(m[2]));
