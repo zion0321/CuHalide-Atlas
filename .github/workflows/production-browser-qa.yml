@@ -70,8 +70,8 @@ jobs:
           );
 
           replaceIfPresent(
-            "<dt>Halogen</dt><dd>${esc(x.halogen)}</dd><dt>Dimension</dt>",
-            "<dt>Halogen</dt><dd>${esc(x.halogen)}</dd><dt>Halogen evidence</dt><dd>${esc(x.halogen_scope||'unresolved')} · ${esc(x.halogen_confidence||'Unresolved')}</dd><dt>Halogen basis</dt><dd>${esc(x.halogen_basis||'Not resolved')}</dd><dt>Dimension</dt>",
+            "<dt>Formula</dt><dd>${esc(x.formula)}</dd><dt>Phase / T</dt><dd>${esc(x.phase||'Not recorded')}</dd><dt>Halogen</dt><dd>${esc(x.halogen)}</dd><dt>Dimension</dt>",
+            "<dt>Formula</dt><dd>${esc(x.formula)}</dd><dt>Phase / T</dt><dd>${esc(x.phase||'Not recorded')}</dd><dt>Halogen</dt><dd>${esc(x.halogen)}</dd><dt>Halogen evidence</dt><dd>${esc(x.halogen_scope||'unresolved')} · ${esc(x.halogen_confidence||'Unresolved')}</dd><dt>Halogen basis</dt><dd>${esc(x.halogen_basis||'Not resolved')}</dd><dt>Dimension</dt>",
             'structure modal halogen evidence',
             '<dt>Halogen evidence</dt>'
           );
