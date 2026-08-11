@@ -1,0 +1,76 @@
+name: Patch final hardening documentation
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.head_ref == 'hardening/v48-final-cleanup'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Synchronize final hardening documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+
+          function patch(path, transform) {
+            const before = fs.readFileSync(path, 'utf8');
+            const after = transform(before);
+            if (!after || typeof after !== 'string') throw new Error(`Invalid transformed content for ${path}`);
+            fs.writeFileSync(path, after);
+          }
+
+          patch('README.md', s => {
+            if (s.includes('## Final production hardening and reproducible operations')) return s;
+            const marker = '## Browser-level production QA\n';
+            const block = `## Final production hardening and reproducible operations\n\nThe v48 production hardening pass also closes deployment and long-term maintenance gaps that are separate from the frozen scientific corpus:\n\n- canonical GitHub Supabase sources now match the deployed **3.0.2 / 2.7.0 / 9.12.0 / 48.0** public runtime, and the release-specific v302 compatibility services plus required validated internal RAG dependencies are versioned for disaster recovery;\n- QA dependencies are locked by \\`package-lock.json\\`, and both browser and Lighthouse workflows install with \\`npm ci\\`;\n- a scheduled Lighthouse gate covers mobile/desktop performance, accessibility, best practices, SEO, LCP and CLS in addition to the Playwright/Axe scientific browser gate;\n- stable crawlable record URLs are available as \\`/article/<record_id>\\` and \\`/structure/<structure_id>\\`, with canonical metadata, schema.org JSON-LD and a release-aware dynamic sitemap;\n- the retired \\`/api/export\\` route remains **410 Gone** and now carries the current frozen release identity;\n- the article halogen filter explicitly distinguishes single-halogen containment semantics from exact mixed-halogen categories;\n- the daily machine discovery monitor is JWT-gated plus a separate private cron-token factor, uses a 30-day rolling lookback and multiple Crossref/OpenAlex query families, and still writes only to the metadata candidate queue;\n- obsolete debug, temporary, ephemeral and bulk-export Edge Functions have been neutralized as JWT-required \\`410 Gone\\` stubs; required runtime dependencies are enumerated in \\`docs/SUPABASE_EDGE_FUNCTION_INVENTORY_V48_2026-08-11.md\\`;\n- health and browser regression allow future **Current Curated revision > 0** while keeping frozen 3.0.2 counts independently fixed.\n\nThe public portal therefore has two distinct notions of freshness: immutable frozen-release provenance and a separately tracked rolling Current Curated layer. New metadata candidates never cross that boundary automatically.\n\n`;
+            if (!s.includes(marker)) throw new Error('README browser QA marker missing');
+            return s.replace(marker, block + marker);
+          });
+
+          patch('docs/PRODUCTION_STATUS_V48_2026-08-11.md', s => {
+            if (s.includes('## Final hardening closure')) return s;
+            return s.trimEnd() + `\n\n## Final hardening closure\n\nThe final v48 hardening pass adds operational reproducibility and public-discovery improvements without changing the frozen 3.0.2 scientific corpus:\n\n- GitHub canonical Supabase wrappers and release-specific v302 services are synchronized with production; required internal RAG dependencies are snapshotted and inventoried.\n- \\`package-lock.json\\` now locks the QA dependency graph; browser and Lighthouse workflows use \\`npm ci\\`.\n- A scheduled production Lighthouse gate complements Playwright/Axe with mobile/desktop performance, accessibility, best-practices, SEO, LCP and CLS thresholds.\n- Stable public record URLs and a dynamic sitemap make canonical article and structure records crawlable without exposing private provenance.\n- Homepage structured/social metadata is release-aligned; article halogen filtering now states its containment-versus-exact-category semantics explicitly.\n- The retired bulk export route remains 410 and identifies release 3.0.2 consistently.\n- Daily machine literature discovery is protected by platform JWT verification plus a separate private cron token, scans a 30-day rolling window with multiple Crossref/OpenAlex query families, and remains metadata-only.\n- Obsolete debug/temp/ephemeral/export Edge Functions were replaced with JWT-required 410 retirement stubs; no required production dependency was retired.\n- Production health accepts future Current Curated revisions while preserving frozen release denominators.\n\nThe machine discovery hardening was validated by a successful JWT+token pg_cron-style invocation on 2026-08-11; the resulting records remain candidate metadata only and do not modify Frozen Release or Current Curated.\n`;
+          });
+
+          patch('CHANGELOG.md', s => {
+            if (s.includes('### Final v48 reproducibility and discovery hardening')) return s;
+            const marker = '### Production QA and security\n';
+            const block = `### Final v48 reproducibility and discovery hardening\n\n- Synchronized canonical GitHub Supabase wrappers and release-specific v302 runtime sources with the deployed production contracts.\n- Snapshotted required validated internal RAG dependencies and added an explicit production/retirement inventory.\n- Added \\`package-lock.json\\`; production browser and Lighthouse CI now use \\`npm ci\\`.\n- Added scheduled mobile/desktop Lighthouse thresholds for performance, accessibility, best practices, SEO, LCP and CLS.\n- Added stable server-rendered \\`/article/:id\\` and \\`/structure/:id\\` pages plus a dynamic canonical sitemap.\n- Aligned JSON-LD/social metadata to 2026-08-11 and added a branded social preview asset.\n- Clarified article halogen filter semantics: single-halogen values use containment, while mixed-halogen labels are exact categories.\n- Kept \\`/api/export\\` at HTTP 410 while aligning its release identity to 3.0.2.\n- Hardened daily metadata discovery with Supabase JWT verification plus a distinct private cron token; expanded the automated sweep to a 30-day rolling window and multiple Crossref/OpenAlex query families.\n- Replaced obsolete debug/temp/ephemeral/bulk-export Edge Functions with JWT-required 410 retirement stubs.\n- Relaxed only the Current Curated health invariant from revision=0 to revision>=0 so future reviewed additions cannot invalidate frozen 3.0.2 provenance.\n\n`;
+            if (!s.includes(marker)) throw new Error('CHANGELOG QA marker missing');
+            return s.replace(marker, block + marker);
+          });
+
+          patch('docs/SUPABASE_EDGE_FUNCTION_INVENTORY_V48_2026-08-11.md', s => {
+            s = s.replace(/`cuhalide-atlas-candidates-v2` \| Internal candidate\/status reader used by public Literature Watch projection \| Yes \| v4 \/ `[^`]+`/, '`cuhalide-atlas-candidates-v2` | Internal candidate/status reader used by public Literature Watch projection | Yes | v5 / contract 2.3.0 / `44f6ce472b429f348fb4d3c03d186b10af313335b06de02b567390e0939fc18b`');
+            if (!s.includes('v5 / contract 2.3.0')) throw new Error('Candidate inventory row was not updated');
+            return s;
+          });
+          NODE
+          git rm .github/workflows/patch-final-hardening-docs.yml
+          git diff --check
+
+      - name: Commit synchronized documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'Document final v48 hardening closure'
+          git push origin HEAD:${{ github.head_ref }}
