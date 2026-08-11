@@ -17,7 +17,7 @@ Only the services listed in **Required runtime** below are dependencies of the c
 | `cuhalide-atlas-public-data-v2` | Canonical public-data wrapper | No, read-only | v14 / `469ea4c4f2e99437f10371501c42b34cff667684169551b9968471341e56eadd` |
 | `cuhalide-atlas-public-data-v302-public` | Release-3.0.2 public-data health/proxy boundary | No, read-only | v1 / `3480a06e08a8824ef60e84618760267f209d6f8e3ab5f3c7f42b98fbc386f1d8` |
 | `cuhalide-atlas-public-data-v302` | Field-whitelisted v302 query/detail service | No, read-only | v1 / `d4e002238373340b06514e45c771741173ca292fd4db43e81ddf7f8df783a43c` |
-| `cuhalide-atlas-candidates-v2` | Internal candidate/status reader used by public Literature Watch projection | Yes | v4 / `59334d5a014c00f5e051bccf29f1498432cb980605a86b312bc49f33f571a3b5` |
+| `cuhalide-atlas-candidates-v2` | Internal candidate/status reader used by public Literature Watch projection | Yes | v5 / contract 2.3.0 / `44f6ce472b429f348fb4d3c03d186b10af313335b06de02b567390e0939fc18b` |
 | `cuhalide-atlas-smart-rag` | Canonical public Smart RAG wrapper | No, read-only/query-only | v22 / `dd4d99379c9ee3b590cfa4a6b916fd8d98999319983bb3e0f11bcd1656594b67` |
 | `cuhalide-atlas-smart-rag-v302-public` | Release-3.0.2 public evidence-grain guard | No, query-only | v1 / `7e1183ddd900fcc6727e9dd14a4652336a8a714108d93387a13fe416841ccc54` |
 | `cuhalide-atlas-smart-rag-v302-public-internal` | Release-aware private gateway | Yes | v1 / `fcee275b7decb5703d3218e6c4f7c54f0c8a68d20f93ef09c6575c5cdaf71642` |
