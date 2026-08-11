@@ -37,6 +37,20 @@ The four 3.0.1 errata are retained as historical audit metadata, marked supersed
 - Paid Workers AI overage was not authorized.
 - v1.5 history was retained. v1.6 rebased release labels without changing frozen scientific fact/count targets; RS08 was intentionally made deterministic to strengthen the boundary between Literature Watch metadata and frozen scientific synthesis.
 
+### Final v48 reproducibility and discovery hardening
+
+- Synchronized canonical GitHub Supabase wrappers and release-specific v302 runtime sources with the deployed production contracts.
+- Snapshotted required validated internal RAG dependencies and added an explicit production/retirement inventory.
+- Added `package-lock.json`; production browser and Lighthouse CI use `npm ci`.
+- Added scheduled mobile/desktop Lighthouse thresholds for performance, accessibility, best practices, SEO, LCP and CLS.
+- Added stable server-rendered `/article/:id` and `/structure/:id` pages plus a dynamic canonical sitemap.
+- Aligned JSON-LD/social metadata to 2026-08-11 and added a branded social preview asset.
+- Clarified article halogen filter semantics: single-halogen values use containment, while mixed-halogen labels are exact categories.
+- Kept `/api/export` at HTTP 410 while aligning its release identity to 3.0.2.
+- Hardened daily metadata discovery with Supabase JWT verification plus a distinct private cron token; expanded the automated sweep to a 30-day rolling window and multiple Crossref/OpenAlex query families.
+- Replaced obsolete debug/temp/ephemeral/bulk-export Edge Functions with JWT-required 410 retirement stubs.
+- Relaxed only the Current Curated health invariant from revision=0 to revision>=0 so future reviewed additions cannot invalidate frozen 3.0.2 provenance.
+
 ### Production QA and security
 
 - Live release-3.0.2/v48 Playwright/Chromium gate passed across the configured desktop/tablet/mobile projects.
