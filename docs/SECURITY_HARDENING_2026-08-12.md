@@ -7,7 +7,7 @@ Smart RAG: **9.12.0**
 
 ## Scope
 
-A defense-in-depth audit of the production database, public API boundary, stable record pages, CI supply chain, runtime logs and scheduled literature discovery was performed after the release-3.0.2 production alignment.
+A defense-in-depth audit of the production database, public API boundary, stable record pages, CI supply chain, runtime logs, scheduled literature discovery, object privileges, function execution rights, sequences, default privileges and Storage configuration was performed after the release-3.0.2 production alignment.
 
 No scientific record, frozen denominator, Record 13 correction, RAG scientific boundary, Current Curated revision or literature cutoff was changed by this hardening pass.
 
@@ -30,11 +30,33 @@ The obsolete permissive read policies on these relations were removed. Explicit 
 
 Two legacy `cuhalide_atlas_search(...)` overloads that return raw `payload jsonb` were also removed from the public/authenticated execution surface and retained for `service_role` only.
 
-Post-migration verification confirmed no SELECT/INSERT/UPDATE/DELETE privilege for `anon` or `authenticated` on the eight internal relations, no public execution privilege on the two raw-payload search functions, and a clean Supabase security-advisor result.
+The remaining CuHalide database helper/trigger functions were audited. Five title/audit helper functions plus `cuhalide_candidate_auto_triage()` had inherited public execution grants even though they are internal implementation details. Their `PUBLIC`, `anon` and `authenticated` execution rights were revoked and trusted `service_role` execution retained. A full post-change scan found no `cuhalide%` database function directly executable by `anon` or `authenticated`.
+
+Twelve CuHalide sequences had inherited `SELECT`/`UPDATE` privileges for public roles. Those privileges were revoked object-by-object and trusted `service_role` sequence access retained. Post-change verification found no `anon` or `authenticated` USAGE/SELECT/UPDATE privilege on any CuHalide sequence.
+
+## Private-by-default future objects
+
+Atlas database objects are created under the `postgres` owner. The `postgres` default privileges in the `public` schema were hardened so future tables, sequences and functions do not automatically grant access to `anon` or `authenticated`; future public database surfaces must be granted explicitly. `service_role` retains the trusted runtime defaults required by server-mediated services. Platform-level `supabase_admin` defaults were left unchanged.
+
+## Storage boundary
+
+The Supabase project currently contains no Storage buckets and no `storage.objects` policies. Primary PDF/SI/CIF material is therefore not exposed through a public Supabase Storage bucket.
+
+## Verification
+
+Post-migration verification confirmed:
+
+- no SELECT/INSERT/UPDATE/DELETE privilege for `anon` or `authenticated` on the eight internal relations;
+- explicit deny-all RLS policies on those relations for public roles;
+- no public execution privilege on the two raw-payload search functions;
+- no public execution privilege on any CuHalide database helper/trigger function;
+- no public sequence privilege on CuHalide counters;
+- hardened `postgres` future-object defaults;
+- a clean Supabase security-advisor result with **0 findings**.
 
 ## Public-contract regression
 
-After the database ACL change, the following remained operational:
+After the database ACL changes, the following remained operational:
 
 - public release/status queries;
 - metadata-only Literature Watch candidates;
