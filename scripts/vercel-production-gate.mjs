@@ -7,6 +7,8 @@ export const REQUIRED_CHECKS = Object.freeze([
   'preview-lighthouse',
 ]);
 
+export const REQUIRED_VERCEL_STATUS = 'Vercel';
+
 function isFullSha(value) {
   return /^[0-9a-f]{40}$/i.test(String(value || ''));
 }
@@ -33,12 +35,33 @@ export function latestGithubActionsChecks(checkRuns) {
   return latest;
 }
 
+export function latestCommitStatuses(statuses) {
+  const latest = new Map();
+  for (const status of Array.isArray(statuses) ? statuses : []) {
+    if (!status?.context) continue;
+    const current = latest.get(status.context);
+    if (!current || Number(status.id || 0) > Number(current.id || 0)) {
+      latest.set(status.context, status);
+    }
+  }
+  return latest;
+}
+
+function isSuccessfulVercelStatus(status) {
+  return Boolean(
+    status &&
+    status.state === 'success' &&
+    /^https:\/\/vercel\.com\//i.test(String(status.target_url || ''))
+  );
+}
+
 export function evaluateProductionGate({
   vercelEnv,
   commitRef,
   commitSha,
   pulls = [],
   checkRuns = [],
+  commitStatuses = [],
 }) {
   if (vercelEnv !== 'production') {
     return { allowBuild: true, reason: 'non-production deployment' };
@@ -78,9 +101,22 @@ export function evaluateProductionGate({
     };
   }
 
+  const latestStatuses = latestCommitStatuses(commitStatuses);
+  const vercelStatus = latestStatuses.get(REQUIRED_VERCEL_STATUS);
+  if (!isSuccessfulVercelStatus(vercelStatus)) {
+    const state = vercelStatus?.state || 'missing';
+    return {
+      allowBuild: false,
+      reason: `merged PR #${pullRequest.number} has no trusted successful Vercel preview status (latest state: ${state})`,
+      pullRequestNumber: pullRequest.number,
+      pullRequestHeadSha: headSha,
+      vercelStatusState: state,
+    };
+  }
+
   return {
     allowBuild: true,
-    reason: `merged PR #${pullRequest.number} passed all required baseline and preview checks`,
+    reason: `merged PR #${pullRequest.number} passed baseline QA, candidate QA and Vercel preview status`,
     pullRequestNumber: pullRequest.number,
     pullRequestHeadSha: headSha,
   };
@@ -139,13 +175,18 @@ async function run() {
     return;
   }
 
-  const checksResponse = await githubJson(`/commits/${headSha}/check-runs?per_page=100`);
+  const [checksResponse, statusResponse] = await Promise.all([
+    githubJson(`/commits/${headSha}/check-runs?per_page=100`),
+    githubJson(`/commits/${headSha}/status`),
+  ]);
+
   const decision = evaluateProductionGate({
     vercelEnv,
     commitRef,
     commitSha,
     pulls,
     checkRuns: checksResponse.check_runs,
+    commitStatuses: statusResponse.statuses,
   });
 
   if (decision.allowBuild) {

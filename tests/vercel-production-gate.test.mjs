@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   REQUIRED_CHECKS,
   evaluateProductionGate,
+  latestCommitStatuses,
   latestGithubActionsChecks,
   selectMergedMainPullRequest,
 } from '../scripts/vercel-production-gate.mjs';
@@ -35,6 +36,27 @@ function successfulChecks() {
   return REQUIRED_CHECKS.map((name, index) => check(name, 100 + index));
 }
 
+function status(context = 'Vercel', id = 200, state = 'success', targetUrl = 'https://vercel.com/team/project/deployment') {
+  return {
+    id,
+    context,
+    state,
+    target_url: targetUrl,
+  };
+}
+
+function validInput(overrides = {}) {
+  return {
+    vercelEnv: 'production',
+    commitRef: 'main',
+    commitSha: MERGE_SHA,
+    pulls: [mergedPr()],
+    checkRuns: successfulChecks(),
+    commitStatuses: [status()],
+    ...overrides,
+  };
+}
+
 test('non-production deployments always continue', () => {
   const result = evaluateProductionGate({ vercelEnv: 'preview' });
   assert.equal(result.allowBuild, true);
@@ -65,15 +87,9 @@ test('production commit must be the exact merge result of a merged PR into main'
   assert.equal(selectMergedMainPullRequest([mergedPr()], MERGE_SHA)?.number, 16);
 });
 
-test('all four baseline and preview checks are required', () => {
+test('all four baseline and candidate checks are required', () => {
   const checks = successfulChecks().filter((run) => run.name !== 'preview-lighthouse');
-  const result = evaluateProductionGate({
-    vercelEnv: 'production',
-    commitRef: 'main',
-    commitSha: MERGE_SHA,
-    pulls: [mergedPr()],
-    checkRuns: checks,
-  });
+  const result = evaluateProductionGate(validInput({ checkRuns: checks }));
 
   assert.equal(result.allowBuild, false);
   assert.deepEqual(result.failedOrMissingChecks, ['preview-lighthouse']);
@@ -84,19 +100,13 @@ test('checks from non-GitHub-Actions apps cannot satisfy the gate', () => {
     run.name === 'preview-chromium' ? check(run.name, run.id, 'success', 'other-app') : run
   ));
 
-  const result = evaluateProductionGate({
-    vercelEnv: 'production',
-    commitRef: 'main',
-    commitSha: MERGE_SHA,
-    pulls: [mergedPr()],
-    checkRuns: checks,
-  });
+  const result = evaluateProductionGate(validInput({ checkRuns: checks }));
 
   assert.equal(result.allowBuild, false);
   assert.ok(result.failedOrMissingChecks.includes('preview-chromium'));
 });
 
-test('latest check result wins so a later failure cannot be masked by an older success', () => {
+test('latest GitHub Actions check result wins so a later failure cannot be masked by an older success', () => {
   const checks = [
     ...successfulChecks(),
     check('preview-lighthouse', 999, 'failure'),
@@ -104,24 +114,44 @@ test('latest check result wins so a later failure cannot be masked by an older s
   const latest = latestGithubActionsChecks(checks);
   assert.equal(latest.get('preview-lighthouse').conclusion, 'failure');
 
-  const result = evaluateProductionGate({
-    vercelEnv: 'production',
-    commitRef: 'main',
-    commitSha: MERGE_SHA,
-    pulls: [mergedPr()],
-    checkRuns: checks,
-  });
+  const result = evaluateProductionGate(validInput({ checkRuns: checks }));
   assert.equal(result.allowBuild, false);
 });
 
-test('verified merged PR with all required successful checks is allowed', () => {
-  const result = evaluateProductionGate({
-    vercelEnv: 'production',
-    commitRef: 'main',
-    commitSha: MERGE_SHA,
-    pulls: [mergedPr()],
-    checkRuns: successfulChecks(),
-  });
+test('missing or failed Vercel deployment status blocks production', () => {
+  assert.equal(evaluateProductionGate(validInput({ commitStatuses: [] })).allowBuild, false);
+  assert.equal(evaluateProductionGate(validInput({ commitStatuses: [status('Vercel', 200, 'failure')] })).allowBuild, false);
+  assert.equal(evaluateProductionGate(validInput({ commitStatuses: [status('Vercel', 200, 'pending')] })).allowBuild, false);
+});
+
+test('Vercel status must point to a vercel.com deployment result', () => {
+  const result = evaluateProductionGate(validInput({
+    commitStatuses: [status('Vercel', 200, 'success', 'https://example.invalid/fake-vercel-status')],
+  }));
+  assert.equal(result.allowBuild, false);
+});
+
+test('latest Vercel status wins so an older success cannot mask a newer failure', () => {
+  const statuses = [
+    status('Vercel', 200, 'success'),
+    status('Vercel', 999, 'failure'),
+  ];
+  const latest = latestCommitStatuses(statuses);
+  assert.equal(latest.get('Vercel').state, 'failure');
+
+  const result = evaluateProductionGate(validInput({ commitStatuses: statuses }));
+  assert.equal(result.allowBuild, false);
+});
+
+test('unrelated commit statuses do not satisfy the Vercel requirement', () => {
+  const result = evaluateProductionGate(validInput({
+    commitStatuses: [status('Other CI', 500, 'success')],
+  }));
+  assert.equal(result.allowBuild, false);
+});
+
+test('verified merged PR with all required QA and Vercel status is allowed', () => {
+  const result = evaluateProductionGate(validInput());
 
   assert.equal(result.allowBuild, true);
   assert.equal(result.pullRequestNumber, 16);
