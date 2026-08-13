@@ -5,11 +5,46 @@ const RELEASE = '3.0.2';
 const CURRENT_REVISION = '1';
 const PAGE_SIZE = 40;
 const MAX_PAGES = 100;
+const MAX_FETCH_ATTEMPTS = 3;
+const RETRY_DELAYS_MS = [350, 1100];
 const EXPECTED_ARTICLES = 348;
 const EXPECTED_STRUCTURES = 859;
 const EXPECTED_URLS = 1 + EXPECTED_ARTICLES + EXPECTED_STRUCTURES;
 
 const xml = (v) => String(v).replace(/[<>&'\"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const isRetryableStatus = (status) => status === 429 || status >= 500;
+
+function retryDelay(response, attempt) {
+  const retryAfter = Number(response?.headers?.get?.('retry-after'));
+  if (Number.isFinite(retryAfter) && retryAfter >= 0) return Math.min(5000, retryAfter * 1000);
+  return RETRY_DELAYS_MS[Math.min(attempt, RETRY_DELAYS_MS.length - 1)] || 1100;
+}
+
+async function fetchPage(url, action, page) {
+  let lastError = null;
+  for (let attempt = 0; attempt < MAX_FETCH_ATTEMPTS; attempt += 1) {
+    let response;
+    try {
+      response = await fetch(url, {
+        headers: { accept: 'application/json', 'user-agent': 'CuHalide-Atlas-Sitemap/48.2' },
+        signal: AbortSignal.timeout(30000),
+      });
+      if (response.ok) return await response.json();
+      lastError = new Error(`${action} page ${page}: HTTP ${response.status}`);
+      if (!isRetryableStatus(response.status) || attempt === MAX_FETCH_ATTEMPTS - 1) throw lastError;
+      await response.arrayBuffer().catch(() => null);
+      await sleep(retryDelay(response, attempt));
+    } catch (error) {
+      lastError = error;
+      const nonRetryableHttp = /HTTP\s+(\d+)/.exec(String(error?.message || ''));
+      if (nonRetryableHttp && !isRetryableStatus(Number(nonRetryableHttp[1]))) throw error;
+      if (attempt === MAX_FETCH_ATTEMPTS - 1) throw error;
+      if (!response) await sleep(RETRY_DELAYS_MS[Math.min(attempt, RETRY_DELAYS_MS.length - 1)] || 1100);
+    }
+  }
+  throw lastError || new Error(`${action} page ${page}: upstream request failed`);
+}
 
 async function pages(action, extra) {
   const items = [];
@@ -22,9 +57,7 @@ async function pages(action, extra) {
     u.searchParams.set('page', String(page));
     u.searchParams.set('page_size', String(PAGE_SIZE));
     for (const [k, v] of Object.entries(extra)) u.searchParams.set(k, v);
-    const r = await fetch(u, { headers: { accept: 'application/json', 'user-agent': 'CuHalide-Atlas-Sitemap/48.1' }, signal: AbortSignal.timeout(30000) });
-    if (!r.ok) throw new Error(`${action} page ${page}: HTTP ${r.status}`);
-    const data = await r.json();
+    const data = await fetchPage(u, action, page);
     const chunk = Array.isArray(data.items) ? data.items : null;
     const pagination = data.pagination || {};
     const reportedPage = Number(pagination.page);
