@@ -8,6 +8,10 @@ export const REQUIRED_CHECKS = Object.freeze([
 ]);
 
 export const REQUIRED_VERCEL_STATUS = 'Vercel';
+export const MERGE_ASSOCIATION_RETRY_ATTEMPTS = 8;
+export const MERGE_ASSOCIATION_RETRY_DELAY_MS = 1500;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function isFullSha(value) {
   return /^[0-9a-f]{40}$/i.test(String(value || ''));
@@ -21,6 +25,28 @@ export function selectMergedMainPullRequest(pulls, commitSha) {
     pr.base?.ref === 'main' &&
     pr.merge_commit_sha === commitSha
   )) || null;
+}
+
+export async function findMergedMainPullRequestWithRetry({
+  fetchPulls,
+  commitSha,
+  attempts = MERGE_ASSOCIATION_RETRY_ATTEMPTS,
+  delayMs = MERGE_ASSOCIATION_RETRY_DELAY_MS,
+  sleepFn = sleep,
+}) {
+  if (typeof fetchPulls !== 'function') throw new TypeError('fetchPulls must be a function');
+  if (!Number.isInteger(attempts) || attempts < 1) throw new RangeError('attempts must be a positive integer');
+  if (!Number.isFinite(delayMs) || delayMs < 0) throw new RangeError('delayMs must be non-negative');
+
+  let pulls = [];
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    pulls = await fetchPulls();
+    const pullRequest = selectMergedMainPullRequest(pulls, commitSha);
+    if (pullRequest) return { pullRequest, pulls, attempt };
+    if (attempt < attempts) await sleepFn(delayMs);
+  }
+
+  return { pullRequest: null, pulls, attempt: attempts };
 }
 
 export function latestGithubActionsChecks(checkRuns) {
@@ -160,12 +186,24 @@ async function run() {
     return;
   }
 
-  const pulls = await githubJson(`/commits/${commitSha}/pulls?per_page=100`);
-  const pullRequest = selectMergedMainPullRequest(pulls, commitSha);
+  // GitHub's commit->pull association is eventually consistent immediately after
+  // a merge. A production deployment can start before that association is visible.
+  // Retry only this read-side association for a short bounded window; every other
+  // provenance requirement remains fail-closed and unchanged.
+  const association = await findMergedMainPullRequestWithRetry({
+    fetchPulls: () => githubJson(`/commits/${commitSha}/pulls?per_page=100`),
+    commitSha,
+  });
+  const { pullRequest, pulls } = association;
+
   if (!pullRequest) {
-    console.log('[deployment-gate] ignore production build: commit is not the merge result of a merged PR into main');
+    console.log(`[deployment-gate] ignore production build: commit is not the merge result of a merged PR into main after ${association.attempt} association checks`);
     process.exitCode = 0;
     return;
+  }
+
+  if (association.attempt > 1) {
+    console.log(`[deployment-gate] merge association became visible on attempt ${association.attempt}/${MERGE_ASSOCIATION_RETRY_ATTEMPTS}`);
   }
 
   const headSha = pullRequest.head?.sha || '';
