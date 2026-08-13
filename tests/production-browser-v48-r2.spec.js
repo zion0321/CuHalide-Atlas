@@ -3,6 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 const SPA_ROUTES = ['home', 'articles', 'structures', 'polar', 'rag', 'watch', 'methods', 'citation'];
 const PREMERGE = process.env.CUHALIDE_PREMERGE_PRODUCTION === 'true';
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function json(response) {
   const text = await response.text();
@@ -11,7 +12,13 @@ async function json(response) {
 }
 
 async function getData(request, query) {
-  const response = await request.get(`/api/public-data?${query}`);
+  let response;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    response = await request.get(`/api/public-data?${query}`);
+    if (response.status() === 200) return json(response);
+    if (![429, 500, 502, 503, 504].includes(response.status()) || attempt === 2) break;
+    await sleep(180 * (attempt + 1));
+  }
   expect(response.status(), query).toBe(200);
   return json(response);
 }
@@ -54,22 +61,17 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.2 scientific contracts
   });
 
   test('Current Curated default and Frozen scope denominators are independently exact', async ({ request }) => {
-    // The rolling backend is already rev.2 before the presentation PR is merged.
-    // Therefore production-baseline QA locks Frozen values and verifies Current against rev.2,
-    // rather than pretending the rolling layer is an immutable rev.1 snapshot.
     expect((await getData(request, 'action=articles&page=1&page_size=1')).pagination.total).toBe(370);
     expect((await getData(request, 'action=articles&page=1&page_size=1&release_status=Current%20canonical')).pagination.total).toBe(356);
     expect((await getData(request, 'action=articles&page=1&page_size=1&release_status=Current%20Curated%20-%20Verified')).pagination.total).toBe(24);
     expect((await getData(request, 'action=structures&page=1&page_size=1')).pagination.total).toBe(935);
     expect((await getData(request, 'action=structures&page=1&page_size=1&eligibility=Core%20-%20Included')).pagination.total).toBe(873);
     expect((await getData(request, 'action=polar&page=1&page_size=1')).pagination.total).toBe(77);
-
     expect((await getData(request, 'action=articles&scope=frozen&page=1&page_size=1')).pagination.total).toBe(346);
     expect((await getData(request, 'action=articles&scope=frozen&page=1&page_size=1&release_status=Core%20-%20Verified')).pagination.total).toBe(332);
     expect((await getData(request, 'action=structures&scope=frozen&page=1&page_size=1')).pagination.total).toBe(878);
     expect((await getData(request, 'action=structures&scope=frozen&page=1&page_size=1&eligibility=Core%20-%20Included')).pagination.total).toBe(816);
     expect((await getData(request, 'action=polar&scope=frozen&page=1&page_size=1')).pagination.total).toBe(67);
-
     expect((await getData(request, 'action=structures&page=1&page_size=1&q=STE')).pagination.total).toBe(0);
     expect((await getData(request, 'action=structures&page=1&page_size=1&q=luminescence')).pagination.total).toBe(0);
   });
@@ -97,7 +99,6 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.2 scientific contracts
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("frame-ancestors 'none'");
     expect(root.headers()['x-cuhalide-current-curated-revision']).toBe('2');
-
     const manifest = await json(await request.get('/release-manifest.json'));
     expect(manifest).toMatchObject({ release: '3.0.2', public_data_version: '2.9.0', smart_rag_version: '9.14.0', meta_version: '48.3' });
     expect(manifest.temporal_scope.current_curated).toMatchObject({ curated_through: '2026-08-13', live_revision: 2 });
@@ -132,7 +133,6 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.2 scientific contracts
     expect(c.Coordination).toMatchObject({ article_count: 113, structure_determinations: 346, motif_count: 26 });
     expect(c['Hybrid Ionic']).toMatchObject({ article_count: 217, structure_determinations: 447, motif_count: 66 });
     expect(c['All-in-One (AIO)']).toMatchObject({ article_count: 26, structure_determinations: 102, motif_count: 22 });
-
     const cu4i4 = await getData(request, 'action=motifs&category=Coordination&motif=Cu4I4&limit=100');
     expect(cu4i4.atlas.motifs[0]).toMatchObject({ motif_formula: 'Cu4I4', article_count: 45, structure_determinations: 74, identity_count: 59 });
     expect(cu4i4.atlas.curated_components.some((x) => /3-methylmorpholine/i.test(x.display_name || ''))).toBe(true);
@@ -148,13 +148,11 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.2 scientific contracts
     expect(rag.current_curated).toMatchObject({ live_revision: 2, curated_through: '2026-08-13' });
     expect(rag.capabilities.deterministic_motif_atlas).toBe(true);
     expect(rag.capabilities.structure_grain_motif).toBe(true);
-
     const motif = await json(await request.post('/api/agent', { data: { messages: [{ role: 'user', content: 'For Coordination Cu4I4 motifs, how many reports and determinations are there and which primary-evidence curated ligands are known?' }] } }));
     expect(motif.mode).toBe('deterministic-motif-atlas');
     expect(motif.answer).toContain('45 article reports');
     expect(motif.answer).toContain('74 crystallographic determinations');
     expect(motif.answer).toMatch(/Primary-evidence curated organic components/i);
-
     const structure = await json(await request.post('/api/agent', { data: { messages: [{ role: 'user', content: 'What is the motif and emission of CUH-370-S01?' }] } }));
     expect(structure.answer).toContain('Cu4I4');
     expect(structure.answer).toMatch(/article-grain|Article-grain|evidence boundary/i);
@@ -168,13 +166,11 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.2 scientific contracts
     for (const token of ['Motif Atlas', 'Current Curated rev.2', 'Cu4I4', 'Primary-evidence curated', 'Legacy label-derived candidate']) expect(motifHtml).toContain(token);
     expect(motifHtml).not.toContain('field_evidence');
     expect(motifs.headers()['x-cuhalide-motif-atlas-version']).toBe('1.1');
-
     const article = await request.get('/article/370');
     expect(article.status()).toBe(200);
     const articleHtml = await article.text();
     expect(articleHtml).toContain('Current Curated rev.2');
     expect(articleHtml).not.toContain('field_evidence');
-
     const structure = await request.get('/structure/CUH-370-S01');
     expect(structure.status()).toBe(200);
     const structureHtml = await structure.text();
@@ -182,11 +178,9 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.2 scientific contracts
     expect(structureHtml).toMatch(/3-methylmorpholine/i);
     expect(structureHtml).toContain('Open Motif Atlas');
     expect(structureHtml).not.toContain('field_evidence');
-
     const frozen = await request.get('/article/13');
     expect(frozen.status()).toBe(200);
     expect(await frozen.text()).toContain('Frozen Release 3.0.2');
-
     const sitemap = await request.get('/sitemap.xml');
     expect(sitemap.status()).toBe(200);
     const xml = await sitemap.text();
@@ -226,7 +220,7 @@ test.describe('v48.3 presentation/accessibility', () => {
     await expect(menu).toBeVisible();
     await menu.click();
     await expect(page.locator('#nav')).toHaveClass(/open/);
-    await expect(page.getByRole('link', { name: 'Motif Atlas' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Motif Atlas', exact: true })).toBeVisible();
     await page.goto('/motifs?category=Coordination&motif=Cu4I4', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { name: 'Motif Atlas', level: 1 })).toBeVisible();
     await noOverflow(page);
