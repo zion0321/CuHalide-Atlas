@@ -43,7 +43,7 @@ The Current overlay contains **24** reviewed articles and **57** reviewed struct
 
 ## Live database health
 
-A direct production-database audit of the Current/Frozen health functions returned `ok=true` for all primary contracts.
+Repeated direct production-database audits of the Current/Frozen health functions returned `ok=true` for all primary contracts, including the final post-deployment check after the runtime/sitemap hardening merge.
 
 Current Curated checks passed for:
 
@@ -117,30 +117,52 @@ Public access remains query-and-view. `/api/export` remains HTTP 410. Complete n
 
 Public unauthenticated Edge wrappers are limited to read-only/query-only public contracts. Scheduled metadata discovery retains JWT plus a separate private cron-token boundary. Historical canary/debug/ephemeral function names are not treated as public dependencies merely because the deployment object remains `ACTIVE`; source and JWT/retirement status are authoritative. Spot checks of historical `release-export`, `debug` and Current indexer endpoints confirmed JWT-required HTTP 410 retirement stubs.
 
+The final Vercel runtime audit over the production environment found **no error/fatal runtime logs** and **no 5xx responses** in the inspected one-hour window following the final deployment.
+
 ## GitHub and Vercel production governance
 
 The active default-branch ruleset `Protect main production` requires PR provenance, resolved review threads, strict required checks, the four Chromium/Lighthouse production/candidate checks, trusted Vercel status, no force push, no branch deletion and no bypass actor.
 
-PR #21 published Current Curated rev.2 and Motif Atlas after the required candidate/production gates. PR #22 synchronized Supabase governance documentation. PR #23 completed repository identity/policy cleanup and added required repository-contract regression tests to `chromium-production`; its exact candidate passed `chromium-production`, `lighthouse-production`, `preview-chromium`, `preview-lighthouse` and trusted Vercel status before merge, and both post-merge production Chromium and Lighthouse suites subsequently passed.
+PR #21 published Current Curated rev.2 and Motif Atlas after the required candidate/production gates. PR #22 synchronized Supabase governance documentation. PR #23 completed repository identity/policy cleanup and added required repository-contract regression tests to `chromium-production`.
 
-Vercel build-log auditing then identified an operational eventual-consistency race. The first post-merge provenance gate relied on GitHub's `commit -> pull requests` association endpoint. Even after a bounded 8 × 1.5 s retry, the PR #24 merge demonstrated that this association can remain invisible long enough for a valid production build to be safely skipped. The fail-closed behavior worked as designed, but repeated sleeping on the same lagging index was not considered a complete fix.
+Vercel build-log auditing then identified an operational eventual-consistency race. The original post-merge provenance gate relied on GitHub's `commit -> pull requests` association endpoint; real merges demonstrated that this association could lag long enough to safely but incorrectly skip a valid production build. A simple bounded retry was proven insufficient by PR #24.
 
-The final gate therefore uses **dual-source merged-PR provenance**: the commit-association endpoint first, then the recent closed PR records on base `main`, with the same exact `merged_at`, `base.ref` and `merge_commit_sha` predicates. Unit tests prove that the fallback cannot accept an unmerged PR, a wrong-base PR or a different merge SHA, and that exhaustion/API failure remains fail-closed. After provenance is established, all four required GitHub Actions checks and trusted Vercel candidate status remain mandatory.
+PR #25 replaced that fragile single-source assumption with **dual-source merged-PR provenance**: the commit-association endpoint first, then recent closed PR records on base `main`, with the same exact `merged_at`, `base.ref` and `merge_commit_sha` predicates. Unit tests prove that the fallback cannot accept an unmerged PR, a wrong-base PR or a different merge SHA, and that exhaustion/API failure remains fail-closed. After provenance is established, all four required GitHub Actions checks and trusted Vercel candidate status remain mandatory. A real production build then passed this gate and deployed successfully.
+
+## Runtime and sitemap closure
+
+PR #26 completed the runtime/reliability closure without changing scientific content:
+
+- the package now declares **ESM** explicitly with `"type": "module"`, eliminating Vercel's ESM-to-CommonJS transpilation warning;
+- the package does not override the Vercel project's Node major;
+- production-browser, production-Lighthouse and both protected-preview jobs are aligned to **Node 24**, matching the Vercel project runtime;
+- repository contracts protect the ESM/Node-runtime alignment;
+- the repository was audited for CommonJS-only `require`, `module.exports` and `__dirname` constructs before the runtime declaration was promoted.
+
+The first full Node-24 protected-preview browser pass exposed a real sitemap reliability issue: serial pagination over the Current corpus could exceed the existing 15-second browser request budget on a cold candidate runtime. The implementation was fixed rather than weakening the test. Sitemap generation now establishes the exact denominator/page-count snapshot from page 1, fetches the remaining pages with bounded concurrency, retains page-level bounded retry/timeout behavior, validates `page`, `total`, `total_pages` and `has_next` consistency on every page, and verifies the complete page set before flattening.
+
+The exact public sitemap invariant remains **1,231 URLs** = root + Motif Atlas + **356 Current canonical article pages** + **873 Current Core-Included structure pages**. The latest protected-preview Chromium suite passed this route without increasing its request timeout.
+
+The exact PR #26 candidate passed `chromium-production`, `lighthouse-production`, `preview-chromium`, `preview-lighthouse` and trusted Vercel status before merge. The merged production SHA **`b137ad7afcbe89fefecd642283a12ccbb03c975f`** was then accepted by the fail-closed production provenance gate on the first association attempt, deployed successfully, and completed both post-merge production Chromium and Lighthouse QA successfully. The production browser suite explicitly verifies health/version/count contracts, Record 13, query-and-view export retirement, Motif Atlas boundaries, Smart RAG evidence-grain behavior, stable record pages, sitemap cardinality **1,231**, accessibility, responsive behavior and privacy/CSP invariants.
 
 ## Supabase GitHub integration boundary
 
 The production Supabase migration ledger contains **121** valid timestamped entries from `20260807140239` through `20260813085032`. The public repository intentionally contains only a sanitized public-safe migration/contract subset and must never be represented as a complete replayable production history.
 
-An earlier post-merge check demonstrated why GitHub-driven migration deployment is inappropriate for this repository: the Supabase integration compared the public-safe local subset with the longer protected production ledger. The repository was therefore documented and governed so that private migration statements are never copied or faked merely to satisfy that comparison.
+The Supabase GitHub App can therefore emit a non-required external check reporting **`Remote migration versions not found in local migrations directory`** after a public-repository merge. The latest final merge reproduced that external check. This is the expected consequence of protecting private production migration history rather than publishing it; the check is **not** one of the repository's required production status checks, did not alter the production database, and does not indicate a scientific/runtime health failure.
 
-The latest observed post-merge Supabase check completed as **skipped**, reporting that the Git branch was not associated with a Supabase Branch; it did not apply migrations and did not alter production. This observable behavior is aligned with the intended model: GitHub Automatic branching/production migration replay is not an authoritative deployment path for this public repository. Production database changes continue through the separately reviewed curation/deployment workflow, with only public-safe contracts mirrored to GitHub.
+It would be incorrect to make that external check green by creating fake/no-op migrations or copying private production migration statements into the public repository. GitHub-driven Supabase migration replay is not an authoritative deployment path for this public repository. Production database changes continue through the separately reviewed curation/deployment workflow, with only public-safe contracts mirrored to GitHub.
 
-The project-level integration configuration is not exposed as a writable/readable setting by the connected Supabase control surface, so the audit does not invent a dashboard toggle value. The operational invariant is instead enforced and verified at the observable boundary: no public-repository merge may auto-replay private production migration history, and no fake/no-op migrations or private migration statements may be published to make an external check green.
+The project-level GitHub-integration toggle is not exposed as a writable/readable setting by the connected Supabase control surface used in this audit, so no dashboard state is invented and no unsafe workaround is applied. The operational invariant is the enforceable one: no public-repository merge may become an implicit replay source for private production migration history.
 
 ## Archival boundary
 
 `CITATION.cff` and CodeMeta identify Frozen Release **3.0.2 / 2026-08-11**. No permanent repository/Zenodo DOI, creator/ORCID/funder record or blanket top-level license is asserted until the repository owner makes those rights/identity decisions. Machine-readable licensing remains `NOASSERTION` rather than inventing authorization.
 
+The formal GitHub release/tag publication surface and any eventual DOI deposit are archival publication decisions, not runtime scientific facts; they must be created only with owner-authorized metadata and rights decisions.
+
 ## Final gate
 
-The current scientific corpus, Current Curated overlay, Motif Atlas, RAG evidence boundary, production database health, public/private access model, browser/Lighthouse QA and protected-main governance are internally consistent. Future scientific growth should proceed through Current Curated and a later data-expansion release such as 3.1.0; Frozen Release 3.0.2 must remain unchanged.
+Within the controllable scientific and engineering boundary audited here, the Current Curated rev.2 corpus, Frozen 3.0.2 snapshot, Motif Atlas, RAG evidence boundary, production database health, public/private access model, production deployment, runtime module/Node alignment, sitemap reliability, browser/Lighthouse QA and protected-main governance are internally consistent. No known production-blocking scientific or code defect remains.
+
+Future scientific growth should proceed through Current Curated and a later data-expansion release such as 3.1.0; Frozen Release 3.0.2 must remain unchanged.
