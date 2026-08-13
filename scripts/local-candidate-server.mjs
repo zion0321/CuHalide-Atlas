@@ -13,6 +13,7 @@ import sitemapHandler from '../api/sitemap.js';
 const HOST = process.env.CUHALIDE_LOCAL_HOST || '127.0.0.1';
 const PORT = Number(process.env.CUHALIDE_LOCAL_PORT || 4173);
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
+const MAX_LOCAL_BODY_BYTES = 100_000;
 
 const STATIC_FILES = new Map([
   ['/og-image.svg', { file: path.join(PUBLIC_DIR, 'og-image.svg'), type: 'image/svg+xml; charset=utf-8' }],
@@ -31,6 +32,31 @@ function applyPlatformHeaders(res) {
 function rewritten(req, value) {
   req.url = value;
   return req;
+}
+
+async function hydrateRequestBody(req) {
+  if (!['POST', 'PUT', 'PATCH'].includes(req.method || '') || req.body != null) return;
+  const chunks = [];
+  let total = 0;
+  for await (const chunk of req) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    total += buffer.byteLength;
+    if (total > MAX_LOCAL_BODY_BYTES) {
+      const error = new Error('Candidate request body too large');
+      error.statusCode = 413;
+      throw error;
+    }
+    chunks.push(buffer);
+  }
+  if (!chunks.length) return;
+  const raw = Buffer.concat(chunks).toString('utf8');
+  const contentType = String(req.headers['content-type'] || '').toLowerCase();
+  if (contentType.includes('application/json')) {
+    try { req.body = JSON.parse(raw); }
+    catch { req.body = raw; }
+  } else {
+    req.body = raw;
+  }
 }
 
 async function dispatch(req, res) {
@@ -89,14 +115,14 @@ async function dispatch(req, res) {
 }
 
 const server = http.createServer((req, res) => {
-  Promise.resolve(dispatch(req, res)).catch((error) => {
+  Promise.resolve(hydrateRequestBody(req).then(() => dispatch(req, res))).catch((error) => {
     console.error('[local-candidate-server]', error);
     if (!res.headersSent) {
       applyPlatformHeaders(res);
-      res.statusCode = 500;
+      res.statusCode = Number(error?.statusCode) || 500;
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     }
-    if (!res.writableEnded) res.end('Candidate server error');
+    if (!res.writableEnded) res.end(res.statusCode === 413 ? 'Request body too large' : 'Candidate server error');
   });
 });
 

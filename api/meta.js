@@ -1,5 +1,6 @@
 const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-meta-v302-stable';
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
+const META_VERSION = '48.1';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function fetchWithRetry(url, req) {
@@ -11,7 +12,7 @@ async function fetchWithRetry(url, req) {
     try {
       const response = await fetch(url, {
         method: req.method,
-        headers: { accept: req.headers.accept || '*/*', 'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Meta-Proxy/48.0' },
+        headers: { accept: req.headers.accept || '*/*', 'user-agent': req.headers['user-agent'] || `CuHalide-Atlas-Vercel-Meta-Proxy/${META_VERSION}` },
         redirect: 'follow',
         signal: controller.signal,
       });
@@ -55,10 +56,12 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', contentTypeFor(requested, response.headers.get('content-type')));
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', requested === 'health' || requested === 'health.json' ? 'no-store' : (response.headers.get('cache-control') || 'public, max-age=300, s-maxage=3600'));
-    for (const header of ['etag', 'x-cuhalide-release', 'x-cuhalide-site-version', 'x-cuhalide-meta-version', 'x-cuhalide-rag-version']) {
+    for (const header of ['etag', 'x-cuhalide-release', 'x-cuhalide-site-version', 'x-cuhalide-meta-version', 'x-cuhalide-rag-version', 'x-cuhalide-current-curated-revision']) {
       const value = response.headers.get(header);
       if (value) res.setHeader(header, value);
     }
+    if (!res.getHeader('X-CuHalide-Meta-Version')) res.setHeader('X-CuHalide-Meta-Version', META_VERSION);
+    if (!res.getHeader('X-CuHalide-Current-Curated-Revision')) res.setHeader('X-CuHalide-Current-Curated-Revision', '1');
     if (req.method === 'HEAD') return res.end();
     return res.end(await response.text());
   } catch (error) {
@@ -66,6 +69,8 @@ export default async function handler(req, res) {
     res.statusCode = error?.name === 'AbortError' ? 504 : 502;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
-    return res.end(JSON.stringify({ error: error?.name === 'AbortError' ? 'CuHalide Atlas metadata backend timed out.' : 'CuHalide Atlas metadata backend is temporarily unavailable.', release: '3.0.2' }));
+    res.setHeader('X-CuHalide-Meta-Version', META_VERSION);
+    res.setHeader('X-CuHalide-Current-Curated-Revision', '1');
+    return res.end(JSON.stringify({ error: error?.name === 'AbortError' ? 'CuHalide Atlas metadata backend timed out.' : 'CuHalide Atlas metadata backend is temporarily unavailable.', release: '3.0.2', version: META_VERSION }));
   }
 }

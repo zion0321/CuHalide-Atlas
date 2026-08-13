@@ -1,65 +1,83 @@
 # Supabase runtime layout
 
-This directory versions the production-facing Supabase runtime and migrations used by CuHalide Atlas. It is intentionally separated from the immutable frozen scientific archives.
+This directory versions production-facing Supabase runtime contracts used by CuHalide Atlas. It is intentionally separated from immutable frozen scientific archives and from private row-level curation payloads.
 
 ## Current public contracts
 
-The canonical anonymous **read-only wrappers** are versioned here and must match the deployed production entrypoints:
+- `cuhalide-atlas-public-data-v2` — canonical Public Data **2.8.0** wrapper.
+- `cuhalide-atlas-smart-rag` — canonical Smart RAG **9.13.0** wrapper.
+- `cuhalide-atlas-meta` — canonical metadata/health **48.1** wrapper.
+- Frozen scientific base — **Release 3.0.2**.
+- Current Curated — **rev.1**, through **2026-08-12**.
 
-- `functions/cuhalide-atlas-public-data-v2/index.ts` — public data contract **2.7.0**, frozen release **3.0.2**;
-- `functions/cuhalide-atlas-smart-rag/index.ts` — public Smart RAG contract **9.12.0**, frozen release **3.0.2**;
-- `functions/cuhalide-atlas-meta/index.ts` — public health/manifest/citation/robots contract **48.0**, site **v48**, frozen release **3.0.2**.
+The canonical public wrappers contain no write path. Anonymous availability of an Edge wrapper is not equivalent to anonymous database access.
 
-These canonical functions contain no public write path. They proxy to release-specific services and preserve release/version response headers. Anonymous availability is required by the public website; it is not equivalent to anonymous database access.
+## Temporal and data layers
 
-## Public-data trust boundary
+Frozen Release 3.0.2 is immutable and has a June 2026 literature cutoff, inclusive through 2026-06-30.
 
-Release-3.0.2 public projections are:
+Current Curated rev.1 is a separate primary-evidence-reviewed overlay. It adds 16 article records and 43 new structure/phase determinations while preserving all Frozen denominators. The public query contract defaults to Current Curated but accepts an explicit Frozen scope for reproducible release queries.
 
-- `public.cuhalide_atlas_public_articles_v302`
-- `public.cuhalide_atlas_public_structures_v302`
+Literature Watch remains metadata-only and review-gated.
 
-They are private runtime projections, not directly readable public tables.
+## Public-data chain
 
-The public chain is:
+`Vercel /api/public-data`
+→ `cuhalide-atlas-public-data-v2`
+→ `cuhalide-atlas-public-data-v302-public`
+→ `cuhalide-atlas-public-data-v302`
+→ private Frozen/Current projections and service-role-only RPCs.
 
-`Vercel /api/public-data` → `cuhalide-atlas-public-data-v2` → `cuhalide-atlas-public-data-v302-public` → release-specific query service/RPCs.
+Frozen projections remain release-specific. Current projections union the Frozen base with reviewed Current Curated rows while exposing only the established public field whitelist.
 
-The release-specific public wrapper uses the service role only server-side to execute explicitly permitted health/query operations. Security requirements are:
+Security requirements:
 
-- RLS is enabled on protected runtime tables;
-- `anon` and `authenticated` have no direct projection-table SELECT privilege;
-- those roles have no projection-query RPC EXECUTE privilege;
-- public list/search/filter/page requests return only field-whitelisted projections;
-- complete normalized tables, exact publisher abstracts, primary PDF/SI/CIF payloads, field-evidence excerpts/locators, candidate scoring/reasoning and internal QA/adjudication data remain private;
+- protected raw/current tables have RLS enabled;
+- `anon` and `authenticated` have no direct raw/current-table SELECT or write privilege;
+- public browser requests do not execute private projection/RPC objects directly;
+- complete normalized tables, exact abstracts, primary PDF/SI/CIF, field-evidence excerpts/locators and internal candidate/QC data remain private;
 - bulk normalized export remains retired.
 
-The service-role-only `cuhalide_atlas_public_projection_health_v302()` / `cuhalide_atlas_public_health_v302()` contracts check frozen row counts, release-specific checksums, RLS/ACL invariants, Record 13 physical corrections, structure-halogen semantics and Current Curated state.
+## Smart RAG 9.13 chain
 
-## Frozen Release and Current Curated
+`Vercel /api/agent`
+→ `cuhalide-atlas-smart-rag`
+→ `cuhalide-atlas-smart-rag-v302-current-public`
+→ Frozen compatibility path + Current Curated unified retrieval/exact path.
 
-Frozen scientific release **3.0.2** physically incorporates the four confirmed Record 13 dimensionality corrections. Release 3.0.1 remains immutable historical provenance; no runtime overlay is required for those four fields in 3.0.2.
+Current Curated internals:
 
-Current Curated is a separate rolling layer based on 3.0.2. New literature may enter Current Curated only after primary article/SI/CIF review, structure/phase expansion, scientific QC and RAG/index regression. Current Curated revisions must never rewrite the frozen 3.0.2 denominators or archive.
+- `cuhalide-atlas-current-rag-r1-internal` — deterministic temporal/current exact service;
+- `cuhalide-atlas-current-rag-r1-unified-internal` — unified Frozen + Current BGE-M3/lexical/RRF retrieval;
+- `cuhalide_atlas_hybrid_search_current_v1` — service-role-only unified retrieval RPC.
 
-## Smart RAG trust boundary
+Frozen compatibility dependencies remain in service because their evidence-grain-safe behavior is validated and reused only where release compatibility is explicitly checked. Some historical function slugs still contain `canary`; these names are implementation history, not evidence that an endpoint is publicly exposed. Production dependency status must be determined from source and `verify_jwt`, not from the slug alone.
 
-The public Smart RAG wrapper is not the reasoning core. The current release-aware path is:
+## Current Curated private schema
 
-`cuhalide-atlas-smart-rag`
-→ `cuhalide-atlas-smart-rag-v302-public`
-→ `cuhalide-atlas-smart-rag-v302-public-internal`
-→ release-3.0.2 compatibility/core services and the validated v9 retrieval stack where content hashes are release-compatible.
+The repository versions Current Curated schema/RLS/RPC contracts but intentionally does not publish the private promoted 16/43 row payload as a bulk SQL/data dump. Production row payloads remain private curation assets.
 
-Required production dependencies include the v302 RAG contract/core adapter, the evidence-grain-safe v9 core, the exact deterministic service, lexical fallback, candidate search, bounded-claims service and provider-state/rate-limit database contracts. These internal functions are JWT-protected unless a public release-specific wrapper is explicitly required.
+Expected Current health:
 
-The public boundary independently enforces request-size/history limits, structure/article evidence-grain separation, deterministic protected facts, source-constrained scientific interpretation, quota-aware safe fallback and candidate/frozen isolation. Structure-level motif/photophysics are not emitted as independently mapped facts without structure-grain evidence.
+- article audit: 362
+- chemically included: 351
+- canonical verified: 348
+- structure/phase: 921
+- Core-Included: 859
+- resolved SG: 693
+- verified SG: 668
+- verified polar: 97
+- strict polar: 77
+- strict-polar articles: 46
+- RAG documents / embedded: 1,283 / 1,283
 
-A current dependency inventory and retirement classification is maintained in `../docs/SUPABASE_EDGE_FUNCTION_INVENTORY_V48_2026-08-11.md`.
+Expected Frozen guard:
 
-## Release-specific migrations
+346 / 335 / 332 / 878 / 816 / 650 / 625 / 87 / 67 / 42 and 1,224 / 1,224 Frozen RAG documents/embeddings.
 
-Release 3.0.1 migrations remain historical. Release 3.0.2 adds release-specific projections, physical Record 13 corrections, Current Curated state/contracts and RAG compatibility/index contracts. Production DDL must be applied through migrations, use fixed `search_path` for privileged functions where appropriate, preserve least privilege, and be followed by Supabase Security Advisor review.
+## Retirement policy
+
+Temporary indexing, debugging, export and benchmark endpoints must be either removed or retained only as JWT-required HTTP 410 retirement stubs when historical operational compatibility warrants a named endpoint. An `ACTIVE` Supabase function status can therefore represent a safe retirement stub; source inspection is authoritative.
 
 ## Operational validation
 
@@ -67,6 +85,15 @@ Production health:
 
 `https://cuhalide-atlas-v3.vercel.app/health.json`
 
-A passing current health result requires release **3.0.2**, site **v48**, public data **2.7.0**, Smart RAG **9.12.0**, metadata **48.0**, release-specific projection/RAG contracts, Current Curated consistency, Record 13 physical corrections, structure evidence-grain safeguards and hardened public access rules.
+A complete synchronized production state requires:
 
-Provider quota/circuit state is operational and deliberately separate from frozen database integrity. `SAFE_FALLBACK` is acceptable when bounded external-model synthesis is unavailable; it must not disable deterministic scientific rules, evidence retrieval or release contracts.
+- core health PASS;
+- `site_readiness=PASS`;
+- Public Data 2.8.0;
+- Smart RAG 9.13.0;
+- metadata 48.1;
+- Current Curated rev.1 counts above;
+- Frozen 3.0.2 guards above;
+- Record 13 physical corrections;
+- structure evidence-grain safeguards;
+- query-and-view access with no public bulk export.

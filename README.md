@@ -1,159 +1,126 @@
 # CuHalide Atlas
 
-**CuHalide Atlas** is an evidence-grounded, structure-resolved knowledge portal for organic-containing Cu(I) chlorides, bromides and iodides.
+CuHalide Atlas is an evidence-grounded, structure-resolved knowledge portal for organic-containing Cu(I) chloride, bromide and iodide materials.
 
-- Public website: https://cuhalide-atlas-v3.vercel.app/
-- Frozen scientific release: **3.0.2** — 11 August 2026
-- Parent release: **3.0.1** · lineage root **3.0.0**
-- Frozen literature cutoff: **2026-06**
-- Public site / data / Smart RAG / meta: **v48 / 2.7.0 / 9.12.0 / 48.0**
-- Current Curated base: **3.0.2**, live revision **0** at publication
-- Correction history: [`ERRATA.md`](ERRATA.md)
+**Production:** https://cuhalide-atlas-v3.vercel.app/
 
-## Frozen scientific corpus
+## Current production model
 
-| Item | Count |
-|---|---:|
-| Article audit records | 346 |
-| Chemically included articles | 335 |
-| Canonical verified articles | 332 |
-| Structure/phase rows | 878 |
-| Core-included structure/phase rows | 816 |
-| Resolved space-group rows | 650 |
-| Verified one-to-one structure–space-group mappings | 625 |
-| Verified polar rows | 87 |
-| Strict polar rows | 67 |
-| Strict polar articles | 42 |
-| RAG documents / embeddings | 1,224 / 1,224 |
+CuHalide Atlas deliberately separates an immutable citation snapshot from a rolling reviewed layer:
 
-Release **3.0.2** is a narrow scientific hotfix over 3.0.1. It physically incorporates four confirmed Record 13 `Structural Dimensionality` corrections, adds no new literature, and changes none of the frozen scientific denominators above. Historical release 3.0.1 remains immutable.
+- **Frozen Release 3.0.2** — released 2026-08-11; literature cutoff **June 2026, inclusive through 2026-06-30**; immutable.
+- **Current Curated rev.1** — based on 3.0.2; curated through **2026-08-12**; primary-evidence reviewed and QC-gated.
+- **Literature Watch** — metadata-only discovery. Its sync timestamp is operational metadata and is **not** a release cutoff or curation date.
 
-## Frozen Release, Current Curated and Literature Watch
+The website defaults to **Current Curated** for query-and-view exploration while retaining an explicit Frozen Release scope for reproducible citation and denominator checks.
 
-The maintenance model deliberately separates three evidence states:
+## Scientific denominators
 
-1. **Frozen Release** — immutable and citable scientific snapshots such as 3.0.2.
-2. **Current Curated** — primary-evidence-reviewed additions layered on the frozen base after quality control. These may update the live portal without rewriting the frozen release.
-3. **Literature Watch** — metadata-only discovery candidates. Candidate discovery never authorizes a scientific claim or database inclusion.
+| Metric | Frozen 3.0.2 | Current Curated rev.1 |
+|---|---:|---:|
+| Article audit records | 346 | 362 |
+| Chemically included articles | 335 | 351 |
+| Canonical verified articles | 332 | 348 |
+| Structure / phase rows | 878 | 921 |
+| Core-Included structure rows | 816 | 859 |
+| Resolved space-group rows | 650 | 693 |
+| Verified one-to-one SG mappings | 625 | 668 |
+| Verified polar rows | 87 | 97 |
+| Strict-polar rows | 67 | 77 |
+| Strict-polar articles | 42 | 46 |
+| RAG documents / embeddings | 1,224 / 1,224 | 1,283 / 1,283 |
 
-The private curation state machine is:
+Current Curated rev.1 adds **16 reviewed articles** and **43 independent structure/phase determinations**. Fourteen articles are coverage backfills dated on or before 2026-06-30; two are post-cutoff additions. Four additional provenance links connect new articles to already known chemical/phase identities without duplicating those identities.
 
-`DISCOVERED → DEDUPED → TRIAGED → NOTIFIED → PRIMARY_EVIDENCE_RECEIVED → EXTRACTED → QC_PASSED → LIVE_CURATED → FORMAL_RELEASE`
+Frozen Release 3.0.2 denominators are not changed by Current Curated.
 
-with explicit `REJECTED` and `BLOCKED` states. Main article, SI and CIF evidence are requested as appropriate before promotion. DOI normalization/deduplication, chemical-scope adjudication, structure/phase expansion, crystallographic mapping, evidence-grain checks, RAG indexing and production regression must all pass before a candidate becomes Current Curated.
+## Production versions
 
-The publication-growth visualization uses the natural-year label **2026**. The frozen literature cutoff remains separately reported as **2026-06**; later primary-evidence-reviewed additions can increase the 2026 bar through Current Curated without falsifying the frozen-release cutoff.
+- Frozen scientific release: **3.0.2**
+- Public site: **v48**
+- Public Data: **2.8.0**
+- Smart RAG: **9.13.0**
+- Metadata / health: **48.1**
+- Current Curated: **rev.1**, through **2026-08-12**
 
-## Public/private access model
+## Public/private boundary
 
-The website is a **query-and-view scientific interface**, not a bulk redistribution endpoint. Public access is limited to selected bibliographic, structural, crystallographic and article-grain scientific fields; strict-polar queries; source-linked Smart RAG; metadata-only Literature Watch; methods; citation metadata; release identity; correction history; and aggregate Current Curated status.
+Public access is **query-and-view**, not bulk redistribution.
 
-The private research layer retains the complete normalized corpus, exact stored publisher abstracts, primary PDFs/SI/CIF payloads, field-evidence excerpts and locators, internal QA/adjudication artifacts, curation-queue internals, and candidate abstracts/scores/reason codes. The legacy bulk `/api/export` route remains retired.
+Public interfaces expose selected bibliographic, structure, crystallographic, scope and evidence-status fields through server-side field-whitelisted queries and stable record pages. Smart RAG uses source-linked public records and deterministic scientific boundaries.
 
-## Public query architecture
+The following remain private research assets:
 
-Public data **2.7.0** uses release-specific, field-whitelisted projections derived from the immutable 3.0.2 snapshot:
+- complete normalized tables and raw payloads;
+- exact stored publisher abstracts;
+- primary PDF, SI and CIF archives;
+- field-evidence excerpts and locators;
+- candidate relevance scores, reason codes and source payloads;
+- internal QA, adjudication and curation artifacts.
 
-- `cuhalide_atlas_public_articles_v302`
-- `cuhalide_atlas_public_structures_v302`
+`/api/export` intentionally returns **HTTP 410 Gone**.
 
-Filtering, counting, sorting and pagination are server-side. Direct projection-table reads and projection-query RPC execution are disabled for `anon` and `authenticated`; the public read-only Edge Function returns only the public contract. Service-role-only contracts verify counts, projection checksums, RLS/ACL invariants, bootstrap denominators, structure-halogen semantics, Record 13 corrections and RAG-index compatibility.
+## Smart RAG 9.13
 
-The live portal is rendered from a version-controlled static scientific-interface shell by `api/site.js`; the renderer applies the release-3.0.2/v48 presentation contract and recomputes CSP hashes from the final HTML before serving the root page. The underlying historical shell is therefore not itself treated as the authoritative release identity.
+Smart RAG 9.13.0 combines:
 
-## Structure-grain evidence boundary
+1. the validated Frozen Release 3.0.2 evidence path;
+2. a Current Curated rev.1 exact/retrieval layer;
+3. unified BGE-M3 + lexical/RRF retrieval across **1,283** embedded documents;
+4. deterministic answers for protected counts, temporal scope and reviewed current records;
+5. structure-grain evidence guards preventing article-level photophysics or unmapped motif claims from being silently reassigned to an individual structure/phase;
+6. source-constrained interpretation and safe fallback when optional model capacity is unavailable.
 
-Structure identity is resolved conservatively. `Cu(I)` oxidation-state notation is not treated as iodide; compact `Cu2I4` and bridging `μ2-I` notation are recognized; ligand-bound halogens do not by themselves redefine the Cu–halide identity; variable-X/series labels are not falsely promoted to phase-specific assignments; and short scientific tokens use token-aware search.
+Model output cannot override frozen/current denominators, human scope decisions, crystallographic mappings or evidence-grain boundaries.
 
-Article-level photophysics and unmapped motif text are not assigned to a structure/phase row. Public structure search/detail, bounded-claims context, explicit structure-ID boundaries, physical RAG documents and generic output guards all enforce this separation.
+## Record 13
 
-All **878** structure RAG documents are identity/crystallography-only and carry valid 1024-dimensional BGE-M3 embeddings. The complete 3.0.2 RAG index is **1,224/1,224 embedded documents**: 346 article-grain documents plus 878 structure documents. Release-transition integrity checks found:
+Frozen Release 3.0.2 physically incorporates the confirmed dimensionality corrections:
 
-- article content-SHA mismatches versus 3.0.1: **0**;
-- unchanged structure content-SHA mismatches versus 3.0.1: **0**;
-- intentionally changed Record 13 structure documents: **4**;
-- forbidden structure `llm_context` science keys: **0**;
-- copied article/motif/emission fields in structure documents: **0**.
+- `CUH-013-S01` → **Unresolved**
+- `CUH-013-S02` → **0D**
+- `CUH-013-S03` → **0D**
+- `CUH-013-S04` → **0D**
 
-## Record 13 correction history
+Historical 3.0.1 errata remain audit history only.
 
-Release 3.0.2 physically stores:
+## Production governance
 
-- `CUH-013-S01` / pip6Cu10I16 → **Unresolved**;
-- `CUH-013-S02` / pyr4Cu4Br8 → **0D**;
-- `CUH-013-S03` / pyr4Cu4I8 → **0D**;
-- `CUH-013-S04` / pyrCu2Br3 → **0D**.
+`main` is protected by the active repository ruleset **Protect main production**. It requires:
 
-The four 3.0.1 errata are retained as historical audit metadata, marked resolved/superseded by 3.0.2. They no longer require a current-release display overlay and change no article, structure, space-group, verified, polar or strict-polar denominator.
+- pull-request merge into the default branch;
+- branch up-to-date before merge;
+- resolved review conversations;
+- successful `chromium-production`;
+- successful `lighthouse-production`;
+- successful `preview-chromium`;
+- successful `preview-lighthouse`;
+- successful trusted `Vercel` status;
+- no force push;
+- no branch deletion;
+- no bypass actors.
 
-## Smart RAG
+A second, fail-closed Vercel production provenance gate independently verifies that a production SHA is the merge result of a reviewed PR whose candidate and production-baseline checks passed.
 
-Public Smart RAG **9.12.0** separates deterministic database truth from bounded model interpretation. Exact counts, protected record fields, scope decisions, correction-state facts and key scientific boundaries are deterministic. Retrieval uses structured/lexical plus semantic ranking with BGE-M3 and BGE reranking when free provider capacity is available. Model interpretation is accepted only through source-constrained claim validation. Live Monitor candidate metadata remains outside model-supported frozen scientific claims, and provider degradation enters a safe fallback mode instead of fabricating synthesis.
+## Citation
 
-### Release-3.0.2 validation
+For frozen, reproducible claims, cite **CuHalide Atlas Frozen Release 3.0.2 (11 August 2026)** and the relevant primary literature.
 
-Fresh **`rag-benchmark-v1.6`** passed **70/70** on release 3.0.2:
+For rolling **Current Curated** results, also report the **access date and live revision**. Literature Watch candidates are not curated evidence and should not be cited as Atlas scientific records until promoted through primary-evidence review and QC.
 
-- exact/deterministic: **25/25**;
-- retrieval: **25/25**;
-- reasoning/scientific-boundary: **20/20**.
+Permanent repository DOI and blanket project licensing are not asserted until owner-authorized archival metadata and rights decisions are complete.
 
-Run ID: `04bd93ec-cc3a-424b-9d8d-a1b08cec58ff`. Paid Workers AI overage was not authorized. The v1.6 case set preserves historical v1.5 rather than editing it in place. Literal release labels were rebased to 3.0.2; frozen scientific fact/count targets were unchanged. RS08 intentionally treats candidate/frozen separation as deterministic because Literature Watch metadata is not scientific evidence for frozen claims.
+## Repository layout
 
-See [`docs/RAG_BENCHMARK_V16_2026-08-11.md`](docs/RAG_BENCHMARK_V16_2026-08-11.md) and [`docs/PRODUCTION_STATUS_V48_2026-08-11.md`](docs/PRODUCTION_STATUS_V48_2026-08-11.md).
+- `api/` — Vercel read-only public handlers and stable record/sitemap rendering.
+- `public/` — version-controlled interface template and social asset.
+- `tests/` — browser/scientific/privacy/accessibility and deployment-gate regression tests.
+- `.github/workflows/` — production baseline, protected-preview candidate and Lighthouse gates.
+- `supabase/functions/` — versioned production-facing Supabase runtime sources.
+- `supabase/migrations/` — executable schema/RPC/access-control migrations that may be applied by Supabase tooling.
+- `supabase/contracts/` — row-data-free consolidated mirrors of already-applied production contracts for audit/recovery; these are not auto-run migrations.
+- `docs/` — release, curation, security, RAG and production audit records.
 
-## Final production hardening and reproducible operations
+Private Current Curated promoted rows are intentionally not published as a bulk SQL/data dump.
 
-The v48 production hardening pass closes deployment and long-term maintenance gaps separately from the frozen scientific corpus:
-
-- canonical GitHub Supabase sources match the deployed **3.0.2 / 2.7.0 / 9.12.0 / 48.0** public runtime, and the release-specific v302 compatibility services plus required validated internal RAG dependencies are versioned for disaster recovery;
-- QA dependencies are locked by `package-lock.json`, and both browser and Lighthouse workflows install with `npm ci`;
-- a scheduled Lighthouse gate covers mobile/desktop performance, accessibility, best practices, SEO, LCP and CLS in addition to the Playwright/Axe scientific browser gate;
-- stable crawlable record URLs are defined as `/article/<record_id>` and `/structure/<structure_id>`, with canonical metadata, schema.org JSON-LD and a release-aware dynamic sitemap;
-- the retired `/api/export` route remains **410 Gone** and carries the current frozen release identity;
-- the article halogen filter explicitly distinguishes single-halogen containment semantics from exact mixed-halogen categories;
-- the daily machine discovery monitor is JWT-gated plus a separate private cron-token factor, uses a 30-day rolling lookback and multiple Crossref/OpenAlex query families, and writes only to the metadata candidate queue;
-- obsolete debug, temporary, ephemeral and bulk-export Edge Functions have been neutralized as JWT-required `410 Gone` stubs; required runtime dependencies are enumerated in [`docs/SUPABASE_EDGE_FUNCTION_INVENTORY_V48_2026-08-11.md`](docs/SUPABASE_EDGE_FUNCTION_INVENTORY_V48_2026-08-11.md);
-- health and browser regression allow future **Current Curated revision > 0** while keeping frozen 3.0.2 counts independently fixed.
-
-The public portal therefore has two distinct notions of freshness: immutable frozen-release provenance and a separately tracked rolling Current Curated layer. New metadata candidates never cross that boundary automatically.
-
-## Browser-level production QA
-
-A repository-retained **read-only Playwright/Chromium production gate** passed against the live release-3.0.2/v48 portal across desktop, tablet and mobile configurations. The release-specific gate validates public routes, health/manifest/RAG/public-data contracts, Current Curated presentation, Record 13 physical corrections, scientific denominators, structure-halogen semantics, serious/critical accessibility findings, page/console errors, horizontal overflow, responsive navigation, modal keyboard behavior, hash deep links, CSP hardening and retired routes.
-
-A separate production **Lighthouse gate** runs against desktop and mobile profiles with pinned dependencies. It enforces explicit thresholds for performance, accessibility, best practices and SEO, plus LCP and CLS regression limits. Both QA workflows use the committed lockfile and `npm ci`.
-
-This automated coverage is substantial but is not a claim of exhaustive Safari/Firefox or manual pixel-perfect certification.
-
-## Current production checks
-
-At publication/finalization:
-
-- `/health.json`: **HTTP 200 / PASS**;
-- frozen release: **3.0.2**;
-- public site: **v48**;
-- public data: **2.7.0**;
-- public Smart RAG: **9.12.0 / FULL** at the checked state;
-- public meta/health: **48.0**;
-- Current Curated: **base 3.0.2 / revision 0 / ready**;
-- Supabase security advisor: **0 findings**;
-- temporary benchmark/re-embedding/debug endpoints: retired or removed;
-- real Chromium production gate: **PASS**.
-
-## Scientific boundaries
-
-1. Missing or unresolved values are never inferred from analogous compounds.
-2. Non-centrosymmetric does not automatically mean polar.
-3. Polar crystallography does not establish ferroelectricity.
-4. Candidate metadata does not authorize release inclusion.
-5. Retrieval absence is not evidence of literature absence.
-6. Model output cannot override frozen fields, deterministic counts or evidence boundaries.
-7. Same-article or same-record coexistence is not automatically same-phase causality.
-8. Current Curated promotion requires primary-evidence review and QC; it is not an LLM-autonomous write path.
-
-## Citation and rights
-
-> CuHalide Atlas. Release 3.0.2 (11 August 2026). https://cuhalide-atlas-v3.vercel.app/
-
-See [`CITATION.cff`](CITATION.cff), [`ERRATA.md`](ERRATA.md), [`LICENSE_STATUS.md`](LICENSE_STATUS.md), [`SECURITY.md`](SECURITY.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md). A permanent repository DOI has not yet been minted. No blanket permission is asserted for copyrighted third-party article content, and primary article/SI/CIF files are not redistributed through the public website.
+See `docs/CURRENT_CURATED_R1_2026-08-12.md` and `docs/PRODUCTION_STATUS_V48_CURRENT_R1_2026-08-13.md` for the current rolling-state audit.

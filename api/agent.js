@@ -1,7 +1,8 @@
 import crypto from 'node:crypto';
 
-const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-smart-rag-v302-public';
+const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-smart-rag-v302-current-public';
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
+const RAG_VERSION = '9.13.0';
 const MAX_BODY_BYTES = 20_000;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -14,7 +15,7 @@ function requestBody(req) {
 function clientFingerprint(req) {
   const ip = String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '').split(',')[0].trim().slice(0, 96);
   const ua = String(req.headers['user-agent'] || '').slice(0, 240);
-  return crypto.createHash('sha256').update(`cuhalide-v48|${ip}|${ua}`).digest('hex');
+  return crypto.createHash('sha256').update(`cuhalide-v48-current-r1|${ip}|${ua}`).digest('hex');
 }
 
 function bodyContract(body) {
@@ -33,12 +34,12 @@ function bodyContract(body) {
 async function upstreamRequest(req, upstream) {
   const headers = {
     accept: req.headers.accept || 'application/json',
-    'user-agent': 'CuHalide-Atlas-Vercel-Agent-Proxy/9.12.0',
+    'user-agent': `CuHalide-Atlas-Vercel-Agent-Proxy/${RAG_VERSION}`,
     'x-cuhalide-client': clientFingerprint(req),
   };
   if (req.method === 'POST') headers['content-type'] = req.headers['content-type'] || 'application/json';
   const attempts = req.method === 'POST' ? 1 : 2;
-  const timeoutMs = req.method === 'POST' ? 120000 : 20000;
+  const timeoutMs = req.method === 'POST' ? 120000 : 30000;
   let lastError;
   let lastResult;
   for (let attempt = 0; attempt < attempts; attempt += 1) {
@@ -78,7 +79,7 @@ export default async function handler(req, res) {
       res.statusCode = 413;
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.setHeader('Cache-Control', 'no-store');
-      return res.end(JSON.stringify({ error: contract.error, release: '3.0.2' }));
+      return res.end(JSON.stringify({ error: contract.error, release: '3.0.2', version: RAG_VERSION }));
     }
   }
   try {
@@ -90,10 +91,12 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json; charset=utf-8');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'no-store');
-    for (const header of ['x-cuhalide-release', 'x-cuhalide-rag-version']) {
+    for (const header of ['x-cuhalide-release', 'x-cuhalide-rag-version', 'x-cuhalide-current-curated-revision']) {
       const value = response.headers.get(header);
       if (value) res.setHeader(header, value);
     }
+    if (!res.getHeader('X-CuHalide-RAG-Version')) res.setHeader('X-CuHalide-RAG-Version', RAG_VERSION);
+    if (!res.getHeader('X-CuHalide-Current-Curated-Revision')) res.setHeader('X-CuHalide-Current-Curated-Revision', '1');
     if (req.method === 'HEAD') return res.end();
     return res.end(body);
   } catch (error) {
@@ -101,6 +104,8 @@ export default async function handler(req, res) {
     res.statusCode = error?.name === 'AbortError' ? 504 : 502;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
-    return res.end(JSON.stringify({ error: error?.name === 'AbortError' ? 'CuHalide Atlas Smart RAG backend timed out.' : 'CuHalide Atlas Smart RAG backend is temporarily unavailable.', release: '3.0.2' }));
+    res.setHeader('X-CuHalide-RAG-Version', RAG_VERSION);
+    res.setHeader('X-CuHalide-Current-Curated-Revision', '1');
+    return res.end(JSON.stringify({ error: error?.name === 'AbortError' ? 'CuHalide Atlas Smart RAG backend timed out.' : 'CuHalide Atlas Smart RAG backend is temporarily unavailable.', release: '3.0.2', version: RAG_VERSION }));
   }
 }

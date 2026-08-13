@@ -44,11 +44,11 @@ jobs:
       - name: Install Chromium and system dependencies
         run: npx playwright install --with-deps chromium
 
-      - name: Run pre-merge production browser baseline
+      - name: Run pre-merge production scientific baseline
         if: github.event_name == 'pull_request'
         run: >-
-          npm run qa:browser -- --grep-invert
-          "production identity, CSP, manifest, Current Curated and retired routes are exact|Current Curated, year display, data loading, modal focus, deep links and responsive navigation work"
+          npm run qa:browser -- --grep
+          "Current Curated default and Frozen scope denominators are independently exact|Record 13 remains frozen-correct"
 
       - name: Run full post-merge production browser QA
         if: github.event_name != 'pull_request'
