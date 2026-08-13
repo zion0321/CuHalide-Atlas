@@ -10,6 +10,13 @@ const expectIncludes = (text, values, label) => {
   }
 };
 
+test('runtime module and Node major are explicit', () => {
+  const pkg = JSON.parse(read('package.json'));
+  assert.equal(pkg.type, 'module');
+  assert.equal(pkg.engines?.node, '22.x');
+  assert.equal(pkg.private, true);
+});
+
 test('machine-readable frozen release identity is synchronized', () => {
   const codemeta = JSON.parse(read('codemeta.json'));
   assert.equal(codemeta.version, '3.0.2');
