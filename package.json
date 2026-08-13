@@ -2,6 +2,7 @@
   "name": "cuhalide-atlas-production-qa",
   "version": "1.2.0",
   "private": true,
+  "type": "module",
   "description": "Production browser, accessibility, performance, repository-contract and SEO quality gates for CuHalide Atlas.",
   "scripts": {
     "qa:browser": "playwright test tests/production-browser-v48-r2.spec.js",

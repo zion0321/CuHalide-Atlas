@@ -10,6 +10,21 @@ const expectIncludes = (text, values, label) => {
   }
 };
 
+test('runtime module type and QA Node major are explicit and aligned', () => {
+  const pkg = JSON.parse(read('package.json'));
+  assert.equal(pkg.type, 'module');
+  assert.equal(pkg.private, true);
+  assert.equal(pkg.engines, undefined, 'package must not override the Vercel project Node major');
+
+  const browser = read('.github/workflows/production-browser-qa.yml');
+  const lighthouse = read('.github/workflows/production-lighthouse-qa.yml');
+  const preview = read('.github/workflows/vercel-preview-qa.yml');
+  expectIncludes(browser, ["node-version: '24'"], 'production browser workflow');
+  expectIncludes(lighthouse, ["node-version: '24'"], 'production Lighthouse workflow');
+  const previewMatches = preview.match(/node-version: '24'/g) || [];
+  assert.equal(previewMatches.length, 2, 'both protected-preview jobs must use Node 24');
+});
+
 test('machine-readable frozen release identity is synchronized', () => {
   const codemeta = JSON.parse(read('codemeta.json'));
   assert.equal(codemeta.version, '3.0.2');
