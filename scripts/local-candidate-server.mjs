@@ -18,6 +18,7 @@ const MAX_LOCAL_BODY_BYTES = 100_000;
 
 const STATIC_FILES = new Map([
   ['/og-image.svg', { file: path.join(PUBLIC_DIR, 'og-image.svg'), type: 'image/svg+xml; charset=utf-8' }],
+  ['/favicon.svg', { file: path.join(PUBLIC_DIR, 'favicon.svg'), type: 'image/svg+xml; charset=utf-8' }],
   ['/ui-v48-2.css', { file: path.join(PUBLIC_DIR, 'ui-v48-2.css'), type: 'text/css; charset=utf-8' }],
   ['/ui-v48-2.js', { file: path.join(PUBLIC_DIR, 'ui-v48-2.js'), type: 'text/javascript; charset=utf-8' }],
 ]);
