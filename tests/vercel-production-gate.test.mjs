@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   REQUIRED_CHECKS,
   evaluateProductionGate,
-  findMergedMainPullRequestWithRetry,
+  findMergedMainPullRequestWithFallback,
   latestCommitStatuses,
   latestGithubActionsChecks,
   selectMergedMainPullRequest,
@@ -88,16 +88,21 @@ test('production commit must be the exact merge result of a merged PR into main'
   assert.equal(selectMergedMainPullRequest([mergedPr()], MERGE_SHA)?.number, 16);
 });
 
-test('merge association retries boundedly until GitHub exposes the merged PR', async () => {
-  let fetchCalls = 0;
+test('recent closed-main PR records recover provenance when commit association lags', async () => {
+  let associatedCalls = 0;
+  let recentCalls = 0;
   let sleepCalls = 0;
-  const result = await findMergedMainPullRequestWithRetry({
+  const result = await findMergedMainPullRequestWithFallback({
     commitSha: MERGE_SHA,
     attempts: 4,
     delayMs: 0,
-    fetchPulls: async () => {
-      fetchCalls += 1;
-      return fetchCalls < 3 ? [] : [mergedPr()];
+    fetchAssociatedPulls: async () => {
+      associatedCalls += 1;
+      return [];
+    },
+    fetchRecentClosedPulls: async () => {
+      recentCalls += 1;
+      return [mergedPr()];
     },
     sleepFn: async () => {
       sleepCalls += 1;
@@ -105,20 +110,71 @@ test('merge association retries boundedly until GitHub exposes the merged PR', a
   });
 
   assert.equal(result.pullRequest?.number, 16);
-  assert.equal(result.attempt, 3);
-  assert.equal(fetchCalls, 3);
-  assert.equal(sleepCalls, 2);
+  assert.equal(result.source, 'recent-closed-main-pulls');
+  assert.equal(result.attempt, 1);
+  assert.equal(associatedCalls, 1);
+  assert.equal(recentCalls, 1);
+  assert.equal(sleepCalls, 0);
 });
 
-test('merge association retry remains fail-closed after the bounded window', async () => {
-  let fetchCalls = 0;
+test('commit association remains preferred when it is available', async () => {
+  let recentCalls = 0;
+  const result = await findMergedMainPullRequestWithFallback({
+    commitSha: MERGE_SHA,
+    attempts: 2,
+    delayMs: 0,
+    fetchAssociatedPulls: async () => [mergedPr()],
+    fetchRecentClosedPulls: async () => {
+      recentCalls += 1;
+      return [mergedPr()];
+    },
+    sleepFn: async () => {},
+  });
+
+  assert.equal(result.pullRequest?.number, 16);
+  assert.equal(result.source, 'commit-association');
+  assert.equal(result.attempt, 1);
+  assert.equal(recentCalls, 0);
+});
+
+test('fallback cannot accept unmerged, wrong-base or wrong-SHA PR records', async () => {
+  let calls = 0;
+  const result = await findMergedMainPullRequestWithFallback({
+    commitSha: MERGE_SHA,
+    attempts: 2,
+    delayMs: 0,
+    fetchAssociatedPulls: async () => [],
+    fetchRecentClosedPulls: async () => {
+      calls += 1;
+      return [
+        mergedPr({ merged_at: null }),
+        mergedPr({ base: { ref: 'other' } }),
+        mergedPr({ merge_commit_sha: 'cccccccccccccccccccccccccccccccccccccccc' }),
+      ];
+    },
+    sleepFn: async () => {},
+  });
+
+  assert.equal(result.pullRequest, null);
+  assert.equal(result.source, 'none');
+  assert.equal(result.attempt, 2);
+  assert.equal(calls, 2);
+});
+
+test('dual-source provenance lookup remains fail-closed after bounded retries', async () => {
+  let associatedCalls = 0;
+  let recentCalls = 0;
   let sleepCalls = 0;
-  const result = await findMergedMainPullRequestWithRetry({
+  const result = await findMergedMainPullRequestWithFallback({
     commitSha: MERGE_SHA,
     attempts: 3,
     delayMs: 0,
-    fetchPulls: async () => {
-      fetchCalls += 1;
+    fetchAssociatedPulls: async () => {
+      associatedCalls += 1;
+      return [];
+    },
+    fetchRecentClosedPulls: async () => {
+      recentCalls += 1;
       return [];
     },
     sleepFn: async () => {
@@ -128,7 +184,8 @@ test('merge association retry remains fail-closed after the bounded window', asy
 
   assert.equal(result.pullRequest, null);
   assert.equal(result.attempt, 3);
-  assert.equal(fetchCalls, 3);
+  assert.equal(associatedCalls, 3);
+  assert.equal(recentCalls, 3);
   assert.equal(sleepCalls, 2);
 });
 

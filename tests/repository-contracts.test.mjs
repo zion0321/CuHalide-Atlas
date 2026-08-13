@@ -58,7 +58,7 @@ test('Record 13 erratum is resolved by 3.0.2, not described as a future hotfix',
   assert.ok(!errata.includes('views, downloads'), 'ERRATA.md must not advertise a retired download surface');
 });
 
-test('production governance reflects the active protected-main model', () => {
+test('production governance reflects the active protected-main and no-auto-replay model', () => {
   const governance = read('docs/PRODUCTION_GOVERNANCE_V48_2026-08-12.md');
   expectIncludes(governance, [
     '`Protect main production`',
@@ -67,9 +67,12 @@ test('production governance reflects the active protected-main model', () => {
     '`preview-chromium`',
     '`preview-lighthouse`',
     'no bypass actors',
-    'Supabase **Deploy to production**',
+    'GitHub production migration replay is not an authoritative deployment path',
+    'fake/no-op timestamp migrations must never be created',
+    'dual-source merged-PR provenance verification',
   ], 'production governance');
   assert.ok(!governance.includes('GitHub currently reports `main` as unprotected'), 'obsolete unprotected-main statement must not return');
+  assert.ok(!governance.includes('Supabase **Deploy to production**'), 'governance must not assert an unreadable dashboard-toggle state');
 });
 
 test('public Supabase migration history remains explicitly non-replayable', () => {
