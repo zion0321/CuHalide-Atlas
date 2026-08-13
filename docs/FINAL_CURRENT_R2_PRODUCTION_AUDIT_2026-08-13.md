@@ -121,7 +121,7 @@ Public unauthenticated Edge wrappers are limited to read-only/query-only public 
 
 The active default-branch ruleset `Protect main production` requires PR provenance, resolved review threads, strict required checks, the four Chromium/Lighthouse production/candidate checks, trusted Vercel status, no force push, no branch deletion and no bypass actor.
 
-PR #21 published Current Curated rev.2 and Motif Atlas after the required candidate/production gates. PR #22 synchronized Supabase governance documentation. PR #23 completed repository identity/policy cleanup and added required repository-contract regression tests to `chromium-production`; its exact candidate passed `chromium-production`, `lighthouse-production`, `preview-chromium`, `preview-lighthouse` and trusted Vercel status before merge.
+PR #21 published Current Curated rev.2 and Motif Atlas after the required candidate/production gates. PR #22 synchronized Supabase governance documentation. PR #23 completed repository identity/policy cleanup and added required repository-contract regression tests to `chromium-production`; its exact candidate passed `chromium-production`, `lighthouse-production`, `preview-chromium`, `preview-lighthouse` and trusted Vercel status before merge, and both post-merge production Chromium and Lighthouse suites subsequently passed.
 
 A Vercel build-log audit of the PR #23 merge exposed one operational race: Vercel started its Ignored Build Step immediately after merge, before GitHub's `commit -> pull request` association endpoint exposed the already-merged PR, so the fail-closed gate safely skipped that deployment with `commit is not the merge result of a merged PR into main`. The existing rev.2 production deployment remained serving and post-merge browser/Lighthouse validation was independent of that skip.
 
@@ -129,18 +129,13 @@ The production gate is therefore hardened to retry **only** that eventually-cons
 
 ## Supabase GitHub integration boundary
 
-The production Supabase migration ledger contains **121** valid timestamped entries from `20260807140239` through `20260813085032`. The public repository intentionally contains only a sanitized public-safe migration/contract subset.
+The production Supabase migration ledger contains **121** valid timestamped entries from `20260807140239` through `20260813085032`. The public repository intentionally contains only a sanitized public-safe migration/contract subset and must never be represented as a complete replayable production history.
 
-Automatic PR branching is disabled. A post-merge audit showed the Supabase GitHub App still attempted its **Deploy to production** workflow and rejected the public-safe repository because remote migration versions are intentionally absent locally. This did not change the production database, but it is an unnecessary red external check.
+An earlier post-merge check demonstrated why GitHub-driven migration deployment is inappropriate for this repository: the Supabase integration compared the public-safe local subset with the longer protected production ledger. The repository was therefore documented and governed so that private migration statements are never copied or faked merely to satisfy that comparison.
 
-The correct platform state is therefore:
+The latest PR #23 post-merge Supabase check completed as **skipped**, reporting that the Git branch is not associated with a Supabase Branch; it did not apply migrations and did not alter production. This observable behavior is aligned with the intended model: GitHub Automatic branching/production migration replay is not an authoritative deployment path for this public repository. Production database changes continue through the separately reviewed curation/deployment workflow, with only public-safe contracts mirrored to GitHub.
 
-- keep **Automatic branching** disabled;
-- disable **Deploy to production** for this public repository in the Supabase project GitHub integration;
-- continue applying reviewed production DB changes through the controlled curation/deployment workflow and mirror only public-safe contracts to GitHub;
-- never create fake/no-op timestamp migrations or publish private migration statements to make the integration check green.
-
-This setting is a Supabase project-level integration toggle rather than a database DDL/runtime contract. Once that toggle is off, the public repository and production migration-governance model are fully aligned.
+The project-level integration configuration is not exposed as a writable/readable setting by the connected Supabase control surface, so the audit does not invent a dashboard toggle value. The operational invariant is instead enforced and verified at the observable boundary: no public-repository merge may auto-replay private production migration history, and no fake/no-op migrations or private migration statements may be published to make an external check green.
 
 ## Archival boundary
 
