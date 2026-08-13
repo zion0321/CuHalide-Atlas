@@ -2,7 +2,7 @@
 
 ## Release 3.0.1 — Record 13 structure dimensionality
 
-**Status:** confirmed; corrected in the public display/query/download layer; immutable 3.0.1 archive retained; formal scientific hotfix planned for **3.0.2**.
+**Status:** resolved and superseded by **Frozen Release 3.0.2**. The immutable 3.0.1 historical state is retained for reproducibility; 3.0.2 physically incorporates the four confirmed corrections.
 
 **Article:** Record 13, DOI `10.1016/j.matlit.2026.100010`  
 **Field:** `Structural Dimensionality`  
@@ -10,7 +10,7 @@
 
 A post-publication QA pass identified a positional mapping error created when the article-level, semicolon-separated dimensionality statement was split across four structure-grain rows.
 
-| Structure ID | Compound | Archived 3.0.1 value | Effective value |
+| Structure ID | Compound | Archived 3.0.1 value | Correct value in 3.0.2 |
 |---|---|---|---|
 | CUH-013-S01 | pip6Cu10I16 | `0D (pyrCu2Br3` | **Unresolved** |
 | CUH-013-S02 | pyr4Cu4Br8 | `pyr4Cu4I8)` | **0D** |
@@ -21,10 +21,10 @@ The article-level evidence states that pyrCu2Br3, pyr4Cu4Br8 and pyr4Cu4I8 are 0
 
 ### Scientific impact
 
-This erratum does **not** change:
+The correction does **not** change:
 
 - article counts;
-- the 878 structure/phase-row denominator;
+- the 878 structure/phase-row Frozen denominator;
 - resolved or verified space-group counts;
 - polar or strict-polar subsets;
 - canonical article denominators;
@@ -32,15 +32,8 @@ This erratum does **not** change:
 
 ### Reproducibility policy
 
-The archived `v3.0.1` ZIP and its SHA-256 are intentionally unchanged. Public structure APIs preserve `Structural Dimensionality` as the archived value and additionally expose:
+Release 3.0.1 is not rewritten in place. Its historical values remain audit history. Frozen Release 3.0.2 contains the corrected structure-grain values directly, and its release-specific RAG documents use those corrected values without a current-release erratum overlay.
 
-- `Structural Dimensionality (Effective)`;
-- `Structural Dimension Class (Effective)`;
-- `Known Release Erratum?`;
-- `Release Erratum Key`;
-- `Release Erratum Status`;
-- `Release Erratum Note`.
+The public portal is query-and-view. Website tables, filters, stable record pages and Smart RAG use the 3.0.2 correction when Frozen Release scope is requested. Bulk normalized release exports and private primary-evidence/curation assets are not publicly distributed.
 
-Website tables, filters, detail views, downloads and Smart RAG use the effective correction where applicable. A later scientific hotfix will regenerate corrected frozen snapshots rather than rewriting release 3.0.1 in place.
-
-Public health/errata metadata: `https://cuhalide-atlas-v3.vercel.app/api/meta?action=health`
+Public health metadata: `https://cuhalide-atlas-v3.vercel.app/api/meta?action=health`

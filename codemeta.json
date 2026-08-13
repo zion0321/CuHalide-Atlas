@@ -2,12 +2,12 @@
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
   "name": "CuHalide Atlas",
-  "version": "3.0.1",
-  "datePublished": "2026-08-10",
+  "version": "3.0.2",
+  "datePublished": "2026-08-11",
   "codeRepository": "https://github.com/zion0321/CuHalide-Atlas",
   "url": "https://cuhalide-atlas-v3.vercel.app/",
   "applicationCategory": "Scientific database and evidence-grounded retrieval system",
-  "description": "Evidence-first, structure-resolved Cu(I) chloride, bromide and iodide literature database with versioned RAG evaluation, coverage screening and audit artifacts.",
+  "description": "Evidence-grounded, structure-resolved Cu(I) chloride, bromide and iodide knowledge portal. Frozen Release 3.0.2 is immutable; a separately identified Current Curated layer advances only after primary-evidence review and QC. Public access is query-and-view and bulk normalized exports remain non-public.",
   "programmingLanguage": [
     "TypeScript",
     "JavaScript",
@@ -17,7 +17,7 @@
   "developmentStatus": "active",
   "isPartOf": {
     "@type": "Dataset",
-    "name": "CuHalide Atlas release 3.0.1"
+    "name": "CuHalide Atlas Frozen Release 3.0.2"
   },
   "license": "NOASSERTION",
   "keywords": [

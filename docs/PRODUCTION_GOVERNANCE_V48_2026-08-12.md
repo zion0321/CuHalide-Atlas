@@ -1,86 +1,96 @@
 # CuHalide Atlas v48 production governance
 
 Date: 2026-08-12  
-Frozen scientific release: 3.0.2  
-Public site: v48
+Updated: 2026-08-13  
+Frozen scientific release: **3.0.2**  
+Current Curated: **rev.2**, through **2026-08-13**  
+Public site: **v48 / UI-content 48.3**
 
 ## Objective
 
-Production deployment must not be triggered by an unreviewed direct push merely because the GitHub default branch is `main`. The connected GitHub integration cannot currently administer branch protection/rulesets, so v48 adds a repository-level, fail-closed Vercel deployment control while retaining the existing pull-request and post-merge QA controls.
+Production changes must be reviewable, provenance-bound and fail closed. CuHalide Atlas uses two independent controls: a native GitHub repository ruleset on the default branch and a repository-level Vercel production provenance gate. Neither control is allowed to weaken scientific, privacy or evidence-grain contracts in order to make a deployment pass.
 
-This is defense in depth. Native server-side GitHub branch protection remains the preferred outer control and should be enabled when repository Administration-write settings access is available.
+## Native GitHub default-branch protection
 
-## Required production provenance
+The active repository ruleset **`Protect main production`** targets the default branch and currently enforces:
 
-For a Vercel Git deployment with `VERCEL_ENV=production`, `scripts/vercel-production-gate.mjs` requires all of the following before the build is allowed to continue:
+- pull-request based changes to `main`;
+- resolution of review conversations;
+- strict required-status-check policy;
+- successful `chromium-production` from GitHub Actions;
+- successful `lighthouse-production` from GitHub Actions;
+- successful `preview-chromium` from GitHub Actions;
+- successful `preview-lighthouse` from GitHub Actions;
+- successful trusted `Vercel` status from the Vercel GitHub App;
+- no branch deletion;
+- no non-fast-forward/force-push update;
+- no bypass actors.
+
+For this single-owner repository, the approving-review count remains zero unless a genuinely independent qualified reviewer is available. This avoids creating a ceremonial self-review requirement while retaining PR provenance, required checks and review-thread resolution.
+
+## Required Vercel production provenance
+
+For a Vercel Git deployment with `VERCEL_ENV=production`, `scripts/vercel-production-gate.mjs` requires all of the following before the build may continue:
 
 1. `VERCEL_GIT_COMMIT_REF` is exactly `main`.
 2. `VERCEL_GIT_COMMIT_SHA` is a full Git SHA.
-3. GitHub reports that SHA as the exact `merge_commit_sha` of a merged pull request whose base is `main`.
+3. GitHub reports that SHA as the exact merge result of a merged pull request whose base is `main`.
 4. The merged PR head SHA has the latest GitHub Actions check run completed successfully for all four required QA checks:
    - `chromium-production`
    - `lighthouse-production`
    - `preview-chromium`
    - `preview-lighthouse`
-5. The four QA checks must be produced by the `github-actions` GitHub App; a same-named check from another App cannot satisfy the gate.
-6. The PR head SHA must also have a latest GitHub commit status with context `Vercel`, state `success`, and a `https://vercel.com/` deployment target. This independently confirms that Vercel successfully built the candidate commit as a Preview deployment.
+5. The four QA checks are produced by the `github-actions` GitHub App; a same-named check from another App cannot satisfy the gate.
+6. The PR head SHA also has a latest GitHub commit status with context `Vercel`, state `success`, and a `https://vercel.com/` deployment target.
 
 For repeated check/status names, the highest GitHub record ID is treated as the latest result so an older success cannot mask a newer failure.
 
-Vercel Ignored Build Step semantics are intentionally inverted from ordinary shell success semantics: exit code `1` continues the build and exit code `0` ignores the build. The gate therefore exits `0` for an unverified production commit.
+Vercel Ignored Build Step semantics are intentionally inverted from ordinary shell success semantics: exit code `1` continues the build and exit code `0` ignores the build. The gate therefore returns the ignore code when production provenance cannot be verified. A skipped build leaves the currently serving production deployment unchanged.
 
 ## Protected Preview candidate validation
 
-Vercel Preview deployments remain protected. Initial direct browser and Lighthouse testing of the Preview URL was intentionally rejected after audit because Vercel Authentication redirected unauthenticated automation to the Vercel login page. The project does not disable Preview protection merely to make CI pass.
+Vercel Preview deployments remain protected. The project does not make preview deployments public merely to satisfy CI.
 
-Vercel documents an Automation Bypass secret for authenticated agents. That approach requires generating a Vercel bypass secret and synchronizing it into a GitHub repository secret. The currently connected integrations cannot safely perform both secret-management steps, so v48 does not distribute or expose a bypass secret.
+`.github/workflows/vercel-preview-qa.yml` uses a protection-preserving two-part attestation:
 
-Instead, `.github/workflows/vercel-preview-qa.yml` uses a protection-preserving two-part attestation:
+1. the workflow starts only after GitHub receives a successful Vercel `deployment_status` event for environment `Preview`;
+2. it checks out the exact deployed SHA and starts that repository revision through `scripts/local-candidate-server.mjs` on the GitHub runner.
 
-1. The workflow starts only after GitHub receives a successful Vercel `deployment_status` event for environment `Preview`.
-2. It checks out the exact `github.event.deployment.sha`, verifies that the checkout SHA matches the Vercel-deployed SHA and that the triggering environment URL is a `vercel.app` Preview URL, then starts that exact candidate repository through `scripts/local-candidate-server.mjs` on the GitHub runner.
+The candidate runtime imports the same versioned Vercel handlers used by the deployment and continues to use the real public Supabase contracts. It does not substitute scientific fixtures or a private database snapshot.
 
-The local candidate runtime imports the same versioned Vercel handlers used by the candidate (`api/site.js`, public-data/meta/RAG proxies, record pages, sitemap and retired export route), applies the release security headers needed by the browser contract, and continues to use the real public Supabase v3.0.2 upstream contracts. It does not substitute scientific fixtures or a private database snapshot.
-
-Against that exact candidate runtime, the workflow runs:
-
-- the full Playwright/Chromium scientific, privacy, security, accessibility, responsive and stable-route suite; and
-- the existing mobile/desktop Lighthouse gate with unchanged thresholds.
-
-The resulting checks are named `preview-chromium` and `preview-lighthouse`. Together with the independent successful `Vercel` commit status, this establishes both candidate-code quality and successful Vercel deployability without making the protected Preview public.
-
-If an owner later configures Vercel Automation Bypass and the corresponding GitHub secret through supported secret-management interfaces, direct testing of the protected Preview may replace the local candidate adapter after an explicit migration and regression audit. It must not be enabled by placing a bypass secret in repository code, logs, URLs, artifacts or public configuration.
+Against that exact candidate revision, CI runs the full Playwright/Chromium scientific/privacy/security/accessibility suite and the mobile/desktop Lighthouse gate. The resulting required checks are `preview-chromium` and `preview-lighthouse`.
 
 ## Fail-closed behavior
 
-If GitHub cannot confirm PR provenance, required QA checks or the Vercel deployment status — including a GitHub API error, timeout or rate-limit condition — a new production build is skipped. The currently serving production deployment is not removed or modified by this decision.
+If GitHub cannot confirm PR provenance, required QA checks or trusted Vercel deployment status — including API errors, timeouts or rate limits — a new production build is skipped. The currently serving production deployment is not removed or modified. Preview deployments are not blocked by the production provenance gate.
 
-Preview deployments are never blocked by the production provenance gate.
+## Supabase deployment governance
+
+The public GitHub repository intentionally contains a **public-safe migration subset**, not a replayable copy of the complete production migration ledger. Historical production migrations include private corpus material, one-time provisioning and credential/Vault handling that must not be copied into a public repository merely to make migration histories look identical.
+
+Accordingly:
+
+- Supabase **Automatic branching** should remain disabled unless a complete sanitized canonical migration repository is introduced;
+- Supabase **Deploy to production** through the GitHub integration should also remain disabled for this public repository;
+- production database/schema changes are separately reviewed, applied, validated, security-audited and then mirrored into public-safe contracts where disclosure is appropriate;
+- fake/no-op timestamp migrations must never be created to silence migration-history checks;
+- raw `supabase_migrations.schema_migrations.statements` must never be bulk-exported into the public repository;
+- a GitHub/Supabase integration check is not a scientific release gate unless the repository has first been migrated to a complete sanitized replayable migration history.
+
+The public-safe inventory boundary is documented in `supabase/contracts/REMOTE_MIGRATION_INVENTORY_2026-08-13.md`.
 
 ## Scientific and data boundary
 
-This governance layer does not modify any Frozen Release or Current Curated scientific record, denominator, Record 13 correction, RAG evidence contract, public field whitelist, private corpus, Literature Watch state, Supabase access-control policy or public query-and-view boundary.
+Deployment governance does not modify any Frozen Release or Current Curated scientific record, denominator, Record 13 correction, RAG evidence contract, public field whitelist, private corpus, Literature Watch state, Motif Atlas taxonomy or Supabase access-control policy.
 
-## Remaining platform-level control
-
-GitHub currently reports `main` as unprotected, and the connected GitHub integration returns HTTP 403 for branch-protection administration. The repository-level Vercel gate therefore cannot be treated as a cryptographic substitute for server-side branch protection: an actor who already has direct repository write permission could deliberately change or remove repository gate code in the same push.
-
-When repository settings are changed by an owner or by an integration with Administration write scope, `main` should additionally enforce:
-
-- pull requests required before merge;
-- required status checks for the production baseline, candidate QA and Vercel deployment status where supported;
-- no force pushes;
-- no branch deletion; and
-- no bypass for ordinary direct pushes.
-
-For this single-owner repository, reviewer-count requirements should only be enabled if a second qualified reviewer is available; otherwise they can make maintenance impossible without adding meaningful independent review.
-
-GitHub Dependabot version updates are enabled. The current integration reports that Dependabot vulnerability alerts are disabled, while Code Scanning and Secret Scanning alert APIs are not readable through the present integration. Those platform settings must not be represented as enabled or zero-alert until independently enabled/readable.
+Public access remains **query-and-view**. `/api/export` remains HTTP 410. Complete normalized tables, exact publisher abstracts, primary PDF/SI/CIF, raw taxonomy/component relations, field-evidence excerpts/locators and internal QA/adjudication/candidate artifacts remain private.
 
 ## Release procedure
 
-Normal changes follow:
+Normal public-web changes follow:
 
-`feature/hardening branch -> PR -> Vercel Preview READY/status success -> exact candidate SHA local runtime -> preview-chromium + preview-lighthouse -> production baseline checks -> merge to main -> Vercel provenance gate -> production deployment -> full post-merge production QA`
+`feature/hardening branch -> PR -> Vercel Preview READY/status success -> exact candidate SHA local runtime -> preview-chromium + preview-lighthouse -> production baseline checks -> merge to main -> Vercel provenance gate -> production deployment or safe skip -> full post-merge production QA`
 
-Any failure stops promotion at that stage. A governance or CI failure must never be converted into a frozen scientific change, bypassed by altering scientific data, or solved by weakening the public/private evidence boundary.
+Scientific data changes additionally require the Current Curated/release-wide curation gates described in `docs/LIVE_CURATION_WORKFLOW_2026-08-11.md`.
+
+Any failure stops promotion at the relevant stage. A governance or CI failure must never be converted into a scientific change, bypassed with fake migration history, or solved by weakening the public/private evidence boundary.

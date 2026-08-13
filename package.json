@@ -2,11 +2,13 @@
   "name": "cuhalide-atlas-production-qa",
   "version": "1.2.0",
   "private": true,
-  "description": "Production browser, accessibility, performance and SEO quality gates for CuHalide Atlas.",
+  "description": "Production browser, accessibility, performance, repository-contract and SEO quality gates for CuHalide Atlas.",
   "scripts": {
     "qa:browser": "playwright test tests/production-browser-v48-r2.spec.js",
     "qa:lighthouse": "bash scripts/production-lighthouse.sh",
-    "qa:deployment-gate": "node --test tests/vercel-production-gate.test.mjs"
+    "qa:deployment-gate": "node --test tests/vercel-production-gate.test.mjs",
+    "qa:contracts": "node --test tests/repository-contracts.test.mjs",
+    "qa:preflight": "npm run qa:contracts && npm run qa:deployment-gate"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
