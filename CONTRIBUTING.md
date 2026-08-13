@@ -19,21 +19,29 @@ Bibliographic metadata alone cannot authorize a scientific-field change.
 - Use the declared missingness codes; blank or unresolved values are not zero.
 - Do not infer unresolved fields from related or analogous materials.
 - CIF-derived crystallographic values take priority where the mapping is explicit and verified.
-- A candidate marked `screened_in_scope` or `screened_boundary` remains outside the frozen release until primary-evidence review is complete.
+- Article-grain photophysics is not silently reassigned to a named structure/phase.
+- A Literature Watch candidate remains outside curated scientific evidence until primary-evidence review and QC are complete.
+- Motif/class/component normalization must preserve unresolved legacy mappings rather than forcing a category.
 
-## Release requirements
+## Current Curated promotion
 
-A release that changes data must pass:
+New literature first enters the private curation workflow. Promotion to the public Current Curated layer requires DOI/entity deduplication, chemical-scope adjudication, primary article/SI/CIF review as appropriate, structure/phase expansion, crystallographic mapping, evidence-grain checks, relational/scientific QC, RAG rebuild/embedding and production regression.
+
+Only QC-passed records may become live Current Curated records. Literature Watch metadata is discovery evidence, not scientific evidence.
+
+## Formal release requirements
+
+A formal release that changes scientific data must pass:
 
 - DOI and entity deduplication;
 - scope and compound-level adjudication;
 - field-evidence construction;
 - expected-difference and zero-difference tests;
 - normalized snapshot regeneration and SHA-256 verification;
-- RAG re-indexing;
-- the frozen benchmark suite;
-- public production smoke tests;
-- public health and security gates;
+- RAG re-indexing and evidence-grain validation;
+- the versioned benchmark suite;
+- public production browser/Lighthouse tests;
+- public health, privacy and security gates;
 - versioned archival-package construction.
 
-Release 3.0.1 is immutable. New literature candidates require a later version.
+Frozen Releases **3.0.1** and **3.0.2** are immutable historical snapshots. Patch releases are reserved for scientific corrections such as the Record 13 hotfix in 3.0.2. Fully curated new literature belongs first to Current Curated and later to a new data-expansion release (for example **3.1.0**) after release-wide validation; it must not be folded into 3.0.2.
