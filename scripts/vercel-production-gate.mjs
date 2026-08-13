@@ -8,8 +8,8 @@ export const REQUIRED_CHECKS = Object.freeze([
 ]);
 
 export const REQUIRED_VERCEL_STATUS = 'Vercel';
-export const MERGE_ASSOCIATION_RETRY_ATTEMPTS = 8;
-export const MERGE_ASSOCIATION_RETRY_DELAY_MS = 1500;
+export const MERGE_PROVENANCE_RETRY_ATTEMPTS = 6;
+export const MERGE_PROVENANCE_RETRY_DELAY_MS = 1000;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -27,26 +27,55 @@ export function selectMergedMainPullRequest(pulls, commitSha) {
   )) || null;
 }
 
-export async function findMergedMainPullRequestWithRetry({
-  fetchPulls,
+export async function findMergedMainPullRequestWithFallback({
+  fetchAssociatedPulls,
+  fetchRecentClosedPulls,
   commitSha,
-  attempts = MERGE_ASSOCIATION_RETRY_ATTEMPTS,
-  delayMs = MERGE_ASSOCIATION_RETRY_DELAY_MS,
+  attempts = MERGE_PROVENANCE_RETRY_ATTEMPTS,
+  delayMs = MERGE_PROVENANCE_RETRY_DELAY_MS,
   sleepFn = sleep,
 }) {
-  if (typeof fetchPulls !== 'function') throw new TypeError('fetchPulls must be a function');
+  if (typeof fetchAssociatedPulls !== 'function') throw new TypeError('fetchAssociatedPulls must be a function');
+  if (typeof fetchRecentClosedPulls !== 'function') throw new TypeError('fetchRecentClosedPulls must be a function');
   if (!Number.isInteger(attempts) || attempts < 1) throw new RangeError('attempts must be a positive integer');
   if (!Number.isFinite(delayMs) || delayMs < 0) throw new RangeError('delayMs must be non-negative');
 
-  let pulls = [];
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    pulls = await fetchPulls();
-    const pullRequest = selectMergedMainPullRequest(pulls, commitSha);
-    if (pullRequest) return { pullRequest, pulls, attempt };
+    const associatedPulls = await fetchAssociatedPulls();
+    const associated = selectMergedMainPullRequest(associatedPulls, commitSha);
+    if (associated) {
+      return {
+        pullRequest: associated,
+        pulls: [associated],
+        attempt,
+        source: 'commit-association',
+      };
+    }
+
+    // GitHub's commit->pull association index can lag behind the merged PR record.
+    // Independently inspect recent closed PR records on main and require the same
+    // exact merge_commit_sha + merged_at + base=main predicates. This is a second
+    // provenance source, not a relaxation of the merged-PR requirement.
+    const recentClosedPulls = await fetchRecentClosedPulls();
+    const recent = selectMergedMainPullRequest(recentClosedPulls, commitSha);
+    if (recent) {
+      return {
+        pullRequest: recent,
+        pulls: [recent],
+        attempt,
+        source: 'recent-closed-main-pulls',
+      };
+    }
+
     if (attempt < attempts) await sleepFn(delayMs);
   }
 
-  return { pullRequest: null, pulls, attempt: attempts };
+  return {
+    pullRequest: null,
+    pulls: [],
+    attempt: attempts,
+    source: 'none',
+  };
 }
 
 export function latestGithubActionsChecks(checkRuns) {
@@ -186,25 +215,20 @@ async function run() {
     return;
   }
 
-  // GitHub's commit->pull association is eventually consistent immediately after
-  // a merge. A production deployment can start before that association is visible.
-  // Retry only this read-side association for a short bounded window; every other
-  // provenance requirement remains fail-closed and unchanged.
-  const association = await findMergedMainPullRequestWithRetry({
-    fetchPulls: () => githubJson(`/commits/${commitSha}/pulls?per_page=100`),
+  const provenance = await findMergedMainPullRequestWithFallback({
+    fetchAssociatedPulls: () => githubJson(`/commits/${commitSha}/pulls?per_page=100`),
+    fetchRecentClosedPulls: () => githubJson('/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=100'),
     commitSha,
   });
-  const { pullRequest, pulls } = association;
+  const { pullRequest, pulls } = provenance;
 
   if (!pullRequest) {
-    console.log(`[deployment-gate] ignore production build: commit is not the merge result of a merged PR into main after ${association.attempt} association checks`);
+    console.log(`[deployment-gate] ignore production build: commit is not the exact merge result of a merged PR into main after ${provenance.attempt} dual-source provenance checks`);
     process.exitCode = 0;
     return;
   }
 
-  if (association.attempt > 1) {
-    console.log(`[deployment-gate] merge association became visible on attempt ${association.attempt}/${MERGE_ASSOCIATION_RETRY_ATTEMPTS}`);
-  }
+  console.log(`[deployment-gate] merged PR #${pullRequest.number} verified via ${provenance.source} on attempt ${provenance.attempt}/${MERGE_PROVENANCE_RETRY_ATTEMPTS}`);
 
   const headSha = pullRequest.head?.sha || '';
   if (!isFullSha(headSha)) {
@@ -242,8 +266,8 @@ async function run() {
 const isDirectExecution = process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).href;
 if (isDirectExecution) {
   run().catch((error) => {
-    // Fail closed for production: a GitHub API outage or rate-limit must not turn
-    // an unverified main push into a production deployment.
+    // Fail closed for production: any provenance API outage/rate-limit must not
+    // turn an unverified main push into a production deployment.
     console.error(`[deployment-gate] ignore production build: ${error instanceof Error ? error.message : String(error)}`);
     process.exitCode = process.env.VERCEL_ENV === 'production' ? 0 : 1;
   });
