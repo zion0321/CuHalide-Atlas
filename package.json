@@ -4,7 +4,7 @@
   "private": true,
   "description": "Production browser, accessibility, performance and SEO quality gates for CuHalide Atlas.",
   "scripts": {
-    "qa:browser": "playwright test tests/production-browser-v48.spec.js",
+    "qa:browser": "playwright test tests/production-browser-v48.spec.js tests/ui-v48-2.spec.js",
     "qa:lighthouse": "bash scripts/production-lighthouse.sh",
     "qa:deployment-gate": "node --test tests/vercel-production-gate.test.mjs"
   },
