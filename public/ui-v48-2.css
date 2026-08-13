@@ -30,7 +30,7 @@ body{font-size:15.25px}
 .panel{padding:21px}
 .toolbar{min-height:44px}
 .toolbar strong{line-height:1.15}
-.denim,.denom{max-width:100%;white-space:normal;line-height:1.35}
+.denom{max-width:100%;white-space:normal;line-height:1.35}
 .btn{min-height:40px}
 .field input,.field select,.field textarea{min-height:42px}
 
@@ -123,6 +123,25 @@ td{line-height:1.45}
 }
 .ui-backtop.show{opacity:1;pointer-events:auto;transform:translateY(0)}
 
+/* Keep the rolling-curation summary balanced across the full dashboard width. */
+@media(min-width:781px){
+  .dashboard>.panel:last-child{grid-column:1/-1}
+}
+@media(min-width:1121px){
+  .dashboard>.panel:last-child{
+    display:grid;
+    grid-template-columns:minmax(190px,.62fr) minmax(0,.9fr) minmax(0,1.35fr);
+    column-gap:24px;
+    align-items:center;
+    padding-top:18px;
+    padding-bottom:18px;
+  }
+  .dashboard>.panel:last-child>.eyebrow{grid-column:1;grid-row:1;margin:0 0 2px}
+  .dashboard>.panel:last-child>h2{grid-column:1;grid-row:2;margin:0}
+  .dashboard>.panel:last-child>#currentCuratedText{grid-column:2;grid-row:1/3;margin:0}
+  .dashboard>.panel:last-child>p.fine:last-child{grid-column:3;grid-row:1/3;margin:0}
+}
+
 @media(max-width:1120px){
   .shell{width:min(var(--shell),calc(100% - 36px))}
   .hero-grid{gap:32px}
@@ -202,8 +221,20 @@ td{line-height:1.45}
   .view[data-view="polar"] table{display:block;min-width:0;width:100%}
   .view[data-view="structures"] caption,
   .view[data-view="polar"] caption{display:block;padding:0 2px 9px;font-size:10px;line-height:1.45}
+  /* Keep semantic table headers for assistive technology while card labels provide the visual headers. */
   .view[data-view="structures"] thead,
-  .view[data-view="polar"] thead{display:none}
+  .view[data-view="polar"] thead{
+    position:absolute!important;
+    width:1px!important;
+    height:1px!important;
+    padding:0!important;
+    margin:-1px!important;
+    overflow:hidden!important;
+    clip:rect(0 0 0 0)!important;
+    clip-path:inset(50%)!important;
+    white-space:nowrap!important;
+    border:0!important;
+  }
   .view[data-view="structures"] tbody,
   .view[data-view="polar"] tbody{display:grid;gap:10px}
   .view[data-view="structures"] tr,
@@ -213,7 +244,7 @@ td{line-height:1.45}
   .view[data-view="structures"] td:first-child,
   .view[data-view="polar"] td:first-child{border-top:0;padding-top:2px}
   .view[data-view="structures"] td::before,
-  .view[data-view="polar"] td::before{font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:850;align-self:start}
+  .view[data-view="polar"] td::before{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:850;align-self:start}
   .view[data-view="structures"] td:nth-child(1)::before{content:"Structure"}
   .view[data-view="structures"] td:nth-child(2)::before{content:"Formula / phase"}
   .view[data-view="structures"] td:nth-child(3)::before{content:"Halogen"}
