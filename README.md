@@ -82,7 +82,9 @@ Historical 3.0.1 errata remain audit history only.
 
 ## Production governance
 
-Production uses pull-request provenance, protected candidate QA and a fail-closed Vercel deployment gate. The required candidate/production checks include Chromium browser QA, Lighthouse QA and trusted Vercel deployment status. Direct production deployment is rejected unless the production SHA is the merge result of a qualifying PR.
+The default branch is protected by the active **Protect main production** ruleset. Production uses pull-request provenance, strict required Chromium/Lighthouse candidate and production checks, trusted Vercel status and a fail-closed Vercel deployment gate. Direct production promotion is rejected or safely skipped unless provenance and required checks can be verified.
+
+Supabase production schema/data changes are governed separately from the public repository. The public `supabase/` tree intentionally contains a public-safe subset rather than the complete private production migration ledger, so GitHub-driven Supabase Automatic branching and Deploy to production are not authoritative deployment paths for this repository and should remain disabled.
 
 ## Citation
 
@@ -94,13 +96,13 @@ Permanent repository DOI and blanket project licensing are not asserted until ow
 
 - `api/` — Vercel read-only public handlers and stable record/sitemap/Motif Atlas rendering.
 - `public/` — version-controlled interface template and presentation assets.
-- `tests/` — browser/scientific/privacy/accessibility and deployment-gate regression tests.
+- `tests/` — browser/scientific/privacy/accessibility, repository-contract and deployment-gate regression tests.
 - `.github/workflows/` — production baseline, protected-preview candidate and Lighthouse gates.
-- `supabase/functions/` — versioned production-facing Supabase runtime sources.
-- `supabase/migrations/` — executable schema/RPC/access-control migrations that may be applied by Supabase tooling.
-- `supabase/contracts/` — row-data-free consolidated mirrors of already-applied production contracts for audit/recovery; these are not auto-run migrations.
+- `supabase/functions/` — public-safe versioned mirrors of production-facing Supabase runtime sources where disclosure is appropriate.
+- `supabase/migrations/` — public-safe executable schema/RPC/access-control migrations; this directory is **not** a complete replayable copy of production migration history.
+- `supabase/contracts/` — sanitized consolidated mirrors and migration-inventory boundaries for audit/recovery; these are not private row-data dumps.
 - `docs/` — release, curation, security, RAG and production audit records.
 
-Private Current Curated promoted rows are intentionally not published as a bulk SQL/data dump.
+Private Current Curated promoted rows are intentionally not published as a bulk SQL/data dump. Fake/no-op migration files and raw private production migration statements must not be added merely to satisfy an external history check.
 
-See `docs/CURRENT_CURATED_R2_2026-08-13.md` and `docs/PRODUCTION_STATUS_V48_CURRENT_R2_2026-08-13.md` for the current rolling-state audit.
+See `docs/CURRENT_CURATED_R2_2026-08-13.md`, `docs/PRODUCTION_STATUS_V48_CURRENT_R2_2026-08-13.md` and `docs/FINAL_CURRENT_R2_PRODUCTION_AUDIT_2026-08-13.md` for the current rolling state and final audit.
