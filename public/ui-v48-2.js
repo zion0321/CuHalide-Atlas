@@ -4,8 +4,39 @@
   'use strict';
 
   const mobile = window.matchMedia('(max-width: 780px)');
+  const tablet = window.matchMedia('(max-width: 1120px)');
   const byId = id => document.getElementById(id);
   const value = id => (byId(id)?.value || '').trim();
+  const nativeFetch = window.fetch.bind(window);
+
+  const RESPONSIVE_PAGE_SIZES = Object.freeze({
+    articles: () => tablet.matches ? 12 : 18,
+    structures: () => mobile.matches ? 12 : (tablet.matches ? 20 : 30),
+    polar: () => mobile.matches ? 12 : (tablet.matches ? 20 : 30),
+  });
+
+  /*
+   * The core portal script is CSP hash-bound and remains byte-for-byte untouched.
+   * Presentation density is therefore applied only to same-origin public-data GET
+   * requests. Counts, filters, curation layers and scientific semantics are unchanged.
+   */
+  window.fetch = (input, init) => {
+    try {
+      const raw = input instanceof Request ? input.url : String(input);
+      const url = new URL(raw, window.location.href);
+      const action = url.searchParams.get('action');
+      const sizeFor = RESPONSIVE_PAGE_SIZES[action];
+      if (url.origin === window.location.origin && url.pathname === '/api/public-data' && sizeFor) {
+        url.searchParams.set('page_size', String(sizeFor()));
+        if (input instanceof Request) return nativeFetch(new Request(url.href, input), init);
+        if (input instanceof URL) return nativeFetch(url, init);
+        return nativeFetch(url.href, init);
+      }
+    } catch {
+      /* Fall through unchanged for opaque/non-URL fetch inputs. */
+    }
+    return nativeFetch(input, init);
+  };
 
   function activeArticleFilters() {
     let n = 0;
