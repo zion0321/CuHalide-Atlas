@@ -31,7 +31,7 @@ async function expectAccessibleMobileTableHead(page, view) {
 }
 
 test.describe('CuHalide Atlas UI v48.2 presentation contracts', () => {
-  test('presentation assets, marker and response identity are explicit', async ({ request }) => {
+  test('presentation assets, CSP-safe core script and response identity are explicit', async ({ request }) => {
     const root = await request.get('/');
     expect(root.status()).toBe(200);
     expect(root.headers()['x-cuhalide-ui-version']).toBe('48.2');
@@ -40,9 +40,10 @@ test.describe('CuHalide Atlas UI v48.2 presentation contracts', () => {
     expect(html).toContain('/ui-v48-2.css?v=48.2');
     expect(html).toContain('/ui-v48-2.js?v=48.2');
     expect(html).toContain('CUHALIDE_UI_V48_2');
-    expect(html).toContain("p.page=S.aPage;p.page_size=window.matchMedia('(max-width:1120px)').matches?12:18;");
-    expect(html).toContain("p.page=S.sPage;p.page_size=window.matchMedia('(max-width:780px)').matches?12:(window.matchMedia('(max-width:1120px)').matches?20:30);");
-    expect(html).toContain("p.page=S.pPage;p.page_size=window.matchMedia('(max-width:780px)').matches?12:(window.matchMedia('(max-width:1120px)').matches?20:30);");
+    expect(html).toContain('p.page=S.aPage;p.page_size=18;');
+    expect(html).toContain('p.page=S.sPage;p.page_size=30;');
+    expect(html).toContain('p.page=S.pPage;p.page_size=30;');
+    expect(root.headers()['content-security-policy'] || '').toContain("script-src 'self' 'sha256-");
 
     const css = await request.get('/ui-v48-2.css?v=48.2');
     expect(css.status()).toBe(200);
@@ -54,7 +55,10 @@ test.describe('CuHalide Atlas UI v48.2 presentation contracts', () => {
     const js = await request.get('/ui-v48-2.js?v=48.2');
     expect(js.status()).toBe(200);
     expect(js.headers()['content-type'] || '').toMatch(/javascript/i);
-    expect(await js.text()).toContain("document.documentElement.classList.add('ui-v48-2')");
+    const jsText = await js.text();
+    expect(jsText).toContain("document.documentElement.classList.add('ui-v48-2')");
+    expect(jsText).toContain('RESPONSIVE_PAGE_SIZES');
+    expect(jsText).toContain('window.fetch =');
   });
 
   test('responsive home presentation is balanced without page-level overflow', async ({ page }, testInfo) => {
