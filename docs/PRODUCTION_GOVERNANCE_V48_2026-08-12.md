@@ -34,7 +34,7 @@ For a Vercel Git deployment with `VERCEL_ENV=production`, `scripts/vercel-produc
 
 1. `VERCEL_GIT_COMMIT_REF` is exactly `main`.
 2. `VERCEL_GIT_COMMIT_SHA` is a full Git SHA.
-3. GitHub reports that SHA as the exact merge result of a merged pull request whose base is `main`.
+3. GitHub proves that SHA is the exact `merge_commit_sha` of a merged pull request whose base is `main`.
 4. The merged PR head SHA has the latest GitHub Actions check run completed successfully for all four required QA checks:
    - `chromium-production`
    - `lighthouse-production`
@@ -45,7 +45,16 @@ For a Vercel Git deployment with `VERCEL_ENV=production`, `scripts/vercel-produc
 
 For repeated check/status names, the highest GitHub record ID is treated as the latest result so an older success cannot mask a newer failure.
 
-GitHub's commit-to-pull association can be briefly eventually consistent immediately after a merge, while Vercel can start the production Ignored Build Step almost immediately. The gate therefore retries **only** the merge-association lookup for a short bounded window (8 attempts, 1.5 seconds apart). As soon as the exact merged PR becomes visible, all original provenance checks apply unchanged. If the association never appears, an API call fails, or any required QA/Vercel evidence is invalid, the gate still fails closed. This removes false deployment skips caused by a read-side race without creating a bypass path.
+### Merge-provenance read consistency
+
+Vercel can start the production Ignored Build Step only a few seconds after GitHub records a merge. GitHub's dedicated `commit -> pull requests` association endpoint is eventually consistent and was observed to lag long enough to make a single-source retry insufficient.
+
+The gate therefore uses **two independent GitHub read paths** for the same exact merged-PR predicate:
+
+1. the commit-association endpoint for the production SHA; and
+2. the recent closed pull-request records on base `main`, filtered by the exact same non-null `merged_at`, `base.ref === main` and `merge_commit_sha === VERCEL_GIT_COMMIT_SHA` conditions.
+
+The second path is a provenance fallback, not a bypass. It cannot accept an unmerged PR, a PR into another base branch, or a PR whose merge SHA differs by even one character. The dual-source lookup is retried only for a short bounded window. Once an exact merged PR is found, all four trusted GitHub Actions checks and the trusted successful Vercel candidate status remain mandatory. Any GitHub API error, exhausted provenance lookup or invalid downstream evidence still fails closed.
 
 Vercel Ignored Build Step semantics are intentionally inverted from ordinary shell success semantics: exit code `1` continues the build and exit code `0` ignores the build. The gate therefore returns the ignore code when production provenance cannot be verified. A skipped build leaves the currently serving production deployment unchanged.
 
@@ -72,8 +81,7 @@ The public GitHub repository intentionally contains a **public-safe migration su
 
 Accordingly:
 
-- Supabase **Automatic branching** should remain disabled unless a complete sanitized canonical migration repository is introduced;
-- Supabase **Deploy to production** through the GitHub integration should also remain disabled for this public repository;
+- Supabase Automatic branching / GitHub production migration replay is not an authoritative deployment path for this public repository;
 - production database/schema changes are separately reviewed, applied, validated, security-audited and then mirrored into public-safe contracts where disclosure is appropriate;
 - fake/no-op timestamp migrations must never be created to silence migration-history checks;
 - raw `supabase_migrations.schema_migrations.statements` must never be bulk-exported into the public repository;
@@ -91,7 +99,7 @@ Public access remains **query-and-view**. `/api/export` remains HTTP 410. Comple
 
 Normal public-web changes follow:
 
-`feature/hardening branch -> PR -> Vercel Preview READY/status success -> exact candidate SHA local runtime -> preview-chromium + preview-lighthouse -> production baseline checks -> merge to main -> bounded merge-association recovery -> Vercel provenance gate -> production deployment or safe skip -> full post-merge production QA`
+`feature/hardening branch -> PR -> Vercel Preview READY/status success -> exact candidate SHA local runtime -> preview-chromium + preview-lighthouse -> production baseline checks -> merge to main -> dual-source merged-PR provenance verification -> Vercel production gate -> production deployment or safe skip -> full post-merge production QA`
 
 Scientific data changes additionally require the Current Curated/release-wide curation gates described in `docs/LIVE_CURATION_WORKFLOW_2026-08-11.md`.
 
