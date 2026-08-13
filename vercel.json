@@ -4,11 +4,14 @@
   "functions": {
     "api/site.js": {
       "includeFiles": "public/index.html"
+    },
+    "api/ui-site.js": {
+      "includeFiles": "public/index.html"
     }
   },
   "rewrites": [
-    { "source": "/", "destination": "/api/site" },
-    { "source": "/index.html", "destination": "/api/site" },
+    { "source": "/", "destination": "/api/ui-site" },
+    { "source": "/index.html", "destination": "/api/ui-site" },
     { "source": "/article/:id", "destination": "/api/record?kind=article&id=:id" },
     { "source": "/structure/:id", "destination": "/api/record?kind=structure&id=:id" },
     { "source": "/robots.txt", "destination": "/api/meta?asset=robots" },

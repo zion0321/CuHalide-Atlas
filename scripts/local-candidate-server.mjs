@@ -2,6 +2,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import siteHandler from '../api/site.js';
+import uiSiteHandler from '../api/ui-site.js';
 import dataHandler from '../api/data.js';
 import publicDataHandler from '../api/public-data.js';
 import agentHandler from '../api/agent.js';
@@ -17,6 +18,8 @@ const MAX_LOCAL_BODY_BYTES = 100_000;
 
 const STATIC_FILES = new Map([
   ['/og-image.svg', { file: path.join(PUBLIC_DIR, 'og-image.svg'), type: 'image/svg+xml; charset=utf-8' }],
+  ['/ui-v48-2.css', { file: path.join(PUBLIC_DIR, 'ui-v48-2.css'), type: 'text/css; charset=utf-8' }],
+  ['/ui-v48-2.js', { file: path.join(PUBLIC_DIR, 'ui-v48-2.js'), type: 'text/javascript; charset=utf-8' }],
 ]);
 
 function applyPlatformHeaders(res) {
@@ -79,8 +82,11 @@ async function dispatch(req, res) {
     }
   }
 
-  if (pathname === '/' || pathname === '/index.html' || pathname === '/api/site') {
-    res.setHeader('X-CuHalide-Middleware', 'release-3.0.2-v48');
+  if (pathname === '/' || pathname === '/index.html' || pathname === '/api/ui-site') {
+    res.setHeader('X-CuHalide-Middleware', 'release-3.0.2-ui-v48.2');
+    return uiSiteHandler(rewritten(req, incoming.search ? `/api/ui-site${incoming.search}` : '/api/ui-site'), res);
+  }
+  if (pathname === '/api/site') {
     return siteHandler(rewritten(req, incoming.search ? `/api/site${incoming.search}` : '/api/site'), res);
   }
 
