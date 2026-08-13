@@ -1,15 +1,15 @@
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
 const DATA = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
-const CONTENT_DATE = '2026-08-12';
+const CONTENT_DATE = '2026-08-13';
 const RELEASE = '3.0.2';
-const CURRENT_REVISION = '1';
+const CURRENT_REVISION = '2';
 const PAGE_SIZE = 40;
 const MAX_PAGES = 100;
 const MAX_FETCH_ATTEMPTS = 3;
 const RETRY_DELAYS_MS = [350, 1100];
-const EXPECTED_ARTICLES = 348;
-const EXPECTED_STRUCTURES = 859;
-const EXPECTED_URLS = 1 + EXPECTED_ARTICLES + EXPECTED_STRUCTURES;
+const EXPECTED_ARTICLES = 356;
+const EXPECTED_STRUCTURES = 873;
+const EXPECTED_URLS = 2 + EXPECTED_ARTICLES + EXPECTED_STRUCTURES;
 
 const xml = (v) => String(v).replace(/[<>&'\"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]));
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -26,10 +26,7 @@ async function fetchPage(url, action, page) {
   for (let attempt = 0; attempt < MAX_FETCH_ATTEMPTS; attempt += 1) {
     let response;
     try {
-      response = await fetch(url, {
-        headers: { accept: 'application/json', 'user-agent': 'CuHalide-Atlas-Sitemap/48.2' },
-        signal: AbortSignal.timeout(30000),
-      });
+      response = await fetch(url, { headers: { accept: 'application/json', 'user-agent': 'CuHalide-Atlas-Sitemap/48.3' }, signal: AbortSignal.timeout(30000) });
       if (response.ok) return await response.json();
       lastError = new Error(`${action} page ${page}: HTTP ${response.status}`);
       if (!isRetryableStatus(response.status) || attempt === MAX_FETCH_ATTEMPTS - 1) throw lastError;
@@ -98,6 +95,7 @@ export default async function handler(req, res) {
     if (structures.length !== EXPECTED_STRUCTURES) throw new Error(`Current Core-Included structure sitemap denominator ${structures.length} != ${EXPECTED_STRUCTURES}`);
     const urls = [
       { loc: `${PUBLIC_ORIGIN}/`, priority: '1.0' },
+      { loc: `${PUBLIC_ORIGIN}/motifs`, priority: '0.9' },
       ...articles.map((x) => ({ loc: `${PUBLIC_ORIGIN}/article/${encodeURIComponent(x.record_id)}`, priority: '0.7' })),
       ...structures.map((x) => ({ loc: `${PUBLIC_ORIGIN}/structure/${encodeURIComponent(x.structure_id)}`, priority: '0.6' })),
     ];
