@@ -8,6 +8,28 @@ async function noPageOverflow(page) {
   expect(size.scrollWidth, `page-wide overflow: ${JSON.stringify(size)}`).toBeLessThanOrEqual(size.clientWidth + 1);
 }
 
+function pageSizeFor(viewportWidth, kind) {
+  if (kind === 'articles') return viewportWidth <= 1120 ? 12 : 18;
+  if (viewportWidth <= 780) return 12;
+  if (viewportWidth <= 1120) return 20;
+  return 30;
+}
+
+async function expectAccessibleMobileTableHead(page, view) {
+  const head = page.locator(`.view[data-view="${view}"] thead`);
+  await expect(head.locator('th')).toHaveCount(8);
+  const style = await head.evaluate((el) => ({
+    position: getComputedStyle(el).position,
+    width: getComputedStyle(el).width,
+    height: getComputedStyle(el).height,
+    clipPath: getComputedStyle(el).clipPath,
+  }));
+  expect(style.position).toBe('absolute');
+  expect(style.width).toBe('1px');
+  expect(style.height).toBe('1px');
+  expect(style.clipPath).not.toBe('none');
+}
+
 test.describe('CuHalide Atlas UI v48.2 presentation contracts', () => {
   test('presentation assets, marker and response identity are explicit', async ({ request }) => {
     const root = await request.get('/');
@@ -18,11 +40,16 @@ test.describe('CuHalide Atlas UI v48.2 presentation contracts', () => {
     expect(html).toContain('/ui-v48-2.css?v=48.2');
     expect(html).toContain('/ui-v48-2.js?v=48.2');
     expect(html).toContain('CUHALIDE_UI_V48_2');
+    expect(html).toContain("p.page=S.aPage;p.page_size=window.matchMedia('(max-width:1120px)').matches?12:18;");
+    expect(html).toContain("p.page=S.sPage;p.page_size=window.matchMedia('(max-width:780px)').matches?12:(window.matchMedia('(max-width:1120px)').matches?20:30);");
+    expect(html).toContain("p.page=S.pPage;p.page_size=window.matchMedia('(max-width:780px)').matches?12:(window.matchMedia('(max-width:1120px)').matches?20:30);");
 
     const css = await request.get('/ui-v48-2.css?v=48.2');
     expect(css.status()).toBe(200);
     expect(css.headers()['content-type'] || '').toMatch(/text\/css/i);
-    expect(await css.text()).toContain('CuHalide Atlas UI hardening layer v48.2');
+    const cssText = await css.text();
+    expect(cssText).toContain('CuHalide Atlas UI hardening layer v48.2');
+    expect(cssText).not.toContain('.denim');
 
     const js = await request.get('/ui-v48-2.js?v=48.2');
     expect(js.status()).toBe(200);
@@ -30,7 +57,7 @@ test.describe('CuHalide Atlas UI v48.2 presentation contracts', () => {
     expect(await js.text()).toContain("document.documentElement.classList.add('ui-v48-2')");
   });
 
-  test('responsive presentation is active without page-level horizontal overflow', async ({ page }, testInfo) => {
+  test('responsive home presentation is balanced without page-level overflow', async ({ page }, testInfo) => {
     await page.goto('/#home', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('html')).toHaveClass(/ui-v48-2/);
     await expect(page.locator('#currentCuratedText')).toContainText('Current Curated through 2026-08-12');
@@ -41,6 +68,16 @@ test.describe('CuHalide Atlas UI v48.2 presentation contracts', () => {
     expect(viewport).not.toBeNull();
     const shellWidth = await page.locator('.shell').first().evaluate((el) => el.getBoundingClientRect().width);
     expect(shellWidth).toBeLessThanOrEqual(Math.min(1280, viewport.width));
+
+    const dashboard = page.locator('.dashboard');
+    const rolling = dashboard.locator('> .panel').last();
+    if (viewport.width > 780) {
+      const widths = await Promise.all([
+        dashboard.evaluate((el) => el.getBoundingClientRect().width),
+        rolling.evaluate((el) => el.getBoundingClientRect().width),
+      ]);
+      expect(Math.abs(widths[0] - widths[1])).toBeLessThanOrEqual(2);
+    }
 
     if (viewport.width <= 780) {
       const kpiColumns = await page.locator('#kpis').evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
@@ -61,10 +98,11 @@ test.describe('CuHalide Atlas UI v48.2 presentation contracts', () => {
     });
   });
 
-  test('filters stay compact on mobile and remain fully usable', async ({ page }) => {
+  test('article filters stay compact on mobile and responsive result density remains bounded', async ({ page }, testInfo) => {
     const viewport = page.viewportSize();
     await page.goto('/#articles', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#acount')).toContainText('348 records');
+    await expect(page.locator('#articles .article')).toHaveCount(pageSizeFor(viewport.width, 'articles'));
     await noPageOverflow(page);
 
     if (viewport.width <= 780) {
@@ -83,19 +121,25 @@ test.describe('CuHalide Atlas UI v48.2 presentation contracts', () => {
     } else {
       await expect(page.locator('#arel')).toBeVisible();
     }
+
+    await testInfo.attach(`${testInfo.project.name}-ui-v48-2-articles`, {
+      body: await page.screenshot({ fullPage: true, animations: 'disabled' }),
+      contentType: 'image/png',
+    });
   });
 
-  test('structure register is card-readable on mobile and table-readable otherwise', async ({ page }, testInfo) => {
+  test('structure register is card-readable on mobile, semantically tabular, and density bounded', async ({ page }, testInfo) => {
     const viewport = page.viewportSize();
     await page.goto('/#structures', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#scount')).toContainText('859 rows');
+    await expect(page.locator('#srows tr')).toHaveCount(pageSizeFor(viewport.width, 'structures'));
     await expect(page.locator('#srows tr').first()).toBeVisible();
     await noPageOverflow(page);
 
     if (viewport.width <= 780) {
       const filterPanel = page.locator('#selig').locator('xpath=ancestor::div[contains(@class,"panel")]');
       await expect(filterPanel).toHaveClass(/ui-collapsed/);
-      await expect(page.locator('.view[data-view="structures"] thead')).toBeHidden();
+      await expectAccessibleMobileTableHead(page, 'structures');
       const rowDisplay = await page.locator('#srows tr').first().evaluate((el) => getComputedStyle(el).display);
       expect(rowDisplay).toBe('grid');
       const cellLayout = await page.locator('#srows tr').first().locator('td').first().evaluate((el) => ({
@@ -109,6 +153,31 @@ test.describe('CuHalide Atlas UI v48.2 presentation contracts', () => {
     }
 
     await testInfo.attach(`${testInfo.project.name}-ui-v48-2-structures`, {
+      body: await page.screenshot({ fullPage: true, animations: 'disabled' }),
+      contentType: 'image/png',
+    });
+  });
+
+  test('strict-polar register follows the same readable responsive table contract', async ({ page }, testInfo) => {
+    const viewport = page.viewportSize();
+    await page.goto('/#polar', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#pcount')).toContainText('77 rows');
+    await expect(page.locator('#prows tr')).toHaveCount(pageSizeFor(viewport.width, 'polar'));
+    await noPageOverflow(page);
+
+    if (viewport.width <= 780) {
+      const filterPanel = page.locator('#pq').locator('xpath=ancestor::div[contains(@class,"panel")]');
+      await expect(filterPanel).toHaveClass(/ui-collapsed/);
+      await expectAccessibleMobileTableHead(page, 'polar');
+      const first = page.locator('#prows tr').first();
+      expect(await first.evaluate((el) => getComputedStyle(el).display)).toBe('grid');
+      const label = await first.locator('td').first().evaluate((el) => getComputedStyle(el, '::before').content);
+      expect(label).toContain('Structure');
+    } else {
+      await expect(page.locator('.view[data-view="polar"] thead')).toBeVisible();
+    }
+
+    await testInfo.attach(`${testInfo.project.name}-ui-v48-2-polar`, {
       body: await page.screenshot({ fullPage: true, animations: 'disabled' }),
       contentType: 'image/png',
     });
