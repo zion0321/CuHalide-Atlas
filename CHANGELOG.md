@@ -1,5 +1,59 @@
 # Changelog
 
+## Current Curated rev.2 — 2026-08-13 (rolling state; not a formal Frozen Release)
+
+Current Curated rev.2 is a primary-evidence-reviewed rolling layer over immutable Frozen Release 3.0.2. It is **not** a rewrite of the 3.0.2 frozen snapshot and is not a patch-level formal data-expansion release.
+
+### Current Curated scientific state
+
+- Curated through **2026-08-13**.
+- Article audit / chemically included / canonical verified: **370 / 359 / 356**.
+- Structure/phase / Core-Included: **935 / 873**.
+- Resolved / verified one-to-one space-group rows: **705 / 680**.
+- Verified polar / strict-polar rows: **97 / 77**, with **46** strict-polar articles.
+- Unified Current RAG corpus: **1,305 / 1,305** documents/embeddings.
+- Overlay relative to Frozen 3.0.2: **24 reviewed articles** and **57 reviewed structure/phase determinations**; **19** are frozen-cutoff coverage backfills and **5** are post-cutoff additions.
+- Frozen 3.0.2 denominators remain **346 / 335 / 332 / 878 / 816 / 650 / 625 / 87 / 67 / 42**, with **1,224 / 1,224** Frozen RAG documents/embeddings.
+
+### Motif Atlas 1.1
+
+- Added server-rendered `/motifs` and structure-grain Motif Atlas data under Public Data **2.9.0**.
+- Primary classes: **Coordination**, **Ionic / Hybrid Ionic**, and **All-in-One (AIO)**; unresolved legacy mappings are not forced into a primary class.
+- Taxonomy coverage: **935** rows; **817** motif-resolved, **118** motif-unresolved, **895** primary-classified and **40** unresolved legacy-category rows.
+- Crystallographic determinations by class: Coordination **346**, Ionic / Hybrid Ionic **447**, AIO **102**, unresolved legacy **40**.
+- Article reports, crystallographic determinations and normalized reported identities remain distinct denominators.
+- Primary-evidence curated organic components remain separated from legacy label-derived candidates.
+
+### Smart RAG 9.14 and evidence boundaries
+
+- Unified BGE-M3 + lexical/RRF retrieval now covers **1,305 / 1,305** Current documents/embeddings while retaining the validated Frozen 3.0.2 compatibility path.
+- Added deterministic Current/Motif Atlas facts and structure-grain motif output only where an independent structure taxonomy mapping exists.
+- Model output cannot override Frozen/Current denominators, human scope decisions, verified crystallography, Motif Atlas taxonomy or evidence-grain boundaries.
+- Article-grain photophysics remains protected from silent reassignment to individual structure/phase records.
+
+### Public/private and production governance closure
+
+- Public access remains **query-and-view**; `/api/export` remains **HTTP 410**.
+- Complete normalized tables/raw payloads, exact publisher abstracts, primary PDF/SI/CIF, raw taxonomy/component relations, field-evidence excerpts/locators and internal candidate/QA/adjudication artifacts remain private.
+- `Protect main production` now actively enforces PR provenance, resolved review threads, strict `chromium-production`, `lighthouse-production`, `preview-chromium`, `preview-lighthouse`, trusted `Vercel`, no force-push/deletion and no bypass actor.
+- Added repository-contract regression tests covering release/runtime metadata, export retirement, Record 13 errata state, governance and public-safe migration-history boundaries.
+- Supabase production migration history remains protected: the public repository contains a sanitized public-safe subset, not a replayable clone of all **121** production migration entries.
+
+### Vercel provenance, runtime and sitemap reliability
+
+- Hardened the fail-closed Vercel production gate against GitHub post-merge eventual consistency using dual-source exact merged-PR provenance: commit association first, then recent closed `main` PR records requiring the same `merged_at`, `base.ref` and exact `merge_commit_sha` predicates.
+- All four trusted GitHub Actions checks and the trusted successful Vercel candidate status remain mandatory after provenance resolution; API failures and exhausted provenance checks remain fail-closed.
+- Declared the repository's JavaScript runtime as ESM via `"type": "module"`, eliminating Vercel's ESM-to-CommonJS build warning.
+- Kept the Vercel project Node **24.x** runtime as production source of truth and aligned production-browser, production-Lighthouse and both protected-preview QA jobs to Node **24**.
+- Reworked sitemap pagination from serial retrieval to page-1 denominator establishment plus bounded concurrent page fetching, preserving per-page retry/timeout and exact pagination consistency checks.
+- Public sitemap invariant remains **1,231 URLs** = root + Motif Atlas + **356** Current canonical articles + **873** Current Core-Included structures.
+- Final production merge **`b137ad7afcbe89fefecd642283a12ccbb03c975f`** passed the production provenance gate, deployed successfully and completed post-merge production Chromium and Lighthouse QA successfully.
+- Final production runtime inspection found no error/fatal logs and no 5xx responses in the inspected post-deployment window; Supabase Current/Frozen/Projection/Halogen/RAG health contracts all remained true and Security Advisor remained at **0 findings**.
+
+The Supabase GitHub App may still emit a non-required migration-history check because the public repository deliberately omits private production migration statements. This external integration signal must not be “fixed” by publishing private migrations or adding fake/no-op timestamps.
+
+See `docs/CURRENT_CURATED_R2_2026-08-13.md`, `docs/PRODUCTION_STATUS_V48_CURRENT_R2_2026-08-13.md` and `docs/FINAL_CURRENT_R2_PRODUCTION_AUDIT_2026-08-13.md`.
+
 ## 3.0.2 — 2026-08-11
 
 Release 3.0.2 is a scientific hotfix over 3.0.1. The historical 3.0.1 archive remains immutable. The hotfix adds no new literature and changes no frozen scientific denominator.
