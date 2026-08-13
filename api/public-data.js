@@ -1,6 +1,7 @@
 const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
-const PUBLIC_DATA_VERSION = '2.8.0';
+const PUBLIC_DATA_VERSION = '2.9.0';
+const CURRENT_REVISION = '2';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function fetchWithRetry(url, req) {
@@ -12,12 +13,8 @@ async function fetchWithRetry(url, req) {
     try {
       const response = await fetch(url, {
         method: req.method,
-        headers: {
-          accept: req.headers.accept || 'application/json',
-          'user-agent': req.headers['user-agent'] || `CuHalide-Atlas-Vercel-Public-Data/${PUBLIC_DATA_VERSION}`,
-        },
-        redirect: 'follow',
-        signal: controller.signal,
+        headers: { accept: req.headers.accept || 'application/json', 'user-agent': req.headers['user-agent'] || `CuHalide-Atlas-Vercel-Public-Data/${PUBLIC_DATA_VERSION}` },
+        redirect: 'follow', signal: controller.signal,
       });
       clearTimeout(timer);
       lastResponse = response;
@@ -35,40 +32,21 @@ async function fetchWithRetry(url, req) {
 }
 
 export default async function handler(req, res) {
-  if (!['GET', 'HEAD'].includes(req.method)) {
-    res.statusCode = 405;
-    res.setHeader('Allow', 'GET, HEAD');
-    return res.end('Method Not Allowed');
-  }
+  if (!['GET', 'HEAD'].includes(req.method)) { res.statusCode = 405; res.setHeader('Allow', 'GET, HEAD'); return res.end('Method Not Allowed'); }
   try {
-    const incoming = new URL(req.url, PUBLIC_ORIGIN);
-    const upstream = new URL(UPSTREAM);
+    const incoming = new URL(req.url, PUBLIC_ORIGIN), upstream = new URL(UPSTREAM);
     for (const [key, value] of incoming.searchParams.entries()) upstream.searchParams.append(key, value);
     const response = await fetchWithRetry(upstream, req);
     res.statusCode = response.status;
     res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-    res.setHeader('X-CuHalide-Public-Access', 'query-and-view');
-    for (const h of ['x-cuhalide-release', 'x-cuhalide-public-data-version', 'x-cuhalide-current-curated-revision']) {
-      const v = response.headers.get(h);
-      if (v) res.setHeader(h, v);
-    }
+    res.setHeader('Cache-Control', 'no-store'); res.setHeader('X-Content-Type-Options', 'nosniff'); res.setHeader('X-Robots-Tag', 'noindex, nofollow'); res.setHeader('X-CuHalide-Public-Access', 'query-and-view');
+    for (const h of ['x-cuhalide-release','x-cuhalide-public-data-version','x-cuhalide-current-curated-revision']) { const v=response.headers.get(h); if(v)res.setHeader(h,v); }
     if (!res.getHeader('X-CuHalide-Public-Data-Version')) res.setHeader('X-CuHalide-Public-Data-Version', PUBLIC_DATA_VERSION);
-    if (!res.getHeader('X-CuHalide-Current-Curated-Revision')) res.setHeader('X-CuHalide-Current-Curated-Revision', '1');
+    if (!res.getHeader('X-CuHalide-Current-Curated-Revision')) res.setHeader('X-CuHalide-Current-Curated-Revision', CURRENT_REVISION);
     if (req.method === 'HEAD') return res.end();
     return res.end(await response.text());
   } catch (error) {
-    console.error('[cuhalide-public-data-proxy]', error);
-    res.statusCode = error?.name === 'AbortError' ? 504 : 502;
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('X-CuHalide-Public-Data-Version', PUBLIC_DATA_VERSION);
-    res.setHeader('X-CuHalide-Current-Curated-Revision', '1');
-    return res.end(JSON.stringify({
-      error: error?.name === 'AbortError' ? 'CuHalide Atlas public data backend timed out.' : 'CuHalide Atlas public data backend is temporarily unavailable.',
-      release: '3.0.2', version: PUBLIC_DATA_VERSION,
-    }));
+    console.error('[cuhalide-public-data-proxy]', error); res.statusCode = error?.name === 'AbortError' ? 504 : 502; res.setHeader('Content-Type','application/json; charset=utf-8'); res.setHeader('Cache-Control','no-store'); res.setHeader('X-CuHalide-Public-Data-Version',PUBLIC_DATA_VERSION); res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);
+    return res.end(JSON.stringify({error:error?.name==='AbortError'?'CuHalide Atlas public data backend timed out.':'CuHalide Atlas public data backend is temporarily unavailable.',release:'3.0.2',version:PUBLIC_DATA_VERSION}));
   }
 }
