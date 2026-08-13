@@ -194,7 +194,7 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.1 production contracts
     expect(rag.corpus.unified_documents).toBe(1283);
     expect(rag.corpus.unified_embedded).toBe(1283);
     expect(rag.capabilities.current_curated_retrieval).toBe(true);
-    expect(rag.capabilities.temporal_scope_guard).toBe(true);
+    expect(rag.capabilities.deterministic_temporal_scope).toBe(true);
 
     const temporalResponse = await request.post('/api/agent', { data: { messages: [{ role: 'user', content: 'What is the literature cutoff, how current is Current Curated, and what does Literature Watch mean?' }] } });
     expect(temporalResponse.status()).toBe(200);
