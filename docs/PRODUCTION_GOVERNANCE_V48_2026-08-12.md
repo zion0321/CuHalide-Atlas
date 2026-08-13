@@ -45,6 +45,8 @@ For a Vercel Git deployment with `VERCEL_ENV=production`, `scripts/vercel-produc
 
 For repeated check/status names, the highest GitHub record ID is treated as the latest result so an older success cannot mask a newer failure.
 
+GitHub's commit-to-pull association can be briefly eventually consistent immediately after a merge, while Vercel can start the production Ignored Build Step almost immediately. The gate therefore retries **only** the merge-association lookup for a short bounded window (8 attempts, 1.5 seconds apart). As soon as the exact merged PR becomes visible, all original provenance checks apply unchanged. If the association never appears, an API call fails, or any required QA/Vercel evidence is invalid, the gate still fails closed. This removes false deployment skips caused by a read-side race without creating a bypass path.
+
 Vercel Ignored Build Step semantics are intentionally inverted from ordinary shell success semantics: exit code `1` continues the build and exit code `0` ignores the build. The gate therefore returns the ignore code when production provenance cannot be verified. A skipped build leaves the currently serving production deployment unchanged.
 
 ## Protected Preview candidate validation
@@ -89,7 +91,7 @@ Public access remains **query-and-view**. `/api/export` remains HTTP 410. Comple
 
 Normal public-web changes follow:
 
-`feature/hardening branch -> PR -> Vercel Preview READY/status success -> exact candidate SHA local runtime -> preview-chromium + preview-lighthouse -> production baseline checks -> merge to main -> Vercel provenance gate -> production deployment or safe skip -> full post-merge production QA`
+`feature/hardening branch -> PR -> Vercel Preview READY/status success -> exact candidate SHA local runtime -> preview-chromium + preview-lighthouse -> production baseline checks -> merge to main -> bounded merge-association recovery -> Vercel provenance gate -> production deployment or safe skip -> full post-merge production QA`
 
 Scientific data changes additionally require the Current Curated/release-wide curation gates described in `docs/LIVE_CURATION_WORKFLOW_2026-08-11.md`.
 

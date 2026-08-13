@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   REQUIRED_CHECKS,
   evaluateProductionGate,
+  findMergedMainPullRequestWithRetry,
   latestCommitStatuses,
   latestGithubActionsChecks,
   selectMergedMainPullRequest,
@@ -85,6 +86,50 @@ test('production commit must be the exact merge result of a merged PR into main'
   ], MERGE_SHA), null);
 
   assert.equal(selectMergedMainPullRequest([mergedPr()], MERGE_SHA)?.number, 16);
+});
+
+test('merge association retries boundedly until GitHub exposes the merged PR', async () => {
+  let fetchCalls = 0;
+  let sleepCalls = 0;
+  const result = await findMergedMainPullRequestWithRetry({
+    commitSha: MERGE_SHA,
+    attempts: 4,
+    delayMs: 0,
+    fetchPulls: async () => {
+      fetchCalls += 1;
+      return fetchCalls < 3 ? [] : [mergedPr()];
+    },
+    sleepFn: async () => {
+      sleepCalls += 1;
+    },
+  });
+
+  assert.equal(result.pullRequest?.number, 16);
+  assert.equal(result.attempt, 3);
+  assert.equal(fetchCalls, 3);
+  assert.equal(sleepCalls, 2);
+});
+
+test('merge association retry remains fail-closed after the bounded window', async () => {
+  let fetchCalls = 0;
+  let sleepCalls = 0;
+  const result = await findMergedMainPullRequestWithRetry({
+    commitSha: MERGE_SHA,
+    attempts: 3,
+    delayMs: 0,
+    fetchPulls: async () => {
+      fetchCalls += 1;
+      return [];
+    },
+    sleepFn: async () => {
+      sleepCalls += 1;
+    },
+  });
+
+  assert.equal(result.pullRequest, null);
+  assert.equal(result.attempt, 3);
+  assert.equal(fetchCalls, 3);
+  assert.equal(sleepCalls, 2);
 });
 
 test('all four baseline and candidate checks are required', () => {
