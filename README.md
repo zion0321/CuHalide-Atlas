@@ -9,74 +9,70 @@ CuHalide Atlas is an evidence-grounded, structure-resolved knowledge portal for 
 CuHalide Atlas deliberately separates an immutable citation snapshot from a rolling reviewed layer:
 
 - **Frozen Release 3.0.2** — released 2026-08-11; literature cutoff **June 2026, inclusive through 2026-06-30**; immutable.
-- **Current Curated rev.1** — based on 3.0.2; curated through **2026-08-12**; primary-evidence reviewed and QC-gated.
+- **Current Curated rev.2** — based on 3.0.2; curated through **2026-08-13**; primary-evidence reviewed and QC-gated.
 - **Literature Watch** — metadata-only discovery. Its sync timestamp is operational metadata and is **not** a release cutoff or curation date.
 
 The website defaults to **Current Curated** for query-and-view exploration while retaining an explicit Frozen Release scope for reproducible citation and denominator checks.
 
 ## Scientific denominators
 
-| Metric | Frozen 3.0.2 | Current Curated rev.1 |
+| Metric | Frozen 3.0.2 | Current Curated rev.2 |
 |---|---:|---:|
-| Article audit records | 346 | 362 |
-| Chemically included articles | 335 | 351 |
-| Canonical verified articles | 332 | 348 |
-| Structure / phase rows | 878 | 921 |
-| Core-Included structure rows | 816 | 859 |
-| Resolved space-group rows | 650 | 693 |
-| Verified one-to-one SG mappings | 625 | 668 |
+| Article audit records | 346 | 370 |
+| Chemically included articles | 335 | 359 |
+| Canonical verified articles | 332 | 356 |
+| Structure / phase rows | 878 | 935 |
+| Core-Included structure rows | 816 | 873 |
+| Resolved space-group rows | 650 | 705 |
+| Verified one-to-one SG mappings | 625 | 680 |
 | Verified polar rows | 87 | 97 |
 | Strict-polar rows | 67 | 77 |
 | Strict-polar articles | 42 | 46 |
-| RAG documents / embeddings | 1,224 / 1,224 | 1,283 / 1,283 |
+| RAG documents / embeddings | 1,224 / 1,224 | 1,305 / 1,305 |
 
-Current Curated rev.1 adds **16 reviewed articles** and **43 independent structure/phase determinations**. Fourteen articles are coverage backfills dated on or before 2026-06-30; two are post-cutoff additions. Four additional provenance links connect new articles to already known chemical/phase identities without duplicating those identities.
+Current Curated rev.2 contains **24 reviewed overlay articles** and **57 overlay structure/phase determinations** relative to Frozen 3.0.2. Nineteen overlay articles are coverage backfills dated on or before 2026-06-30; five are post-cutoff additions. Frozen Release 3.0.2 denominators are not changed by Current Curated.
 
-Frozen Release 3.0.2 denominators are not changed by Current Curated.
+## Motif Atlas
+
+The public **Motif Atlas** adds a structure-level taxonomy for Cu–halide building units without exposing the private curation corpus.
+
+Primary material classes are:
+- **Coordination**
+- **Ionic / Hybrid Ionic**
+- **All-in-One (AIO)**
+
+Historical mixed/ambiguous labels are kept as **Unresolved legacy mapping** rather than forced into one of the three primary classes.
+
+Three denominators are deliberately separated: **article reports**, **crystallographic determinations**, and **normalized reported identities**. The current taxonomy covers 935 structure/phase rows; 817 have a resolved normalized Cu–X motif and 118 remain motif-unresolved. Primary-evidence curated ligand/cation identities are kept separate from legacy label-derived candidates.
 
 ## Production versions
 
 - Frozen scientific release: **3.0.2**
 - Public site: **v48**
-- Public Data: **2.8.0**
-- Smart RAG: **9.13.0**
-- Metadata / health: **48.1**
-- Current Curated: **rev.1**, through **2026-08-12**
+- UI/content layer: **48.3**
+- Public Data: **2.9.0**
+- Smart RAG: **9.14.0**
+- Metadata / health: **48.3**
+- Motif Atlas schema: **1.1**
+- Current Curated: **rev.2**, through **2026-08-13**
 
 ## Public/private boundary
 
-Public access is **query-and-view**, not bulk redistribution.
+Public access is **query-and-view**, not bulk redistribution. Public interfaces expose selected bibliographic, structure, crystallographic, motif-taxonomy, scope and evidence-status fields through server-side field-whitelisted queries and stable record pages. Smart RAG uses source-linked public records and deterministic scientific boundaries.
 
-Public interfaces expose selected bibliographic, structure, crystallographic, scope and evidence-status fields through server-side field-whitelisted queries and stable record pages. Smart RAG uses source-linked public records and deterministic scientific boundaries.
-
-The following remain private research assets:
-
-- complete normalized tables and raw payloads;
-- exact stored publisher abstracts;
-- primary PDF, SI and CIF archives;
-- field-evidence excerpts and locators;
-- candidate relevance scores, reason codes and source payloads;
-- internal QA, adjudication and curation artifacts.
+The following remain private research assets: complete normalized tables and raw payloads; exact stored publisher abstracts; primary PDF, SI and CIF archives; field-evidence excerpts and locators; candidate relevance scores, reason codes and source payloads; internal QA, adjudication and curation artifacts.
 
 `/api/export` intentionally returns **HTTP 410 Gone**.
 
-## Smart RAG 9.13
+## Smart RAG 9.14
 
-Smart RAG 9.13.0 combines:
+Smart RAG 9.14.0 combines the validated Frozen Release 3.0.2 evidence path; Current Curated rev.1 + rev.2 incremental evidence; unified BGE-M3 + lexical/RRF retrieval across **1,305** embedded documents; deterministic answers for protected counts, temporal scope, reviewed current records and Motif Atlas statistics; structure-grain evidence guards; structure-level motif output only when taxonomy provides an independent mapping; and source-constrained interpretation/safe fallback.
 
-1. the validated Frozen Release 3.0.2 evidence path;
-2. a Current Curated rev.1 exact/retrieval layer;
-3. unified BGE-M3 + lexical/RRF retrieval across **1,283** embedded documents;
-4. deterministic answers for protected counts, temporal scope and reviewed current records;
-5. structure-grain evidence guards preventing article-level photophysics or unmapped motif claims from being silently reassigned to an individual structure/phase;
-6. source-constrained interpretation and safe fallback when optional model capacity is unavailable.
-
-Model output cannot override frozen/current denominators, human scope decisions, crystallographic mappings or evidence-grain boundaries.
+Model output cannot override frozen/current denominators, human scope decisions, crystallographic mappings, motif taxonomy or evidence-grain boundaries.
 
 ## Record 13
 
 Frozen Release 3.0.2 physically incorporates the confirmed dimensionality corrections:
-
 - `CUH-013-S01` → **Unresolved**
 - `CUH-013-S02` → **0D**
 - `CUH-013-S03` → **0D**
@@ -86,34 +82,18 @@ Historical 3.0.1 errata remain audit history only.
 
 ## Production governance
 
-`main` is protected by the active repository ruleset **Protect main production**. It requires:
-
-- pull-request merge into the default branch;
-- branch up-to-date before merge;
-- resolved review conversations;
-- successful `chromium-production`;
-- successful `lighthouse-production`;
-- successful `preview-chromium`;
-- successful `preview-lighthouse`;
-- successful trusted `Vercel` status;
-- no force push;
-- no branch deletion;
-- no bypass actors.
-
-A second, fail-closed Vercel production provenance gate independently verifies that a production SHA is the merge result of a reviewed PR whose candidate and production-baseline checks passed.
+Production uses pull-request provenance, protected candidate QA and a fail-closed Vercel deployment gate. The required candidate/production checks include Chromium browser QA, Lighthouse QA and trusted Vercel deployment status. Direct production deployment is rejected unless the production SHA is the merge result of a qualifying PR.
 
 ## Citation
 
-For frozen, reproducible claims, cite **CuHalide Atlas Frozen Release 3.0.2 (11 August 2026)** and the relevant primary literature.
-
-For rolling **Current Curated** results, also report the **access date and live revision**. Literature Watch candidates are not curated evidence and should not be cited as Atlas scientific records until promoted through primary-evidence review and QC.
+For frozen, reproducible claims, cite **CuHalide Atlas Frozen Release 3.0.2 (11 August 2026)** and the relevant primary literature. For rolling **Current Curated** results, also report the **access date and live revision**. Literature Watch candidates are not curated evidence and should not be cited as Atlas scientific records until promoted through primary-evidence review and QC.
 
 Permanent repository DOI and blanket project licensing are not asserted until owner-authorized archival metadata and rights decisions are complete.
 
 ## Repository layout
 
-- `api/` — Vercel read-only public handlers and stable record/sitemap rendering.
-- `public/` — version-controlled interface template and social asset.
+- `api/` — Vercel read-only public handlers and stable record/sitemap/Motif Atlas rendering.
+- `public/` — version-controlled interface template and presentation assets.
 - `tests/` — browser/scientific/privacy/accessibility and deployment-gate regression tests.
 - `.github/workflows/` — production baseline, protected-preview candidate and Lighthouse gates.
 - `supabase/functions/` — versioned production-facing Supabase runtime sources.
@@ -123,4 +103,4 @@ Permanent repository DOI and blanket project licensing are not asserted until ow
 
 Private Current Curated promoted rows are intentionally not published as a bulk SQL/data dump.
 
-See `docs/CURRENT_CURATED_R1_2026-08-12.md` and `docs/PRODUCTION_STATUS_V48_CURRENT_R1_2026-08-13.md` for the current rolling-state audit.
+See `docs/CURRENT_CURATED_R2_2026-08-13.md` and `docs/PRODUCTION_STATUS_V48_CURRENT_R2_2026-08-13.md` for the current rolling-state audit.
