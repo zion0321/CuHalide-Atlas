@@ -74,7 +74,7 @@ Relational/public-projection audit returned:
 - unexpected evidence labels: **0**
 - unexpected halogen labels: **0**
 
-Projection integrity uses SHA-256 and the article/structure projection checks both matched. Anonymous/authenticated roles have no direct public-projection table reads or projection-query RPC execution; service-role reads are bounded and update privileges are absent on the frozen public projections.
+Projection integrity uses SHA-256 and the article/structure projection checks both matched. A direct privilege scan returned **zero** `anon`/`authenticated` table grants and **zero** `anon`/`authenticated` routine grants in the `public` schema. Public browser access is therefore mediated through bounded Edge/Vercel wrappers rather than direct database objects.
 
 ## Motif Atlas
 
@@ -115,13 +115,17 @@ Supabase Security Advisor returned **0 findings** in the final audit. Performanc
 
 Public access remains query-and-view. `/api/export` remains HTTP 410. Complete normalized tables, exact publisher abstracts, primary PDF/SI/CIF, raw taxonomy/component relations, field-evidence excerpts/locators and internal candidate/QA/adjudication artifacts remain private.
 
-Public unauthenticated Edge wrappers are limited to read-only/query-only public contracts. Scheduled metadata discovery retains JWT plus a separate private cron-token boundary. Historical canary/debug/ephemeral function names are not treated as public dependencies merely because the deployment object remains `ACTIVE`; source and JWT/retirement status are authoritative.
+Public unauthenticated Edge wrappers are limited to read-only/query-only public contracts. Scheduled metadata discovery retains JWT plus a separate private cron-token boundary. Historical canary/debug/ephemeral function names are not treated as public dependencies merely because the deployment object remains `ACTIVE`; source and JWT/retirement status are authoritative. Spot checks of historical `release-export`, `debug` and Current indexer endpoints confirmed JWT-required HTTP 410 retirement stubs.
 
 ## GitHub and Vercel production governance
 
 The active default-branch ruleset `Protect main production` requires PR provenance, resolved review threads, strict required checks, the four Chromium/Lighthouse production/candidate checks, trusted Vercel status, no force push, no branch deletion and no bypass actor.
 
-PR #21 published Current Curated rev.2 and Motif Atlas after the required candidate/production gates. PR #22 synchronized Supabase governance documentation. Post-merge production Chromium and Lighthouse QA for PR #22 both completed successfully; the documentation-only Vercel production attempt was safely skipped by the fail-closed Ignored Build Step, leaving the already validated rev.2 production deployment serving.
+PR #21 published Current Curated rev.2 and Motif Atlas after the required candidate/production gates. PR #22 synchronized Supabase governance documentation. PR #23 completed repository identity/policy cleanup and added required repository-contract regression tests to `chromium-production`; its exact candidate passed `chromium-production`, `lighthouse-production`, `preview-chromium`, `preview-lighthouse` and trusted Vercel status before merge.
+
+A Vercel build-log audit of the PR #23 merge exposed one operational race: Vercel started its Ignored Build Step immediately after merge, before GitHub's `commit -> pull request` association endpoint exposed the already-merged PR, so the fail-closed gate safely skipped that deployment with `commit is not the merge result of a merged PR into main`. The existing rev.2 production deployment remained serving and post-merge browser/Lighthouse validation was independent of that skip.
+
+The production gate is therefore hardened to retry **only** that eventually-consistent merge-association lookup for a bounded window (8 × 1.5 s). The exact PR, four required GitHub Actions checks and trusted Vercel candidate status remain mandatory; API failures or absent evidence still fail closed. Unit tests cover both recovery after delayed association and failure after the bounded retry window.
 
 ## Supabase GitHub integration boundary
 
