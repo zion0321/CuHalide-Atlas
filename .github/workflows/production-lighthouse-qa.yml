@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      CUHALIDE_BASE_URL: https://cuhalide-atlas-v3.vercel.app
+      CUHALIDE_BASE_URL: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173' || 'https://cuhalide-atlas-v3.vercel.app' }}
       CI: 'true'
     steps:
       - name: Checkout
@@ -37,17 +37,44 @@ jobs:
       - name: Install locked QA dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
+      - name: Start exact pull-request candidate runtime
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/local-candidate-server.mjs > candidate-server.log 2>&1 &
+          echo $! > candidate-server.pid
+          for i in $(seq 1 45); do
+            if curl --fail --silent --show-error "$CUHALIDE_BASE_URL/health.json" > /tmp/cuhalide-required-lighthouse-health.json; then
+              cat /tmp/cuhalide-required-lighthouse-health.json
+              exit 0
+            fi
+            sleep 1
+          done
+          cat candidate-server.log >&2 || true
+          exit 1
+
       - name: Install Chromium and system dependencies
         run: npx playwright install --with-deps chromium
 
-      - name: Run Lighthouse production gate
+      - name: Run required Lighthouse quality gate
         run: npm run qa:lighthouse
+
+      - name: Stop exact pull-request candidate runtime
+        if: always() && github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          if [ -f candidate-server.pid ]; then
+            kill "$(cat candidate-server.pid)" 2>/dev/null || true
+          fi
 
       - name: Upload Lighthouse reports
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: production-lighthouse-qa-${{ github.run_id }}
-          path: lighthouse-report/
+          path: |
+            lighthouse-report/
+            candidate-server.log
           if-no-files-found: warn
           retention-days: 30

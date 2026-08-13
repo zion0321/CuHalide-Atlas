@@ -1,6 +1,7 @@
 import siteHandler from './site.js';
 
 const UI_VERSION = '48.2';
+const ICON_LINK = '<link rel="icon" href="/favicon.svg" type="image/svg+xml">';
 const STYLE_LINK = '<link rel="stylesheet" href="/ui-v48-2.css?v=48.2">';
 const SCRIPT_LINK = '<script src="/ui-v48-2.js?v=48.2" defer></script>';
 const UI_MARKER = '<!-- CUHALIDE_UI_V48_2 -->';
@@ -9,7 +10,7 @@ function enhanceHtml(body) {
   if (typeof body !== 'string' || !body.includes('</head>') || !body.includes('</body>')) return body;
   if (body.includes('ui-v48-2.css') || body.includes('ui-v48-2.js')) throw new Error('UI v48.2 assets already injected');
   return body
-    .replace('</head>', `${STYLE_LINK}\n</head>`)
+    .replace('</head>', `${ICON_LINK}\n${STYLE_LINK}\n</head>`)
     .replace('</body>', `${SCRIPT_LINK}\n${UI_MARKER}\n</body>`);
 }
 
