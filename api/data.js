@@ -1,7 +1,8 @@
 const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
 const RELEASE = '3.0.2';
-const PUBLIC_DATA_VERSION = '2.7.0';
+const PUBLIC_DATA_VERSION = '2.8.0';
+const CURRENT_REVISION = '1';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function fetchWithRetry(url, req) {
@@ -15,7 +16,7 @@ async function fetchWithRetry(url, req) {
         method: req.method,
         headers: {
           accept: req.headers.accept || 'application/json',
-          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Legacy-Data/48',
+          'user-agent': req.headers['user-agent'] || 'CuHalide-Atlas-Vercel-Legacy-Data/48.1',
         },
         redirect: 'follow',
         signal: controller.signal,
@@ -54,6 +55,7 @@ export default async function handler(req, res) {
     res.setHeader('X-CuHalide-Public-Access', 'query-and-view');
     res.setHeader('X-CuHalide-Release', response.headers.get('x-cuhalide-release') || RELEASE);
     res.setHeader('X-CuHalide-Public-Data-Version', response.headers.get('x-cuhalide-public-data-version') || PUBLIC_DATA_VERSION);
+    res.setHeader('X-CuHalide-Current-Curated-Revision', response.headers.get('x-cuhalide-current-curated-revision') || CURRENT_REVISION);
     res.setHeader('Warning', '299 - Legacy /api/data route exposes only the minimized public query contract.');
     if (req.method === 'HEAD') return res.end();
     return res.end(await response.text());
@@ -67,9 +69,11 @@ export default async function handler(req, res) {
     res.setHeader('X-CuHalide-Public-Access', 'query-and-view');
     res.setHeader('X-CuHalide-Release', RELEASE);
     res.setHeader('X-CuHalide-Public-Data-Version', PUBLIC_DATA_VERSION);
+    res.setHeader('X-CuHalide-Current-Curated-Revision', CURRENT_REVISION);
     return res.end(JSON.stringify({
       error: 'CuHalide Atlas public data service is temporarily unavailable.',
       release: RELEASE,
+      version: PUBLIC_DATA_VERSION,
       public_access: 'query-and-view'
     }));
   }

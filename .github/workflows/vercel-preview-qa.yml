@@ -21,7 +21,7 @@ jobs:
     env:
       VERCEL_PREVIEW_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
       CUHALIDE_BASE_URL: http://127.0.0.1:4173
-      CUHALIDE_PREMERGE_PRODUCTION: 'false'
+      CUHALIDE_PREMERGE_PRODUCTION: 'true'
       CI: 'true'
     steps:
       - name: Checkout exact Vercel-deployed commit

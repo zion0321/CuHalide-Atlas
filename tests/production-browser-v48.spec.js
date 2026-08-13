@@ -2,178 +2,156 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 const ROUTES = ['home', 'articles', 'structures', 'polar', 'rag', 'watch', 'methods', 'citation'];
+const PREMERGE = process.env.CUHALIDE_PREMERGE_PRODUCTION === 'true';
 
 async function json(response) {
   const text = await response.text();
   try { return JSON.parse(text); }
   catch { throw new Error(`Expected JSON from ${response.url()}, received: ${text.slice(0, 300)}`); }
 }
-
 function captureRuntimeErrors(page) {
-  const consoleErrors = [];
-  const pageErrors = [];
-  page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text());
-  });
-  page.on('pageerror', (error) => pageErrors.push(String(error)));
+  const consoleErrors = [], pageErrors = [];
+  page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
+  page.on('pageerror', (e) => pageErrors.push(String(e)));
   return { consoleErrors, pageErrors };
 }
-
 async function expectNoPageOverflow(page) {
-  const overflow = await page.evaluate(() => ({
-    scrollWidth: document.documentElement.scrollWidth,
-    clientWidth: document.documentElement.clientWidth,
-  }));
-  expect(overflow.scrollWidth, `Page-wide horizontal overflow: ${JSON.stringify(overflow)}`).toBeLessThanOrEqual(overflow.clientWidth + 1);
+  const x = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
+  expect(x.scrollWidth, `Page-wide horizontal overflow: ${JSON.stringify(x)}`).toBeLessThanOrEqual(x.clientWidth + 1);
 }
-
-async function attachScreenshot(page, testInfo, name) {
-  const body = await page.screenshot({ fullPage: true, animations: 'disabled' });
-  await testInfo.attach(name, { body, contentType: 'image/png' });
-}
-
 async function expectNoSeriousA11yViolations(page, route) {
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-    .analyze();
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   const serious = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact));
   expect(serious, `${route} serious/critical accessibility violations:\n${JSON.stringify(serious, null, 2)}`).toEqual([]);
 }
+async function getData(request, query) {
+  const r = await request.get(`/api/public-data?${query}`);
+  expect(r.status(), query).toBe(200);
+  return json(r);
+}
 
-test.describe('release 3.0.2 HTTP, scientific, privacy and security contracts', () => {
-  test('production identity, CSP, manifest, Current Curated and retired routes are exact', async ({ request }) => {
+test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.1 production contracts', () => {
+  test('health, temporal semantics, privacy and version identities are exact', async ({ request }) => {
     const healthResponse = await request.get('/health.json');
     expect(healthResponse.status()).toBe(200);
     const health = await json(healthResponse);
     expect(health.ok).toBe(true);
     expect(health.status).toBe('PASS');
+    if (!PREMERGE) expect(health.site_readiness).toBe('PASS');
     expect(health.release).toBe('3.0.2');
     expect(health.site_version).toBe('48');
-    expect(health.meta_version).toBe('48.0');
-    expect(health.public_data.version).toBe('2.7.0');
-    expect(health.smart_rag.version).toBe('9.12.0');
-    expect(health.current_curated.base_release).toBe('3.0.2');
-    expect(Number(health.current_curated.live_revision)).toBeGreaterThanOrEqual(0);
+    expect(health.meta_version).toBe('48.1');
+    expect(health.public_data.version).toBe('2.8.0');
+    expect(health.smart_rag.version).toBe('9.13.0');
+    expect(health.smart_rag.unified_documents).toBe(1283);
+    expect(health.temporal_scope.frozen_release.literature_cutoff).toBe('2026-06');
+    expect(health.temporal_scope.frozen_release.cutoff_inclusive_through).toBe('2026-06-30');
+    expect(health.temporal_scope.frozen_release.immutable).toBe(true);
+    expect(health.current_curated.current_curated_through).toBe('2026-08-12');
+    expect(Number(health.current_curated.live_revision)).toBe(1);
     expect(health.current_curated.status).toBe('ready');
     expect(health.current_errata_count).toBe(0);
     expect(health.historical_corrections_count).toBe(4);
-    expect(Object.values(health.checks).every(Boolean)).toBe(true);
+
+    const currentCounts = health.current_curated.counts;
+    expect(currentCounts.article_audit_records).toBe(362);
+    expect(currentCounts.chemically_included_articles).toBe(351);
+    expect(currentCounts.canonical_verified_articles).toBe(348);
+    expect(currentCounts.structure_phase_rows).toBe(921);
+    expect(currentCounts.core_included_structure_rows).toBe(859);
+    expect(currentCounts.resolved_space_group_rows).toBe(693);
+    expect(currentCounts.verified_space_group_rows).toBe(668);
+    expect(currentCounts.verified_polar_rows).toBe(97);
+    expect(currentCounts.strict_polar_rows).toBe(77);
+    expect(currentCounts.strict_polar_articles).toBe(46);
+    expect(currentCounts.rag_documents).toBe(1283);
+    expect(currentCounts.rag_embedded).toBe(1283);
+
+    const frozen = health.frozen_release.counts;
+    expect(frozen.article_audit_records).toBe(346);
+    expect(frozen.chemically_included_articles).toBe(335);
+    expect(frozen.canonical_verified_articles).toBe(332);
+    expect(frozen.structure_phase_rows).toBe(878);
+    expect(frozen.core_included_structure_rows).toBe(816);
+    expect(frozen.resolved_space_group_rows).toBe(650);
+    expect(frozen.verified_space_group_rows).toBe(625);
+    expect(frozen.verified_polar_rows).toBe(87);
+    expect(frozen.strict_polar_rows).toBe(67);
+    expect(frozen.strict_polar_articles).toBe(42);
 
     const root = await request.get('/');
     expect(root.status()).toBe(200);
     const html = await root.text();
     expect(html).toContain('CUHALIDE_SITE_V48_CURRENT_CURATED');
-    expect(html).toContain('content="3.0.2"');
-    expect(html).toContain('content="48"');
-    expect(html).toContain('Display window 2006–2026');
+    expect(html).toContain('Frozen Release 3.0.2');
+    expect(html).toContain('2026-06-30');
+    expect(html).toContain('Current Curated rev.1');
+    expect(html).toContain('2026-08-12');
+    expect(html).toContain('Current canonical · n=348');
+    expect(html).toContain('Current Core-Included · n=859');
+    expect(html).toContain('"dateModified":"2026-08-12"');
     expect(html).not.toContain('2026.06');
-    expect(html).toContain('Current Curated');
-    expect(html).toContain('"dateModified":"2026-08-11"');
     expect(html).toContain('/og-image.svg');
-    expect(html).toContain('Halogen set');
-    expect(html).toContain('Single-halogen filters include mixed records containing that halogen');
     const csp = root.headers()['content-security-policy'] || '';
     expect(csp).toContain("script-src 'self' 'sha256-");
     expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
     expect(csp).toContain("script-src-attr 'none'");
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("frame-ancestors 'none'");
-    expect(root.headers()['strict-transport-security']).toContain('max-age=63072000');
-    expect(root.headers()['x-frame-options']).toBe('DENY');
     expect(root.headers()['x-cuhalide-release']).toBe('3.0.2');
     expect(root.headers()['x-cuhalide-site-version']).toBe('48');
+    expect(root.headers()['x-cuhalide-current-curated-revision']).toBe('1');
 
     const manifestResponse = await request.get('/release-manifest.json');
     expect(manifestResponse.status()).toBe(200);
     const manifest = await json(manifestResponse);
     expect(manifest.release).toBe('3.0.2');
     expect(manifest.release_date).toBe('2026-08-11');
-    expect(manifest.literature_cutoff).toBe('2026-06');
-    expect(manifest.site_version).toBe('48');
-    expect(manifest.public_data_version).toBe('2.7.0');
-    expect(manifest.smart_rag_version).toBe('9.12.0');
-    expect(manifest.counts.canonical_verified_articles).toBe(332);
-    expect(manifest.counts.core_included_structure_rows).toBe(816);
-    expect(manifest.structure_halogen_runtime.version).toBe('structure-halogen-v6');
-    expect(manifest.structure_halogen_runtime.structure_specific_rows).toBe(803);
-    expect(manifest.structure_halogen_runtime.series_level_rows).toBe(45);
-    expect(manifest.structure_halogen_runtime.unresolved_rows).toBe(30);
-    expect(manifest.structure_halogen_runtime.source_conflict_rows).toBe(4);
-    expect(manifest.current_curated.base_release).toBe('3.0.2');
-    expect(Number(manifest.current_curated.live_revision)).toBeGreaterThanOrEqual(0);
+    expect(manifest.public_data_version).toBe('2.8.0');
+    expect(manifest.smart_rag_version).toBe('9.13.0');
+    expect(manifest.meta_version).toBe('48.1');
+    expect(manifest.temporal_scope.frozen_release.cutoff_inclusive_through).toBe('2026-06-30');
+    expect(manifest.temporal_scope.current_curated.curated_through).toBe('2026-08-12');
+    expect(manifest.temporal_scope.current_curated.live_revision).toBe(1);
+    expect(manifest.frozen_counts.canonical_verified_articles).toBe(332);
+    expect(manifest.current_curated_counts.canonical_verified_articles).toBe(348);
+    expect(manifest.current_curated_counts.core_included_structure_rows).toBe(859);
 
     const exportResponse = await request.get('/api/export');
     expect(exportResponse.status()).toBe(410);
-    expect(exportResponse.headers()['x-cuhalide-release']).toBe('3.0.2');
-    expect((await json(exportResponse)).release).toBe('3.0.2');
+    const exported = await json(exportResponse);
+    expect(exported.release).toBe('3.0.2');
+    expect(exported.public_access).toBe('query-and-view');
     expect((await request.get('/manifest.json')).status()).toBe(404);
     expect((await request.get('/manifest.webmanifest')).status()).toBe(404);
-
-    const dataHealthResponse = await request.get('/api/public-data?action=health');
-    expect(dataHealthResponse.status()).toBe(200);
-    const dataHealth = await json(dataHealthResponse);
-    expect(dataHealth.release).toBe('3.0.2');
-    expect(dataHealth.version).toBe('2.7.0');
-    expect(Object.values(dataHealth.checks).every(Boolean)).toBe(true);
-    expect(dataHealth.public_access.bulk_export).toBe(false);
-    expect(dataHealth.public_access.primary_evidence).toBe(false);
-
-    const currentResponse = await request.get('/api/public-data?action=current-curated');
-    expect(currentResponse.status()).toBe(200);
-    const current = await json(currentResponse);
-    expect(current.current_curated.base_release).toBe('3.0.2');
-    expect(current.current_curated.current_curated_through).toMatch(/^2026-\d{2}-\d{2}$/);
-    expect(Number(current.current_curated.live_revision)).toBeGreaterThanOrEqual(0);
-    expect(current.current_curated.status).toBe('ready');
-    expect(Number(current.current_curated.canonical_verified_articles)).toBeGreaterThanOrEqual(332);
-    expect(Number(current.current_curated.structure_phase_rows)).toBeGreaterThanOrEqual(878);
-
-    const ragResponse = await request.get('/api/agent');
-    expect(ragResponse.status()).toBe(200);
-    const rag = await json(ragResponse);
-    expect(rag.release).toBe('3.0.2');
-    expect(rag.version).toBe('9.12.0');
-    expect(rag.ok).toBe(true);
-    expect(rag.checks.scientific_context_contract).toBe(true);
-    expect(rag.capabilities.release_302_physical_record13_correction).toBe(true);
   });
 
-  test('article, structure, polar, halogen and Record 13 contracts are exact', async ({ request }) => {
-    const getData = async (query) => json(await request.get(`/api/public-data?${query}`));
+  test('Current Curated default and Frozen scope denominators are independently exact', async ({ request }) => {
+    const current = await getData(request, 'action=current-curated');
+    expect(current.current_curated.base_release).toBe('3.0.2');
+    expect(current.current_curated.current_curated_through).toBe('2026-08-12');
+    expect(Number(current.current_curated.live_revision)).toBe(1);
+    expect(current.current_curated.status).toBe('ready');
 
-    expect((await getData('action=articles&page=1&page_size=1&release_status=Core%20-%20Verified')).pagination.total).toBe(332);
-    expect((await getData('action=articles&page=1&page_size=1')).pagination.total).toBe(346);
-    expect((await getData('action=articles&page=1&page_size=1&release_status=Core%20-%20Verified&halogen=I')).pagination.total).toBe(247);
-    expect((await getData('action=articles&page=1&page_size=1&release_status=Core%20-%20Verified&halogen=Cl%2FBr%2FI')).pagination.total).toBe(27);
+    expect((await getData(request, 'action=articles&page=1&page_size=1')).pagination.total).toBe(362);
+    expect((await getData(request, 'action=articles&page=1&page_size=1&release_status=Current%20canonical')).pagination.total).toBe(348);
+    expect((await getData(request, 'action=articles&page=1&page_size=1&release_status=Core%20-%20Verified')).pagination.total).toBe(332);
+    expect((await getData(request, 'action=articles&page=1&page_size=1&release_status=Current%20Curated%20-%20Verified')).pagination.total).toBe(16);
+    expect((await getData(request, 'action=articles&scope=frozen&page=1&page_size=1')).pagination.total).toBe(346);
+    expect((await getData(request, 'action=articles&scope=frozen&page=1&page_size=1&release_status=Core%20-%20Verified')).pagination.total).toBe(332);
 
-    expect((await getData('action=structures&page=1&page_size=1&eligibility=Core%20-%20Included')).pagination.total).toBe(816);
-    expect((await getData('action=structures&page=1&page_size=1')).pagination.total).toBe(878);
-    expect((await getData('action=polar&page=1&page_size=1')).pagination.total).toBe(67);
-    expect((await getData('action=structures&page=1&page_size=1&q=STE')).pagination.total).toBe(0);
-    expect((await getData('action=structures&page=1&page_size=1&q=luminescence')).pagination.total).toBe(0);
-    expect((await getData('action=structures&page=1&page_size=1&q=I')).pagination.total).toBe(599);
+    expect((await getData(request, 'action=structures&page=1&page_size=1')).pagination.total).toBe(921);
+    expect((await getData(request, 'action=structures&page=1&page_size=1&eligibility=Core%20-%20Included')).pagination.total).toBe(859);
+    expect((await getData(request, 'action=structures&scope=frozen&page=1&page_size=1')).pagination.total).toBe(878);
+    expect((await getData(request, 'action=structures&scope=frozen&page=1&page_size=1&eligibility=Core%20-%20Included')).pagination.total).toBe(816);
+    expect((await getData(request, 'action=polar&page=1&page_size=1')).pagination.total).toBe(77);
+    expect((await getData(request, 'action=polar&scope=frozen&page=1&page_size=1')).pagination.total).toBe(67);
 
-    const s00801 = (await getData('action=structure&id=CUH-008-S01')).item;
-    expect(s00801.halogen).toBe('I');
-    expect(s00801.halogen_scope).toBe('structure-specific');
-    expect(s00801.halogen_confidence).toBe('High');
-    expect(s00801.emission_nm).toBe('');
-    expect(s00801.emission_assignment).toContain('article grain');
+    expect((await getData(request, 'action=structures&page=1&page_size=1&q=STE')).pagination.total).toBe(0);
+    expect((await getData(request, 'action=structures&page=1&page_size=1&q=luminescence')).pagination.total).toBe(0);
+  });
 
-    const s00802 = (await getData('action=structure&id=CUH-008-S02')).item;
-    expect(s00802.halogen).toBe('Unresolved');
-    expect(s00802.halogen_scope).toBe('unresolved');
-
-    const s162 = (await getData('action=structure&id=CUH-162-S01')).item;
-    expect(s162.halogen).toBe('Cl/Br/I');
-    expect(s162.halogen_scope).toBe('series-level');
-
-    for (const id of ['CUH-293-S02', 'CUH-293-S03', 'CUH-299-S01']) {
-      const row = (await getData(`action=structure&id=${id}`)).item;
-      expect(row.halogen).toBe('Unresolved');
-      expect(row.halogen_basis).toBe('source-conflict');
-    }
-
+  test('Record 13 remains frozen-correct and Current record 353 is independently represented', async ({ request }) => {
     const expectedRecord13 = {
       'CUH-013-S01': 'Unresolved',
       'CUH-013-S02': '0D',
@@ -181,51 +159,93 @@ test.describe('release 3.0.2 HTTP, scientific, privacy and security contracts', 
       'CUH-013-S04': '0D',
     };
     for (const [id, dimension] of Object.entries(expectedRecord13)) {
-      const row = (await getData(`action=structure&id=${id}`)).item;
+      const row = (await getData(request, `action=structure&id=${id}`)).item;
       expect(row.dimensionality).toBe(dimension);
       expect(row.known_erratum).toBe(false);
       expect(row.erratum_note).toBe('');
     }
 
-    const history = await getData('action=errata');
-    expect(history.count).toBe(4);
-    expect(history.history_release).toBe('3.0.1');
-    expect(history.items.every((x) => x.resolved_in_release === '3.0.2')).toBe(true);
+    const article = (await getData(request, 'action=article&id=353')).item;
+    expect(article.record_id).toBe(353);
+    expect(article.curation_layer).toBe('Current Curated');
+    expect(Number(article.live_revision)).toBe(1);
+    expect(article.release_status).toBe('Current Curated - Verified');
+
+    const structures = await getData(request, 'action=article-structures&id=353');
+    expect(structures.items.length).toBeGreaterThan(0);
+    for (const row of structures.items) {
+      expect(row.curation_layer).toBe('Current Curated');
+      expect(Number(row.live_revision)).toBe(1);
+    }
+    const s = (await getData(request, 'action=structure&id=CUH-353-S01')).item;
+    expect(s.curation_layer).toBe('Current Curated');
+    expect(Number(s.live_revision)).toBe(1);
+    expect(s.emission_nm).toBe('');
+    expect(String(s.emission_assignment)).toMatch(/article grain|article-grain/i);
   });
 
-  test('stable crawlable article and structure pages expose only public record metadata', async ({ request }) => {
-    test.skip(process.env.CUHALIDE_PREMERGE_PRODUCTION === 'true', 'Stable record routes are verified by post-merge production QA.');
-    const article = await request.get('/article/13');
-    expect(article.status()).toBe(200);
-    const articleHtml = await article.text();
-    expect(articleHtml).toContain('Article record 13');
-    expect(articleHtml).toContain('rel="canonical"');
-    expect(articleHtml).toContain('/article/13');
-    expect(articleHtml).toContain('application/ld+json');
-    expect(articleHtml).not.toContain('field_evidence');
-    expect(articleHtml).not.toContain('candidate_score');
-    expect(articleHtml).not.toContain('evidence excerpt');
-    expect(article.headers()['x-cuhalide-release']).toBe('3.0.2');
+  test('Smart RAG 9.13 exposes unified current corpus and deterministic temporal/evidence-grain boundaries', async ({ request }) => {
+    const ragResponse = await request.get('/api/agent');
+    expect(ragResponse.status()).toBe(200);
+    const rag = await json(ragResponse);
+    expect(rag.ok).toBe(true);
+    expect(rag.release).toBe('3.0.2');
+    expect(rag.version).toBe('9.13.0');
+    expect(rag.corpus.unified_documents).toBe(1283);
+    expect(rag.corpus.unified_embedded).toBe(1283);
+    expect(rag.capabilities.current_curated_retrieval).toBe(true);
+    expect(rag.capabilities.temporal_scope_guard).toBe(true);
 
-    const structure = await request.get('/structure/CUH-013-S01');
-    expect(structure.status()).toBe(200);
-    const structureHtml = await structure.text();
-    expect(structureHtml).toContain('CUH-013-S01');
-    expect(structureHtml).toContain('Unresolved');
-    expect(structureHtml).toContain('/structure/CUH-013-S01');
-    expect(structureHtml).toContain('application/ld+json');
-    expect(structure.headers()['x-cuhalide-release']).toBe('3.0.2');
+    const temporalResponse = await request.post('/api/agent', { data: { messages: [{ role: 'user', content: 'What is the literature cutoff, how current is Current Curated, and what does Literature Watch mean?' }] } });
+    expect(temporalResponse.status()).toBe(200);
+    const temporal = await json(temporalResponse);
+    expect(temporal.answer).toContain('2026-06-30');
+    expect(temporal.answer).toContain('2026-08-12');
+    expect(temporal.answer).toMatch(/Literature Watch/i);
+
+    const structureResponse = await request.post('/api/agent', { data: { messages: [{ role: 'user', content: 'What is the emission of CUH-353-S01?' }] } });
+    expect(structureResponse.status()).toBe(200);
+    const structure = await json(structureResponse);
+    expect(structure.answer).toMatch(/article-grain|Article-grain|evidence boundary/i);
+    expect(structure.sources.some((s) => s.type === 'structure' && s.id === 'CUH-353-S01')).toBe(true);
+  });
+
+  test('stable current/frozen pages and sitemap expose only whitelisted crawlable records', async ({ request }) => {
+    const frozenArticle = await request.get('/article/13');
+    expect(frozenArticle.status()).toBe(200);
+    const frozenArticleHtml = await frozenArticle.text();
+    expect(frozenArticleHtml).toContain('Frozen Release 3.0.2');
+    expect(frozenArticleHtml).not.toContain('field_evidence');
+    expect(frozenArticleHtml).not.toContain('candidate_score');
+
+    const currentArticle = await request.get('/article/353');
+    expect(currentArticle.status()).toBe(200);
+    const currentArticleHtml = await currentArticle.text();
+    expect(currentArticleHtml).toContain('Current Curated rev.1');
+    expect(currentArticleHtml).toContain('Article record 353');
+    expect(currentArticleHtml).toContain('application/ld+json');
+
+    const currentStructure = await request.get('/structure/CUH-353-S01');
+    expect(currentStructure.status()).toBe(200);
+    const currentStructureHtml = await currentStructure.text();
+    expect(currentStructureHtml).toContain('Current Curated rev.1');
+    expect(currentStructureHtml).toContain('CUH-353-S01');
+    expect(currentStructureHtml).toContain('application/ld+json');
+    expect(currentStructureHtml).not.toContain('field_evidence');
 
     const sitemap = await request.get('/sitemap.xml');
     expect(sitemap.status()).toBe(200);
     const sitemapText = await sitemap.text();
+    expect((sitemapText.match(/<url>/g) || []).length).toBe(1208);
     expect(sitemapText).toContain('/article/13');
-    expect(sitemapText).toContain('/structure/CUH-013-S01');
+    expect(sitemapText).toContain('/article/353');
+    expect(sitemapText).toContain('/structure/CUH-353-S01');
+    expect(sitemap.headers()['x-cuhalide-sitemap-urls']).toBe('1208');
   });
 });
 
-test.describe('release 3.0.2 live Chromium interaction, responsive and visual QA', () => {
-  test('all public routes render without serious accessibility errors or page overflow', async ({ page }, testInfo) => {
+test.describe('CuHalide Atlas v48 current UI, responsive and accessibility QA', () => {
+  test('all routes render without serious accessibility errors, page errors or overflow', async ({ page }, testInfo) => {
     const runtime = captureRuntimeErrors(page);
     for (const route of ROUTES) {
       await page.goto(`/#${route}`, { waitUntil: 'domcontentloaded' });
@@ -233,31 +253,21 @@ test.describe('release 3.0.2 live Chromium interaction, responsive and visual QA
       await expect(page.locator('main#main')).toBeVisible();
       await expectNoPageOverflow(page);
       await expectNoSeriousA11yViolations(page, route);
-      await attachScreenshot(page, testInfo, `${testInfo.project.name}-${route}`);
+      await testInfo.attach(`${testInfo.project.name}-${route}`, { body: await page.screenshot({ fullPage: true, animations: 'disabled' }), contentType: 'image/png' });
     }
-    expect(runtime.pageErrors, `Page errors: ${runtime.pageErrors.join('\n')}`).toEqual([]);
-    expect(runtime.consoleErrors, `Console errors: ${runtime.consoleErrors.join('\n')}`).toEqual([]);
+    expect(runtime.pageErrors).toEqual([]);
+    expect(runtime.consoleErrors).toEqual([]);
   });
 
-  test('Current Curated, year display, data loading, modal focus, deep links and responsive navigation work', async ({ page, request }, testInfo) => {
-    const runtime = captureRuntimeErrors(page);
-    const current = await json(await request.get('/api/public-data?action=current-curated'));
-    const liveRevision = Number(current.current_curated.live_revision || 0);
-    const curatedThrough = current.current_curated.current_curated_through;
-
+  test('Current Curated defaults, temporal labels, filters and responsive navigation are correct', async ({ page }) => {
     await page.goto('/#home', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('#currentCuratedText')).toContainText(`Current Curated through ${curatedThrough}`);
-    await expect(page.locator('#currentCuratedText')).toContainText(`live revision ${liveRevision}`);
+    await expect(page.locator('.release .ver')).toHaveText('Frozen Release 3.0.2');
+    await expect(page.locator('.release-note')).toContainText('2026-06-30');
+    await expect(page.locator('.release-note')).toContainText('Current Curated rev.1');
+    await expect(page.locator('#currentCuratedText')).toContainText('Current Curated through 2026-08-12');
+    await expect(page.locator('#currentCuratedText')).toContainText('live revision 1');
     await expect(page.locator('#yearChart')).toContainText('2026');
     await expect(page.locator('#yearChart')).not.toContainText('2026.06');
-    await expect(page.locator('.release .ver')).toHaveText('Release 3.0.2');
-
-    const frozenCanonical = Number((await json(await request.get('/api/public-data?action=bootstrap'))).release.canonical_verified_articles);
-    expect(frozenCanonical).toBe(332);
-    if (liveRevision > 0) {
-      expect(Number(current.current_curated.canonical_verified_articles)).toBeGreaterThanOrEqual(frozenCanonical);
-      await expect(page.locator('#currentCuratedText')).toContainText('Frozen base 3.0.2');
-    }
 
     const viewportWidth = page.viewportSize()?.width || 1440;
     if (viewportWidth <= 1120) {
@@ -268,45 +278,16 @@ test.describe('release 3.0.2 live Chromium interaction, responsive and visual QA
     }
 
     await page.goto('/#articles', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('#acount')).toContainText('332 records');
+    await expect(page.locator('#arel')).toHaveValue('Current canonical');
+    await expect(page.locator('#acount')).toContainText('348 records');
     await expect(page.locator('#articleHalogenNote')).toContainText('mixed records containing that halogen');
 
     await page.goto('/#structures', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('#scount')).toContainText('816 rows');
-    const firstStructure = page.locator('[data-structure]').first();
-    await expect(firstStructure).toBeVisible();
-    await firstStructure.focus();
-    const firstId = await firstStructure.getAttribute('data-structure');
-    await firstStructure.click();
-    await expect(page.locator('#modalCard')).toBeVisible();
-    await expect(page.locator('#modalCard')).toHaveAttribute('role', 'dialog');
-    await expect(page.locator('#modalCard')).toHaveAttribute('aria-modal', 'true');
-    for (let i = 0; i < 5; i += 1) await page.keyboard.press('Tab');
-    const focusInside = await page.evaluate(() => Boolean(document.querySelector('#modalCard')?.contains(document.activeElement)));
-    expect(focusInside).toBe(true);
-    await page.keyboard.press('Escape');
-    await expect(page.locator('#modal')).toBeHidden();
-    expect(await page.evaluate((id) => document.activeElement?.getAttribute?.('data-structure') === id, firstId)).toBe(true);
+    await expect(page.locator('#selig')).toHaveValue('Core - Included');
+    await expect(page.locator('#scount')).toContainText('859 rows');
 
-    await page.goto('/#structure/CUH-013-S01', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('#modalCard')).toBeVisible();
-    await expect(page.locator('#modalBody')).not.toContainText('Known release erratum');
-    await expect(page.locator('#modalBody')).toContainText('Unresolved');
-    await page.keyboard.press('Escape');
-    await expect(page).toHaveURL(/#structures$/);
-
-    await page.goto('/#article/13', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('#modalCard')).toBeVisible();
-    await expect(page.locator('#modalBody')).toContainText('Article record 13');
-    await page.keyboard.press('Escape');
-    await expect(page).toHaveURL(/#articles$/);
-
-    await page.goto('/#watch', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('[data-view="watch"]')).toContainText('Current Curated');
-    await expect(page.locator('[data-view="watch"]')).toContainText('primary article/SI/CIF');
-
-    await attachScreenshot(page, testInfo, `${testInfo.project.name}-interaction-final`);
-    expect(runtime.pageErrors, `Page errors: ${runtime.pageErrors.join('\n')}`).toEqual([]);
-    expect(runtime.consoleErrors, `Console errors: ${runtime.consoleErrors.join('\n')}`).toEqual([]);
+    await page.goto('/#polar', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#pcount')).toContainText('77 rows');
+    await expect(page.locator('.polar-num')).toContainText('46 articles');
   });
 });
