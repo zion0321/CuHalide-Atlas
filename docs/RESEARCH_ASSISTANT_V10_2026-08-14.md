@@ -100,7 +100,7 @@ It must not expose:
 
 `/api/export` remains HTTP 410 Gone.
 
-## 6. Provider failure / quota behavior
+## 6. Provider failure, quota and client-identity behavior
 
 LLM availability is not allowed to determine whether deterministic scientific evidence remains accessible.
 
@@ -110,14 +110,23 @@ If the conversational model is unavailable or its provider quota is exhausted:
 - exact scientific boundaries continue to use deterministic services;
 - the UI reports that conversational synthesis is temporarily limited.
 
-This preserves scientific availability while making degradation legible to the user.
+Conversation and evidence requests intentionally use separate quota domains. The established evidence-query limiter remains unchanged. Ordinary conversation uses a service-role-only `cuhalide_atlas_conversation_rate_limit_v10` bucket with 60 requests/hour and 240 requests/day per conversation fingerprint plus a 1,200/day global conversation ceiling.
+
+A preview hostile test exposed that `IP + User-Agent` alone incorrectly merged multiple browser contexts behind the same runner/NAT. v10 therefore uses two server-generated identities:
+- **evidence identity:** remains network-derived (`IP + User-Agent`) so existing scientific-query abuse controls are not weakened;
+- **conversation identity:** hashes the same network identity together with a browser-generated random 256-bit session token. This separates legitimate users sharing a campus/laboratory NAT without treating the browser token as authentication.
+
+The browser session token is random, contains no user data and is stored locally only to stabilize a user's conversational quota. The server never trusts it by itself: the network component and global conversation ceiling remain part of the abuse boundary.
+
+This preserves scientific availability while making degradation legible and avoiding false rate-limit collisions for normal multi-turn chat.
 
 ## 7. Backward compatibility
 
 The public `/api/agent` GET contract preserves the established evidence-engine identity for existing scientific clients:
 - top-level evidence `version` remains `9.15.0`;
+- `x-cuhalide-rag-version` remains `9.15.0`;
 - corpus/current-curated/capability fields remain available;
-- `assistant_version = 10.0.0` is additive;
+- `assistant_version = 10.0.0` and `x-cuhalide-assistant-version = 10.0.0` are additive;
 - the new conversation/evidence service status is additive.
 
 The navigation label **Smart RAG** is retained as the feature name, while the page itself is presented as the **CuHalide Research Assistant**. This preserves recognizable navigation and existing browser contracts without exposing implementation mode selection to users.
@@ -134,6 +143,7 @@ The 48.5 assistant interface:
 - distinguishes conversational replies from evidence-backed replies;
 - populates evidence cards only when database evidence is actually used;
 - retains source-linked article/structure cards for evidence answers;
+- creates a local random conversation-session identifier to prevent shared-NAT quota collisions;
 - displays degraded model availability without implying that the scientific database is unavailable.
 
 Responsive and WCAG AA behavior remains part of the required browser gate.
@@ -149,7 +159,7 @@ The protected browser suite explicitly tests:
 - multi-turn scientific follow-up → inherited evidence context;
 - capability question after a scientific turn → conversational override;
 - latest Cu(I)-iodide literature → research/Literature Watch route;
-- short UI chat submission;
+- short UI chat submission and persisted random browser session token;
 - no manual mode selector;
 - CSP synchronization;
 - multi-viewport overflow and WCAG AA checks.
