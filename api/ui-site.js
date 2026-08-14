@@ -3,6 +3,8 @@ import siteHandler from './site.js';
 
 const UI_VERSION = '48.4';
 const CURRENT_REVISION = '3';
+const CONTENT_DATE = '2026-08-14';
+const LAST_MODIFIED = new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
 const ICON_LINK = '<link rel="icon" href="/favicon.svg" type="image/svg+xml">';
 const STYLE_LINK = '<link rel="stylesheet" href="/ui-v48-2.css?v=48.2">';
 const SCRIPT_LINK = '<script src="/ui-v48-2.js?v=48.2" defer></script>';
@@ -26,6 +28,7 @@ function enhanceHtml(input) {
     '<div class="actions"><a class="btn primary" href="#structures">Explore structures</a><a class="btn secondary" href="/motifs">Open Motif Atlas</a><a class="btn secondary" href="#rag">Ask Smart RAG</a></div>');
 
   const replacements = [
+    ['"dateModified":"2026-08-12"', `"dateModified":"${CONTENT_DATE}"`],
     ['<strong>Current Curated rev.1</strong> is separately curated through 2026-08-12 and adds 14 cutoff-period coverage backfills plus 2 post-cutoff articles after primary-evidence QC.', '<strong>Current Curated rev.3</strong> is separately curated through 2026-08-14 and contains 19 cutoff-period coverage backfills plus 8 post-cutoff additions after primary-evidence QC.'],
     ['<h2>Current Curated rev.1</h2>', '<h2>Current Curated rev.3</h2>'],
     ['Current canonical articles · n = 348 · Frozen Release = 332', 'Current canonical articles · n = 359 · Frozen Release = 332'],
@@ -37,6 +40,7 @@ function enhanceHtml(input) {
     ['Current Core-Included · n=859', 'Current Core-Included · n=887'],
     ['All current rows · n=921', 'All current rows · n=949'],
     ['Current Curated rev.1 additions', 'Current Curated rev.3 additions'],
+    ['Frozen Release 3.0.2 plus primary-evidence-reviewed rev.1 additions', 'Frozen Release 3.0.2 plus primary-evidence-reviewed Current Curated additions through rev.3'],
     ['using a unified 1,283-document BGE-M3/RRF retrieval layer', 'using a unified 1,322-document BGE-M3/RRF retrieval layer'],
     ['Smart RAG 9.13.0 searches', 'Smart RAG 9.15.0 searches'],
     ['together with Current Curated rev.1', 'together with Current Curated rev.3'],
@@ -85,10 +89,13 @@ function synchronizeFinalCsp(html, res) {
 export default async function handler(req, res) {
   res.setHeader('X-CuHalide-UI-Version', UI_VERSION);
   res.setHeader('X-CuHalide-Current-Curated-Revision', CURRENT_REVISION);
+  res.setHeader('Last-Modified', LAST_MODIFIED);
 
   const bridge = {
     setHeader: (name, value) => {
-      if (String(name).toLowerCase() === 'x-cuhalide-current-curated-revision') return res.setHeader(name, CURRENT_REVISION);
+      const lower = String(name).toLowerCase();
+      if (lower === 'x-cuhalide-current-curated-revision') return res.setHeader(name, CURRENT_REVISION);
+      if (lower === 'last-modified') return res.setHeader(name, LAST_MODIFIED);
       return res.setHeader(name, value);
     },
     end: body => {
