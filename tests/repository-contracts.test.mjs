@@ -96,7 +96,7 @@ test('Research Assistant provides free conversation while routing scientific cla
   assert.ok(!conversation.includes("rest('rpc/cuhalide_atlas_agent_rate_limit'"), 'conversation must not consume the evidence-query quota');
 });
 
-test('conversation quota migration is private, service-role-only and independent of scientific evidence quota', () => {
+test('conversation quota migrations are private, service-role-only and explicitly fail-closed for browser roles', () => {
   const migration = read('supabase/migrations/20260814084241_separate_conversation_rate_limit_v10.sql');
   expectIncludes(migration, [
     'create table if not exists public.cuhalide_atlas_conversation_usage',
@@ -108,6 +108,16 @@ test('conversation quota migration is private, service-role-only and independent
     'revoke all on table public.cuhalide_atlas_conversation_usage from public, anon, authenticated',
     'grant execute on function public.cuhalide_atlas_conversation_rate_limit_v10(text) to service_role',
   ], 'conversation quota migration');
+  const denyMigration = read('supabase/migrations/20260814093038_explicit_conversation_usage_deny_policy_v10.sql');
+  expectIncludes(denyMigration, [
+    'create policy cuhalide_atlas_conversation_usage_explicit_deny',
+    'on public.cuhalide_atlas_conversation_usage',
+    'as restrictive',
+    'for all',
+    'to anon, authenticated',
+    'using (false)',
+    'with check (false)',
+  ], 'conversation usage explicit deny migration');
 });
 
 test('Smart RAG 9.15 public-safe mirror matches the rev.3 production evidence engine', () => {
@@ -199,8 +209,8 @@ test('production governance reflects the active protected-main and no-auto-repla
 test('public Supabase migration inventory tracks the real ledger without becoming a replay dump', () => {
   const supabaseReadme = read('supabase/README.md');
   const inventory = read('supabase/contracts/REMOTE_MIGRATION_INVENTORY_2026-08-14.md');
-  expectIncludes(supabaseReadme, ['125', '`20260807140239`', '`20260814084241`', 'fake/no-op timestamp migrations', 'separate_conversation_rate_limit_v10'], 'supabase/README.md');
-  expectIncludes(inventory, ['total migration-history entries: **125**', 'not a replayable SQL dump', '`add_scoped_current_curated_rag_embedding_writer`', '`motif_atlas_schema_1_2_fractional_conservatism`', '`separate_conversation_rate_limit_v10`'], 'remote migration inventory');
+  expectIncludes(supabaseReadme, ['126', '`20260807140239`', '`20260814093038`', 'fake/no-op timestamp migrations', 'separate_conversation_rate_limit_v10', 'explicit_conversation_usage_deny_policy_v10'], 'supabase/README.md');
+  expectIncludes(inventory, ['total migration-history entries: **126**', 'latest recorded version: **20260814093038**', 'not a replayable SQL dump', '`add_scoped_current_curated_rag_embedding_writer`', '`motif_atlas_schema_1_2_fractional_conservatism`', '`separate_conversation_rate_limit_v10`', '`explicit_conversation_usage_deny_policy_v10`'], 'remote migration inventory');
 });
 
 test('release versioning policy protects 3.0.2 from literature expansion', () => {
