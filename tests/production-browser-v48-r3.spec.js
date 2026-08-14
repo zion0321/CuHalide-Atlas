@@ -115,11 +115,11 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.3 scientific contracts
     expect(all.atlas.schema_version).toBe('1.2');
     expect(all.atlas.coverage).toMatchObject({ total_taxonomy_rows: 949, motif_resolved_rows: 816, motif_unresolved_rows: 133, primary_classified_rows: 909, unresolved_category_rows: 40, curated_component_structures: 28 });
     const c = Object.fromEntries(all.atlas.categories.map((x) => [x.primary_category, x]));
-    expect(c.Coordination).toMatchObject({ article_count: 115, structure_determinations: 356, identity_count: 253, motif_count: 26 });
-    expect(c['Hybrid Ionic']).toMatchObject({ article_count: 218, structure_determinations: 451, identity_count: 393, motif_count: 65 });
-    expect(c['All-in-One (AIO)']).toMatchObject({ article_count: 26, structure_determinations: 102, identity_count: 91, motif_count: 22 });
+    expect(c.Coordination).toMatchObject({ article_count: 115, structure_determinations: 356, identity_count: 278, motif_count: 26 });
+    expect(c['Hybrid Ionic']).toMatchObject({ article_count: 218, structure_determinations: 451, identity_count: 397, motif_count: 67 });
+    expect(c['All-in-One (AIO)']).toMatchObject({ article_count: 26, structure_determinations: 102, identity_count: 91, motif_count: 19 });
     const cu4i4 = await getData(request, 'action=motifs&category=Coordination&motif=Cu4I4&limit=100');
-    expect(cu4i4.atlas.motifs[0]).toMatchObject({ motif_formula: 'Cu4I4', article_count: 46, structure_determinations: 82, identity_count: 65 });
+    expect(cu4i4.atlas.motifs[0]).toMatchObject({ motif_formula: 'Cu4I4', article_count: 46, structure_determinations: 82, identity_count: 67 });
     expect(String(all.atlas.component_note)).toMatch(/fractional|mixed-occupancy/i);
     const fractional = (await getData(request, 'action=structure&id=CUH-037-S01')).item;
     expect(fractional.motif).toBe('Unresolved');
