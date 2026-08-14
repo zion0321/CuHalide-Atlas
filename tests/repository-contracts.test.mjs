@@ -113,7 +113,6 @@ test('Research Assistant UI removes manual mode selection and preserves automati
   const css = read('public/ui-assistant-v48-5.css');
   expectIncludes(ui, ['Just ask naturally','What can you do?','Ask naturally. When a scientific claim needs Atlas evidence','No database evidence was needed for this answer.',"mode:'auto'"], 'assistant UI');
   expectIncludes(css, ['.assistant-steps','.assistant-welcome','.no-evidence','@media(max-width:780px)'], 'assistant CSS');
-  assert.ok(!ui.includes('<select id="rmode">'), 'manual RAG mode selector must not be rendered by assistant UI');
   expectIncludes(ui, ["if(body.includes('<select id=\"rmode\">'))throw new Error('Manual Smart RAG mode selector must not remain in conversational UI')"], 'assistant fail-closed UI guard');
 });
 
