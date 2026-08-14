@@ -73,7 +73,7 @@ test('meta health follows living-knowledge readiness instead of deprecated visib
     "!html.includes('Frozen Release core · n=332')",
     "!html.includes('Frozen Release 3.0.2 · cutoff through 2026-06-30')",
     "site_readiness:siteReady?'PASS':'OUT_OF_SYNC'",
-    'snapshot coverage verified through June 2026',
+    'coverage verified through June 2026',
   ], 'stable meta function mirror');
   assert.ok(!meta.includes("html.includes('Frozen Release')&&html.includes('2026-08-14')&&html.includes('rev.3')"), 'site readiness must not require deprecated visible Frozen/revision UI labels');
 });
