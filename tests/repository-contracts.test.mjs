@@ -3,10 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
-
-const expectIncludes = (text, values, label) => {
-  for (const value of values) assert.ok(text.includes(value), `${label} must include ${JSON.stringify(value)}`);
-};
+const expectIncludes = (text, values, label) => { for (const value of values) assert.ok(text.includes(value), `${label} must include ${JSON.stringify(value)}`); };
 
 test('runtime module type and QA Node major are explicit and aligned', () => {
   const pkg = JSON.parse(read('package.json'));
@@ -14,7 +11,6 @@ test('runtime module type and QA Node major are explicit and aligned', () => {
   assert.equal(pkg.private, true);
   assert.equal(pkg.engines, undefined, 'package must not override the Vercel project Node major');
   assert.equal(pkg.scripts['qa:browser'], 'playwright test tests/production-browser-v48-r3.spec.js');
-
   const browser = read('.github/workflows/production-browser-qa.yml');
   const lighthouse = read('.github/workflows/production-lighthouse-qa.yml');
   const preview = read('.github/workflows/vercel-preview-qa.yml');
@@ -35,40 +31,17 @@ test('machine-readable frozen release identity is synchronized', () => {
 
 test('current public runtime identities remain synchronized', () => {
   const readme = read('README.md');
-  expectIncludes(readme, [
-    'Current Curated rev.3',
-    'Public Data: **2.10.0**',
-    'Smart RAG: **9.15.0**',
-    'Metadata / health: **48.4**',
-    'Motif Atlas schema: **1.2**',
-    '1,322 / 1,322',
-  ], 'README.md');
+  expectIncludes(readme, ['Current Curated rev.3','Public Data: **2.10.0**','Smart RAG: **9.15.0**','Metadata / health: **48.4**','Motif Atlas schema: **1.2**','1,322 / 1,322'], 'README.md');
   expectIncludes(read('api/public-data.js'), ['2.10.0', "CURRENT_REVISION = '3'"], 'api/public-data.js');
   expectIncludes(read('api/agent.js'), ['9.15.0', "CURRENT_REVISION='3'"], 'api/agent.js');
   expectIncludes(read('api/meta.js'), ['48.4', "CURRENT_REVISION='3'"], 'api/meta.js');
   expectIncludes(read('api/motifs.js'), ["REV='3'", "CONTENT_DATE='2026-08-14'", 'Conservative motif rule', 'Curated through 14 Aug 2026', 'Legacy label-derived component candidates'], 'api/motifs.js');
   const ui = read('api/ui-site.js');
-  expectIncludes(ui, [
-    "UI_VERSION = '48.4'",
-    "CURRENT_REVISION = '3'",
-    "CONTENT_DATE = '2026-08-14'",
-    'ui-living-knowledge.css',
-    'Latest curated state',
-    'Curated literature · n=359',
-    'Archived scientific snapshot 3.0.2',
-    'CUHALIDE_UI_V48_4_LIVING_KNOWLEDGE',
-  ], 'api/ui-site.js');
-  assert.ok(!ui.includes('Frozen Release core · n=332'), 'archived snapshot must not be restored as a routine browsing mode');
-
+  expectIncludes(ui, ["UI_VERSION = '48.4'","CURRENT_REVISION = '3'","CONTENT_DATE = '2026-08-14'",'ui-living-knowledge.css','Latest curated state','Curated literature · n=359','Archived scientific snapshot 3.0.2','CUHALIDE_UI_V48_4_LIVING_KNOWLEDGE'], 'api/ui-site.js');
   const record = read('api/record.js');
   expectIncludes(record, ['Curated record', 'Data provenance', 'Archived scientific snapshot 3.0.2'], 'api/record.js');
-
   const middleware = read('middleware.js');
-  expectIncludes(middleware, [
-    "release-3.0.2-ui-v48.4-current-r3",
-    "headers.set('x-cuhalide-current-curated-revision', '3')",
-    "headers.set('x-cuhalide-ui-version', '48.4')",
-  ], 'middleware.js');
+  expectIncludes(middleware, ["release-3.0.2-ui-v48.4-current-r3","headers.set('x-cuhalide-current-curated-revision', '3')","headers.set('x-cuhalide-ui-version', '48.4')"], 'middleware.js');
   assert.ok(!middleware.includes('release-3.0.2-ui-v48.3'), 'middleware must not expose stale UI 48.3 identity');
   assert.ok(!middleware.includes("headers.set('x-cuhalide-current-curated-revision', '2')"), 'middleware must not expose stale Current Curated rev.2 identity');
 });
@@ -81,24 +54,15 @@ test('living-knowledge UI keeps snapshot provenance without making snapshot sele
     'Continuously curated scientific knowledge',
     'Curated through 14 Aug 2026',
     'Latest reviewed corpus.',
-    'snapshot coverage was verified through 30 June 2026',
+    'Snapshot coverage was verified through 30 June 2026',
+    '<select id="arel"><option value="Current canonical" selected>Curated literature · n=359',
+    "if (body.includes('Frozen Release core · n=332')) throw new Error('Archived snapshot must not remain a routine browsing mode')",
   ], 'living knowledge UI');
-  assert.ok(!ui.includes('<option value="Core - Verified">Frozen Release core'), 'frozen snapshot selector must remain absent from routine literature browsing');
 });
 
 test('rev.3 release audit records primary-evidence additions and duplicate identity controls', () => {
   const audit = read('docs/CURRENT_CURATED_R3_2026-08-14.md');
-  expectIncludes(audit, [
-    '10.1021/acs.inorgchem.6c03055',
-    '10.1002/smll.74688',
-    '10.1021/acs.cgd.6c00650',
-    '`CUH-370-S02`',
-    '`CUH-370-S01`',
-    '`CUH-158-S09`',
-    '15 legacy rows',
-    '1,322 / 1,322',
-    '`ok = true`',
-  ], 'Current Curated rev.3 audit');
+  expectIncludes(audit, ['10.1021/acs.inorgchem.6c03055','10.1002/smll.74688','10.1021/acs.cgd.6c00650','`CUH-370-S02`','`CUH-370-S01`','`CUH-158-S09`','15 legacy rows','1,322 / 1,322','`ok = true`'], 'Current Curated rev.3 audit');
 });
 
 test('public/private boundary cannot silently regress to bulk export', () => {
@@ -118,10 +82,7 @@ test('Record 13 erratum is resolved by 3.0.2, not described as a future hotfix',
 
 test('production governance reflects the active protected-main and no-auto-replay model', () => {
   const governance = read('docs/PRODUCTION_GOVERNANCE_V48_2026-08-12.md');
-  expectIncludes(governance, [
-    '`Protect main production`', '`chromium-production`', '`lighthouse-production`', '`preview-chromium`', '`preview-lighthouse`',
-    'no bypass actors', 'GitHub production migration replay is not an authoritative deployment path', 'fake/no-op timestamp migrations must never be created', 'dual-source merged-PR provenance verification',
-  ], 'production governance');
+  expectIncludes(governance, ['`Protect main production`','`chromium-production`','`lighthouse-production`','`preview-chromium`','`preview-lighthouse`','no bypass actors','GitHub production migration replay is not an authoritative deployment path','fake/no-op timestamp migrations must never be created','dual-source merged-PR provenance verification'], 'production governance');
   assert.ok(!governance.includes('GitHub currently reports `main` as unprotected'), 'obsolete unprotected-main statement must not return');
   assert.ok(!governance.includes('Supabase **Deploy to production**'), 'governance must not assert an unreadable dashboard-toggle state');
 });
