@@ -32,9 +32,9 @@ test('machine-readable frozen release identity is synchronized', () => {
 test('current public runtime identities remain synchronized', () => {
   const readme = read('README.md');
   expectIncludes(readme, ['Current Curated rev.3','Public Data: **2.10.0**','Research Assistant: **10.0.0**','Evidence engine: **Smart RAG 9.15.0**','Metadata / health: **48.5**','Motif Atlas schema: **1.2**','1,322 / 1,322'], 'README.md');
-  expectIncludes(read('api/public-data.js'), ['2.10.0', "CURRENT_REVISION = '3'"], 'api/public-data.js');
-  expectIncludes(read('api/agent.js'), ['cuhalide-atlas-research-assistant-v1-public','10.0.0', "CURRENT_REVISION='3'"], 'api/agent.js');
-  expectIncludes(read('api/meta.js'), ['48.5', 'cuhalide-atlas-research-assistant-v1-public', "CURRENT_REVISION='3'"], 'api/meta.js');
+  expectIncludes(read('api/public-data.js'), ['2.10.0', "CURRENT_REVISION='3'", 'cuhalide-atlas-runtime-contract-v1-public'], 'api/public-data.js');
+  expectIncludes(read('api/agent.js'), ['cuhalide-atlas-research-assistant-v1-public', 'cuhalide-atlas-runtime-contract-v1-public', '10.0.0', "CURRENT_REVISION='3'"], 'api/agent.js');
+  expectIncludes(read('api/meta.js'), ['48.5', 'cuhalide-atlas-runtime-contract-v1-public', "CURRENT_REVISION='3'"], 'api/meta.js');
   expectIncludes(read('api/motifs.js'), ["REV='3'", "CONTENT_DATE='2026-08-14'", 'Conservative motif rule', 'Curated through 14 Aug 2026', 'Legacy label-derived component candidates'], 'api/motifs.js');
   const living = read('api/ui-site.js');
   expectIncludes(living, ["UI_VERSION = '48.4'","CURRENT_REVISION = '3'","CONTENT_DATE = '2026-08-14'",'ui-living-knowledge.css','Latest curated state','Curated literature · n=359','Archived scientific snapshot 3.0.2','CUHALIDE_UI_V48_4_LIVING_KNOWLEDGE'], 'api/ui-site.js');
@@ -160,13 +160,20 @@ test('meta health keeps the scientific core and adds the public Research Assista
   const publicMeta = read('api/meta.js');
   expectIncludes(publicMeta, [
     "META_VERSION='48.5'",
-    'cuhalide-atlas-research-assistant-v1-public',
-    "x?.assistant_version==='10.0.0'",
-    'gateway_meta_version:META_VERSION',
-    'research_assistant_gateway:assistantOk',
-    'natural_conversation_contract',
-    'automatic_evidence_routing',
-  ], 'public composite health');
+    'cuhalide-atlas-runtime-contract-v1-public',
+    "isHealth?new URL(CONTRACT_UPSTREAM):new URL(META_UPSTREAM)",
+    "upstream.searchParams.set('action','health')",
+    'base.gateway_meta_version=META_VERSION',
+  ], 'public composite health proxy');
+  const runtime = read('supabase/functions/cuhalide-atlas-runtime-contract-v1-public/index.ts');
+  expectIncludes(runtime, [
+    "gateway_meta_version:'48.5'",
+    'research_assistant_gateway:c.ok',
+    'natural_conversation_contract:true',
+    'automatic_evidence_routing:true',
+    'site_probe_mode',
+    "health_mode:'deterministic-db-contract'",
+  ], 'deterministic runtime health contract');
 });
 
 test('candidate QA runtime serves the exact assistant wrapper and stylesheet', () => {
