@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: vercel-preview-qa-${{ github.event.deployment.sha }}
+  group: vercel-preview-qa-${{ github.event.deployment.ref || github.event.deployment.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -57,8 +57,9 @@ jobs:
           node scripts/local-candidate-server.mjs > candidate-server.log 2>&1 &
           echo $! > candidate-server.pid
           for i in $(seq 1 45); do
-            if curl --fail --silent --show-error "$CUHALIDE_BASE_URL/health.json" > /tmp/cuhalide-candidate-health.json; then
-              cat /tmp/cuhalide-candidate-health.json
+            rm -f /tmp/cuhalide-candidate-ready.headers
+            if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then
+              echo 'Exact candidate runtime is locally ready; full health remains part of protected QA.'
               exit 0
             fi
             sleep 1
@@ -135,8 +136,9 @@ jobs:
           node scripts/local-candidate-server.mjs > candidate-server.log 2>&1 &
           echo $! > candidate-server.pid
           for i in $(seq 1 45); do
-            if curl --fail --silent --show-error "$CUHALIDE_BASE_URL/health.json" > /tmp/cuhalide-candidate-health.json; then
-              cat /tmp/cuhalide-candidate-health.json
+            rm -f /tmp/cuhalide-candidate-ready.headers
+            if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then
+              echo 'Exact candidate runtime is locally ready; full health remains part of protected QA.'
               exit 0
             fi
             sleep 1
