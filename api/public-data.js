@@ -1,7 +1,7 @@
 const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
 const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
-const PUBLIC_DATA_VERSION = '2.9.0';
-const CURRENT_REVISION = '2';
+const PUBLIC_DATA_VERSION = '2.10.0';
+const CURRENT_REVISION = '3';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function fetchWithRetry(url, req) {
