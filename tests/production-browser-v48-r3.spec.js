@@ -151,11 +151,13 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.3 scientific contracts
     expect(structure.sources.some((x) => x.type === 'structure' && x.id === 'CUH-372-S01')).toBe(true);
   });
 
-  test('rev.3 root, stable pages, sitemap and privacy boundary are coherent', async ({ request }) => {
+  test('living root, stable pages, sitemap and privacy boundary are coherent', async ({ request }) => {
     const root = await request.get('/');
     expect(root.status()).toBe(200);
     const html = await root.text();
-    for (const token of ['CUHALIDE_SITE_V48_MOTIF_ATLAS', 'Frozen Release 3.0.2', 'Current Curated rev.3', '2026-08-14', 'Current canonical · n=359', 'Current Core-Included · n=887', 'Motif Atlas']) expect(html).toContain(token);
+    for (const token of ['CUHALIDE_UI_V48_4_LIVING_KNOWLEDGE', 'Latest curated state', 'Curated through 14 Aug 2026', 'Curated literature · n=359', 'Core-Included · n=887', 'Archived scientific snapshot 3.0.2', 'Motifs']) expect(html).toContain(token);
+    expect(html).not.toContain('Frozen Release core · n=332');
+    expect(html).not.toContain('<h2>Current Curated rev.3</h2>');
     const csp = root.headers()['content-security-policy'] || '';
     expect(csp).toContain("script-src 'self' 'sha256-");
     expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
@@ -170,6 +172,18 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.3 scientific contracts
     expect(manifest.public_access.bulk_normalized_export).toBe(false);
     expect((await request.get('/api/export')).status()).toBe(410);
     for (const path of ['/article/371', '/article/372', '/article/373', '/structure/CUH-371-S01', '/structure/CUH-372-S01', '/structure/CUH-373-S01', '/motifs']) expect((await request.get(path)).status(), path).toBe(200);
+    const articleHtml = await (await request.get('/article/371')).text();
+    expect(articleHtml).toContain('Curated record');
+    expect(articleHtml).toContain('Data provenance');
+    expect(articleHtml).not.toContain('<span class="layer">Current Curated rev.3</span>');
+    const structureHtml = await (await request.get('/structure/CUH-372-S01')).text();
+    expect(structureHtml).toContain('Curated record');
+    expect(structureHtml).toContain('Data provenance');
+    const motifsHtml = await (await request.get('/motifs')).text();
+    expect(motifsHtml).toContain('Curated through 14 Aug 2026');
+    expect(motifsHtml).toContain('Conservative motif rule');
+    expect(motifsHtml).toContain('Legacy label-derived component candidates');
+    expect(motifsHtml).toContain('Archived scientific snapshot 3.0.2');
     const fractionalHtml = await (await request.get('/structure/CUH-037-S01')).text();
     expect(fractionalHtml).toContain('Unresolved');
     const sitemap = await request.get('/sitemap.xml');
@@ -182,7 +196,7 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.3 scientific contracts
   });
 });
 
-test.describe('v48.4 presentation and accessibility', () => {
+test.describe('v48.4 living-knowledge presentation and accessibility', () => {
   for (const width of [390, 768, 1440]) {
     test(`root and Motif Atlas fit viewport ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
@@ -199,5 +213,18 @@ test.describe('v48.4 presentation and accessibility', () => {
       await noSeriousA11y(page, label);
       await noOverflow(page);
     }
+  });
+
+  test('public navigation emphasizes research tasks rather than internal release modes', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const nav = page.locator('#nav');
+    await expect(nav).toContainText('Literature');
+    await expect(nav).toContainText('Structures');
+    await expect(nav).toContainText('Motifs');
+    await expect(nav).toContainText('Smart RAG');
+    await expect(nav).toContainText('About data');
+    await expect(nav).not.toContainText('Literature Watch');
+    await expect(page.locator('#arel')).not.toContainText('Frozen Release core');
+    await expect(page.locator('.release .ver')).toHaveText('Latest curated state');
   });
 });
