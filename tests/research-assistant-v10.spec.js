@@ -110,11 +110,11 @@ test.describe('Research Assistant 48.5 interface', () => {
   test('assistant UI presents one natural composer with no manual mode selector', async ({ page }) => {
     await page.goto('/#rag', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { name: 'CuHalide Research Assistant' })).toBeVisible();
-    await expect(page.getByText('Just ask naturally')).toBeVisible();
+    await expect(page.getByText('Just ask naturally', { exact: true })).toBeVisible();
     await expect(page.locator('#rmode')).toHaveCount(0);
     await expect(page.locator('#rq')).toHaveAttribute('placeholder', /Ask naturally/);
     await expect(page.locator('#rsend')).toHaveText('Send');
-    await expect(page.getByText('Evidence used')).toBeVisible();
+    await expect(page.getByText('Evidence used', { exact: true })).toBeVisible();
   });
 
   test('short chat input is accepted and rendered without a scope rejection', async ({ page }) => {

@@ -11,190 +11,91 @@
 
 The previous public Smart RAG interface exposed a capable LLM-backed evidence system through an overly restrictive keyword/domain gate. Ordinary conversational inputs such as `what can you do?` could be diverted into the frozen scientific retrieval path and answered as if they were unsupported literature claims, for example with an “outside CuHalide Atlas release 3.0.2 scope” message.
 
-That behavior was scientifically conservative but product-semantically wrong. An evidence boundary should constrain **scientific assertions**, not prevent ordinary conversation.
-
-The v10 architecture separates those responsibilities.
+That behavior was scientifically conservative but product-semantically wrong. An evidence boundary should constrain **scientific assertions**, not prevent ordinary conversation. The v10 architecture separates those responsibilities.
 
 ## 2. Product contract
 
-The public assistant is now defined as:
+The public assistant is **Conversational LLM + automatic evidence-grounded scientific tools**. A user interacts through one chat composer and does not select database/research/chat modes.
 
-> **Conversational LLM + automatic evidence-grounded scientific tools**
+Conversational turns cover greetings, capability/usage questions, general stable scientific explanations and ordinary non-evidentiary follow-ups. The conversational layer uses `@cf/qwen/qwen3-30b-a3b-fp8` through the existing Cloudflare Workers AI environment.
 
-A user interacts through one chat composer. The user does not select “database”, “research” or “chat” modes. The assistant decides whether a request requires Atlas evidence.
+Evidence routing is automatic for Atlas records, DOI/CCDC questions, exact corpus counts, current/frozen scope, Cu(I)-halide material-specific claims, structure/crystallography/polarity, motif, photophysics, source requests and scientific follow-ups inheriting an earlier Atlas context. The evidence path remains Smart RAG 9.15.0 over the unified 1,322-document corpus.
 
-### Conversational path
-
-Used for:
-- greetings and ordinary conversational turns;
-- capability / usage questions;
-- general, stable scientific concept explanations that do not assert Atlas-specific corpus facts;
-- non-evidentiary follow-up discussion when no Atlas-specific claim is being made.
-
-The conversational layer uses `@cf/qwen/qwen3-30b-a3b-fp8` through the existing Cloudflare Workers AI environment.
-
-### Evidence path
-
-Used automatically for:
-- CuHalide Atlas records and record identifiers;
-- DOI / CCDC-specific questions;
-- exact or corpus-specific counts;
-- current curated coverage and archived-snapshot scope;
-- Cu(I)-halide material-specific literature claims;
-- structure identity and dimensionality;
-- space groups / point groups / polarity;
-- motif assignments;
-- photophysical evidence and emission assignments;
-- source/evidence requests;
-- scientific follow-ups that inherit a previous Atlas/material context.
-
-The evidence path remains Smart RAG 9.15.0 over the unified 1,322-document corpus.
-
-### Research / Literature Watch path
-
-Requests explicitly asking for the latest/newest/recent Cu(I)-halide literature can automatically select the research route. Literature Watch items remain metadata-only candidates and are never silently promoted into the curated evidence layer.
+Latest/newest/recent Cu(I)-halide requests can select the Literature Watch research route. Watch items remain metadata-only candidates and are never silently promoted into curated evidence.
 
 ## 3. Routing precedence
-
-Routing is deliberately asymmetric in favor of scientific safety.
 
 1. Explicit capability/greeting/meta-conversation takes the conversational route even after a prior scientific turn.
 2. Explicit record/DOI/CCDC/Atlas/corpus references take the evidence route.
 3. Cu(I)-halide material-specific questions take the evidence route.
 4. Short scientific follow-ups inherit earlier evidence context.
-5. General scientific definitions without Atlas/material context may use the conversational LLM.
-6. The conversational LLM has a second fail-safe: if an Atlas-specific factual request escapes the deterministic router, it emits an internal evidence-routing sentinel rather than answering from memory.
+5. General definitions without Atlas/material context may use the conversational LLM.
+6. If an Atlas-specific factual request escapes the deterministic router, the conversational LLM emits an internal evidence-routing sentinel rather than answering from memory.
 
-Chinese and English routing are implemented separately where necessary. Chinese matching does not depend on English word-boundary semantics.
+Chinese and English routing are implemented separately where necessary; Chinese matching does not depend on English word-boundary semantics.
 
 ## 4. Scientific invariants the LLM cannot override
 
-Assistant 10.0 does **not** relax any scientific guardrail. The following remain deterministic / evidence-governed:
+Assistant 10.0 does not relax any scientific guardrail. Frozen 3.0.2 and Current Curated rev.3 temporal scope, exact corpus counts, Record 13, structure-grain crystallography, `polar ≠ ferroelectric`, structure-grain/article-grain photophysics, structure-level motif mapping, fractional/mixed-occupancy conservatism, Literature Watch isolation, unresolved values and read-only authority remain deterministic/evidence-governed.
 
-- Frozen 3.0.2 and Current Curated rev.3 temporal-scope contracts;
-- exact corpus counts;
-- Record 13 physical dimensionality correction;
-- structure-grain identity and crystallography;
-- `polar` ≠ `ferroelectric`;
-- structure-grain vs article-grain photophysics;
-- structure-level motif mapping;
-- fractional/mixed-occupancy motif conservatism;
-- Literature Watch candidate isolation;
-- missing/unresolved values are not filled by analogy;
-- no write authority is available to the public assistant.
-
-For a structure-specific photophysical question, article-grain photophysics may be shown as article evidence, but it is not reassigned to the named structure unless a structure-grain mapping independently establishes that relationship.
+Article-grain photophysics may be shown for a structure query as article evidence, but it is not reassigned to the named structure unless an independent structure-grain mapping establishes that relationship.
 
 ## 5. Privacy and access contract
 
-The assistant remains a read-only public query interface.
+The assistant remains read-only. It must not expose primary PDF/SI/CIF files, exact stored publisher abstracts kept as private research assets, private field-evidence excerpts/locators, candidate relevance internals, QA/adjudication notes, service credentials/hidden instructions or complete normalized bulk tables. `/api/export` remains HTTP 410 Gone.
 
-It must not expose:
-- primary PDF/SI/CIF files;
-- exact stored publisher abstracts that are private research assets;
-- private field-evidence excerpts/locators;
-- candidate relevance scores/reason codes;
-- internal QA/adjudication/curation notes;
-- service credentials or hidden system instructions;
-- complete normalized bulk tables.
+## 6. Provider failure, quota and client identity
 
-`/api/export` remains HTTP 410 Gone.
+LLM availability cannot determine whether deterministic scientific evidence remains accessible. Provider unavailability or quota exhaustion produces `SAFE_CONVERSATION_FALLBACK`; evidence retrieval and deterministic scientific boundaries remain independently available.
 
-## 6. Provider failure, quota and client-identity behavior
+Conversation and evidence use separate quota domains. Evidence keeps the established conservative limiter. Conversation uses service-role-only `cuhalide_atlas_conversation_rate_limit_v10`: 60/hour and 240/day per conversation fingerprint plus 1,200/day global.
 
-LLM availability is not allowed to determine whether deterministic scientific evidence remains accessible.
+A hostile preview found that `IP + User-Agent` merged legitimate users behind the same NAT. Evidence identity therefore remains network-derived, while conversation identity hashes the same network identity with a browser-generated random 256-bit local session token. The token contains no user data, is not authentication, and is never trusted by itself.
 
-If the conversational model is unavailable or its provider quota is exhausted:
-- ordinary chat returns a clear `SAFE_CONVERSATION_FALLBACK` response rather than a false scientific “out of scope” rejection;
-- evidence-grounded Atlas retrieval remains available independently;
-- exact scientific boundaries continue to use deterministic services;
-- the UI reports that conversational synthesis is temporarily limited.
-
-Conversation and evidence requests intentionally use separate quota domains. The established evidence-query limiter remains unchanged. Ordinary conversation uses a service-role-only `cuhalide_atlas_conversation_rate_limit_v10` bucket with 60 requests/hour and 240 requests/day per conversation fingerprint plus a 1,200/day global conversation ceiling.
-
-A preview hostile test exposed that `IP + User-Agent` alone incorrectly merged multiple browser contexts behind the same runner/NAT. v10 therefore uses two server-generated identities:
-- **evidence identity:** remains network-derived (`IP + User-Agent`) so existing scientific-query abuse controls are not weakened;
-- **conversation identity:** hashes the same network identity together with a browser-generated random 256-bit session token. This separates legitimate users sharing a campus/laboratory NAT without treating the browser token as authentication.
-
-The browser session token is random, contains no user data and is stored locally only to stabilize a user's conversational quota. The server never trusts it by itself: the network component and global conversation ceiling remain part of the abuse boundary.
-
-This preserves scientific availability while making degradation legible and avoiding false rate-limit collisions for normal multi-turn chat.
+The private usage table has RLS, direct browser privileges revoked, a service-role-only RPC, and an explicit RESTRICTIVE deny-all policy for `anon` and `authenticated`.
 
 ## 7. Backward compatibility
 
-The public `/api/agent` GET contract preserves the established evidence-engine identity for existing scientific clients:
-- top-level evidence `version` remains `9.15.0`;
-- `x-cuhalide-rag-version` remains `9.15.0`;
-- corpus/current-curated/capability fields remain available;
-- `assistant_version = 10.0.0` and `x-cuhalide-assistant-version = 10.0.0` are additive;
-- the new conversation/evidence service status is additive.
+The public `/api/agent` GET contract keeps evidence `version=9.15.0` and `x-cuhalide-rag-version=9.15.0`; `assistant_version=10.0.0` and `x-cuhalide-assistant-version=10.0.0` are additive. Corpus/current-curated/capability fields remain available. The navigation label Smart RAG remains recognizable while the page is presented as CuHalide Research Assistant.
 
-The navigation label **Smart RAG** is retained as the feature name, while the page itself is presented as the **CuHalide Research Assistant**. This preserves recognizable navigation and existing browser contracts without exposing implementation mode selection to users.
+Scientific meta core 48.4 remains independently versioned; public composite health/UI is 48.5.
 
-The public composite health layer is 48.5. The stable scientific meta core remains independently versioned at 48.4 and is composed rather than rewritten, preserving previously validated scientific health semantics.
+## 8. UI contract
 
-## 8. UI changes
+The 48.5 interface removes manual mode selection, accepts short messages, presents one natural composer, distinguishes conversation from evidence-backed replies, shows source cards only when evidence is used, retains source-linked article/structure cards, creates a local random conversation-session identifier, and reports degraded model availability without implying the database is unavailable.
 
-The 48.5 assistant interface:
-- removes the manual RAG mode selector;
-- accepts short messages such as `hi`;
-- presents a single natural-language composer;
-- explains automatic routing in user-oriented language;
-- distinguishes conversational replies from evidence-backed replies;
-- populates evidence cards only when database evidence is actually used;
-- retains source-linked article/structure cards for evidence answers;
-- creates a local random conversation-session identifier to prevent shared-NAT quota collisions;
-- displays degraded model availability without implying that the scientific database is unavailable.
+The Assistant guidance panel is not treated as the legacy Smart RAG “research setup” on mobile: guidance remains visible at 390 px. The page-head eyebrow color is independently AA-safe rather than relying on the marginal legacy color token. Responsive behavior, overflow and WCAG AA remain required browser gates.
 
-Responsive and WCAG AA behavior remains part of the required browser gate.
+## 9. Deterministic runtime control plane
 
-## 9. QA matrix
+Hostile production/preview testing showed that the historical composite health topology recursively fanned out through Public Data, Literature Watch, multiple Smart RAG/legacy layers and a site self-probe. Health itself could become a load generator.
 
-The protected browser suite explicitly tests:
-- `what can you do?` → conversational answer, never release-scope rejection;
-- Chinese capability query → conversational answer;
-- general exciton explanation → conversational answer without fake Atlas sources;
-- Record 13 dimensionality → evidence route and `Unresolved`;
-- `CUH-372-S01` motif + emission → structure-grain/article-grain evidence boundary;
-- multi-turn scientific follow-up → inherited evidence context;
-- capability question after a scientific turn → conversational override;
-- latest Cu(I)-iodide literature → research/Literature Watch route;
-- short UI chat submission and persisted random browser session token;
-- no manual mode selector;
-- CSP synchronization;
-- multi-viewport overflow and WCAG AA checks.
+`cuhalide-atlas-runtime-contract-v1-public` now supplies high-frequency GET control-plane responses directly from existing deterministic database/RPC contracts:
+- Public Data `health` and `bootstrap`;
+- `/health.json`;
+- `/api/agent` GET manifest;
+- sitemap identity index.
 
-All prior rev.3 scientific, privacy, Record 13, Motif Atlas, sitemap, export-410 and stable-record tests remain active.
+The control endpoint never recursively calls Public Data, Smart RAG or Candidates. Literature Watch live status remains a separate status surface. Real Assistant POST is unchanged and still traverses Research Assistant → conversational/evidence services; protected Preview Chromium must execute those POST paths before release.
 
-## 10. Release gate
+The sitemap control action reads only already-public identity columns from the Current projection and independently verifies exactly 359 canonical article IDs and 887 Core-Included structure IDs. `api/sitemap` then verifies the final 1,248-URL invariant. This replaces the prior 31+ Edge-page rebuild without weakening any denominator guard.
 
-No assistant/UI change is production-authorized merely because the Supabase canary or Vercel preview builds.
+## 10. Public-data reliability and QA load hardening
 
-Production promotion still requires:
-1. protected PR provenance;
-2. exact-head Vercel Preview;
-3. production-baseline Chromium;
-4. production-baseline Lighthouse;
-5. Preview Chromium including POST conversation/evidence tests;
-6. Preview Lighthouse;
-7. expected-head merge protection;
-8. production Vercel deployment on the exact merge SHA;
-9. post-merge Chromium and Lighthouse;
-10. independent production smoke and Supabase security review.
+The production baseline exposed an old `Body is unusable: Body has already been read` path. The Vercel public-data proxy now uses a 12 s total budget, two bounded attempts and immutable response snapshots; a later network failure can return an earlier captured 5xx without re-reading a consumed `Response`.
 
-The scientific corpus, Frozen snapshot and Current Curated data rows are not modified by this assistant release.
+The public Supabase wrapper is synchronized to Public Data 2.10.0 / rev.3, with independent core/context/structure-enrichment work parallelized under bounded timeouts. Mocked tests cover `503→200`, `503→network failure`, repeated aborts and HEAD.
 
-## 11. Hostile production-baseline reliability finding
+Preview QA previously grouped concurrency by deployment SHA and startup loops polled full `/health.json`, allowing superseded candidates to create a thundering herd. Preview concurrency is now keyed by deployment ref with cancellation; candidate startup uses local-only `/__qa/ready`. Full scientific/health tests remain in the protected suite.
 
-The exact-head production Chromium gate exposed a pre-existing reliability defect in the public-data proxy rather than a scientific-contract mismatch. During an upstream 5xx/network sequence, the Vercel proxy cancelled a first `Response`, retained that object, and could later attempt `response.text()` on the already-consumed body, producing Node/Undici `Body is unusable: Body has already been read`. The same path also allowed upstream/body waits to exceed the 15 s browser contract.
+## 11. QA matrix
 
-The release candidate therefore adds a reliability-only repair:
-- the Vercel proxy has a single 12 s end-to-end budget with two bounded attempts;
-- every attempt consumes the body into an immutable `{status, headers, body}` snapshot before retry control flow continues;
-- a captured 5xx snapshot can be returned after a later network failure without re-reading a `Response`;
-- the Supabase public-data wrapper is synchronized to Public Data 2.10.0 / Current Curated rev.3;
-- core data, current-state/coverage context and structure enrichment execute in parallel where independent;
-- Supabase-side upstream calls use bounded retry/timeout behavior;
-- mocked-fetch contract tests cover `503→200`, `503→network failure`, repeated aborts and HEAD behavior.
+Protected QA explicitly verifies conversational English/Chinese capability questions, general exciton explanation without fake citations, Record 13 evidence routing and `Unresolved`, CUH-372-S01 motif/photophysics evidence-grain separation, inherited scientific context, meta-conversation override, Literature Watch routing, short UI chat, session persistence, no mode selector, deterministic control-plane topology, 1,248 sitemap URLs, multi-viewport overflow and WCAG AA.
 
-This repair changes transport reliability only. It does not modify scientific rows, counts, classification, motif/photophysics evidence grain, Frozen 3.0.2, Current Curated membership or private/public access policy.
+All prior rev.3 scientific, privacy, Record 13, Motif Atlas, export-410 and stable-record tests remain active. A passing release is expected to have no failed or flaky protected-browser tests.
+
+## 12. Release gate
+
+Production promotion requires protected PR provenance; exact-head Vercel Preview; production-baseline Chromium and Lighthouse; Preview Chromium including live POST conversation/evidence tests; Preview Lighthouse; expected-head merge; exact merge-SHA Vercel production deployment; post-merge Chromium/Lighthouse; and independent production/Supabase security smoke.
+
+No assistant/UI/control-plane change is permitted to modify scientific rows, Frozen denominators, Current Curated membership, taxonomy assignments, RAG documents or the public/private evidence boundary.
