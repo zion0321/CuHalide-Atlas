@@ -45,7 +45,7 @@ test('public-data production mirror is synchronized to 2.10/rev.3 and keeps boun
 
 test('Vercel public-data proxy has one bounded end-to-end retry budget and snapshots response bodies before retry', () => {
   const source = read('api/public-data.js');
-  for (const token of ['TOTAL_TIMEOUT_MS = 12000', 'FIRST_ATTEMPT_TIMEOUT_MS = 5000', 'const body = req.method === \'HEAD\' ? \'\' : await response.text()', 'lastSnapshot = snapshot']) {
+  for (const token of ['TOTAL_TIMEOUT_MS=12000', 'FIRST_ATTEMPT_TIMEOUT_MS=5000', "body=req.method==='HEAD'?'':await response.text()", 'lastSnapshot=snapshot']) {
     assert.ok(source.includes(token), `public-data proxy must include ${JSON.stringify(token)}`);
   }
   assert.ok(!source.includes('response.body?.cancel()'), 'proxy must not cancel a response and later risk reusing its consumed body');
