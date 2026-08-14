@@ -1,113 +1,13 @@
-const UPSTREAM = 'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
-const PUBLIC_ORIGIN = 'https://cuhalide-atlas-v3.vercel.app';
-const PUBLIC_DATA_VERSION = '2.10.0';
-const CURRENT_REVISION = '3';
-const TOTAL_TIMEOUT_MS = 12000;
-const FIRST_ATTEMPT_TIMEOUT_MS = 5000;
-const RETRY_DELAY_MS = 120;
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-function abortError(message = 'Public data backend request timed out') {
-  const error = new Error(message);
-  error.name = 'AbortError';
-  return error;
-}
-
-async function fetchSnapshotWithRetry(url, req) {
-  const startedAt = Date.now();
-  let lastSnapshot = null;
-  let lastError = null;
-
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const elapsed = Date.now() - startedAt;
-    const remaining = TOTAL_TIMEOUT_MS - elapsed;
-    if (remaining <= 250) {
-      if (lastSnapshot) return lastSnapshot;
-      throw lastError || abortError();
-    }
-
-    const timeoutMs = attempt === 0
-      ? Math.min(FIRST_ATTEMPT_TIMEOUT_MS, remaining)
-      : remaining;
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-    try {
-      const response = await fetch(url, {
-        method: req.method,
-        headers: {
-          accept: req.headers.accept || 'application/json',
-          'user-agent': req.headers['user-agent'] || `CuHalide-Atlas-Vercel-Public-Data/${PUBLIC_DATA_VERSION}`,
-        },
-        redirect: 'follow',
-        signal: controller.signal,
-      });
-      const body = req.method === 'HEAD' ? '' : await response.text();
-      const snapshot = { status: response.status, headers: response.headers, body };
-      lastSnapshot = snapshot;
-      if (response.status < 500 || attempt === 1) return snapshot;
-    } catch (error) {
-      lastError = error;
-      if (attempt === 1) {
-        if (lastSnapshot) return lastSnapshot;
-        throw error;
-      }
-    } finally {
-      clearTimeout(timer);
-    }
-
-    const retryRemaining = TOTAL_TIMEOUT_MS - (Date.now() - startedAt);
-    if (retryRemaining <= 250) {
-      if (lastSnapshot) return lastSnapshot;
-      throw lastError || abortError();
-    }
-    await sleep(Math.min(RETRY_DELAY_MS, Math.max(0, retryRemaining - 200)));
-  }
-
-  if (lastSnapshot) return lastSnapshot;
-  throw lastError || new Error('Public data backend request failed');
-}
-
-export default async function handler(req, res) {
-  if (!['GET', 'HEAD'].includes(req.method)) {
-    res.statusCode = 405;
-    res.setHeader('Allow', 'GET, HEAD');
-    return res.end('Method Not Allowed');
-  }
-
-  try {
-    const incoming = new URL(req.url, PUBLIC_ORIGIN);
-    const upstream = new URL(UPSTREAM);
-    for (const [key, value] of incoming.searchParams.entries()) upstream.searchParams.append(key, value);
-
-    const snapshot = await fetchSnapshotWithRetry(upstream, req);
-    res.statusCode = snapshot.status;
-    res.setHeader('Content-Type', snapshot.headers.get('content-type') || 'application/json; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-    res.setHeader('X-CuHalide-Public-Access', 'query-and-view');
-    for (const h of ['x-cuhalide-release', 'x-cuhalide-public-data-version', 'x-cuhalide-current-curated-revision']) {
-      const v = snapshot.headers.get(h);
-      if (v) res.setHeader(h, v);
-    }
-    if (!res.getHeader('X-CuHalide-Public-Data-Version')) res.setHeader('X-CuHalide-Public-Data-Version', PUBLIC_DATA_VERSION);
-    if (!res.getHeader('X-CuHalide-Current-Curated-Revision')) res.setHeader('X-CuHalide-Current-Curated-Revision', CURRENT_REVISION);
-    if (req.method === 'HEAD') return res.end();
-    return res.end(snapshot.body);
-  } catch (error) {
-    console.error('[cuhalide-public-data-proxy]', error);
-    res.statusCode = error?.name === 'AbortError' ? 504 : 502;
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('X-CuHalide-Public-Data-Version', PUBLIC_DATA_VERSION);
-    res.setHeader('X-CuHalide-Current-Curated-Revision', CURRENT_REVISION);
-    return res.end(JSON.stringify({
-      error: error?.name === 'AbortError'
-        ? 'CuHalide Atlas public data backend timed out.'
-        : 'CuHalide Atlas public data backend is temporarily unavailable.',
-      release: '3.0.2',
-      version: PUBLIC_DATA_VERSION,
-    }));
-  }
-}
+const DATA_UPSTREAM='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
+const CONTRACT_UPSTREAM='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-runtime-contract-v1-public';
+const PUBLIC_ORIGIN='https://cuhalide-atlas-v3.vercel.app';
+const PUBLIC_DATA_VERSION='2.10.0';
+const CURRENT_REVISION='3';
+const TOTAL_TIMEOUT_MS=12000;
+const FIRST_ATTEMPT_TIMEOUT_MS=5000;
+const RETRY_DELAY_MS=120;
+const sleep=(ms)=>new Promise((resolve)=>setTimeout(resolve,ms));
+function abortError(message='Public data backend request timed out'){const error=new Error(message);error.name='AbortError';return error}
+function targetUrl(incoming){const action=String(incoming.searchParams.get('action')||'health').toLowerCase(),control=action==='health'||action==='bootstrap',upstream=new URL(control?CONTRACT_UPSTREAM:DATA_UPSTREAM);for(const[key,value]of incoming.searchParams.entries()){if(key==='action'&&action==='health')continue;upstream.searchParams.append(key,value)}if(action==='health')upstream.searchParams.set('action','public-health');return upstream}
+async function fetchSnapshotWithRetry(url,req){const startedAt=Date.now();let lastSnapshot=null,lastError=null;for(let attempt=0;attempt<2;attempt+=1){const elapsed=Date.now()-startedAt,remaining=TOTAL_TIMEOUT_MS-elapsed;if(remaining<=250){if(lastSnapshot)return lastSnapshot;throw lastError||abortError()}const timeoutMs=attempt===0?Math.min(FIRST_ATTEMPT_TIMEOUT_MS,remaining):remaining,controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);try{const response=await fetch(url,{method:req.method,headers:{accept:req.headers.accept||'application/json','user-agent':req.headers['user-agent']||`CuHalide-Atlas-Vercel-Public-Data/${PUBLIC_DATA_VERSION}`},redirect:'follow',signal:controller.signal}),body=req.method==='HEAD'?'':await response.text(),snapshot={status:response.status,headers:response.headers,body};lastSnapshot=snapshot;if(response.status<500||attempt===1)return snapshot}catch(error){lastError=error;if(attempt===1){if(lastSnapshot)return lastSnapshot;throw error}}finally{clearTimeout(timer)}const retryRemaining=TOTAL_TIMEOUT_MS-(Date.now()-startedAt);if(retryRemaining<=250){if(lastSnapshot)return lastSnapshot;throw lastError||abortError()}await sleep(Math.min(RETRY_DELAY_MS,Math.max(0,retryRemaining-200)))}if(lastSnapshot)return lastSnapshot;throw lastError||new Error('Public data backend request failed')}
+export default async function handler(req,res){if(!['GET','HEAD'].includes(req.method)){res.statusCode=405;res.setHeader('Allow','GET, HEAD');return res.end('Method Not Allowed')}try{const incoming=new URL(req.url,PUBLIC_ORIGIN),upstream=targetUrl(incoming),snapshot=await fetchSnapshotWithRetry(upstream,req);res.statusCode=snapshot.status;res.setHeader('Content-Type',snapshot.headers.get('content-type')||'application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('X-Robots-Tag','noindex, nofollow');res.setHeader('X-CuHalide-Public-Access','query-and-view');for(const h of['x-cuhalide-release','x-cuhalide-public-data-version','x-cuhalide-current-curated-revision']){const v=snapshot.headers.get(h);if(v)res.setHeader(h,v)}if(!res.getHeader('X-CuHalide-Public-Data-Version'))res.setHeader('X-CuHalide-Public-Data-Version',PUBLIC_DATA_VERSION);if(!res.getHeader('X-CuHalide-Current-Curated-Revision'))res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);if(req.method==='HEAD')return res.end();return res.end(snapshot.body)}catch(error){console.error('[cuhalide-public-data-proxy]',error);res.statusCode=error?.name==='AbortError'?504:502;res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.setHeader('X-CuHalide-Public-Data-Version',PUBLIC_DATA_VERSION);res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);return res.end(JSON.stringify({error:error?.name==='AbortError'?'CuHalide Atlas public data backend timed out.':'CuHalide Atlas public data backend is temporarily unavailable.',release:'3.0.2',version:PUBLIC_DATA_VERSION}))}}
