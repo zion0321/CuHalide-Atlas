@@ -1,5 +1,8 @@
+import crypto from 'node:crypto';
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+
+const API_SESSION = crypto.randomBytes(32).toString('hex');
 
 async function json(response) {
   const text = await response.text();
@@ -8,7 +11,7 @@ async function json(response) {
 }
 
 async function ask(request, messages) {
-  const response = await request.post('/api/agent', { data: { messages, mode: 'auto', depth: 'standard' }, timeout: 125000 });
+  const response = await request.post('/api/agent', { headers: { 'x-cuhalide-session': API_SESSION }, data: { messages, mode: 'auto', depth: 'standard' }, timeout: 125000 });
   expect(response.status()).toBe(200);
   return json(response);
 }
@@ -26,7 +29,7 @@ test.describe('Research Assistant 10.0 conversational routing', () => {
     expect(x).toMatchObject({ ok: true, release: '3.0.2', version: '9.15.0', assistant_version: '10.0.0', service: 'CuHalide Research Assistant' });
     expect(x.corpus).toMatchObject({ unified_documents: 1322, unified_embedded: 1322 });
     expect(x.current_curated).toMatchObject({ live_revision: 3, curated_through: '2026-08-14' });
-    expect(x.capabilities).toMatchObject({ natural_conversation: true, automatic_evidence_routing: true, general_scientific_explanation: true, multi_turn_context: true, evidence_grounded_retrieval: true, deterministic_motif_atlas: true, fractional_motif_conservatism: true, live_web: false });
+    expect(x.capabilities).toMatchObject({ natural_conversation: true, automatic_evidence_routing: true, general_scientific_explanation: true, multi_turn_context: true, evidence_grounded_retrieval: true, deterministic_motif_atlas: true, fractional_motif_conservatism: true, separate_conversation_identity: true, live_web: false });
     expect(x.checks.evidence_layer_reachable).toBe(true);
   });
 
@@ -121,6 +124,8 @@ test.describe('Research Assistant 48.5 interface', () => {
     const messages = page.locator('#thread .bubble.assistant');
     await expect(messages.last()).toContainText('CuHalide Research Assistant', { timeout: 125000 });
     await expect(messages.last()).not.toContainText('outside CuHalide Atlas release 3.0.2 scope');
+    const session = await page.evaluate(() => localStorage.getItem('cuhalide-assistant-session-v1'));
+    expect(session).toMatch(/^[a-f0-9]{64}$/);
   });
 
   test('assistant page has no serious WCAG failures or horizontal overflow', async ({ page }) => {
