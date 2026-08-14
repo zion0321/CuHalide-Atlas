@@ -82,14 +82,32 @@ test('Research Assistant provides free conversation while routing scientific cla
   ], 'Research Assistant gateway');
   const conversation = read('supabase/functions/cuhalide-atlas-conversation-v1-internal/index.ts');
   expectIncludes(conversation, [
+    "VERSION='1.0.1'",
     "LLM='@cf/qwen/qwen3-30b-a3b-fp8'",
     'Converse naturally',
     'Do NOT invent or assert CuHalide Atlas corpus-specific facts',
     '__CUHALIDE_ROUTE_EVIDENCE__',
     'general_scientific_explanation:true',
+    'separate_conversation_quota:true',
     'SAFE_CONVERSATION_FALLBACK',
-    'cuhalide_atlas_agent_rate_limit',
+    'cuhalide_atlas_conversation_rate_limit_v10',
+    'hour_limit:60,day_limit:240,global_day_limit:1200',
   ], 'conversational LLM layer');
+  assert.ok(!conversation.includes("rest('rpc/cuhalide_atlas_agent_rate_limit'"), 'conversation must not consume the evidence-query quota');
+});
+
+test('conversation quota migration is private, service-role-only and independent of scientific evidence quota', () => {
+  const migration = read('supabase/migrations/20260814084241_separate_conversation_rate_limit_v10.sql');
+  expectIncludes(migration, [
+    'create table if not exists public.cuhalide_atlas_conversation_usage',
+    'enable row level security',
+    'cuhalide_atlas_conversation_rate_limit_v10',
+    'hour_limit constant integer := 60',
+    'day_limit constant integer := 240',
+    'global_day_limit constant integer := 1200',
+    'revoke all on table public.cuhalide_atlas_conversation_usage from public, anon, authenticated',
+    'grant execute on function public.cuhalide_atlas_conversation_rate_limit_v10(text) to service_role',
+  ], 'conversation quota migration');
 });
 
 test('Smart RAG 9.15 public-safe mirror matches the rev.3 production evidence engine', () => {
@@ -181,8 +199,8 @@ test('production governance reflects the active protected-main and no-auto-repla
 test('public Supabase migration inventory tracks the real ledger without becoming a replay dump', () => {
   const supabaseReadme = read('supabase/README.md');
   const inventory = read('supabase/contracts/REMOTE_MIGRATION_INVENTORY_2026-08-14.md');
-  expectIncludes(supabaseReadme, ['124', '`20260807140239`', '`20260814054208`', 'fake/no-op timestamp migrations'], 'supabase/README.md');
-  expectIncludes(inventory, ['total migration-history entries: **124**', 'not a replayable SQL dump', '`add_scoped_current_curated_rag_embedding_writer`', '`motif_atlas_schema_1_2_fractional_conservatism`'], 'remote migration inventory');
+  expectIncludes(supabaseReadme, ['125', '`20260807140239`', '`20260814084241`', 'fake/no-op timestamp migrations', 'separate_conversation_rate_limit_v10'], 'supabase/README.md');
+  expectIncludes(inventory, ['total migration-history entries: **125**', 'not a replayable SQL dump', '`add_scoped_current_curated_rag_embedding_writer`', '`motif_atlas_schema_1_2_fractional_conservatism`', '`separate_conversation_rate_limit_v10`'], 'remote migration inventory');
 });
 
 test('release versioning policy protects 3.0.2 from literature expansion', () => {
