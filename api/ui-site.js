@@ -89,9 +89,9 @@ function enhanceHtml(input) {
     '<select id="arel"><option value="Current canonical" selected>Curated literature · n=359</option><option value="">All reviewed / audit records · n=373</option><option value="Context - Boundary">Boundary context</option><option value="Excluded - Curated Audit">Excluded audit</option><option value="Pending - Primary Evidence Unavailable">Primary evidence pending</option></select>', 'article dataset selector');
   body = all(body, 'Reset to Current canonical', 'Reset to curated literature');
   body = all(body, 'Default data layer = Current canonical; Frozen Release core remains selectable.', 'Latest reviewed corpus.');
-  body = all(body,
-    'The default view is Current Curated canonical evidence (the latest primary-evidence-reviewed CuHalide Atlas corpus). Frozen core and audit views remain explicitly selectable.',
-    'Search the latest primary-evidence-reviewed literature. Archived snapshots are kept under Data provenance for reproducibility rather than exposed as a routine browsing mode.');
+  body = required(body,
+    'The default view is Current Curated canonical evidence (Frozen Release 3.0.2 plus primary-evidence-reviewed rev.1 additions). Frozen core and audit views remain explicitly selectable.',
+    'Search the latest primary-evidence-reviewed literature. Archived snapshots are kept under Data provenance for reproducibility rather than exposed as a routine browsing mode.', 'literature introduction');
 
   body = all(body,
     'The default view contains Current Curated Core-Included structure/phase rows. Frozen Release rows remain the immutable base; structure search is restricted to identity and crystallographic fields, with article-level photophysics and unmapped motif text excluded.',
@@ -152,6 +152,7 @@ function enhanceHtml(input) {
     if (!body.includes(token)) throw new Error(`Living knowledge output missing: ${token}`);
   }
   if (body.includes('Frozen Release core · n=332')) throw new Error('Archived snapshot must not remain a routine browsing mode');
+  if (body.includes('Frozen core and audit views remain explicitly selectable')) throw new Error('Archived snapshot must not remain a routine browsing mode');
   if (body.includes('Frozen Release 3.0.2 · cutoff through 2026-06-30')) throw new Error('Archived snapshot cutoff must not be presented as living-portal freshness');
   return body;
 }
