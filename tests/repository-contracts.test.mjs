@@ -47,7 +47,16 @@ test('current public runtime identities remain synchronized', () => {
   expectIncludes(read('api/agent.js'), ['9.15.0', "CURRENT_REVISION='3'"], 'api/agent.js');
   expectIncludes(read('api/meta.js'), ['48.4', "CURRENT_REVISION='3'"], 'api/meta.js');
   expectIncludes(read('api/motifs.js'), ["REV='3'", "CONTENT_DATE='2026-08-14'", 'Conservative motif rule'], 'api/motifs.js');
-  expectIncludes(read('api/ui-site.js'), ["UI_VERSION = '48.4'", "CURRENT_REVISION = '3'", 'Current canonical · n=359'], 'api/ui-site.js');
+  expectIncludes(read('api/ui-site.js'), ["UI_VERSION = '48.4'", "CURRENT_REVISION = '3'", "CONTENT_DATE = '2026-08-14'", 'Current canonical · n=359', 'primary-evidence-reviewed Current Curated additions through rev.3'], 'api/ui-site.js');
+
+  const middleware = read('middleware.js');
+  expectIncludes(middleware, [
+    "release-3.0.2-ui-v48.4-current-r3",
+    "headers.set('x-cuhalide-current-curated-revision', '3')",
+    "headers.set('x-cuhalide-ui-version', '48.4')",
+  ], 'middleware.js');
+  assert.ok(!middleware.includes('release-3.0.2-ui-v48.3'), 'middleware must not expose stale UI 48.3 identity');
+  assert.ok(!middleware.includes("headers.set('x-cuhalide-current-curated-revision', '2')"), 'middleware must not expose stale Current Curated rev.2 identity');
 });
 
 test('rev.3 release audit records primary-evidence additions and duplicate identity controls', () => {
