@@ -60,6 +60,24 @@ test('living-knowledge UI keeps snapshot provenance without making snapshot sele
   ], 'living knowledge UI');
 });
 
+test('meta health follows living-knowledge readiness instead of deprecated visible release labels', () => {
+  const meta = read('supabase/functions/cuhalide-atlas-meta-v302-stable/index.ts');
+  expectIncludes(meta, [
+    "VERSION='48.4'",
+    "'x-cuhalide-current-curated-revision':'3'",
+    "r.x?.version==='9.15.0'",
+    'CUHALIDE_UI_V48_4_LIVING_KNOWLEDGE',
+    'Latest curated state',
+    'Curated through 14 Aug 2026',
+    'Archived scientific snapshot 3.0.2',
+    "!html.includes('Frozen Release core · n=332')",
+    "!html.includes('Frozen Release 3.0.2 · cutoff through 2026-06-30')",
+    "site_readiness:siteReady?'PASS':'OUT_OF_SYNC'",
+    'snapshot coverage verified through June 2026',
+  ], 'stable meta function mirror');
+  assert.ok(!meta.includes("html.includes('Frozen Release')&&html.includes('2026-08-14')&&html.includes('rev.3')"), 'site readiness must not require deprecated visible Frozen/revision UI labels');
+});
+
 test('rev.3 release audit records primary-evidence additions and duplicate identity controls', () => {
   const audit = read('docs/CURRENT_CURATED_R3_2026-08-14.md');
   expectIncludes(audit, ['10.1021/acs.inorgchem.6c03055','10.1002/smll.74688','10.1021/acs.cgd.6c00650','`CUH-370-S02`','`CUH-370-S01`','`CUH-158-S09`','15 legacy rows','1,322 / 1,322','`ok = true`'], 'Current Curated rev.3 audit');
