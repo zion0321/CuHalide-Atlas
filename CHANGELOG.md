@@ -1,5 +1,59 @@
 # Changelog
 
+## Current Curated rev.3 — 2026-08-14 (living production state; archived snapshot unchanged)
+
+CuHalide Atlas now presents the public portal as **one continuously curated scientific knowledge base**. The latest primary-evidence-reviewed state is the default public experience; internal Frozen/Current identifiers remain machine-readable for provenance, but users are no longer asked to choose between them as competing browsing modes.
+
+### Current scientific state
+
+- Curated through **2026-08-14**.
+- Article audit / chemically included / canonical verified: **373 / 362 / 359**.
+- Structure/phase / Core-Included: **949 / 887**.
+- Resolved / verified one-to-one space-group rows: **719 / 694**.
+- Verified polar / strict-polar rows: **97 / 77**, with **46** strict-polar articles.
+- Unified RAG corpus: **1,322 / 1,322** documents/embeddings.
+- Overlay relative to archived snapshot 3.0.2: **27 reviewed articles** and **71 reviewed structure/phase determinations**; **19** are snapshot-period coverage backfills and **8** are post-snapshot additions.
+- Archived/Frozen 3.0.2 denominators remain immutable at **346 / 335 / 332 / 878 / 816 / 650 / 625 / 87 / 67 / 42**, with **1,224 / 1,224** archived RAG documents/embeddings.
+
+### Three primary-evidence additions
+
+- `10.1021/acs.inorgchem.6c03055` — four SCXRD determinations spanning reversible 0D `[Cu10I20]10−` and 1D `[Cu10I17]n7n−` phases.
+- `10.1002/smll.74688` — eight enantiomeric Cu4I4 determinations; the R/S-3-methylmorpholine structures are linked as known chemical identities with new determinations rather than double-counted as new identities.
+- `10.1021/acs.cgd.6c00650` — two new Cu2I2(bpp)(phosphine) SCXRD structures; previously reported CP-1 is linked to `CUH-158-S09` rather than duplicated.
+
+### Motif Atlas 1.2 and conservative taxonomy
+
+- Taxonomy coverage: **949** rows; **816** motif-resolved and **133** motif-unresolved.
+- Primary-evidence curated organic-component coverage now spans **28** structures.
+- Corrected **15** fractional/mixed-occupancy legacy over-parsed motif rows. Fractional or solid-solution Cu–halide labels are no longer truncated to artificial integer Cu–X motifs; without independent structure-grain evidence the motif remains `Unresolved`.
+- Coordination, Ionic / Hybrid Ionic, All-in-One (AIO) and unresolved legacy mappings retain separate article/determination/identity denominators.
+
+### Smart RAG 9.15
+
+- Unified BGE-M3 + lexical/RRF retrieval covers **1,322 / 1,322** latest curated documents/embeddings.
+- Added rev.3 article/structure evidence while retaining archived 3.0.2 temporal-scope reproducibility.
+- Structure-grain identity, crystallography and motif evidence remain separate from article-grain photophysics.
+- Fractional-motif conservatism, deterministic protected counts, Record 13 and temporal-scope guards remain enforced independently of model synthesis.
+
+### Living-knowledge public information architecture
+
+- The public interface now emphasizes **Curated through 14 Aug 2026** and the latest reviewed corpus rather than displaying Frozen and Current as two peer databases.
+- Archived scientific snapshot **3.0.2** remains available under Data provenance/citation for exact historical reproduction. Its coverage was verified through **2026-06-30**; this is a **snapshot coverage boundary, not a cutoff for the living database**.
+- Literature Watch remains the metadata-only discovery layer for publications that have not yet completed primary-source review and QC.
+- Main navigation is research-task oriented: Overview, Literature, Structures, Motifs, Polar, Smart RAG and About data.
+- Stable article/structure pages use neutral **Curated record** status with secondary provenance rather than exposing internal revision jargon as the primary badge.
+- Motif Atlas foregrounds current coverage/resolution metrics and collapses legacy label-derived component candidates by default.
+- Public machine headers/APIs still expose `release=3.0.2` and `current_revision=3`; scientific scope semantics are unchanged.
+
+### Governance and access
+
+- Public access remains **query-and-view**; `/api/export` remains **HTTP 410 Gone**.
+- Complete normalized tables/raw payloads, exact publisher abstracts, primary PDF/SI/CIF, field-evidence excerpts/locators and internal candidate/QA/adjudication artifacts remain private.
+- Supabase GitHub automatic deployment integration was disconnected after verifying that the public-safe repository is intentionally not a replayable copy of the private production migration ledger. The former false migration-history check no longer appears on new PR/main commits.
+- Protected-main Vercel provenance, Preview Chromium/Lighthouse and production Chromium/Lighthouse gates remain fail-closed and are not weakened by the UI simplification.
+
+See `docs/CURRENT_CURATED_R3_2026-08-14.md` and `docs/PUBLIC_INFORMATION_ARCHITECTURE_2026-08-14.md`.
+
 ## Current Curated rev.2 — 2026-08-13 (rolling state; not a formal Frozen Release)
 
 Current Curated rev.2 is a primary-evidence-reviewed rolling layer over immutable Frozen Release 3.0.2. It is **not** a rewrite of the 3.0.2 frozen snapshot and is not a patch-level formal data-expansion release.
