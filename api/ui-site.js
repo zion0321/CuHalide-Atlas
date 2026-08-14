@@ -116,6 +116,12 @@ function enhanceHtml(input) {
     '<p class="eyebrow">Data provenance & citation</p><h1>Cite the living atlas or reproduce a snapshot</h1><p>The public site always opens on the latest reviewed knowledge. An archived scientific snapshot is retained separately for exact historical reproduction.</p>', 'citation heading');
   body = required(body, '<p class="eyebrow">Recommended citation</p>', '<p class="eyebrow">Current portal</p>', 'citation eyebrow');
   body = required(body, 'CuHalide Atlas. Frozen Release 3.0.2 (11 August 2026). https://cuhalide-atlas-v3.vercel.app/', 'CuHalide Atlas. Continuously curated Cu(I) halide knowledge portal. Curated through 14 August 2026. https://cuhalide-atlas-v3.vercel.app/', 'living citation');
+  body = required(body,
+    '<a class="btn secondary" href="/citation.cff" target="_blank" rel="noreferrer">Citation metadata</a>',
+    '<a class="btn secondary" href="/citation.cff" target="_blank" rel="noreferrer">Snapshot citation metadata</a>', 'snapshot citation button');
+  body = required(body,
+    '<a class="btn secondary" href="/release-manifest.json" target="_blank" rel="noreferrer">Release manifest</a>',
+    '<a class="btn secondary" href="/release-manifest.json" target="_blank" rel="noreferrer">Machine provenance</a>', 'machine provenance button');
   body = regexRequired(body, /<p class="fine">Frozen Release 3\.0\.2 literature cutoff:[\s\S]*?<\/p>/,
     '<p class="fine">For results from the living atlas, report the access date. The internal live revision remains machine-readable but is not required for routine browsing.</p><div class="provenance-box"><strong>Archived scientific snapshot 3.0.2</strong><p>Immutable reproducibility baseline. Snapshot coverage was verified through 30 June 2026; that date is a boundary of the archived snapshot, not a limit on the living database.</p><span class="snapshot">Snapshot 3.0.2 · 30 Jun 2026</span></div>', 'snapshot provenance box');
   body = required(body,
