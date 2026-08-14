@@ -4,9 +4,9 @@ This document records the **public-safe inventory boundary** for the CuHalide At
 
 ## Inventory summary
 
-- total migration-history entries: **125**
+- total migration-history entries: **126**
 - earliest recorded version: **20260807140239** — `create_cuhalide_atlas_v2_public_schema`
-- latest recorded version: **20260814084241** — `separate_conversation_rate_limit_v10`
+- latest recorded version: **20260814093038** — `explicit_conversation_usage_deny_policy_v10`
 - production Current Curated state: **rev.3**, curated through **2026-08-14**
 - frozen scientific base: **3.0.2**, immutable
 
@@ -26,13 +26,19 @@ The three rev.3 scientific schema changes remain:
    - advances Motif Atlas contract metadata to schema 1.2
    - states the conservative rule that fractional/mixed-occupancy labels remain motif-unresolved unless an independent structure-grain mapping establishes a discrete integer Cu–X core
 
-The latest non-scientific runtime/governance migration is:
+The current non-scientific Research Assistant runtime/governance migrations are:
 
 4. `20260814084241` — `separate_conversation_rate_limit_v10`
    - creates a private conversation-only usage bucket and service-role-only RPC for Research Assistant 10.0;
    - separates ordinary LLM conversation quota from the stricter Smart RAG evidence-query quota;
    - uses 60 requests/hour and 240 requests/day per conversation fingerprint with a 1,200/day global conversation ceiling;
+   - revokes direct table access from `public`, `anon`, and `authenticated` and grants RPC execution only to `service_role`;
    - changes no Frozen/Current scientific rows, counts, taxonomy assignments, RAG documents or public database privileges.
+5. `20260814093038` — `explicit_conversation_usage_deny_policy_v10`
+   - adds an explicit **RESTRICTIVE** `ALL` policy for `anon` and `authenticated` on `public.cuhalide_atlas_conversation_usage`;
+   - uses `USING (false)` and `WITH CHECK (false)` as defense-in-depth on top of revoked direct privileges;
+   - preserves service-role-only RPC operation and does not widen any public data path;
+   - was applied as a new real migration rather than rewriting the already-executed 20260814084241 history entry.
 
 The 15-row taxonomy correction and the three promoted articles/14 structure determinations are protected production curation data, not public migration payloads, and are intentionally not reproduced here.
 
