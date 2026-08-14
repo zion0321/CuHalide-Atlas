@@ -183,3 +183,18 @@ Production promotion still requires:
 10. independent production smoke and Supabase security review.
 
 The scientific corpus, Frozen snapshot and Current Curated data rows are not modified by this assistant release.
+
+## 11. Hostile production-baseline reliability finding
+
+The exact-head production Chromium gate exposed a pre-existing reliability defect in the public-data proxy rather than a scientific-contract mismatch. During an upstream 5xx/network sequence, the Vercel proxy cancelled a first `Response`, retained that object, and could later attempt `response.text()` on the already-consumed body, producing Node/Undici `Body is unusable: Body has already been read`. The same path also allowed upstream/body waits to exceed the 15 s browser contract.
+
+The release candidate therefore adds a reliability-only repair:
+- the Vercel proxy has a single 12 s end-to-end budget with two bounded attempts;
+- every attempt consumes the body into an immutable `{status, headers, body}` snapshot before retry control flow continues;
+- a captured 5xx snapshot can be returned after a later network failure without re-reading a `Response`;
+- the Supabase public-data wrapper is synchronized to Public Data 2.10.0 / Current Curated rev.3;
+- core data, current-state/coverage context and structure enrichment execute in parallel where independent;
+- Supabase-side upstream calls use bounded retry/timeout behavior;
+- mocked-fetch contract tests cover `503→200`, `503→network failure`, repeated aborts and HEAD behavior.
+
+This repair changes transport reliability only. It does not modify scientific rows, counts, classification, motif/photophysics evidence grain, Frozen 3.0.2, Current Curated membership or private/public access policy.
