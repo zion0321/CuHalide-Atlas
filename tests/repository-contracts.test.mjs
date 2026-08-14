@@ -10,7 +10,7 @@ test('runtime module type and QA Node major are explicit and aligned', () => {
   assert.equal(pkg.type, 'module');
   assert.equal(pkg.private, true);
   assert.equal(pkg.engines, undefined, 'package must not override the Vercel project Node major');
-  assert.equal(pkg.scripts['qa:browser'], 'playwright test tests/production-browser-v48-r3.spec.js');
+  assert.equal(pkg.scripts['qa:browser'], 'playwright test tests/production-browser-v48-r3.spec.js tests/research-assistant-v10.spec.js');
   const browser = read('.github/workflows/production-browser-qa.yml');
   const lighthouse = read('.github/workflows/production-lighthouse-qa.yml');
   const preview = read('.github/workflows/vercel-preview-qa.yml');
@@ -31,18 +31,20 @@ test('machine-readable frozen release identity is synchronized', () => {
 
 test('current public runtime identities remain synchronized', () => {
   const readme = read('README.md');
-  expectIncludes(readme, ['Current Curated rev.3','Public Data: **2.10.0**','Smart RAG: **9.15.0**','Metadata / health: **48.4**','Motif Atlas schema: **1.2**','1,322 / 1,322'], 'README.md');
+  expectIncludes(readme, ['Current Curated rev.3','Public Data: **2.10.0**','Research Assistant: **10.0.0**','Evidence engine: **Smart RAG 9.15.0**','Metadata / health: **48.5**','Motif Atlas schema: **1.2**','1,322 / 1,322'], 'README.md');
   expectIncludes(read('api/public-data.js'), ['2.10.0', "CURRENT_REVISION = '3'"], 'api/public-data.js');
-  expectIncludes(read('api/agent.js'), ['9.15.0', "CURRENT_REVISION='3'"], 'api/agent.js');
-  expectIncludes(read('api/meta.js'), ['48.4', "CURRENT_REVISION='3'"], 'api/meta.js');
+  expectIncludes(read('api/agent.js'), ['cuhalide-atlas-research-assistant-v1-public','10.0.0', "CURRENT_REVISION='3'"], 'api/agent.js');
+  expectIncludes(read('api/meta.js'), ['48.5', 'cuhalide-atlas-research-assistant-v1-public', "CURRENT_REVISION='3'"], 'api/meta.js');
   expectIncludes(read('api/motifs.js'), ["REV='3'", "CONTENT_DATE='2026-08-14'", 'Conservative motif rule', 'Curated through 14 Aug 2026', 'Legacy label-derived component candidates'], 'api/motifs.js');
-  const ui = read('api/ui-site.js');
-  expectIncludes(ui, ["UI_VERSION = '48.4'","CURRENT_REVISION = '3'","CONTENT_DATE = '2026-08-14'",'ui-living-knowledge.css','Latest curated state','Curated literature · n=359','Archived scientific snapshot 3.0.2','CUHALIDE_UI_V48_4_LIVING_KNOWLEDGE'], 'api/ui-site.js');
+  const living = read('api/ui-site.js');
+  expectIncludes(living, ["UI_VERSION = '48.4'","CURRENT_REVISION = '3'","CONTENT_DATE = '2026-08-14'",'ui-living-knowledge.css','Latest curated state','Curated literature · n=359','Archived scientific snapshot 3.0.2','CUHALIDE_UI_V48_4_LIVING_KNOWLEDGE'], 'api/ui-site.js');
+  const assistant = read('api/ui-assistant.js');
+  expectIncludes(assistant, ["UI_VERSION='48.5'",'ui-assistant-v48-5.css','CuHalide Research Assistant','Conversation + evidence tools ready','CUHALIDE_UI_V48_5_CONVERSATIONAL_RESEARCH_ASSISTANT'], 'api/ui-assistant.js');
   const record = read('api/record.js');
   expectIncludes(record, ['Curated record', 'Data provenance', 'Archived scientific snapshot 3.0.2'], 'api/record.js');
   const middleware = read('middleware.js');
-  expectIncludes(middleware, ["release-3.0.2-ui-v48.4-current-r3","headers.set('x-cuhalide-current-curated-revision', '3')","headers.set('x-cuhalide-ui-version', '48.4')"], 'middleware.js');
-  assert.ok(!middleware.includes('release-3.0.2-ui-v48.3'), 'middleware must not expose stale UI 48.3 identity');
+  expectIncludes(middleware, ["new URL('/api/ui-assistant'", "release-3.0.2-ui-v48.5-current-r3","headers.set('x-cuhalide-current-curated-revision', '3')","headers.set('x-cuhalide-ui-version', '48.5')"], 'middleware.js');
+  assert.ok(!middleware.includes('release-3.0.2-ui-v48.4-current-r3'), 'middleware must not expose stale UI 48.4 identity');
   assert.ok(!middleware.includes("headers.set('x-cuhalide-current-curated-revision', '2')"), 'middleware must not expose stale Current Curated rev.2 identity');
 });
 
@@ -60,9 +62,64 @@ test('living-knowledge UI keeps snapshot provenance without making snapshot sele
   ], 'living knowledge UI');
 });
 
-test('meta health follows living-knowledge readiness instead of deprecated visible release labels', () => {
-  const meta = read('supabase/functions/cuhalide-atlas-meta-v302-stable/index.ts');
-  expectIncludes(meta, [
+test('Research Assistant provides free conversation while routing scientific claims to governed evidence', () => {
+  const gateway = read('supabase/functions/cuhalide-atlas-research-assistant-v1-public/index.ts');
+  expectIncludes(gateway, [
+    "VERSION='10.0.0'",
+    'cuhalide-atlas-smart-rag-v302-current-public',
+    'cuhalide-atlas-conversation-v1-internal',
+    'natural_conversation:true',
+    'automatic_evidence_routing:true',
+    "route:'conversation'",
+    "answer_kind:'evidence'",
+    "LATEST.test(q)",
+    "hasPriorEvidenceContext(ms)&&isFollowup(q)",
+    'META_ZH=',
+    'GENERAL_DEFINITION_ZH=',
+    'FOLLOWUP_ZH=',
+    "assistant_version:VERSION",
+    "version:e.x?.version||'9.15.0'",
+  ], 'Research Assistant gateway');
+  const conversation = read('supabase/functions/cuhalide-atlas-conversation-v1-internal/index.ts');
+  expectIncludes(conversation, [
+    "LLM='@cf/qwen/qwen3-30b-a3b-fp8'",
+    'Converse naturally',
+    'Do NOT invent or assert CuHalide Atlas corpus-specific facts',
+    '__CUHALIDE_ROUTE_EVIDENCE__',
+    'general_scientific_explanation:true',
+    'SAFE_CONVERSATION_FALLBACK',
+    'cuhalide_atlas_agent_rate_limit',
+  ], 'conversational LLM layer');
+});
+
+test('Smart RAG 9.15 public-safe mirror matches the rev.3 production evidence engine', () => {
+  const evidence = read('supabase/functions/cuhalide-atlas-smart-rag-v302-current-public/index.ts');
+  expectIncludes(evidence, [
+    "VERSION='9.15.0'",
+    "'x-cuhalide-current-curated-revision':'3'",
+    "layer:'current-curated-r3'",
+    'documents:98,embedded:98',
+    'unified_documents:1322,unified_embedded:1322',
+    'fractional_motif_conservatism:true',
+    "guard:'current-structure-grain-boundary-v3'",
+    "CUH-(?:34[7-9]|35\\d|36\\d|37[0-3])-S\\d{2}",
+  ], 'Smart RAG 9.15 production mirror');
+  assert.ok(!evidence.includes("VERSION='9.14.0'"), 'stale 9.14 evidence mirror must not return');
+  assert.ok(!evidence.includes("layer:'current-curated-r2'"), 'stale rev.2 evidence mirror must not return');
+});
+
+test('Research Assistant UI removes manual mode selection and preserves automatic evidence routing', () => {
+  const ui = read('api/ui-assistant.js');
+  const css = read('public/ui-assistant-v48-5.css');
+  expectIncludes(ui, ['Just ask naturally','What can you do?','Ask naturally. When a scientific claim needs Atlas evidence','No database evidence was needed for this answer.',"mode:'auto'"], 'assistant UI');
+  expectIncludes(css, ['.assistant-steps','.assistant-welcome','.no-evidence','@media(max-width:780px)'], 'assistant CSS');
+  assert.ok(!ui.includes('<select id="rmode">'), 'manual RAG mode selector must not be rendered by assistant UI');
+  expectIncludes(ui, ["if(body.includes('<select id=\"rmode\">'))throw new Error('Manual Smart RAG mode selector must not remain in conversational UI')"], 'assistant fail-closed UI guard');
+});
+
+test('meta health keeps the scientific core and adds the public Research Assistant gateway contract', () => {
+  const stable = read('supabase/functions/cuhalide-atlas-meta-v302-stable/index.ts');
+  expectIncludes(stable, [
     "VERSION='48.4'",
     "'x-cuhalide-current-curated-revision':'3'",
     "r.x?.version==='9.15.0'",
@@ -71,11 +128,28 @@ test('meta health follows living-knowledge readiness instead of deprecated visib
     'Curated through 14 Aug 2026',
     'Archived scientific snapshot 3.0.2',
     "!html.includes('Frozen Release core · n=332')",
-    "!html.includes('Frozen Release 3.0.2 · cutoff through 2026-06-30')",
     "site_readiness:siteReady?'PASS':'OUT_OF_SYNC'",
-    'coverage verified through June 2026',
-  ], 'stable meta function mirror');
-  assert.ok(!meta.includes("html.includes('Frozen Release')&&html.includes('2026-08-14')&&html.includes('rev.3')"), 'site readiness must not require deprecated visible Frozen/revision UI labels');
+  ], 'stable scientific meta mirror');
+  const publicMeta = read('api/meta.js');
+  expectIncludes(publicMeta, [
+    "META_VERSION='48.5'",
+    'cuhalide-atlas-research-assistant-v1-public',
+    "x?.assistant_version==='10.0.0'",
+    'gateway_meta_version:META_VERSION',
+    'research_assistant_gateway:assistantOk',
+    'natural_conversation_contract',
+    'automatic_evidence_routing',
+  ], 'public composite health');
+});
+
+test('candidate QA runtime serves the exact assistant wrapper and stylesheet', () => {
+  const server = read('scripts/local-candidate-server.mjs');
+  expectIncludes(server, [
+    "import uiAssistantHandler from '../api/ui-assistant.js'",
+    "'/ui-assistant-v48-5.css'",
+    "pathname === '/api/ui-assistant'",
+    "release-3.0.2-ui-v48.5-current-r3",
+  ], 'candidate server');
 });
 
 test('rev.3 release audit records primary-evidence additions and duplicate identity controls', () => {

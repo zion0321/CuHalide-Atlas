@@ -72,25 +72,33 @@ Primary-evidence curated ligand/cation identities remain separate from legacy la
 - Archived scientific snapshot / internal Frozen Release: **3.0.2**
 - Current governed rolling state: **Current Curated rev.3**, reviewed through **2026-08-14**
 - Public site: **v48**
-- UI/content layer: **48.4**
+- UI/content layer: **48.5**
 - Public Data: **2.10.0**
-- Smart RAG: **9.15.0**
-- Metadata / health: **48.4**
+- Research Assistant: **10.0.0**
+- Evidence engine: **Smart RAG 9.15.0**
+- Metadata / health: **48.5**
 - Motif Atlas schema: **1.2**
 
 ## Public/private boundary
 
-Public access is **query-and-view**, not bulk redistribution. Public interfaces expose selected bibliographic, structural, crystallographic, motif-taxonomy, scope and evidence-status fields through server-side field-whitelisted queries and stable record pages. Smart RAG uses source-linked public records and deterministic scientific boundaries.
+Public access is **query-and-view**, not bulk redistribution. Public interfaces expose selected bibliographic, structural, crystallographic, motif-taxonomy, scope and evidence-status fields through server-side field-whitelisted queries and stable record pages. The Research Assistant uses source-linked public records and deterministic scientific boundaries whenever an answer requires Atlas-specific evidence.
 
 Private research assets include complete normalized tables/raw payloads; exact stored publisher abstracts; primary PDF, SI and CIF archives; field-evidence excerpts and locators; candidate relevance scores, reason codes and source payloads; internal QA, adjudication and curation artifacts.
 
 `/api/export` intentionally returns **HTTP 410 Gone**.
 
-## Smart RAG 9.15
+## Research Assistant 10.0
 
-Smart RAG 9.15.0 combines the validated archived 3.0.2 evidence path with Current Curated rev.1–rev.3 incremental evidence, using unified BGE-M3 + lexical/RRF retrieval across **1,322** embedded documents. Protected counts, temporal scope, reviewed current records, Motif Atlas statistics and evidence-grain boundaries remain deterministic.
+The public assistant is now a **conversational LLM with automatic evidence routing**, rather than a keyword-gated database chat box.
 
-For ordinary questions, RAG uses the latest curated corpus. Archived temporal scope is selected only when a question explicitly asks for a historical/snapshot boundary. Model output cannot override governed denominators, human scope decisions, crystallographic mappings, motif taxonomy or evidence-grain boundaries.
+- Greetings, capability questions, ordinary conversation and general stable scientific explanations use a dedicated conversational LLM layer based on **Qwen3-30B-A3B-FP8**.
+- Questions that ask for CuHalide Atlas records, material-specific claims, DOI/CCDC facts, literature evidence, exact counts, crystallography, polarity, motif assignments or photophysical evidence are automatically routed to the evidence engine.
+- Scientific follow-ups inherit prior evidence context automatically. Users do not need to select a “database” or “research” mode.
+- Questions about newly discovered Cu(I)-halide literature can automatically include **Literature Watch** candidate metadata while keeping those candidates explicitly outside the curated scientific evidence layer.
+- Exact counts, temporal scope, Record 13 corrections, structure-grain identity/crystallography, polarity semantics, motif conservatism and article-vs-structure photophysics boundaries remain deterministic and cannot be overridden by model prose.
+- If the conversational LLM provider is temporarily unavailable, evidence-grounded database queries continue to work; the interface reports the degraded conversational state rather than incorrectly saying that ordinary conversation is “outside release scope.”
+
+The evidence engine remains **Smart RAG 9.15.0**, combining the validated archived 3.0.2 evidence path with Current Curated rev.1–rev.3 incremental evidence and unified BGE-M3 + lexical/RRF retrieval across **1,322** embedded documents. Archived temporal scope is selected only when a question explicitly asks for a historical/snapshot boundary.
 
 ## Record 13
 
@@ -120,7 +128,7 @@ Permanent repository DOI and blanket project licensing are not asserted until ow
 
 ## Repository layout
 
-- `api/` — Vercel read-only public handlers and stable record/sitemap/Motif Atlas rendering.
+- `api/` — Vercel read-only public handlers, conversational UI composition, stable record/sitemap/Motif Atlas rendering.
 - `public/` — version-controlled interface template and presentation assets.
 - `tests/` — browser/scientific/privacy/accessibility, repository-contract and deployment-gate regression tests.
 - `.github/workflows/` — production baseline, protected-preview candidate and Lighthouse gates.
