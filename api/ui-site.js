@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import siteHandler from './site.js';
 
 const UI_VERSION = '48.4';
@@ -59,6 +60,28 @@ function enhanceHtml(input) {
   return body;
 }
 
+function finalInlineScriptHashes(html) {
+  const hashes = [];
+  const pattern = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi;
+  let match;
+  while ((match = pattern.exec(String(html))) !== null) {
+    if (/\bsrc\s*=/i.test(match[1])) continue;
+    hashes.push(`'sha256-${crypto.createHash('sha256').update(match[2]).digest('base64')}'`);
+  }
+  return [...new Set(hashes)];
+}
+
+function synchronizeFinalCsp(html, res) {
+  const current = String(res.getHeader?.('Content-Security-Policy') || '');
+  if (!current) throw new Error('Missing Content-Security-Policy from site handler');
+  const hashes = finalInlineScriptHashes(html);
+  if (!hashes.length) throw new Error('No inline scripts found for strict CSP synchronization');
+  if (!/\bscript-src\s+[^;]*;/i.test(current)) throw new Error('CSP script-src directive missing');
+  const next = current.replace(/\bscript-src\s+[^;]*;/i, `script-src 'self' ${hashes.join(' ')};`);
+  if (/script-src[^;]*'unsafe-inline'/i.test(next)) throw new Error('unsafe-inline is forbidden');
+  res.setHeader('Content-Security-Policy', next);
+}
+
 export default async function handler(req, res) {
   res.setHeader('X-CuHalide-UI-Version', UI_VERSION);
   res.setHeader('X-CuHalide-Current-Curated-Revision', CURRENT_REVISION);
@@ -68,7 +91,11 @@ export default async function handler(req, res) {
       if (String(name).toLowerCase() === 'x-cuhalide-current-curated-revision') return res.setHeader(name, CURRENT_REVISION);
       return res.setHeader(name, value);
     },
-    end: body => res.end(enhanceHtml(body)),
+    end: body => {
+      const finalBody = enhanceHtml(body);
+      if (typeof finalBody === 'string' && finalBody.includes('</html>')) synchronizeFinalCsp(finalBody, res);
+      return res.end(finalBody);
+    },
   };
   Object.defineProperty(bridge, 'statusCode', { get: () => res.statusCode, set: value => { res.statusCode = value; } });
   return siteHandler(req, bridge);
