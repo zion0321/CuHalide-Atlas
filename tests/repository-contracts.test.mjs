@@ -46,8 +46,22 @@ test('current public runtime identities remain synchronized', () => {
   expectIncludes(read('api/public-data.js'), ['2.10.0', "CURRENT_REVISION = '3'"], 'api/public-data.js');
   expectIncludes(read('api/agent.js'), ['9.15.0', "CURRENT_REVISION='3'"], 'api/agent.js');
   expectIncludes(read('api/meta.js'), ['48.4', "CURRENT_REVISION='3'"], 'api/meta.js');
-  expectIncludes(read('api/motifs.js'), ["REV='3'", "CONTENT_DATE='2026-08-14'", 'Conservative motif rule'], 'api/motifs.js');
-  expectIncludes(read('api/ui-site.js'), ["UI_VERSION = '48.4'", "CURRENT_REVISION = '3'", "CONTENT_DATE = '2026-08-14'", 'Current canonical · n=359', 'primary-evidence-reviewed Current Curated additions through rev.3'], 'api/ui-site.js');
+  expectIncludes(read('api/motifs.js'), ["REV='3'", "CONTENT_DATE='2026-08-14'", 'Conservative motif rule', 'Curated through 14 Aug 2026', 'Legacy label-derived component candidates'], 'api/motifs.js');
+  const ui = read('api/ui-site.js');
+  expectIncludes(ui, [
+    "UI_VERSION = '48.4'",
+    "CURRENT_REVISION = '3'",
+    "CONTENT_DATE = '2026-08-14'",
+    'ui-living-knowledge.css',
+    'Latest curated state',
+    'Curated literature · n=359',
+    'Archived scientific snapshot 3.0.2',
+    'CUHALIDE_UI_V48_4_LIVING_KNOWLEDGE',
+  ], 'api/ui-site.js');
+  assert.ok(!ui.includes('Frozen Release core · n=332'), 'archived snapshot must not be restored as a routine browsing mode');
+
+  const record = read('api/record.js');
+  expectIncludes(record, ['Curated record', 'Data provenance', 'Archived scientific snapshot 3.0.2'], 'api/record.js');
 
   const middleware = read('middleware.js');
   expectIncludes(middleware, [
@@ -57,6 +71,19 @@ test('current public runtime identities remain synchronized', () => {
   ], 'middleware.js');
   assert.ok(!middleware.includes('release-3.0.2-ui-v48.3'), 'middleware must not expose stale UI 48.3 identity');
   assert.ok(!middleware.includes("headers.set('x-cuhalide-current-curated-revision', '2')"), 'middleware must not expose stale Current Curated rev.2 identity');
+});
+
+test('living-knowledge UI keeps snapshot provenance without making snapshot selection a user burden', () => {
+  const css = read('public/ui-living-knowledge.css');
+  expectIncludes(css, ['.provenance-box', '.curation-panel', '.release .ver', '@media(max-width:780px)'], 'living knowledge CSS');
+  const ui = read('api/ui-site.js');
+  expectIncludes(ui, [
+    'Continuously curated scientific knowledge',
+    'Curated through 14 Aug 2026',
+    'Latest reviewed corpus.',
+    'snapshot coverage was verified through 30 June 2026',
+  ], 'living knowledge UI');
+  assert.ok(!ui.includes('<option value="Core - Verified">Frozen Release core'), 'frozen snapshot selector must remain absent from routine literature browsing');
 });
 
 test('rev.3 release audit records primary-evidence additions and duplicate identity controls', () => {
