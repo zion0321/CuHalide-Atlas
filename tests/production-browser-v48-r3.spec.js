@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
@@ -22,6 +23,17 @@ async function getData(request, query) {
   }
   expect(response.status(), query).toBe(200);
   return json(response);
+}
+
+function inlineScriptHashes(html) {
+  const hashes = [];
+  const pattern = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi;
+  let match;
+  while ((match = pattern.exec(html)) !== null) {
+    if (/\bsrc\s*=/i.test(match[1])) continue;
+    hashes.push(`'sha256-${crypto.createHash('sha256').update(match[2]).digest('base64')}'`);
+  }
+  return [...new Set(hashes)];
 }
 
 async function noOverflow(page) {
@@ -147,6 +159,9 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.3 scientific contracts
     const csp = root.headers()['content-security-policy'] || '';
     expect(csp).toContain("script-src 'self' 'sha256-");
     expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
+    const finalHashes = inlineScriptHashes(html);
+    expect(finalHashes.length).toBeGreaterThan(0);
+    for (const hash of finalHashes) expect(csp, `final inline script hash missing from CSP: ${hash}`).toContain(hash);
     expect(root.headers()['x-cuhalide-current-curated-revision']).toBe('3');
     const manifest = await json(await request.get('/release-manifest.json'));
     expect(manifest).toMatchObject({ release: '3.0.2', ui_version: '48.4', public_data_version: '2.10.0', smart_rag_version: '9.15.0', meta_version: '48.4' });
