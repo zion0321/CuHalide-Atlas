@@ -9,28 +9,36 @@ CuHalide Atlas is an evidence-grounded, structure-resolved knowledge portal for 
 CuHalide Atlas deliberately separates an immutable citation snapshot from a rolling reviewed layer:
 
 - **Frozen Release 3.0.2** — released 2026-08-11; literature cutoff **June 2026, inclusive through 2026-06-30**; immutable.
-- **Current Curated rev.2** — based on 3.0.2; curated through **2026-08-13**; primary-evidence reviewed and QC-gated.
+- **Current Curated rev.3** — based on 3.0.2; curated through **2026-08-14**; primary-evidence reviewed and QC-gated.
 - **Literature Watch** — metadata-only discovery. Its sync timestamp is operational metadata and is **not** a release cutoff or curation date.
 
 The website defaults to **Current Curated** for query-and-view exploration while retaining an explicit Frozen Release scope for reproducible citation and denominator checks.
 
 ## Scientific denominators
 
-| Metric | Frozen 3.0.2 | Current Curated rev.2 |
+| Metric | Frozen 3.0.2 | Current Curated rev.3 |
 |---|---:|---:|
-| Article audit records | 346 | 370 |
-| Chemically included articles | 335 | 359 |
-| Canonical verified articles | 332 | 356 |
-| Structure / phase rows | 878 | 935 |
-| Core-Included structure rows | 816 | 873 |
-| Resolved space-group rows | 650 | 705 |
-| Verified one-to-one SG mappings | 625 | 680 |
+| Article audit records | 346 | 373 |
+| Chemically included articles | 335 | 362 |
+| Canonical verified articles | 332 | 359 |
+| Structure / phase rows | 878 | 949 |
+| Core-Included structure rows | 816 | 887 |
+| Resolved space-group rows | 650 | 719 |
+| Verified one-to-one SG mappings | 625 | 694 |
 | Verified polar rows | 87 | 97 |
 | Strict-polar rows | 67 | 77 |
 | Strict-polar articles | 42 | 46 |
-| RAG documents / embeddings | 1,224 / 1,224 | 1,305 / 1,305 |
+| RAG documents / embeddings | 1,224 / 1,224 | 1,322 / 1,322 |
 
-Current Curated rev.2 contains **24 reviewed overlay articles** and **57 overlay structure/phase determinations** relative to Frozen 3.0.2. Nineteen overlay articles are coverage backfills dated on or before 2026-06-30; five are post-cutoff additions. Frozen Release 3.0.2 denominators are not changed by Current Curated.
+Current Curated rev.3 contains **27 reviewed overlay articles** and **71 overlay structure/phase determinations** relative to Frozen 3.0.2. Nineteen overlay articles are coverage backfills dated on or before 2026-06-30; eight are post-cutoff additions. Frozen Release 3.0.2 denominators are not changed by Current Curated.
+
+### Rev.3 primary-evidence additions
+
+Rev.3 adds three DOI-unique 2026 articles after main-article/SI/crystallographic review:
+
+- `10.1021/acs.inorgchem.6c03055` — four SCXRD determinations spanning the reversible 0D `[Cu10I20]10−` / 1D `[Cu10I17]n7n−` system.
+- `10.1002/smll.74688` — eight enantiomeric Cu4I4 determinations; R/S-3-methylmorpholine identities are cross-linked to previously curated identities rather than counted as new chemical identities.
+- `10.1021/acs.cgd.6c00650` — two new Cu2I2(bpp)(phosphine) SCXRD structures; the previously reported CP-1 identity is linked to `CUH-158-S09` rather than duplicated.
 
 ## Motif Atlas
 
@@ -43,18 +51,22 @@ Primary material classes are:
 
 Historical mixed/ambiguous labels are kept as **Unresolved legacy mapping** rather than forced into one of the three primary classes.
 
-Three denominators are deliberately separated: **article reports**, **crystallographic determinations**, and **normalized reported identities**. The current taxonomy covers 935 structure/phase rows; 817 have a resolved normalized Cu–X motif and 118 remain motif-unresolved. Primary-evidence curated ligand/cation identities are kept separate from legacy label-derived candidates.
+Three denominators are deliberately separated: **article reports**, **crystallographic determinations**, and **normalized reported identities**. Rev.3 taxonomy covers **949** structure/phase rows; **816** have a resolved normalized Cu–X motif and **133** remain motif-unresolved.
+
+Motif Atlas schema 1.2 adds a conservative fractional/mixed-occupancy rule: a structure label such as a solid-solution or fractional Br/I composition is **not truncated into an integer Cu–X motif**. Unless an independent structure-grain mapping establishes a discrete core, the motif remains `Unresolved`. This hotfix corrected 15 legacy over-parsed rows without changing the frozen release or any article/structure/space-group denominator.
+
+Primary-evidence curated ligand/cation identities remain separate from legacy label-derived candidates.
 
 ## Production versions
 
 - Frozen scientific release: **3.0.2**
 - Public site: **v48**
-- UI/content layer: **48.3**
-- Public Data: **2.9.0**
-- Smart RAG: **9.14.0**
-- Metadata / health: **48.3**
-- Motif Atlas schema: **1.1**
-- Current Curated: **rev.2**, through **2026-08-13**
+- UI/content layer: **48.4**
+- Public Data: **2.10.0**
+- Smart RAG: **9.15.0**
+- Metadata / health: **48.4**
+- Motif Atlas schema: **1.2**
+- Current Curated: **rev.3**, through **2026-08-14**
 
 ## Public/private boundary
 
@@ -64,11 +76,11 @@ The following remain private research assets: complete normalized tables and raw
 
 `/api/export` intentionally returns **HTTP 410 Gone**.
 
-## Smart RAG 9.14
+## Smart RAG 9.15
 
-Smart RAG 9.14.0 combines the validated Frozen Release 3.0.2 evidence path; Current Curated rev.1 + rev.2 incremental evidence; unified BGE-M3 + lexical/RRF retrieval across **1,305** embedded documents; deterministic answers for protected counts, temporal scope, reviewed current records and Motif Atlas statistics; structure-grain evidence guards; structure-level motif output only when taxonomy provides an independent mapping; and source-constrained interpretation/safe fallback.
+Smart RAG 9.15.0 combines the validated Frozen Release 3.0.2 evidence path; Current Curated rev.1–rev.3 incremental evidence; unified BGE-M3 + lexical/RRF retrieval across **1,322** embedded documents; deterministic answers for protected counts, temporal scope, reviewed current records and Motif Atlas statistics; structure-grain evidence guards; structure-level motif output only when taxonomy provides an independent mapping; and source-constrained interpretation/safe fallback.
 
-Model output cannot override frozen/current denominators, human scope decisions, crystallographic mappings, motif taxonomy or evidence-grain boundaries.
+Model output cannot override frozen/current denominators, human scope decisions, crystallographic mappings, motif taxonomy or evidence-grain boundaries. Fractional/mixed-occupancy formulas are not silently converted into discrete motifs.
 
 ## Record 13
 
@@ -105,4 +117,4 @@ Permanent repository DOI and blanket project licensing are not asserted until ow
 
 Private Current Curated promoted rows are intentionally not published as a bulk SQL/data dump. Fake/no-op migration files and raw private production migration statements must not be added merely to satisfy an external history check.
 
-See `docs/CURRENT_CURATED_R2_2026-08-13.md`, `docs/PRODUCTION_STATUS_V48_CURRENT_R2_2026-08-13.md` and `docs/FINAL_CURRENT_R2_PRODUCTION_AUDIT_2026-08-13.md` for the current rolling state and final audit.
+See `docs/CURRENT_CURATED_R3_2026-08-14.md` for the current rolling state. Frozen Release 3.0.2 remains the immutable citation snapshot.
