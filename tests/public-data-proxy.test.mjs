@@ -52,6 +52,22 @@ test('Vercel public-data proxy has one bounded end-to-end retry budget and snaps
   assert.ok(!source.includes('return res.end(await response.text())'), 'handler must not read a retry response body after retry control flow has already touched it');
 });
 
+test('candidate QA readiness is local-only and superseded preview SHAs share a cancelable branch concurrency group', () => {
+  const server = read('scripts/local-candidate-server.mjs');
+  const lighthouse = read('.github/workflows/production-lighthouse-qa.yml');
+  const preview = read('.github/workflows/vercel-preview-qa.yml');
+  for (const token of ["pathname === '/__qa/ready'", "res.setHeader('X-CuHalide-Candidate-Ready', '1')"]) {
+    assert.ok(server.includes(token), `candidate readiness must include ${JSON.stringify(token)}`);
+  }
+  assert.ok(lighthouse.includes('$CUHALIDE_BASE_URL/__qa/ready'), 'production Lighthouse candidate startup must use local readiness');
+  assert.ok(!lighthouse.includes('$CUHALIDE_BASE_URL/health.json'), 'production Lighthouse startup must not fan out full remote health once per second');
+  assert.ok(preview.includes('group: vercel-preview-qa-${{ github.event.deployment.ref || github.event.deployment.sha }}'), 'preview QA concurrency must group superseded commits by deployment ref with SHA fallback');
+  assert.ok(!preview.includes('group: vercel-preview-qa-${{ github.event.deployment.sha }}\n'), 'preview QA must not isolate every superseded SHA into its own concurrency group');
+  assert.equal((preview.match(/\$CUHALIDE_BASE_URL\/__qa\/ready/g) || []).length, 2, 'both preview candidate jobs must use local readiness');
+  assert.ok(!preview.includes('$CUHALIDE_BASE_URL/health.json'), 'preview startup must not fan out full remote health once per second');
+  assert.equal((preview.match(/full health remains part of protected QA/g) || []).length, 2, 'preview must state that readiness does not replace protected health QA');
+});
+
 test('503 followed by success returns the successful retry body', async () => {
   let calls = 0;
   globalThis.fetch = async () => {

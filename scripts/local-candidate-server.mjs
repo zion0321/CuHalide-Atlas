@@ -59,6 +59,12 @@ async function dispatch(req, res) {
   applyPlatformHeaders(res);
   const incoming = new URL(req.url, `http://${HOST}:${PORT}`);
   const pathname = incoming.pathname;
+  if (pathname === '/__qa/ready') {
+    res.statusCode = 204;
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-CuHalide-Candidate-Ready', '1');
+    return res.end();
+  }
   if (STATIC_FILES.has(pathname)) {
     const asset = STATIC_FILES.get(pathname);
     try { const body = fs.readFileSync(asset.file); res.statusCode = 200; res.setHeader('Content-Type', asset.type); res.setHeader('Cache-Control', 'public, max-age=3600'); if (req.method === 'HEAD') return res.end(); return res.end(body); }
