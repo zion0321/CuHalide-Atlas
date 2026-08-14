@@ -90,7 +90,7 @@ function enhanceHtml(input) {
   body = all(body, 'Reset to Current canonical', 'Reset to curated literature');
   body = all(body, 'Default data layer = Current canonical; Frozen Release core remains selectable.', 'Latest reviewed corpus.');
   body = all(body,
-    'The default view is Current Curated canonical evidence (Frozen Release 3.0.2 plus primary-evidence-reviewed rev.1 additions). Frozen core and audit views remain explicitly selectable.',
+    'The default view is Current Curated canonical evidence (the latest primary-evidence-reviewed CuHalide Atlas corpus). Frozen core and audit views remain explicitly selectable.',
     'Search the latest primary-evidence-reviewed literature. Archived snapshots are kept under Data provenance for reproducibility rather than exposed as a routine browsing mode.');
 
   body = all(body,
@@ -118,9 +118,9 @@ function enhanceHtml(input) {
   body = required(body, 'CuHalide Atlas. Frozen Release 3.0.2 (11 August 2026). https://cuhalide-atlas-v3.vercel.app/', 'CuHalide Atlas. Continuously curated Cu(I) halide knowledge portal. Curated through 14 August 2026. https://cuhalide-atlas-v3.vercel.app/', 'living citation');
   body = regexRequired(body, /<p class="fine">Frozen Release 3\.0\.2 literature cutoff:[\s\S]*?<\/p>/,
     '<p class="fine">For results from the living atlas, report the access date. The internal live revision remains machine-readable but is not required for routine browsing.</p><div class="provenance-box"><strong>Archived scientific snapshot 3.0.2</strong><p>Immutable reproducibility baseline. Snapshot coverage was verified through 30 June 2026; that date is a boundary of the archived snapshot, not a limit on the living database.</p><span class="snapshot">Snapshot 3.0.2 · 30 Jun 2026</span></div>', 'snapshot provenance box');
-  body = all(body,
-    'Evidence-grounded Cu(I) halide knowledge portal · Frozen Release 3.0.2 · cutoff through 2026-06-30 · Current Curated rev.1 through 2026-08-12',
-    'Continuously curated Cu(I) halide knowledge · reviewed through 14 Aug 2026');
+  body = required(body,
+    'Evidence-grounded Cu(I) halide knowledge portal · Frozen Release 3.0.2 · cutoff through 2026-06-30 · curated through 2026-08-14',
+    'Continuously curated Cu(I) halide knowledge · reviewed through 14 Aug 2026', 'public footer');
   body = all(body,
     '<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Citation</a><a href="#watch">Literature Watch</a></div>',
     '<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Data provenance</a><a href="#watch">Literature Watch</a></div>');
@@ -152,6 +152,7 @@ function enhanceHtml(input) {
     if (!body.includes(token)) throw new Error(`Living knowledge output missing: ${token}`);
   }
   if (body.includes('Frozen Release core · n=332')) throw new Error('Archived snapshot must not remain a routine browsing mode');
+  if (body.includes('Frozen Release 3.0.2 · cutoff through 2026-06-30')) throw new Error('Archived snapshot cutoff must not be presented as living-portal freshness');
   return body;
 }
 
