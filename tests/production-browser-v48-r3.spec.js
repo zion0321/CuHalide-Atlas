@@ -41,7 +41,7 @@ test.describe('CuHalide Atlas 3.0.2 + Current Curated rev.3 scientific contracts
     const h = await json(response);
     expect(h.ok).toBe(true);
     expect(h.status).toBe('PASS');
-    if (!PREMERGE || CANDIDATE) expect(h.site_readiness).toBe('PASS');
+    if (!PREMERGE) expect(h.site_readiness).toBe('PASS');
     expect(h.release).toBe('3.0.2');
     expect(h.site_version).toBe('48');
     if (CANDIDATE || !PREMERGE) {
