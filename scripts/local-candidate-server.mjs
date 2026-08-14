@@ -21,6 +21,7 @@ const STATIC_FILES = new Map([
   ['/og-image.svg', { file: path.join(PUBLIC_DIR, 'og-image.svg'), type: 'image/svg+xml; charset=utf-8' }],
   ['/favicon.svg', { file: path.join(PUBLIC_DIR, 'favicon.svg'), type: 'image/svg+xml; charset=utf-8' }],
   ['/ui-v48-2.css', { file: path.join(PUBLIC_DIR, 'ui-v48-2.css'), type: 'text/css; charset=utf-8' }],
+  ['/ui-living-knowledge.css', { file: path.join(PUBLIC_DIR, 'ui-living-knowledge.css'), type: 'text/css; charset=utf-8' }],
   ['/ui-v48-2.js', { file: path.join(PUBLIC_DIR, 'ui-v48-2.js'), type: 'text/javascript; charset=utf-8' }],
 ]);
 
@@ -61,7 +62,7 @@ async function dispatch(req, res) {
     try { const body = fs.readFileSync(asset.file); res.statusCode = 200; res.setHeader('Content-Type', asset.type); res.setHeader('Cache-Control', 'public, max-age=3600'); if (req.method === 'HEAD') return res.end(); return res.end(body); }
     catch { res.statusCode = 404; return res.end('Not Found'); }
   }
-  if (pathname === '/' || pathname === '/index.html' || pathname === '/api/ui-site') { res.setHeader('X-CuHalide-Middleware', 'release-3.0.2-ui-v48.3'); return uiSiteHandler(rewritten(req, incoming.search ? `/api/ui-site${incoming.search}` : '/api/ui-site'), res); }
+  if (pathname === '/' || pathname === '/index.html' || pathname === '/api/ui-site') { res.setHeader('X-CuHalide-Middleware', 'release-3.0.2-ui-v48.4-current-r3'); return uiSiteHandler(rewritten(req, incoming.search ? `/api/ui-site${incoming.search}` : '/api/ui-site'), res); }
   if (pathname === '/motifs' || pathname === '/api/motifs') return motifsHandler(rewritten(req, incoming.search ? `/api/motifs${incoming.search}` : '/api/motifs'), res);
   if (pathname === '/api/site') return siteHandler(rewritten(req, incoming.search ? `/api/site${incoming.search}` : '/api/site'), res);
   if (pathname === '/api/data') return dataHandler(req, res);
