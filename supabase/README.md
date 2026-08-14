@@ -75,6 +75,7 @@ Research Assistant 10.0 deliberately separates ordinary chat quota from the stri
 - Conversational turns use `cuhalide_atlas_conversation_rate_limit_v10`, backed by a private RLS-enabled usage table.
 - Conversation budget: **60/hour**, **240/day** per fingerprint; **1,200/day** global conversation ceiling.
 - `anon` and `authenticated` have no table access and cannot execute the conversation rate RPC directly; it is service-role-only.
+- The usage table has an explicit **RESTRICTIVE deny-all RLS policy** for `anon` and `authenticated`, making the fail-closed posture independently auditable even though direct table privileges are already revoked.
 - Provider quota exhaustion still degrades to `SAFE_CONVERSATION_FALLBACK` and does not disable deterministic evidence retrieval.
 
 This prevents ordinary back-and-forth conversation from consuming the scientific evidence-search allowance while retaining a public-abuse boundary.
@@ -117,7 +118,7 @@ Therefore:
 - fake/no-op timestamp migrations must **not** be added simply to silence migration-history checks;
 - raw statements from `supabase_migrations.schema_migrations` must **not** be bulk-exported to this public repository.
 
-As of 2026-08-14, production records **125** migration-history entries spanning `20260807140239` through `20260814084241`. The latest entry, `separate_conversation_rate_limit_v10`, is a public-safe runtime/governance change and does not alter scientific data. The production ledger is internally consistent, but it is intentionally not reproduced verbatim in the public repository. See `contracts/REMOTE_MIGRATION_INVENTORY_2026-08-14.md` for the public-safe inventory boundary.
+As of 2026-08-14, production records **126** migration-history entries spanning `20260807140239` through `20260814093038`. The latest entry, `explicit_conversation_usage_deny_policy_v10`, adds an explicit restrictive deny policy for browser database roles on the private conversation-usage table; it complements `20260814084241 separate_conversation_rate_limit_v10`, changes no scientific data, and does not expand public privileges. The production ledger is internally consistent, but it is intentionally not reproduced verbatim in the public repository. See `contracts/REMOTE_MIGRATION_INVENTORY_2026-08-14.md` for the public-safe inventory boundary.
 
 ### GitHub integration policy
 
