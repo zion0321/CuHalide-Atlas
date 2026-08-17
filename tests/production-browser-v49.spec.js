@@ -1,0 +1,48 @@
+import {test,expect} from '@playwright/test';
+
+const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
+
+test.describe.configure({mode:'serial'});
+
+test('v49 living portal exposes Current Curated rev.4',async({page})=>{
+  const r=await page.goto(BASE,{waitUntil:'domcontentloaded'});expect(r?.status()).toBe(200);
+  await expect(page.locator('body')).toContainText('Current Curated rev.4');
+  await expect(page.locator('body')).toContainText('17 Aug 2026');
+  await expect(page.locator('body')).toContainText('924');
+  await expect(page.locator('body')).toContainText('864');
+  await expect(page.locator('body')).not.toContainText('Core-Included · n=887');
+  expect(r?.headers()['x-cuhalide-current-curated-revision']).toBe('4');
+  expect(r?.headers()['x-cuhalide-ui-version']).toBe('49.0');
+});
+
+test('runtime health is exact rev.4 contract',async({request})=>{
+  const r=await request.get(`${BASE}/health.json`);expect(r.status()).toBe(200);const x=await r.json();
+  expect(x.ok).toBe(true);expect(x.status).toBe('PASS');
+  expect(x.current_curated.live_revision).toBe(4);
+  expect(x.current_curated.counts).toMatchObject({article_audit_records:373,chemically_included_articles:362,canonical_verified_articles:359,structure_phase_rows:924,core_included_structure_rows:864,resolved_space_group_rows:691,verified_space_group_rows:665,verified_polar_rows:94,strict_polar_rows:79,strict_polar_articles:49,rag_documents:1297,rag_embedded:1297,taxonomy_rows:924});
+  expect(x.motif_atlas).toMatchObject({taxonomy_rows:924,resolved:567,unresolved:357});
+});
+
+test('manifest, sitemap and Motif Atlas agree with rev.4',async({request,page})=>{
+  const m=await request.get(`${BASE}/release-manifest.json`);expect(m.status()).toBe(200);const j=await m.json();expect(j.current_curated).toMatchObject({revision:4,structure_phase_rows:924,core_included_structure_rows:864,rag_documents:1297});expect(j.frozen_release).toMatchObject({version:'3.0.2',structure_phase_rows:878,immutable:true});
+  const s=await request.get(`${BASE}/sitemap.xml`);expect(s.status()).toBe(200);const xml=await s.text();expect((xml.match(/<url>/g)||[]).length).toBe(1225);
+  const mr=await page.goto(`${BASE}/motifs`,{waitUntil:'domcontentloaded'});expect(mr?.status()).toBe(200);await expect(page.locator('body')).toContainText('924');await expect(page.locator('body')).toContainText('567');await expect(page.locator('body')).toContainText('357');
+});
+
+test('Research Assistant reports 10.1 / 9.16 and full-current RAG',async({request})=>{
+  const r=await request.get(`${BASE}/api/agent`);expect(r.status()).toBe(200);const x=await r.json();
+  expect(x.assistant_version).toBe('10.1.0');expect(x.version).toBe('9.16.0');expect(x.current_curated).toMatchObject({layer:'current-curated-r4',live_revision:4,documents:1297,embedded:1297});
+});
+
+test('protected crystallographic corrections are live',async({request})=>{
+  const ask=async content=>{const r=await request.post(`${BASE}/api/agent`,{data:{messages:[{role:'user',content}]}});expect(r.status()).toBe(200);return r.json()};
+  const s11=await ask('What is the space group and polarity of CUH-160-S11?');expect(s11.answer).toContain('C2/c');expect(s11.answer).toContain('polar=No');
+  const r45=await ask('What is the space group and polarity of CUH-045-S01?');expect(r45.answer).toContain('C2');expect(r45.answer).toContain('polar=Yes');
+  const r32=await ask('List the structures for record 32, including the R/S Cu4I6 structures.');expect(r32.answer).toContain('CUH-032-S04');expect(r32.answer).toContain('2414808');expect(r32.answer).toContain('CUH-032-S05');expect(r32.answer).toContain('2414807');
+});
+
+test('review/perspective placeholders are absent from current structure grain',async({request})=>{
+  for(const id of ['CUH-244-S01','CUH-305-S01']){const r=await request.post(`${BASE}/api/agent`,{data:{messages:[{role:'user',content:`Show structure ${id}`} ]}});expect(r.status()).toBe(200);const x=await r.json();expect(x.matched).toBe(false);expect(x.not_found).toBe(id)}
+});
+
+test('public export remains disabled',async({request})=>{const r=await request.get(`${BASE}/api/export`);expect(r.status()).toBe(410)});
