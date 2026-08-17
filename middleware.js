@@ -1,4 +1,5 @@
 export const config={matcher:['/','/index.html']};
+const LAST_MODIFIED=new Date('2026-08-17T00:00:00Z').toUTCString();
 export default async function middleware(request){
   const target=new URL('/api/ui-assistant',request.url);
   const response=await fetch(target,{method:request.method,headers:request.headers,redirect:'follow'});
@@ -7,5 +8,6 @@ export default async function middleware(request){
   headers.set('x-cuhalide-current-curated-revision','4');
   headers.set('x-cuhalide-ui-version','49.0');
   headers.set('x-cuhalide-site-version','49');
+  headers.set('last-modified',LAST_MODIFIED);
   return new Response(request.method==='HEAD'?null:response.body,{status:response.status,statusText:response.statusText,headers});
 }
