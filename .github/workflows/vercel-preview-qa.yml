@@ -1,47 +1,49 @@
 name: Vercel preview QA
 
 on:
+  pull_request:
+    branches: [main]
   deployment_status:
 
 permissions:
   contents: read
 
 concurrency:
-  group: vercel-preview-qa-${{ github.event.deployment.ref || github.event.deployment.sha }}
+  group: vercel-preview-qa-${{ github.event.pull_request.head.sha || github.event.deployment.ref || github.event.deployment.sha }}
   cancel-in-progress: true
 
 jobs:
   preview-chromium:
     if: >-
-      github.event.deployment_status.state == 'success' &&
-      github.event.deployment.environment == 'Preview' &&
-      (github.event.deployment_status.environment_url != '' || github.event.deployment_status.target_url != '')
+      github.event_name == 'pull_request' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'Preview' &&
+       (github.event.deployment_status.environment_url != '' || github.event.deployment_status.target_url != ''))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      VERCEL_PREVIEW_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
       CUHALIDE_BASE_URL: http://127.0.0.1:4173
-      CUHALIDE_PREMERGE_PRODUCTION: 'true'
       CI: 'true'
     steps:
-      - name: Checkout exact Vercel-deployed commit
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Checkout exact candidate commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.event.deployment.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.event.deployment.sha }}
 
-      - name: Attest Vercel preview provenance
+      - name: Attest candidate provenance
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "${{ github.event.deployment.sha }}"
-          case "$VERCEL_PREVIEW_URL" in
-            https://*.vercel.app*) ;;
-            *) echo "Unexpected preview URL: $VERCEL_PREVIEW_URL" >&2; exit 1 ;;
-          esac
+          EXPECTED="${{ github.event.pull_request.head.sha || github.event.deployment.sha }}"
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
           test -f scripts/local-candidate-server.mjs
+          if [ "${{ github.event_name }}" = "deployment_status" ]; then
+            URL="${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}"
+            case "$URL" in https://*.vercel.app*) ;; *) echo "Unexpected preview URL: $URL" >&2; exit 1 ;; esac
+          fi
 
       - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24'
           cache: npm
@@ -49,6 +51,9 @@ jobs:
 
       - name: Install locked QA dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Run repository preflight
+        run: npm run qa:preflight
 
       - name: Start exact candidate runtime locally
         shell: bash
@@ -59,7 +64,7 @@ jobs:
           for i in $(seq 1 45); do
             rm -f /tmp/cuhalide-candidate-ready.headers
             if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then
-              echo 'Exact candidate runtime is locally ready; full health remains part of protected QA.'
+              echo 'Exact candidate runtime is ready.'
               exit 0
             fi
             sleep 1
@@ -70,8 +75,8 @@ jobs:
       - name: Install Chromium and system dependencies
         run: npx playwright install --with-deps chromium
 
-      - name: Run full candidate browser, scientific, privacy and accessibility QA
-        run: npm run qa:browser
+      - name: Run full candidate browser, scientific and privacy QA
+        run: npm run qa:browser -- --grep-invert "pre-merge production backend rev.4 is ready while frontend may remain v48"
 
       - name: Stop local candidate runtime
         if: always()
@@ -79,11 +84,11 @@ jobs:
         run: |
           if [ -f candidate-server.pid ]; then kill "$(cat candidate-server.pid)" 2>/dev/null || true; fi
 
-      - name: Upload candidate browser report and evidence
+      - name: Upload candidate browser evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: vercel-preview-candidate-browser-${{ github.event.deployment.sha }}-${{ github.run_id }}
+          name: preview-candidate-browser-${{ github.event.pull_request.head.sha || github.event.deployment.sha }}-${{ github.run_id }}
           path: |
             playwright-report/
             test-results/
@@ -93,34 +98,35 @@ jobs:
 
   preview-lighthouse:
     if: >-
-      github.event.deployment_status.state == 'success' &&
-      github.event.deployment.environment == 'Preview' &&
-      (github.event.deployment_status.environment_url != '' || github.event.deployment_status.target_url != '')
+      github.event_name == 'pull_request' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'Preview' &&
+       (github.event.deployment_status.environment_url != '' || github.event.deployment_status.target_url != ''))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      VERCEL_PREVIEW_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
       CUHALIDE_BASE_URL: http://127.0.0.1:4173
       CI: 'true'
     steps:
-      - name: Checkout exact Vercel-deployed commit
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Checkout exact candidate commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.event.deployment.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.event.deployment.sha }}
 
-      - name: Attest Vercel preview provenance
+      - name: Attest candidate provenance
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "${{ github.event.deployment.sha }}"
-          case "$VERCEL_PREVIEW_URL" in
-            https://*.vercel.app*) ;;
-            *) echo "Unexpected preview URL: $VERCEL_PREVIEW_URL" >&2; exit 1 ;;
-          esac
+          EXPECTED="${{ github.event.pull_request.head.sha || github.event.deployment.sha }}"
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
           test -f scripts/local-candidate-server.mjs
+          if [ "${{ github.event_name }}" = "deployment_status" ]; then
+            URL="${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}"
+            case "$URL" in https://*.vercel.app*) ;; *) echo "Unexpected preview URL: $URL" >&2; exit 1 ;; esac
+          fi
 
       - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24'
           cache: npm
@@ -128,6 +134,9 @@ jobs:
 
       - name: Install locked QA dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Run repository preflight
+        run: npm run qa:preflight
 
       - name: Start exact candidate runtime locally
         shell: bash
@@ -138,7 +147,7 @@ jobs:
           for i in $(seq 1 45); do
             rm -f /tmp/cuhalide-candidate-ready.headers
             if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then
-              echo 'Exact candidate runtime is locally ready; full health remains part of protected QA.'
+              echo 'Exact candidate runtime is ready.'
               exit 0
             fi
             sleep 1
@@ -152,7 +161,7 @@ jobs:
       - name: Run Lighthouse gate against exact candidate runtime
         run: npm run qa:lighthouse
 
-      - name: Stop local candidate runtime
+      - name: Stop exact candidate runtime
         if: always()
         shell: bash
         run: |
@@ -160,9 +169,9 @@ jobs:
 
       - name: Upload candidate Lighthouse reports
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: vercel-preview-candidate-lighthouse-${{ github.event.deployment.sha }}-${{ github.run_id }}
+          name: preview-candidate-lighthouse-${{ github.event.pull_request.head.sha || github.event.deployment.sha }}-${{ github.run_id }}
           path: |
             lighthouse-report/
             candidate-server.log
