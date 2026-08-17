@@ -1,5 +1,7 @@
 # Current Curated rev.4 — 2026-08-17
 
+> Deployment candidate: **site v49 / UI 49.0 / Current Curated rev.4**. This document is the release marker used for the final Preview-to-Production gate.
+
 ## Release decision
 
 Current Curated rev.4 is the authoritative living scientific state of CuHalide Atlas as of 2026-08-17. Frozen Release 3.0.2 remains immutable and is not modified by this release.
