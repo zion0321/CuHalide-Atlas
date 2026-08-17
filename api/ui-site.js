@@ -1,14 +1,14 @@
 import siteHandler from './site.js';
 
-const UI_VERSION='49.0';
-const CURRENT_REVISION='4';
+const UI_VERSION='50.0';
+const CURRENT_REVISION='5';
 const CONTENT_DATE='2026-08-17';
 const LAST_MODIFIED=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
 const ICON_LINK='<link rel="icon" href="/favicon.svg" type="image/svg+xml">';
-const STYLE_LINK='<link rel="stylesheet" href="/ui-v48-2.css?v=49.0">';
+const STYLE_LINK='<link rel="stylesheet" href="/ui-v48-2.css?v=50.0">';
 const LIVING_STYLE_LINK='<link rel="stylesheet" href="/ui-living-knowledge.css?v=20260817">';
-const SCRIPT_LINK='<script src="/ui-v48-2.js?v=49.0" defer></script>';
-const UI_MARKER='<!-- CUHALIDE_UI_V49_0_CURRENT_R4 -->';
+const SCRIPT_LINK='<script src="/ui-v48-2.js?v=50.0" defer></script>';
+const UI_MARKER='<!-- CUHALIDE_UI_V50_0_CURRENT_R5 -->';
 
 function enhanceHtml(input){
   if(typeof input!=='string'||!input.includes('</head>')||!input.includes('</body>'))return input;
@@ -21,8 +21,8 @@ function enhanceHtml(input){
   body=body.split('<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Citation</a><a href="#watch">Literature Watch</a></div>').join('<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Data provenance</a><a href="#watch">Literature Watch</a></div>');
   if(!body.includes('/ui-v48-2.css'))body=body.replace('</head>',`${ICON_LINK}\n${STYLE_LINK}\n${LIVING_STYLE_LINK}\n</head>`);
   if(!body.includes('/ui-v48-2.js'))body=body.replace('</body>',`${SCRIPT_LINK}\n${UI_MARKER}\n</body>`);
-  for(const token of ['CUHALIDE_SITE_V49_CURRENT_CURATED_R4','CUHALIDE_UI_V49_0_CURRENT_R4','Curated through 17 Aug 2026','Core-Included · n=864','All structure / phase rows · n=924'])if(!body.includes(token))throw new Error(`v49 UI contract missing: ${token}`);
-  for(const stale of ['Current Curated rev.3','Curated through 14 Aug 2026','Core-Included · n=887','All structure / phase rows · n=949'])if(body.includes(stale))throw new Error(`stale rev.3 UI token: ${stale}`);
+  for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R5','CUHALIDE_UI_V50_0_CURRENT_R5','Curated through 17 Aug 2026','Core-Included · n=878','All structure / phase rows · n=938'])if(!body.includes(token))throw new Error(`v50 UI contract missing: ${token}`);
+  for(const stale of ['Current Curated rev.4','Core-Included · n=864','All structure / phase rows · n=924'])if(body.includes(stale))throw new Error(`stale rev.4 UI token: ${stale}`);
   return body;
 }
 
@@ -30,10 +30,7 @@ export default async function handler(req,res){
   res.setHeader('X-CuHalide-UI-Version',UI_VERSION);
   res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);
   res.setHeader('Last-Modified',LAST_MODIFIED);
-  const bridge={
-    setHeader:(name,value)=>{const lower=String(name).toLowerCase();if(lower==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(lower==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
-    end:body=>res.end(enhanceHtml(body)),
-  };
+  const bridge={setHeader:(name,value)=>{const lower=String(name).toLowerCase();if(lower==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(lower==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},end:body=>res.end(enhanceHtml(body))};
   Object.defineProperty(bridge,'statusCode',{get:()=>res.statusCode,set:value=>{res.statusCode=value}});
   return siteHandler(req,bridge);
 }
