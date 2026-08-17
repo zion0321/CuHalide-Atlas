@@ -29,7 +29,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.deployment.sha }}
-
       - name: Attest candidate provenance
         shell: bash
         run: |
@@ -41,20 +40,16 @@ jobs:
             URL="${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}"
             case "$URL" in https://*.vercel.app*) ;; *) echo "Unexpected preview URL: $URL" >&2; exit 1 ;; esac
           fi
-
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24'
           cache: npm
           cache-dependency-path: package-lock.json
-
       - name: Install locked QA dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-
       - name: Run repository preflight
         run: npm run qa:preflight
-
       - name: Start exact candidate runtime locally
         shell: bash
         run: |
@@ -63,27 +58,30 @@ jobs:
           echo $! > candidate-server.pid
           for i in $(seq 1 45); do
             rm -f /tmp/cuhalide-candidate-ready.headers
-            if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then
-              echo 'Exact candidate runtime is ready.'
-              exit 0
-            fi
+            if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then echo 'Exact candidate runtime is ready.'; exit 0; fi
             sleep 1
           done
           cat candidate-server.log >&2 || true
           exit 1
-
       - name: Install Chromium and system dependencies
         run: npx playwright install --with-deps chromium
-
-      - name: Run full candidate browser, scientific and privacy QA
-        run: npm run qa:browser -- --grep-invert "pre-merge production backend rev.4 is ready while frontend may remain v48"
-
+      - name: Verify v50 portal contract
+        run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.5"
+      - name: Verify rev.5 runtime health
+        run: npm run qa:browser -- --grep "runtime health is exact rev.5 contract"
+      - name: Verify manifest sitemap and Motif Atlas
+        run: npm run qa:browser -- --grep "manifest, sitemap and Motif Atlas agree with rev.5"
+      - name: Verify Research Assistant runtime contract
+        run: npm run qa:browser -- --grep "Research Assistant reports 10.2 / 9.17 and rev.5 full-current RAG"
+      - name: Verify new structure-truth boundaries
+        run: npm run qa:browser -- --grep "new structure-truth boundaries are live"
+      - name: Verify deleted placeholders and export privacy boundary
+        run: npm run qa:browser -- --grep "review/perspective placeholders stay absent and export stays disabled"
       - name: Stop local candidate runtime
         if: always()
         shell: bash
         run: |
           if [ -f candidate-server.pid ]; then kill "$(cat candidate-server.pid)" 2>/dev/null || true; fi
-
       - name: Upload candidate browser evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -112,7 +110,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.deployment.sha }}
-
       - name: Attest candidate provenance
         shell: bash
         run: |
@@ -124,20 +121,16 @@ jobs:
             URL="${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}"
             case "$URL" in https://*.vercel.app*) ;; *) echo "Unexpected preview URL: $URL" >&2; exit 1 ;; esac
           fi
-
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24'
           cache: npm
           cache-dependency-path: package-lock.json
-
       - name: Install locked QA dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-
       - name: Run repository preflight
         run: npm run qa:preflight
-
       - name: Start exact candidate runtime locally
         shell: bash
         run: |
@@ -146,27 +139,20 @@ jobs:
           echo $! > candidate-server.pid
           for i in $(seq 1 45); do
             rm -f /tmp/cuhalide-candidate-ready.headers
-            if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then
-              echo 'Exact candidate runtime is ready.'
-              exit 0
-            fi
+            if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then echo 'Exact candidate runtime is ready.'; exit 0; fi
             sleep 1
           done
           cat candidate-server.log >&2 || true
           exit 1
-
       - name: Install Chromium and system dependencies
         run: npx playwright install --with-deps chromium
-
       - name: Run Lighthouse gate against exact candidate runtime
         run: npm run qa:lighthouse
-
       - name: Stop exact candidate runtime
         if: always()
         shell: bash
         run: |
           if [ -f candidate-server.pid ]; then kill "$(cat candidate-server.pid)" 2>/dev/null || true; fi
-
       - name: Upload candidate Lighthouse reports
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

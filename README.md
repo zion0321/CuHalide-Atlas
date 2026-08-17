@@ -6,25 +6,25 @@ CuHalide Atlas is an evidence-grounded, structure-resolved knowledge base for or
 
 Two scientific layers are intentionally distinct.
 
-### Current Curated rev.4 — living default
+### Current Curated rev.5 — living default
 
-Curated through **2026-08-17**. Rev.4 replaces the former append-only structure overlay with a **full-current atomic/context structure snapshot** so corrections, removals, splits and phase-specific determinations can be represented without duplicating obsolete Frozen rows.
+Curated through **2026-08-17**. Rev.5 retains the rev.4 full-current atomic/context structure architecture and adds a primary-evidence-reviewed literature batch while preserving structure grain, local Cu–X motif, and global connectivity dimensionality as separate scientific axes.
 
-| Denominator | Current Curated rev.4 |
+| Denominator | Current Curated rev.5 |
 |---|---:|
-| Article audit records | 373 |
-| Chemically included articles | 362 |
-| Canonical verified articles | 359 |
-| Structure / phase rows | 924 |
-| Core-Included structure rows | 864 |
-| Resolved space-group rows | 691 |
-| Verified one-to-one SG rows | 665 |
-| Verified polar rows | 94 |
-| Strict-polar rows | 79 |
-| Strict-polar articles | 49 |
-| RAG documents / embeddings | 1,297 / 1,297 |
+| Article audit records | 379 |
+| Chemically included articles | 368 |
+| Canonical verified articles | 365 |
+| Structure / phase rows | 938 |
+| Core-Included structure rows | 878 |
+| Resolved space-group rows | 705 |
+| Verified one-to-one SG rows | 679 |
+| Verified polar rows | 96 |
+| Strict-polar rows | 81 |
+| Strict-polar articles | 51 |
+| RAG documents / embeddings | 1,317 / 1,317 |
 
-Motif Atlas rev.4 contains **924 taxonomy rows**, of which **567** have a resolved motif and **357** remain unresolved. **35** rows retain an unresolved legacy material-category mapping rather than being force-classified.
+Motif Atlas rev.5 contains **938 taxonomy rows**, of which **581** have a resolved motif and **357** remain unresolved. **35** rows retain an unresolved legacy material-category mapping rather than being force-classified.
 
 ### Frozen Release 3.0.2 — immutable historical snapshot
 
@@ -50,41 +50,48 @@ The 2026-06-30 date is a boundary of the archived snapshot, **not** a cutoff for
 
 - One article-audit row per normalized DOI.
 - Article, chemical identity and crystallographic determination are different entity grains.
+- **Reported composition, normalized local Cu–X motif and global connectivity dimensionality are distinct fields.** A Cu2I2 or Cu4I4 local repeat does not imply a globally 0D material.
 - Multiple polymorphs, temperatures, CIF blocks or independent refinements remain separate structure rows when primary evidence supports separate determinations.
 - Evidence hierarchy for crystallography: **CIF > SI crystallographic table > main article > external metadata**.
-- Missing or non-unique mappings remain unresolved; space group, motif, topology or photophysics are not inferred from analogy.
+- Missing or non-unique mappings remain unresolved; space group, motif, topology, empirical formula or photophysics are not inferred from analogy or arithmetic repair.
 - Halogen type refers to the Cu–halide structural unit, not an unrelated organic substituent halogen.
 - Fractional/mixed-occupancy Cu/halide stoichiometry is never rounded or truncated into an integer Cu–X motif without independent structure-grain connectivity evidence.
 - Article-grain emission, PLQY, lifetime or mechanism is not copied to individual structures without explicit structure-specific mapping.
 - Polar point-group symmetry does not establish ferroelectric switching.
 - Strict-polar requires Core-Included status, polar symmetry and High SG/mapping confidence.
 
-## Rev.4 hostile re-audit
+## Rev.4 hostile structure re-audit and rev.5 additions
 
-Rev.4 performs entity-level and crystallographic hostile review across the current structure register. Examples of corrections include:
+Rev.4 remains the hostile full-corpus structure-truth baseline. It removed non-structure placeholders, repaired structure/determination identity, completed crystallographic mappings where primary evidence permitted, and retained genuine source conflicts explicitly rather than silently normalizing them.
 
-- removal of two non-structure article-level placeholders (`CUH-244-S01`, `CUH-305-S01`) while retaining their review/perspective articles as boundary context;
-- separation of record 32 R/S Cu4I6 enantiomeric SCXRD determinations and one-to-one CCDC mappings;
-- phase-specific promotion of alpha-Gua3Cu2I5 where primary crystallography supports Fdd2;
-- completion of record 45 Cu5I7 C2 / C2/c one-to-one mappings;
-- verification that record 160 contains two independent 235 K refinements rather than a duplicate import;
-- CIF-first adjudication of record 160 compound 3 (`CUH-160-S11`) as **C2/c, nonpolar**, while retaining the main-article `Cc` statement as an explicit source conflict.
+Rev.5 adds **six peer-reviewed in-scope articles and fourteen structure-grain determinations** after DOI/CCDC/identity deduplication and primary-evidence review. Examples include:
 
-See `docs/CURRENT_CURATED_R4_2026-08-17.md` for the release audit.
+- two isolated 0D Cu4Br6 phases in `10.1002/anie.202519379`, including the C2/polar mixed-cation phase;
+- discrete rhomboid Cu2I2 and cubane Cu4I4 clusters in `10.1021/acs.inorgchem.5c05228`;
+- a discrete 0D stairstep Cu4I4(L1)2 cluster in `10.1016/j.jlumin.2026.121789`;
+- five ICA structures in `10.1016/j.ica.2026.123354` represented as **local Cu2I2 repeats within globally 1D polymeric ladder chains**, not 0D dimers;
+- the CEJ structure in `10.1016/j.cej.2026.177390` represented as a **local stepped Cu4I4 repeat within a globally 1D Cu–I zigzag coordination polymer**; its empirical formula remains unresolved rather than being replaced by the shorthand `PyPzPh-CuI`;
+- three discrete 0D planar-rhomboid Cu2I2 complexes in `10.1021/acsaom.6c00035`.
+
+The Research Square preprint `10.21203/rs.3.rs-9170631/v1` was primary-evidence reviewed and retained in Literature Watch as an in-scope preprint candidate, but it is **not** counted in Current Curated canonical denominators.
+
+A source-internal crystallographic inconsistency in ICA complex 3 (CCDC 2407308) is retained explicitly: the SI reports mutually incompatible b/c/volume cell data, so the normalized b, c and V fields remain unresolved rather than being mathematically reconstructed.
+
+See `docs/CURRENT_CURATED_R5_2026-08-17.md` and `docs/CURRENT_CURATED_R5_RELEASE_AUDIT_2026-08-17.md` for the rev.5 scientific baseline and destructive release audit.
 
 ## Public runtime
 
-Current public runtime contract:
+Current public runtime contract after v50 deployment:
 
-- Site: **v49**
-- UI: **49.0**
-- Public Data: **2.11.0**
-- Smart RAG: **9.16.0**
-- Research Assistant: **10.1.0**
+- Site: **v50**
+- UI: **50.0**
+- Public Data: **2.12.0**
+- Smart RAG: **9.17.0**
+- Research Assistant: **10.2.0**
 - Motif Atlas: **1.2**
-- Current evidence corpus: **1,297 BGE-M3 documents / 1,297 embeddings**
+- Current evidence corpus: **1,317 BGE-M3 documents / 1,317 embeddings**
 
-Current queries use the rev.4 full-current corpus. Frozen 3.0.2 evidence is consulted only when a question explicitly asks for the archived snapshot or historical denominator.
+Current queries use the rev.5 full-current corpus. Frozen 3.0.2 evidence is consulted only when a question explicitly asks for the archived snapshot or historical denominator. Literature Watch candidate metadata remains outside curated evidence until promotion through the defined review/QC gate.
 
 ## Public/private boundary
 
