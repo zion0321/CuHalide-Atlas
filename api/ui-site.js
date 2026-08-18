@@ -21,8 +21,8 @@ function enhanceHtml(input){
   body=body.split('<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Citation</a><a href="#watch">Literature Watch</a></div>').join('<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Data provenance</a><a href="#watch">Literature Watch</a></div>');
   if(!body.includes('/ui-v48-2.css'))body=body.replace('</head>',`${ICON_LINK}\n${STYLE_LINK}\n${LIVING_STYLE_LINK}\n</head>`);
   if(!body.includes('/ui-v48-2.js'))body=body.replace('</body>',`${SCRIPT_LINK}\n${UI_MARKER}\n</body>`);
-  for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R5','CUHALIDE_UI_V50_2_CURRENT_R6','Curated through 18 Aug 2026','Core-Included · n=886','All structure / phase rows · n=946'])if(!body.includes(token))throw new Error(`v50 UI contract missing: ${token}`);
-  for(const stale of ['Current Curated rev.4','Core-Included · n=864','All structure / phase rows · n=924'])if(body.includes(stale))throw new Error(`stale rev.4 UI token: ${stale}`);
+  for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R6','CUHALIDE_UI_V50_2_CURRENT_R6','Curated through 18 Aug 2026','Core-Included · n=886','All structure / phase rows · n=946'])if(!body.includes(token))throw new Error(`v50 UI contract missing: ${token}`);
+  for(const stale of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R5','Current Curated rev.5','Current Curated rev.4','Core-Included · n=864','All structure / phase rows · n=924'])if(body.includes(stale))throw new Error(`stale UI token: ${stale}`);
   return body;
 }
 
