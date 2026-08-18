@@ -104,7 +104,7 @@ td{border-top-color:#e7edef}
 
 .methods{gap:12px}
 .method{border-radius:16px}
-.method .no{color:#93a3ab}
+.method .no{color:var(--atlas-muted)}
 .detail{border-radius:18px}
 .detail details{padding:14px 0}
 .detail summary{color:var(--atlas-navy)}
