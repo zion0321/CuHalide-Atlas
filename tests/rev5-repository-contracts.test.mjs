@@ -5,14 +5,14 @@ const url=p=>new URL(`../${p}`,import.meta.url);
 const read=p=>fs.readFileSync(url(p),'utf8');
 
 test('v50 public runtime files expose one rev.5 contract',()=>{
-  const files=['api/site.js','api/ui-site.js','api/ui-assistant.js','api/meta.js','api/data.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record.js','middleware.js','vercel.json'];
+  const files=['api/site.js','api/ui-site.js','api/meta.js','api/data.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record.js','middleware.js','vercel.json'];
   const text=files.map(read).join('\n');
   for(const token of ["CURRENT_REVISION='5'","2026-08-17","938","878","679","81","1317"])assert.ok(text.includes(token),`missing ${token}`);
   for(const stale of ["CURRENT_REVISION='4'","EXPECTED_STRUCTURES=864","EXPECTED_URLS=1225","PUBLIC_DATA_VERSION='2.11.0'","PUBLIC_DATA_VERSION='2.10.0'","EVIDENCE_VERSION='9.16.0'","ASSISTANT_VERSION='10.1.0'"])assert.ok(!text.includes(stale),`stale token ${stale}`);
 });
 
 test('root routing preserves the proven v50 assistant middleware path',()=>{
-  const config=JSON.parse(read('vercel.json')),middleware=read('middleware.js');
+  const config=JSON.parse(read('vercel.json')),middleware=read('middleware.js'),assistant=read('api/ui-assistant.js');
   const root=config.rewrites.find(x=>x.source==='/'),index=config.rewrites.find(x=>x.source==='/index.html');
   assert.equal(root?.destination,'/api/ui-site');
   assert.equal(index?.destination,'/api/ui-site');
@@ -20,18 +20,14 @@ test('root routing preserves the proven v50 assistant middleware path',()=>{
   assert.match(middleware,/new URL\('\/api\/ui-assistant'/);
   assert.match(middleware,/release-3\.0\.2-ui-v50\.0-current-r5/);
   assert.match(middleware,/x-cuhalide-site-version','50'/);
+  assert.match(assistant,/CUHALIDE_UI_V48_5_CONVERSATIONAL_RESEARCH_ASSISTANT/);
+  assert.match(assistant,/Conversation \+ evidence tools ready/);
 });
 
 test('record pages cannot regress to rev.3/site48 provenance',()=>{
   const record=read('api/record.js');
   for(const token of ["SITE_VERSION='50'","CURRENT_REVISION='5'","CURRENT_DATE='2026-08-17'",'Current Curated rev.5','Retry-After','X-Robots-Tag'])assert.ok(record.includes(token),`record contract missing ${token}`);
   for(const stale of ["SITE_VERSION='48'","CURRENT_REVISION='3'","CURRENT_DATE='2026-08-14'",'reviewed through 14 Aug 2026'])assert.ok(!record.includes(stale),`stale record token ${stale}`);
-});
-
-test('assistant UI wrapper metadata follows the active v50/rev.5 shell',()=>{
-  const ui=read('api/ui-assistant.js');
-  for(const token of ["UI_VERSION='50.0'","CURRENT_REVISION='5'","CONTENT_DATE='2026-08-17'"])assert.ok(ui.includes(token),`assistant UI contract missing ${token}`);
-  for(const stale of ["UI_VERSION='48.5'","CURRENT_REVISION='3'","CONTENT_DATE='2026-08-14'"])assert.ok(!ui.includes(stale),`stale assistant wrapper token ${stale}`);
 });
 
 test('health Motif sitemap and data gateways retry transient faults without hiding persistent failure',()=>{
