@@ -56,7 +56,7 @@ header{background:rgba(255,255,255,.94);border-bottom:1px solid rgba(220,229,232
 .kpis{gap:11px;margin-top:-42px}
 .kpi,.panel,.card{border-color:var(--atlas-line);box-shadow:var(--atlas-shadow)}
 .kpi{padding:19px 20px;background:rgba(255,255,255,.98)}
-.kpi span{font-size:9px;color:#71818a;letter-spacing:.09em}
+.kpi span{font-size:9px;color:#526873;letter-spacing:.09em}
 .kpi strong{font-size:31px;margin:7px 0 4px;color:var(--atlas-navy)}
 .kpi small{font-size:10px;color:#536a75}
 .panel,.card{background:var(--atlas-card)}
@@ -75,7 +75,7 @@ header{background:rgba(255,255,255,.94);border-bottom:1px solid rgba(220,229,232
 .page-head p:not(.eyebrow){color:#4f6672;font-size:15px;line-height:1.68}
 .layout{gap:20px}
 .filters{border-radius:16px}
-.field span{color:#6b7d86}
+.field span{color:#526873}
 .field input,.field select,.field textarea{border-color:#c8d5da;background:#fff}
 .field input:hover,.field select:hover,.field textarea:hover{border-color:#aebfc6}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:#388e84;box-shadow:0 0 0 3px rgba(56,142,132,.11)}
@@ -104,7 +104,7 @@ td{border-top-color:#e7edef}
 
 .methods{gap:12px}
 .method{border-radius:16px}
-.method .no{color:#93a3ab}
+.method .no{color:var(--atlas-muted)}
 .detail{border-radius:18px}
 .detail details{padding:14px 0}
 .detail summary{color:var(--atlas-navy)}
