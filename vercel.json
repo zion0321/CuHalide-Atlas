@@ -3,12 +3,11 @@
   "ignoreCommand": "node scripts/vercel-production-gate.mjs",
   "functions": {
     "api/site.js": { "includeFiles": "public/index.html" },
-    "api/ui-site.js": { "includeFiles": "public/index.html" },
-    "api/ui-assistant.js": { "includeFiles": "public/index.html" }
+    "api/ui-site.js": { "includeFiles": "public/index.html" }
   },
   "rewrites": [
-    { "source": "/", "destination": "/api/ui-assistant" },
-    { "source": "/index.html", "destination": "/api/ui-assistant" },
+    { "source": "/", "destination": "/api/ui-site" },
+    { "source": "/index.html", "destination": "/api/ui-site" },
     { "source": "/motifs", "destination": "/api/motifs" },
     { "source": "/article/:id", "destination": "/api/record?kind=article&id=:id" },
     { "source": "/structure/:id", "destination": "/api/record?kind=structure&id=:id" },
