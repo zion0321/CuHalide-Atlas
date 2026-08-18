@@ -4,10 +4,10 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 
 test('v50 public runtime files expose one rev.5 contract',()=>{
-  const files=['api/site.js','api/ui-site.js','api/meta.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record.js','middleware.js'];
+  const files=['api/site.js','api/ui-site.js','api/meta.js','api/data.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record.js','middleware.js'];
   const text=files.map(read).join('\n');
   for(const token of ["CURRENT_REVISION='5'","2026-08-17","938","878","679","81","1317"])assert.ok(text.includes(token),`missing ${token}`);
-  for(const stale of ["CURRENT_REVISION='4'","EXPECTED_STRUCTURES=864","EXPECTED_URLS=1225","PUBLIC_DATA_VERSION='2.11.0'","EVIDENCE_VERSION='9.16.0'","ASSISTANT_VERSION='10.1.0'"])assert.ok(!text.includes(stale),`stale token ${stale}`);
+  for(const stale of ["CURRENT_REVISION='4'","EXPECTED_STRUCTURES=864","EXPECTED_URLS=1225","PUBLIC_DATA_VERSION='2.11.0'","PUBLIC_DATA_VERSION='2.10.0'","EVIDENCE_VERSION='9.16.0'","ASSISTANT_VERSION='10.1.0'"])assert.ok(!text.includes(stale),`stale token ${stale}`);
 });
 
 test('record pages cannot regress to rev.3/site48 provenance',()=>{
@@ -21,6 +21,12 @@ test('health and Motif gateways retry transient faults without hiding persistent
   assert.match(meta,/RETRIES=3/);assert.match(meta,/frontend v50 active; backend rev\.5 deterministic contract/);assert.doesNotMatch(meta,/frontend v49 active/);
   assert.match(motifs,/RETRIES=3/);assert.match(motifs,/res\.statusCode=503/);assert.match(motifs,/Retry-After/);
   assert.match(sitemap,/RETRIES=3/);assert.match(sitemap,/res\.statusCode=503/);assert.match(sitemap,/Retry-After/);
+});
+
+test('legacy public data route is compatibility-only but current',()=>{
+  const data=read('api/data.js');
+  for(const token of ["PUBLIC_DATA_VERSION='2.12.0'","CURRENT_REVISION='5'",'prefer /api/public-data','RETRIES=3'])assert.ok(data.includes(token),`legacy data contract missing ${token}`);
+  assert.ok(!data.includes("CURRENT_REVISION='3'"));
 });
 
 test('sitemap and QA denominators are exact',()=>{
