@@ -12,7 +12,7 @@ test('v50 public runtime files expose one rev.6 contract',()=>{
 });
 
 test('root routing preserves the proven v50 assistant middleware path',()=>{
-  const config=JSON.parse(read('vercel.json')),middleware=read('middleware.js'),assistant=read('api/ui-assistant.js');
+  const config=JSON.parse(read('vercel.json')),middleware=read('middleware.js'),assistant=read('api/ui-assistant.js'),candidate=read('scripts/local-candidate-server.mjs');
   const root=config.rewrites.find(x=>x.source==='/'),index=config.rewrites.find(x=>x.source==='/index.html');
   assert.equal(root?.destination,'/api/ui-site');
   assert.equal(index?.destination,'/api/ui-site');
@@ -20,6 +20,12 @@ test('root routing preserves the proven v50 assistant middleware path',()=>{
   assert.match(middleware,/new URL\('\/api\/ui-assistant'/);
   assert.match(middleware,/release-3\.0\.2-ui-v50\.2-current-r6/);
   assert.match(middleware,/x-cuhalide-site-version','50'/);
+  assert.ok(middleware.includes("headers.set('x-cuhalide-current-curated-revision','6')"));
+  assert.ok(!middleware.includes("headers.set('x-cuhalide-current-curated-revision','5')"));
+  assert.match(candidate,/release-3\.0\.2-ui-v50\.2-current-r6/);
+  assert.ok(candidate.includes("['x-cuhalide-ui-version','50.2']"));
+  assert.ok(candidate.includes("['x-cuhalide-current-curated-revision','6']"));
+  assert.ok(!candidate.includes("['x-cuhalide-current-curated-revision','5']"));
   assert.match(assistant,/CUHALIDE_UI_V48_5_CONVERSATIONAL_RESEARCH_ASSISTANT/);
   assert.match(assistant,/Conversation \+ evidence tools ready/);
 });
