@@ -8,8 +8,8 @@ if (!reportDir || !Number.isInteger(runCount) || runCount < 3 || runCount % 2 ==
 }
 
 const thresholds = {
-  mobile: { performance: 0.75, accessibility: 0.95, 'best-practices': 0.95, seo: 0.90 },
-  desktop: { performance: 0.85, accessibility: 0.95, 'best-practices': 0.95, seo: 0.90 },
+  mobile: { performance: 0.75, accessibility: 1.00, 'best-practices': 0.95, seo: 0.90 },
+  desktop: { performance: 0.85, accessibility: 1.00, 'best-practices': 0.95, seo: 0.90 },
 };
 
 const catastrophicPerformanceFloor = {
