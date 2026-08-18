@@ -62,7 +62,7 @@ test('sitemap and QA denominators are exact',()=>{
   for(const token of ['EXPECTED_ARTICLES=369','EXPECTED_STRUCTURES=886','EXPECTED_URLS=1257'])assert.ok(sitemap.includes(token));
   for(const token of ['article_audit_records:383','canonical_verified_articles:369','structure_phase_rows:946','core_included_structure_rows:886','verified_space_group_rows:687','verified_polar_rows:100','strict_polar_rows:85','strict_polar_articles:53','rag_documents:1329'])assert.ok(qa.includes(token));
   assert.ok(site.includes('All reviewed / audit records · n=383'));
-  assert.ok(!site.includes('All reviewed / audit records · n=379'));
+  assert.ok(site.includes("'All reviewed / audit records · n=379'"));
   for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R6','content="6"','/article/381','589'])assert.ok(siteQa.includes(token),`site QA contract missing ${token}`);
 });
 
