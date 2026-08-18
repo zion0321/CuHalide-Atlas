@@ -49,6 +49,20 @@ test('Motif Atlas and public record pages pass automated WCAG AA scans',async({p
   await expectNoAxeViolations(page,'/structure/CUH-378-S01');
 });
 
+test('public root exposes one current v50/rev.5 provenance contract',async({request})=>{
+  const r=await request.get(BASE);
+  expect(r.status()).toBe(200);
+  expect(header(r,'x-cuhalide-site-version')).toBe('50');
+  expect(header(r,'x-cuhalide-ui-version')).toBe('50.0');
+  expect(header(r,'x-cuhalide-current-curated-revision')).toBe('5');
+  expect(header(r,'x-cuhalide-middleware')).toContain('current-r5');
+  expect(header(r,'last-modified')).toContain('17 Aug 2026');
+  const html=await r.text();
+  expect(html).toContain('CUHALIDE_SITE_V50_CURRENT_CURATED_R5');
+  expect(html).toContain('Current Curated rev.5');
+  expect(html).not.toContain('CUHALIDE_SITE_V47_PUBLIC_KNOWLEDGE_PORTAL');
+});
+
 test('current article and structure pages expose rev.5 machine provenance',async({request})=>{
   const article=await request.get(`${BASE}/article/379`);
   const articleHtml=await article.text();
@@ -113,13 +127,7 @@ test('Motif Atlas and HEAD metadata stay aligned with rev.5',async({request})=>{
   expect(header(head,'x-cuhalide-current-curated-revision')).toBe('5');
 });
 
-test('hidden compatibility endpoints cannot reintroduce stale revision metadata',async({request})=>{
-  const assistant=await request.get(`${BASE}/api/ui-assistant`);
-  expect(assistant.status()).toBe(200);
-  expect(header(assistant,'x-cuhalide-ui-version')).toBe('50.0');
-  expect(header(assistant,'x-cuhalide-current-curated-revision')).toBe('5');
-  expect(header(assistant,'last-modified')).toContain('17 Aug 2026');
-
+test('legacy public-data compatibility route cannot reintroduce stale revision metadata',async({request})=>{
   const legacy=await request.get(`${BASE}/api/data?action=bootstrap`);
   expect(legacy.status()).toBe(200);
   expect(header(legacy,'x-cuhalide-public-data-version')).toBe('2.12.0');
