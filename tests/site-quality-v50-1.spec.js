@@ -11,7 +11,8 @@ async function expectCurrentPageMetadata(response,html){
   expect(response.status()).toBe(200);
   expect(header(response,'x-cuhalide-site-version')).toBe('50');
   expect(header(response,'x-cuhalide-current-curated-revision')).toBe('6');
-  expect(html).toContain('content="5"');
+  expect(html).toContain('<meta name="cuhalide-current-curated-revision" content="6">');
+  expect(html).not.toContain('<meta name="cuhalide-current-curated-revision" content="5">');
   expect(html).toContain('current-r6');
   expect(html).toContain('2026-08-18');
   expect(html).not.toContain('current-r3');
@@ -58,13 +59,16 @@ test('public root exposes one current v50/rev.6 provenance contract',async({requ
   expect(header(r,'x-cuhalide-middleware')).toContain('current-r6');
   expect(header(r,'last-modified')).toContain('18 Aug 2026');
   const html=await r.text();
-  expect(html).toContain('CUHALIDE_SITE_V50_CURRENT_CURATED_R5');
+  expect(html).toContain('CUHALIDE_SITE_V50_CURRENT_CURATED_R6');
   expect(html).toContain('Current Curated rev.6');
+  expect(html).toContain('All reviewed / audit records · n=383');
+  expect(html).not.toContain('All reviewed / audit records · n=379');
+  expect(html).not.toContain('CUHALIDE_SITE_V50_CURRENT_CURATED_R5');
   expect(html).not.toContain('CUHALIDE_SITE_V47_PUBLIC_KNOWLEDGE_PORTAL');
 });
 
 test('current article and structure pages expose rev.6 machine provenance',async({request})=>{
-  const article=await request.get(`${BASE}/article/383`);
+  const article=await request.get(`${BASE}/article/381`);
   const articleHtml=await article.text();
   await expectCurrentPageMetadata(article,articleHtml);
   expect(articleHtml).toContain('Current Curated rev.6');
@@ -119,7 +123,7 @@ test('Motif Atlas and HEAD metadata stay aligned with rev.6',async({request})=>{
   expect(header(r,'x-cuhalide-current-curated-revision')).toBe('6');
   const html=await r.text();
   expect(html).toContain('946');
-  expect(html).toContain('585');
+  expect(html).toContain('589');
   expect(html).toContain('357');
   expect(html).toContain('aria-label="Filter motif taxonomy"');
   const head=await request.head(`${BASE}/motifs`);
