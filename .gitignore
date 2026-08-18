@@ -1,0 +1,6 @@
+node_modules/
+playwright-report/
+test-results/
+lighthouse-report/
+candidate-server.log
+candidate-server.pid

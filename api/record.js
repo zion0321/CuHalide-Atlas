@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 
 const PUBLIC_ORIGIN='https://cuhalide-atlas-v3.vercel.app';
 const DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
-const RELEASE='3.0.2',SITE_VERSION='50',CURRENT_REVISION='5',CURRENT_DATE='2026-08-17';
+const RELEASE='3.0.2',SITE_VERSION='50',CURRENT_REVISION='6',CURRENT_DATE='2026-08-18';
 const RETRIES=3,ATTEMPT_TIMEOUT_MS=7000,RETRY_DELAY_MS=180;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -31,7 +31,7 @@ function provenance(x){
   return rolling?{
     rolling:true,
     label:'Curated record',
-    detail:'Current Curated rev.5 · primary-evidence reviewed through 17 Aug 2026',
+    detail:'Current Curated rev.6 · primary-evidence reviewed through 18 Aug 2026',
     modified:CURRENT_DATE,
     dataset:'CuHalide Atlas living knowledge base',
     version:`current-r${CURRENT_REVISION}`,

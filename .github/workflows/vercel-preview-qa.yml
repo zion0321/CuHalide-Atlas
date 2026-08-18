@@ -68,15 +68,17 @@ jobs:
       - name: Run comprehensive site quality regression gate
         run: npm run qa:site-quality
       - name: Verify v50 portal contract
-        run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.5"
-      - name: Verify rev.5 runtime health
-        run: npm run qa:browser -- --grep "runtime health is exact rev.5 contract"
+        run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.6"
+      - name: Verify rev.6 runtime health
+        run: npm run qa:browser -- --grep "runtime health is exact rev.6 contract"
       - name: Verify manifest sitemap and Motif Atlas
-        run: npm run qa:browser -- --grep "manifest, sitemap and Motif Atlas agree with rev.5"
+        run: npm run qa:browser -- --grep "manifest, sitemap and Motif Atlas agree with rev.6"
       - name: Verify Research Assistant runtime contract
-        run: npm run qa:browser -- --grep "Research Assistant reports 10.2 / 9.17 and rev.5 full-current RAG"
+        run: npm run qa:browser -- --grep "Research Assistant reports 10.3 / 9.18 and rev.6 full-current RAG"
       - name: Verify new structure-truth boundaries
         run: npm run qa:browser -- --grep "new structure-truth boundaries are live"
+      - name: Verify rev.6 primary-evidence boundaries
+        run: npm run qa:browser -- --grep "rev.6 primary-evidence boundaries remain deterministic"
       - name: Verify deleted placeholders and export privacy boundary
         run: npm run qa:browser -- --grep "review/perspective placeholders stay absent and export stays disabled"
       - name: Stop local candidate runtime
