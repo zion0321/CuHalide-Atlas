@@ -3,6 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
 test.describe.configure({mode:'serial'});
+const AXE_TAGS=['wcag2a','wcag2aa','wcag21aa','wcag22aa'];
 
 function header(response,name){return response.headers()[String(name).toLowerCase()]||''}
 
@@ -17,11 +18,21 @@ async function expectCurrentPageMetadata(response,html){
   expect(html).not.toContain('reviewed through 14 Aug 2026');
 }
 
-test('home passes automated WCAG AA scan with no violations',async({page})=>{
-  const r=await page.goto(BASE,{waitUntil:'networkidle'});
+async function expectNoAxeViolations(page,path){
+  const r=await page.goto(`${BASE}${path}`,{waitUntil:'networkidle'});
   expect(r?.status()).toBe(200);
-  const results=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();
-  expect(results.violations).toEqual([]);
+  const results=await new AxeBuilder({page}).withTags(AXE_TAGS).analyze();
+  expect(results.violations,`${path}: ${results.violations.map(v=>`${v.id}:${v.nodes.length}`).join(', ')}`).toEqual([]);
+}
+
+test('home passes automated WCAG AA scan with no violations',async({page})=>{
+  await expectNoAxeViolations(page,'/');
+});
+
+test('Motif Atlas and public record pages pass automated WCAG AA scans',async({page})=>{
+  await expectNoAxeViolations(page,'/motifs');
+  await expectNoAxeViolations(page,'/article/379');
+  await expectNoAxeViolations(page,'/structure/CUH-378-S01');
 });
 
 test('current article and structure pages expose rev.5 machine provenance',async({request})=>{
@@ -82,9 +93,24 @@ test('Motif Atlas and HEAD metadata stay aligned with rev.5',async({request})=>{
   expect(html).toContain('938');
   expect(html).toContain('581');
   expect(html).toContain('357');
+  expect(html).toContain('aria-label="Filter motif taxonomy"');
   const head=await request.head(`${BASE}/motifs`);
   expect(head.status()).toBe(200);
   expect(header(head,'x-cuhalide-current-curated-revision')).toBe('5');
+});
+
+test('hidden compatibility endpoints cannot reintroduce stale revision metadata',async({request})=>{
+  const assistant=await request.get(`${BASE}/api/ui-assistant`);
+  expect(assistant.status()).toBe(200);
+  expect(header(assistant,'x-cuhalide-ui-version')).toBe('50.0');
+  expect(header(assistant,'x-cuhalide-current-curated-revision')).toBe('5');
+  expect(header(assistant,'last-modified')).toContain('17 Aug 2026');
+
+  const legacy=await request.get(`${BASE}/api/data?action=bootstrap`);
+  expect(legacy.status()).toBe(200);
+  expect(header(legacy,'x-cuhalide-public-data-version')).toBe('2.12.0');
+  expect(header(legacy,'x-cuhalide-current-curated-revision')).toBe('5');
+  expect(header(legacy,'warning')).toContain('Legacy /api/data');
 });
 
 test('public interfaces remain read-only and private bulk export remains disabled',async({request})=>{
@@ -97,10 +123,10 @@ test('public interfaces remain read-only and private bulk export remains disable
   for(const forbidden of ['evidence_excerpt','evidence_locator','raw_payload','private_path','candidate_score','reason_code'])expect(html).not.toContain(forbidden);
 });
 
-test('mobile layout has no horizontal page overflow and navigation remains operable',async({page},testInfo)=>{
+test('mobile pages have no horizontal page overflow and navigation remains operable',async({page},testInfo)=>{
   test.skip(testInfo.project.name!=='mobile-chromium','mobile-only layout check');
   await page.goto(BASE,{waitUntil:'networkidle'});
-  const widths=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
+  let widths=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
   expect(widths.scroll).toBeLessThanOrEqual(widths.client+1);
   const menu=page.locator('#menu');
   await expect(menu).toBeVisible();
@@ -110,4 +136,8 @@ test('mobile layout has no horizontal page overflow and navigation remains opera
   await expect(page.locator('#nav')).toHaveClass(/open/);
   await page.locator('#nav a[href="#articles"]').click();
   await expect(menu).toHaveAttribute('aria-expanded','false');
+
+  await page.goto(`${BASE}/motifs`,{waitUntil:'networkidle'});
+  widths=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
+  expect(widths.scroll).toBeLessThanOrEqual(widths.client+1);
 });
