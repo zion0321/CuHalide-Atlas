@@ -22,7 +22,7 @@ Four article-grain records were promoted: 10.1002/adma.73745, 10.1021/acs.inorgc
 
 The 1D Cu3I5 systems in Record 381 store Cu3I5 as an extended chain repeat/SBU, not an isolated 0D cluster. The main-article formulation C10H21N2Cu3I5·CH3CN is retained; the conflicting SI Table S1 literal C12H25Cu3I5N2 is preserved as source-conflict provenance rather than silently repaired.
 
-The dppb abbreviation in Record 382 is normalized explicitly as 1,2-bis(diphenylphosphino)benzene and is not conflated with 1,4-bis(diphenylphosphino)butane.
+The dppb abbreviation in Record 382 is normalized explicitly as 1,2-bis(diphenylphosphino)benzene and is not conflated with 1,4-bis(diphenylphosphino)butane. Research Assistant evidence routing treats this abbreviation collision as a protected Atlas query, so the deterministic Current Curated evidence layer is used instead of unconstrained general-chemistry conversation; the release gate verifies CUH-382-S04/S05 and the 1,4-dppb distinction.
 
 Reference-chain auditing also discovered historical coverage-backfill candidate 10.1016/j.poly.2014.07.034; it remains outside curated denominators pending primary-evidence promotion.
 
