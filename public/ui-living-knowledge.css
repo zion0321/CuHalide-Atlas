@@ -75,7 +75,7 @@ header{background:rgba(255,255,255,.94);border-bottom:1px solid rgba(220,229,232
 .page-head p:not(.eyebrow){color:#4f6672;font-size:15px;line-height:1.68}
 .layout{gap:20px}
 .filters{border-radius:16px}
-.field span{color:#6b7d86}
+.field span{color:#526873}
 .field input,.field select,.field textarea{border-color:#c8d5da;background:#fff}
 .field input:hover,.field select:hover,.field textarea:hover{border-color:#aebfc6}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:#388e84;box-shadow:0 0 0 3px rgba(56,142,132,.11)}
