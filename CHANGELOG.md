@@ -1,3 +1,7 @@
+## Current Curated rev.6 — 2026-08-18
+
+Living-state promotion only; Frozen Release 3.0.2 remains immutable. Current Curated now contains 383 article-audit records, 369 canonical verified articles, 946 structure/phase rows, 886 Core-Included structures, 85 strict-polar rows across 53 articles, and 1,329/1,329 embedded RAG documents. Four primary-evidence-reviewed articles and eight SCXRD determinations were promoted. Record 381 preserves the main-article formula/SI conflict explicitly; Record 382 normalizes the 1,2-dppb abbreviation; Record 383 keeps amorphous glass states outside crystallographic denominators and links 3c to an existing identity. Runtime: Public Data 2.13.0, Smart RAG 9.18.0, Research Assistant 10.3.0.
+
 # Changelog
 
 ## Current Curated rev.3 — 2026-08-14 (living production state; archived snapshot unchanged)

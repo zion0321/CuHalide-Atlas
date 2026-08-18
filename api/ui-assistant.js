@@ -1,11 +1,11 @@
 import crypto from 'node:crypto';
 import livingHandler from './ui-site.js';
 
-const UI_VERSION='48.5';
-const CURRENT_REVISION='3';
-const CONTENT_DATE='2026-08-14';
+const UI_VERSION='50.2';
+const CURRENT_REVISION='6';
+const CONTENT_DATE='2026-08-18';
 const LAST_MODIFIED=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
-const STYLE_LINK='<link rel="stylesheet" href="/ui-assistant-v48-5.css?v=20260814">';
+const STYLE_LINK='<link rel="stylesheet" href="/ui-assistant-v48-5.css?v=20260818">';
 const MARKER='<!-- CUHALIDE_UI_V48_5_CONVERSATIONAL_RESEARCH_ASSISTANT -->';
 
 function required(body,from,to,label){const n=body.split(from).length-1;if(n!==1)throw new Error(`${label}: expected one occurrence, found ${n}`);return body.replace(from,to)}

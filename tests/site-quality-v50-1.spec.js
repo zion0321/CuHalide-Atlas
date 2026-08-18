@@ -10,10 +10,11 @@ function header(response,name){return response.headers()[String(name).toLowerCas
 async function expectCurrentPageMetadata(response,html){
   expect(response.status()).toBe(200);
   expect(header(response,'x-cuhalide-site-version')).toBe('50');
-  expect(header(response,'x-cuhalide-current-curated-revision')).toBe('5');
-  expect(html).toContain('content="5"');
-  expect(html).toContain('current-r5');
-  expect(html).toContain('2026-08-17');
+  expect(header(response,'x-cuhalide-current-curated-revision')).toBe('6');
+  expect(html).toContain('<meta name="cuhalide-current-curated-revision" content="6">');
+  expect(html).not.toContain('<meta name="cuhalide-current-curated-revision" content="5">');
+  expect(html).toContain('current-r6');
+  expect(html).toContain('2026-08-18');
   expect(html).not.toContain('current-r3');
   expect(html).not.toContain('reviewed through 14 Aug 2026');
 }
@@ -45,31 +46,34 @@ test('every interactive portal view passes automated WCAG AA scan',async({page},
 
 test('Motif Atlas and public record pages pass automated WCAG AA scans',async({page})=>{
   await expectNoAxeViolations(page,'/motifs');
-  await expectNoAxeViolations(page,'/article/379');
+  await expectNoAxeViolations(page,'/article/381');
   await expectNoAxeViolations(page,'/structure/CUH-378-S01');
 });
 
-test('public root exposes one current v50/rev.5 provenance contract',async({request})=>{
+test('public root exposes one current v50/rev.6 provenance contract',async({request})=>{
   const r=await request.get(BASE);
   expect(r.status()).toBe(200);
   expect(header(r,'x-cuhalide-site-version')).toBe('50');
-  expect(header(r,'x-cuhalide-ui-version')).toBe('50.0');
-  expect(header(r,'x-cuhalide-current-curated-revision')).toBe('5');
-  expect(header(r,'x-cuhalide-middleware')).toContain('current-r5');
-  expect(header(r,'last-modified')).toContain('17 Aug 2026');
+  expect(header(r,'x-cuhalide-ui-version')).toBe('50.2');
+  expect(header(r,'x-cuhalide-current-curated-revision')).toBe('6');
+  expect(header(r,'x-cuhalide-middleware')).toContain('current-r6');
+  expect(header(r,'last-modified')).toContain('18 Aug 2026');
   const html=await r.text();
-  expect(html).toContain('CUHALIDE_SITE_V50_CURRENT_CURATED_R5');
-  expect(html).toContain('Current Curated rev.5');
+  expect(html).toContain('CUHALIDE_SITE_V50_CURRENT_CURATED_R6');
+  expect(html).toContain('Current Curated rev.6');
+  expect(html).toContain('All reviewed / audit records · n=383');
+  expect(html).not.toContain('All reviewed / audit records · n=379');
+  expect(html).not.toContain('CUHALIDE_SITE_V50_CURRENT_CURATED_R5');
   expect(html).not.toContain('CUHALIDE_SITE_V47_PUBLIC_KNOWLEDGE_PORTAL');
 });
 
-test('current article and structure pages expose rev.5 machine provenance',async({request})=>{
-  const article=await request.get(`${BASE}/article/379`);
+test('current article and structure pages expose rev.6 machine provenance',async({request})=>{
+  const article=await request.get(`${BASE}/article/381`);
   const articleHtml=await article.text();
   await expectCurrentPageMetadata(article,articleHtml);
-  expect(articleHtml).toContain('Current Curated rev.5');
-  expect(articleHtml).toContain('17 Aug 2026');
-  expect(articleHtml).toContain('10.1021/acsaom.6c00035');
+  expect(articleHtml).toContain('Current Curated rev.6');
+  expect(articleHtml).toContain('18 Aug 2026');
+  expect(articleHtml).toContain('10.1021/acs.inorgchem.5c06028');
 
   const structure=await request.get(`${BASE}/structure/CUH-378-S01`);
   const structureHtml=await structure.text();
@@ -83,7 +87,7 @@ test('frozen-origin record keeps archived scientific provenance while site heade
   const r=await request.get(`${BASE}/article/1`);
   expect(r.status()).toBe(200);
   expect(header(r,'x-cuhalide-site-version')).toBe('50');
-  expect(header(r,'x-cuhalide-current-curated-revision')).toBe('5');
+  expect(header(r,'x-cuhalide-current-curated-revision')).toBe('6');
   const html=await r.text();
   expect(html).toContain('archived scientific snapshot 3.0.2');
   expect(html).toContain('"version":"3.0.2"');
@@ -101,7 +105,7 @@ test('missing record is a branded noindex 404 rather than a backend-outage false
   expect(html).toContain('Browse literature');
 });
 
-test('health endpoint is normalized to the active v50/rev.5 runtime',async({request})=>{
+test('health endpoint is normalized to the active v50/rev.6 runtime',async({request})=>{
   const r=await request.get(`${BASE}/health.json`);
   expect(r.status()).toBe(200);
   const x=await r.json();
@@ -109,29 +113,29 @@ test('health endpoint is normalized to the active v50/rev.5 runtime',async({requ
   expect(x.site_version).toBe('50');
   expect(x.meta_version).toBe('50.1');
   expect(x.gateway_meta_version).toBe('50.1');
-  expect(x.site_probe_mode).toBe('frontend v50 active; backend rev.5 deterministic contract');
+  expect(x.site_probe_mode).toBe('frontend v50 active; backend rev.6 deterministic contract');
   expect(JSON.stringify(x)).not.toContain('frontend v49');
 });
 
-test('Motif Atlas and HEAD metadata stay aligned with rev.5',async({request})=>{
+test('Motif Atlas and HEAD metadata stay aligned with rev.6',async({request})=>{
   const r=await request.get(`${BASE}/motifs`);
   expect(r.status()).toBe(200);
-  expect(header(r,'x-cuhalide-current-curated-revision')).toBe('5');
+  expect(header(r,'x-cuhalide-current-curated-revision')).toBe('6');
   const html=await r.text();
-  expect(html).toContain('938');
-  expect(html).toContain('581');
+  expect(html).toContain('946');
+  expect(html).toContain('589');
   expect(html).toContain('357');
   expect(html).toContain('aria-label="Filter motif taxonomy"');
   const head=await request.head(`${BASE}/motifs`);
   expect(head.status()).toBe(200);
-  expect(header(head,'x-cuhalide-current-curated-revision')).toBe('5');
+  expect(header(head,'x-cuhalide-current-curated-revision')).toBe('6');
 });
 
 test('legacy public-data compatibility route cannot reintroduce stale revision metadata',async({request})=>{
   const legacy=await request.get(`${BASE}/api/data?action=bootstrap`);
   expect(legacy.status()).toBe(200);
-  expect(header(legacy,'x-cuhalide-public-data-version')).toBe('2.12.0');
-  expect(header(legacy,'x-cuhalide-current-curated-revision')).toBe('5');
+  expect(header(legacy,'x-cuhalide-public-data-version')).toBe('2.13.0');
+  expect(header(legacy,'x-cuhalide-current-curated-revision')).toBe('6');
   expect(header(legacy,'warning')).toContain('Legacy /api/data');
 });
 
