@@ -4,10 +4,23 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 
 test('v50 public runtime files expose one rev.5 contract',()=>{
-  const files=['api/site.js','api/ui-site.js','api/meta.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','middleware.js'];
+  const files=['api/site.js','api/ui-site.js','api/meta.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record.js','middleware.js'];
   const text=files.map(read).join('\n');
   for(const token of ["CURRENT_REVISION='5'","2026-08-17","938","878","679","81","1317"])assert.ok(text.includes(token),`missing ${token}`);
   for(const stale of ["CURRENT_REVISION='4'","EXPECTED_STRUCTURES=864","EXPECTED_URLS=1225","PUBLIC_DATA_VERSION='2.11.0'","EVIDENCE_VERSION='9.16.0'","ASSISTANT_VERSION='10.1.0'"])assert.ok(!text.includes(stale),`stale token ${stale}`);
+});
+
+test('record pages cannot regress to rev.3/site48 provenance',()=>{
+  const record=read('api/record.js');
+  for(const token of ["SITE_VERSION='50'","CURRENT_REVISION='5'","CURRENT_DATE='2026-08-17'",'Current Curated rev.5','Retry-After','X-Robots-Tag'])assert.ok(record.includes(token),`record contract missing ${token}`);
+  for(const stale of ["SITE_VERSION='48'","CURRENT_REVISION='3'","CURRENT_DATE='2026-08-14'",'reviewed through 14 Aug 2026'])assert.ok(!record.includes(stale),`stale record token ${stale}`);
+});
+
+test('health and Motif gateways retry transient faults without hiding persistent failure',()=>{
+  const meta=read('api/meta.js'),motifs=read('api/motifs.js'),sitemap=read('api/sitemap.js');
+  assert.match(meta,/RETRIES=3/);assert.match(meta,/frontend v50 active; backend rev\.5 deterministic contract/);assert.doesNotMatch(meta,/frontend v49 active/);
+  assert.match(motifs,/RETRIES=3/);assert.match(motifs,/res\.statusCode=503/);assert.match(motifs,/Retry-After/);
+  assert.match(sitemap,/RETRIES=3/);assert.match(sitemap,/res\.statusCode=503/);assert.match(sitemap,/Retry-After/);
 });
 
 test('sitemap and QA denominators are exact',()=>{
