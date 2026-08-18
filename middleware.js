@@ -5,7 +5,7 @@ export default async function middleware(request){
   const response=await fetch(target,{method:request.method,headers:request.headers,redirect:'follow'});
   const headers=new Headers(response.headers);
   headers.set('x-cuhalide-middleware','release-3.0.2-ui-v50.2-current-r6');
-  headers.set('x-cuhalide-current-curated-revision','5');
+  headers.set('x-cuhalide-current-curated-revision','6');
   headers.set('x-cuhalide-ui-version','50.2');
   headers.set('x-cuhalide-site-version','50');
   headers.set('last-modified',LAST_MODIFIED);
