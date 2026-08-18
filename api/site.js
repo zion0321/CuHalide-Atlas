@@ -30,7 +30,7 @@ function buildPortal(){
   h=all(h,'<span class="denom">Canonical articles · n = 332</span>','<span class="denom">Curated literature · n = 369</span>');
   h=all(h,'<span class="denom">Core-included structure rows · n = 816</span>','<span class="denom">Core-Included structure rows · n = 886</span>');
   h=all(h,'<span class="denom">Resolved structure rows · n = 650</span>','<span class="denom">Resolved structure rows · n = 713</span>');
-  h=h.replace(/<select id="arel">[\s\S]*?<\/select>/,'<select id="arel"><option value="Current canonical" selected>Curated literature · n=369</option><option value="">All reviewed / audit records · n=379</option><option value="Context - Boundary">Boundary context</option><option value="Excluded - Curated Audit">Excluded audit</option><option value="Pending - Primary Evidence Unavailable">Primary evidence pending</option></select>');
+  h=h.replace(/<select id="arel">[\s\S]*?<\/select>/,'<select id="arel"><option value="Current canonical" selected>Curated literature · n=369</option><option value="">All reviewed / audit records · n=383</option><option value="Context - Boundary">Boundary context</option><option value="Excluded - Curated Audit">Excluded audit</option><option value="Pending - Primary Evidence Unavailable">Primary evidence pending</option></select>');
   h=all(h,'Reset to canonical core','Reset to curated literature');
   h=all(h,'Canonical release status = Core - Verified.','Latest reviewed corpus.');
   h=all(h,'The default view is the canonical scientific core. Switch to an audit view only when you explicitly need boundary, excluded or primary-evidence-pending records.','Search the latest primary-evidence-reviewed literature. Archived snapshots are retained for reproducibility rather than exposed as a routine browsing mode.');
@@ -53,9 +53,9 @@ function buildPortal(){
   h=all(h,"a.release_status==='Core - Verified'?'':'audit'","['Core - Verified','Current Curated - Verified'].includes(a.release_status)?'':'audit'");
   h=all(h,"'Audit view: all 878 structure/phase rows.'","'Audit view: all 946 structure/phase rows.'");
   h=all(h,"$('arel').value='Core - Verified'","$('arel').value='Current canonical'");
-  const stale=['Current Curated rev.4','n=359','n=864','n=924','1,297-document','9.16.0','CUHALIDE_SITE_V49_CURRENT_CURATED_R4'];
-  for(const token of stale) if(h.includes(token)) throw new Error(`stale v49 token remains: ${token}`);
-  for(const token of ['Current Curated rev.6','18 Aug 2026','n=369','n=886','n=946','1,329-document','CUHALIDE_SITE_V50_CURRENT_CURATED_R6']) if(!h.includes(token)) throw new Error(`v50 output missing: ${token}`);
+  const stale=['Current Curated rev.5','Current Curated rev.4','All reviewed / audit records · n=379','n=365','n=864','n=878','n=924','n=938','1,297-document','1,317-document','9.16.0','9.17.0','CUHALIDE_SITE_V49_CURRENT_CURATED_R4','CUHALIDE_SITE_V50_CURRENT_CURATED_R5'];
+  for(const token of stale) if(h.includes(token)) throw new Error(`stale site token remains: ${token}`);
+  for(const token of ['Current Curated rev.6','18 Aug 2026','n=369','All reviewed / audit records · n=383','n=886','n=946','1,329-document','CUHALIDE_SITE_V50_CURRENT_CURATED_R6']) if(!h.includes(token)) throw new Error(`v50 output missing: ${token}`);
   const styles=[...h.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map(m=>sha(m[1]));
   const scripts=[...h.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)].filter(m=>!/\bsrc\s*=/i.test(m[1]||'')).map(m=>sha(m[2]));
   if(styles.length!==1||scripts.length<1) throw new Error(`Unexpected CSP sources: ${styles.length}/${scripts.length}`);
