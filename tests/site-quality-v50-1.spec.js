@@ -18,15 +18,29 @@ async function expectCurrentPageMetadata(response,html){
   expect(html).not.toContain('reviewed through 14 Aug 2026');
 }
 
+async function axe(page,label){
+  const results=await new AxeBuilder({page}).withTags(AXE_TAGS).analyze();
+  expect(results.violations,`${label}: ${results.violations.map(v=>`${v.id}:${v.nodes.length}`).join(', ')}`).toEqual([]);
+}
+
 async function expectNoAxeViolations(page,path){
   const r=await page.goto(`${BASE}${path}`,{waitUntil:'networkidle'});
   expect(r?.status()).toBe(200);
-  const results=await new AxeBuilder({page}).withTags(AXE_TAGS).analyze();
-  expect(results.violations,`${path}: ${results.violations.map(v=>`${v.id}:${v.nodes.length}`).join(', ')}`).toEqual([]);
+  await axe(page,path);
 }
 
 test('home passes automated WCAG AA scan with no violations',async({page})=>{
   await expectNoAxeViolations(page,'/');
+});
+
+test('every interactive portal view passes automated WCAG AA scan',async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=='desktop-chromium','single-project full-view accessibility sweep');
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  for(const route of ['articles','structures','polar','rag','watch','methods','citation']){
+    await page.goto(`${BASE}/#${route}`,{waitUntil:'networkidle'});
+    await expect(page.locator(`.view[data-view="${route}"]`)).toBeVisible();
+    await axe(page,`#${route}`);
+  }
 });
 
 test('Motif Atlas and public record pages pass automated WCAG AA scans',async({page})=>{
