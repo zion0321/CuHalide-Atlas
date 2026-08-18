@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: vercel-preview-qa-${{ github.event.pull_request.head.sha || github.event.deployment.ref || github.event.deployment.sha }}
+  group: vercel-preview-qa-${{ github.event_name }}-${{ github.event.pull_request.head.sha || github.event.deployment.ref || github.event.deployment.sha }}
   cancel-in-progress: true
 
 jobs:
