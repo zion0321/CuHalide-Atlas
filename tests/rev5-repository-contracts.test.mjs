@@ -5,20 +5,21 @@ const url=p=>new URL(`../${p}`,import.meta.url);
 const read=p=>fs.readFileSync(url(p),'utf8');
 
 test('v50 public runtime files expose one rev.5 contract',()=>{
-  const files=['api/site.js','api/ui-site.js','api/ui-assistant.js','api/meta.js','api/data.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record.js','vercel.json'];
+  const files=['api/site.js','api/ui-site.js','api/ui-assistant.js','api/meta.js','api/data.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record.js','middleware.js','vercel.json'];
   const text=files.map(read).join('\n');
   for(const token of ["CURRENT_REVISION='5'","2026-08-17","938","878","679","81","1317"])assert.ok(text.includes(token),`missing ${token}`);
   for(const stale of ["CURRENT_REVISION='4'","EXPECTED_STRUCTURES=864","EXPECTED_URLS=1225","PUBLIC_DATA_VERSION='2.11.0'","PUBLIC_DATA_VERSION='2.10.0'","EVIDENCE_VERSION='9.16.0'","ASSISTANT_VERSION='10.1.0'"])assert.ok(!text.includes(stale),`stale token ${stale}`);
 });
 
-test('root routing has no redundant middleware network hop',()=>{
-  const config=JSON.parse(read('vercel.json'));
-  assert.equal(fs.existsSync(url('middleware.js')),false,'middleware.js must remain absent');
-  const root=config.rewrites.find(x=>x.source==='/');
-  const index=config.rewrites.find(x=>x.source==='/index.html');
-  assert.equal(root?.destination,'/api/ui-assistant');
-  assert.equal(index?.destination,'/api/ui-assistant');
-  assert.equal(config.functions?.['api/ui-assistant.js']?.includeFiles,'public/index.html');
+test('root routing preserves the proven v50 assistant middleware path',()=>{
+  const config=JSON.parse(read('vercel.json')),middleware=read('middleware.js');
+  const root=config.rewrites.find(x=>x.source==='/'),index=config.rewrites.find(x=>x.source==='/index.html');
+  assert.equal(root?.destination,'/api/ui-site');
+  assert.equal(index?.destination,'/api/ui-site');
+  assert.match(middleware,/matcher:\['\/','\/index\.html'\]/);
+  assert.match(middleware,/new URL\('\/api\/ui-assistant'/);
+  assert.match(middleware,/release-3\.0\.2-ui-v50\.0-current-r5/);
+  assert.match(middleware,/x-cuhalide-site-version','50'/);
 });
 
 test('record pages cannot regress to rev.3/site48 provenance',()=>{
