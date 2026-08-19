@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import siteHandler from './site.js';
+import siteHandler from '../lib/site-renderer.js';
 
 const UI_VERSION='50.2';
 const CURRENT_REVISION='7';
