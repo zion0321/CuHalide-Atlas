@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import siteHandler from './site.js';
 
 const UI_VERSION='50.2';
@@ -46,11 +47,14 @@ function enhanceHtml(input){
   return body;
 }
 
+function inlineScriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))!==null){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
+function syncCsp(html,res){const current=String(res.getHeader?.('Content-Security-Policy')||'');if(!current)return;const hashes=inlineScriptHashes(html);if(!hashes.length)return;const next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src 'self' ${hashes.join(' ')};`);if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');res.setHeader('Content-Security-Policy',next)}
+
 export default async function handler(req,res){
   res.setHeader('X-CuHalide-UI-Version',UI_VERSION);
   res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);
   res.setHeader('Last-Modified',LAST_MODIFIED);
-  const bridge={setHeader:(name,value)=>{const lower=String(name).toLowerCase();if(lower==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(lower==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},end:body=>res.end(enhanceHtml(body))};
+  const bridge={setHeader:(name,value)=>{const lower=String(name).toLowerCase();if(lower==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(lower==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},getHeader:name=>res.getHeader?.(name),removeHeader:name=>res.removeHeader?.(name),end:body=>{const out=enhanceHtml(body);if(typeof out==='string'&&out.includes('</html>'))syncCsp(out,res);res.removeHeader?.('Content-Length');return res.end(out)}};
   Object.defineProperty(bridge,'statusCode',{get:()=>res.statusCode,set:value=>{res.statusCode=value}});
   return siteHandler(req,bridge);
 }
