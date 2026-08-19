@@ -1,0 +1,9 @@
+insert into atlas_internal.cuhalide_photophysics_property_dictionary_v1
+(property_key,domain,canonical_unit,definition,structure_property_default,condition_sensitive,allow_text_value,notes)
+values
+('exciton_binding_energy','excited_state','meV','Source-reported exciton binding energy derived from the stated temperature-dependent PL model.',false,true,false,'Retain fitting equation, temperature interval and source basis.'),
+('huang_rhys_factor','electron_phonon_coupling','','Source-reported Huang-Rhys factor derived from the stated temperature-dependent FWHM model.',false,true,false,'Retain fitting model and temperature interval.'),
+('phonon_energy','electron_phonon_coupling','meV','Source-reported effective phonon energy associated with the fitted electron-phonon coupling model.',false,true,false,'Retain model basis and do not infer when source does not report a value.'),
+('thermal_activation_energy','stability','meV','Source-reported activation energy extracted from temperature-dependent luminescence quenching.',false,true,false,'Retain fitting interval and source equation.'),
+('dielectric_transition_temperature','stimulus_response','K','Source-reported dielectric/thermal transition temperature relevant to an optical or structural state transition.',false,true,false,'Keep heating/cooling branch and measurement basis in qualifier.')
+on conflict (property_key) do update set domain=excluded.domain,canonical_unit=excluded.canonical_unit,definition=excluded.definition,structure_property_default=excluded.structure_property_default,condition_sensitive=excluded.condition_sensitive,allow_text_value=excluded.allow_text_value,notes=excluded.notes,active=true;
