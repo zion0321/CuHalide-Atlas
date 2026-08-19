@@ -29,7 +29,10 @@ Rev.7 is a structure-truth hostile-audit promotion. The frozen 3.0.2 release is 
    - Gua7Cu3I10·3DMF: 0D inorganic topology supported by partial SCXRD/isostructural evidence, but exact iodide motif and space group remain unresolved.
 4. **10.1039/a902290b / Record 186** — all four triazine-linked Cu(I)-halide compounds are classified as **3D global coordination networks**. Local Cu–X columns/chains/layers are retained separately in the motif/connectivity taxonomy and are not confused with global dimensionality.
 5. **10.1021/acsmaterialslett.3c01594 / Record 341** — the four Cu4I4 polymorphs are atomized as 1-bu, 1-gn, 1-ye and 1-wh; fractional reduced CIF formulae are not used as compound identities. Compound 2 remains the distinct 1D CuI(4-trifluoromethylpyridine) coordination polymer.
-6. **10.1039/c7dt00262a / Record 246** — the individual Cu11X15 members are no longer assigned the family-level `0D/1D/2D` value. Primary evidence explicitly identifies [H2dpp]2Cu11I15 and [H2dpp]2Cu11Br15 as **2D microporous [Cu11X15]4− layers**, built from [Cu9X17] units interconnected by [CuX4] tetrahedra. Their Aba2 crystallography is retained.
+6. **10.1039/c7dt00262a / Record 246** — all compound-number-specific topologies are now reconstructed from the primary RSC article rather than inherited from the family-level `0D/1D/2D` descriptor:
+   - compound 1, [H2dpp]2[Cu4I8]·H2O: **0D discrete [Cu4I8]4−**; both near-identical C2/c CIF determinations are retained as crystallographic determinations of that reported compound identity;
+   - compound 2, [H2dpp][Cu2I4]: **1D [Cu2I4]2− chain**; Cu2I4 is treated as the chain repeat composition, not as a discrete dimer;
+   - compounds 3–4, [H2dpp]2Cu11I15 and [H2dpp]2Cu11Br15: **2D microporous [Cu11X15]4− layers**, built from [Cu9X17] units interconnected by [CuX4] tetrahedra; their Aba2 crystallography is retained.
 
 ## QC gates
 
