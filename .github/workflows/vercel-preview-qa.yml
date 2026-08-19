@@ -67,18 +67,20 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run comprehensive site quality regression gate
         run: npm run qa:site-quality
-      - name: Verify v50 portal contract
-        run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.6"
-      - name: Verify rev.6 runtime health
-        run: npm run qa:browser -- --grep "runtime health is exact rev.6 contract"
+      - name: Verify v50 portal rev.7 contract
+        run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.7"
+      - name: Verify rev.7 runtime health
+        run: npm run qa:browser -- --grep "runtime health is exact rev.7 contract"
       - name: Verify manifest sitemap and Motif Atlas
-        run: npm run qa:browser -- --grep "manifest, sitemap and Motif Atlas agree with rev.6"
+        run: npm run qa:browser -- --grep "manifest, sitemap and Motif Atlas agree with rev.7"
       - name: Verify Research Assistant runtime contract
-        run: npm run qa:browser -- --grep "Research Assistant reports 10.3 / 9.18 and rev.6 full-current RAG"
-      - name: Verify new structure-truth boundaries
-        run: npm run qa:browser -- --grep "new structure-truth boundaries are live"
-      - name: Verify rev.6 primary-evidence boundaries
-        run: npm run qa:browser -- --grep "rev.6 primary-evidence boundaries remain deterministic"
+        run: npm run qa:browser -- --grep "Research Assistant reports 10.4 / 9.19 and rev.7 full-current RAG"
+      - name: Verify rev.7 structure-truth corrections
+        run: npm run qa:browser -- --grep "rev.7 structure-truth corrections are exposed at structure grain"
+      - name: Verify local/global connectivity boundaries
+        run: npm run qa:browser -- --grep "local motif versus global dimensionality boundaries remain live"
+      - name: Verify rev.7 deterministic identity boundaries
+        run: npm run qa:browser -- --grep "rev.7 exact-count and identity boundaries remain deterministic"
       - name: Verify deleted placeholders and export privacy boundary
         run: npm run qa:browser -- --grep "review/perspective placeholders stay absent and export stays disabled"
       - name: Stop local candidate runtime
