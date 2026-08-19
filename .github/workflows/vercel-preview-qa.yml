@@ -61,6 +61,8 @@ jobs:
         run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.7"
       - name: Verify rev.7 production copy is residue-free
         run: npm run qa:browser -- --grep "public rev.7 copy contains no rev.6 release-language residues"
+      - name: Verify prepublication indexing boundary
+        run: npm run qa:browser -- --grep "prepublication indexing remains disabled while direct access stays available"
       - name: Verify rev.7 runtime health
         run: npm run qa:browser -- --grep "runtime health is exact final rev.7 contract"
       - name: Verify manifest sitemap and Motif Atlas
