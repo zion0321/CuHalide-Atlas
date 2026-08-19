@@ -1,0 +1,5 @@
+insert into atlas_internal.cuhalide_photophysics_property_dictionary_v1
+(property_key,domain,canonical_unit,definition,structure_property_default,condition_sensitive,allow_text_value,notes)
+values
+('dose_response_observation','scintillation','','Qualitative source-reported relationship between radioluminescence/scintillation response and X-ray dose rate when exact fit parameters or numeric range are not available.',false,true,true,'Use only for explicit source statements such as linear response; never infer slope/range from this field.')
+on conflict (property_key) do update set domain=excluded.domain,canonical_unit=excluded.canonical_unit,definition=excluded.definition,structure_property_default=excluded.structure_property_default,condition_sensitive=excluded.condition_sensitive,allow_text_value=excluded.allow_text_value,notes=excluded.notes,active=true;
