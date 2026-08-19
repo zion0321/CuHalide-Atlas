@@ -11,6 +11,7 @@ function normalize(body){
   return body
     .split('<meta name="cuhalide-current-curated-revision" content="6">').join('<meta name="cuhalide-current-curated-revision" content="7">')
     .split('<meta name="robots" content="index,follow,max-image-preview:large">').join(ROBOTS_META)
+    .split('<meta name="robots" content="noindex,nofollow">').join(ROBOTS_META)
     .split('Current Curated rev.6 · primary-evidence reviewed through 18 Aug 2026').join('Current Curated rev.7 · primary-evidence reviewed through 19 Aug 2026')
     .split('current-r6').join('current-r7')
     .split('2026-08-18').join('2026-08-19');
