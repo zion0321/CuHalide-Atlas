@@ -1,0 +1,5 @@
+insert into atlas_internal.cuhalide_photophysics_property_dictionary_v1
+(property_key,domain,canonical_unit,definition,structure_property_default,condition_sensitive,allow_text_value,notes)
+values
+('cu_cu_distance_mean','structure_context','Angstrom','Source-reported mean/average Cu···Cu distance for the mapped structure or explicitly defined Cu subnetwork.',true,false,false,'Use only when the source explicitly reports an average or when an Atlas calculation is separately labeled with its derivation; do not replace the underlying min/max contacts.')
+on conflict (property_key) do update set domain=excluded.domain,canonical_unit=excluded.canonical_unit,definition=excluded.definition,structure_property_default=excluded.structure_property_default,condition_sensitive=excluded.condition_sensitive,allow_text_value=excluded.allow_text_value,notes=excluded.notes,active=true;
