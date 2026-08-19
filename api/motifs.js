@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-const DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
+const DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v2';
 const PUBLIC='https://cuhalide-atlas-v3.vercel.app',RELEASE='3.0.2',REV='7',CONTENT_DATE='2026-08-19';
 const RETRIES=3,ATTEMPT_TIMEOUT_MS=7000,RETRY_DELAY_MS=180,CACHE_TTL_MS=60000,MAX_CACHE_ENTRIES=32;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
