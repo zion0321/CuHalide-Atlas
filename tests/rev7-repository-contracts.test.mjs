@@ -7,7 +7,7 @@ const read=p=>fs.readFileSync(url(p),'utf8');
 test('canonical public runtime exposes one rev.7 contract',()=>{
   const files=['api/ui-site.js','api/ui-assistant-current.js','api/meta.js','api/data.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record-current.js','middleware.js','vercel.json'];
   const text=files.map(read).join('\n');
-  for(const token of ["CURRENT_REVISION='7'","2026-08-19","946","886","684","87","1329"])assert.ok(text.includes(token),`missing ${token}`);
+  for(const token of ["CURRENT_REVISION='7'","2026-08-19","946","886","684","87","1329","PUBLIC_DATA_VERSION='2.14.0'"])assert.ok(text.includes(token),`missing ${token}`);
   for(const stale of ["CURRENT_REVISION='4'","EXPECTED_STRUCTURES=864","EXPECTED_URLS=1225","PUBLIC_DATA_VERSION='2.11.0'","PUBLIC_DATA_VERSION='2.10.0'","EVIDENCE_VERSION='9.16.0'","ASSISTANT_VERSION='10.1.0'"])assert.ok(!text.includes(stale),`stale token ${stale}`);
 });
 
@@ -39,7 +39,7 @@ test('rev.7 wrappers normalize living UI and record provenance without rewriting
 
 test('metadata health and manifest carry exact rev.7 denominators',()=>{
   const meta=read('api/meta.js');
-  for(const token of ["META_VERSION='50.2'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:607','motif_unresolved_rows:339',"smart_rag_version:'9.19.0'","research_assistant_version:'10.4.0'"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
+  for(const token of ["META_VERSION='50.2'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:607','motif_unresolved_rows:339',"public_data_version:'2.14.0'","smart_rag_version:'9.19.0'","research_assistant_version:'10.4.0'"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
   assert.match(meta,/frontend v50 active; backend rev\.7 deterministic contract/);
 });
 
@@ -64,7 +64,8 @@ test('sitemap denominators remain canonical and revision provenance advances onl
 
 test('legacy data route remains compatibility-only and current',()=>{
   const data=read('api/data.js'),publicData=read('api/public-data.js');
-  for(const token of ["PUBLIC_DATA_VERSION='2.13.0'","CURRENT_REVISION='7'",'prefer /api/public-data','RETRIES=3'])assert.ok(data.includes(token),`legacy data contract missing ${token}`);
+  for(const token of ["PUBLIC_DATA_VERSION='2.14.0'","CURRENT_REVISION='7'",'prefer /api/public-data','RETRIES=3'])assert.ok(data.includes(token),`legacy data contract missing ${token}`);
+  assert.ok(publicData.includes("PUBLIC_DATA_VERSION='2.14.0'"));
   assert.ok(publicData.includes("CURRENT_REVISION='7'"));
   assert.match(publicData,/response\.status===429/);
 });
