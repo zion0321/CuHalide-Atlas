@@ -11,6 +11,12 @@ test('canonical public runtime exposes one rev.7 contract',()=>{
   for(const stale of ["CURRENT_REVISION='4'","EXPECTED_STRUCTURES=864","EXPECTED_URLS=1225","PUBLIC_DATA_VERSION='2.11.0'","PUBLIC_DATA_VERSION='2.10.0'","EVIDENCE_VERSION='9.16.0'","ASSISTANT_VERSION='10.1.0'"])assert.ok(!text.includes(stale),`stale token ${stale}`);
 });
 
+test('README is locked to the same rev.7 living scientific state',()=>{
+  const readme=read('README.md');
+  for(const token of ['Current Curated rev.7','2026-08-19','Article audit records | 383','Canonical verified articles | 369','Structure / phase rows | 946','Core-Included structure rows | 886','Resolved space-group rows | 710','Verified one-to-one SG rows | 684','Strict-polar rows | 87','RAG documents / embeddings | 1,329 / 1,329','628','318','Public Data: **2.14.0**','Smart RAG: **9.19.0**','Research Assistant: **10.4.0**'])assert.ok(readme.includes(token),`README missing current token ${token}`);
+  for(const stale of ['Current Curated rev.5 — living default','Curated through **2026-08-17**','Structure / phase rows | 938','Core-Included structure rows | 878','581','357','Public Data: **2.12.0**','Smart RAG: **9.17.0**','Research Assistant: **10.2.0**'])assert.ok(!readme.includes(stale),`README stale token ${stale}`);
+});
+
 test('canonical routes terminate at rev.7 wrappers, not historical renderer provenance',()=>{
   const config=JSON.parse(read('vercel.json')),middleware=read('middleware.js'),candidate=read('scripts/local-candidate-server.mjs');
   const route=source=>config.rewrites.find(x=>x.source===source)?.destination;
