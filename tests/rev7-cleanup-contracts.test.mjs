@@ -25,3 +25,25 @@ test('obsolete rev.6 deployment compatibility bridge is removed',()=>{
   assert.match(pkg.scripts['qa:browser'],/rev7-production-copy\.spec\.js/);
   assert.doesNotMatch(pkg.scripts['qa:browser'],/rev6-deployment-compat/);
 });
+
+test('prepublication indexing boundary is fail-closed and reversible',()=>{
+  const config=JSON.parse(read('vercel.json'));
+  const globalHeaders=config.headers.find(x=>x.source==='/(.*)')?.headers||[];
+  const robotsHeader=globalHeaders.find(x=>String(x.key).toLowerCase()==='x-robots-tag');
+  assert.equal(robotsHeader?.value,'noindex, nofollow, noarchive');
+
+  const site=read('api/ui-site.js');
+  const record=read('api/record-current.js');
+  const meta=read('api/meta.js');
+  for(const text of [site,record]){
+    assert.match(text,/noindex,nofollow,noarchive/);
+    assert.match(text,/X-Robots-Tag/);
+  }
+  assert.match(meta,/'X-Robots-Tag':'noindex, nofollow, noarchive'/);
+  assert.match(meta,/release_state:'prepublication'/);
+  assert.match(meta,/indexing:'disabled-prepublication'/);
+  assert.ok(!meta.includes('Sitemap: ${PUBLIC}/sitemap.xml'));
+
+  const pkg=JSON.parse(read('package.json'));
+  assert.match(pkg.scripts['qa:browser'],/prepublication-indexing\.spec\.js/);
+});
