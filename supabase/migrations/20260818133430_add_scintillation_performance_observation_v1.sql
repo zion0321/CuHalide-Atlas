@@ -1,0 +1,5 @@
+insert into atlas_internal.cuhalide_photophysics_property_dictionary_v1
+(property_key,domain,canonical_unit,definition,structure_property_default,condition_sensitive,allow_text_value,notes)
+values
+('scintillation_performance_observation','scintillation','','Qualitative source-reported comparison or outcome for scintillation/radioluminescence performance when exact scalar metrics are unavailable in the accessible source layer.',false,true,true,'Use for explicit statements such as higher light yield or lower detection limit versus a named comparator; do not infer numeric values.')
+on conflict (property_key) do update set domain=excluded.domain,canonical_unit=excluded.canonical_unit,definition=excluded.definition,structure_property_default=excluded.structure_property_default,condition_sensitive=excluded.condition_sensitive,allow_text_value=excluded.allow_text_value,notes=excluded.notes,active=true;
