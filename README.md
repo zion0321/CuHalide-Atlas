@@ -1,6 +1,10 @@
 # CuHalide Atlas
 
-CuHalide Atlas is an evidence-grounded, structure-resolved knowledge base for organic-containing Cu(I) chloride, bromide and iodide materials. The public site is a read-only query-and-view interface; the complete normalized curation corpus and primary-evidence archive remain private.
+CuHalide Atlas is an evidence-grounded, structure-resolved knowledge base for organic-containing Cu(I) chloride, bromide and iodide materials. The review portal is a read-only query-and-view interface; the complete normalized curation corpus and primary-evidence archive remain private.
+
+## Prepublication release status
+
+**CuHalide Atlas is currently in a prepublication review state, not a formally released public dataset.** Direct-link access is retained for review and internal/advisor sharing, while search-engine indexing is disabled. Formal domain, ownership/authentication, archival identifier/DOI, licensing and final public-release metadata are intentionally not asserted until the owner completes those governance decisions. Any later public launch must explicitly remove the prepublication indexing boundary through a reviewed release change.
 
 ## Authoritative scientific state
 
@@ -82,7 +86,7 @@ See [`docs/CURRENT_CURATED_R7_2026-08-19.md`](docs/CURRENT_CURATED_R7_2026-08-19
 
 ## Public runtime contract
 
-The rev.7 public runtime contract is:
+The rev.7 review runtime contract is:
 
 - Site: **v50**
 - UI: **50.2**
@@ -97,10 +101,10 @@ Current queries use the rev.7 full-current evidence corpus. Exact counts and pro
 
 ## Public/private boundary
 
-Public access is intentionally **query-and-view**, not bulk redistribution. Public pages expose selected bibliographic, structural, crystallographic, motif, scope and evidence-status fields. The following remain private research assets: complete normalized tables/raw payloads, exact stored publisher abstracts, primary PDF/SI/CIF files, field-evidence excerpts and locators, candidate scores/reason codes/source payloads, and internal QA/adjudication artifacts. `/api/export` is intentionally unavailable.
+Review access is intentionally **query-and-view**, not bulk redistribution. Review pages expose selected bibliographic, structural, crystallographic, motif, scope and evidence-status fields. The following remain private research assets: complete normalized tables/raw payloads, exact stored publisher abstracts, primary PDF/SI/CIF files, field-evidence excerpts and locators, candidate scores/reason codes/source payloads, and internal QA/adjudication artifacts. `/api/export` is intentionally unavailable.
 
 A manuscript-specific minimal dataset can be deposited separately when required for reproducibility. No permanent repository DOI or blanket project-wide license is asserted until the owner authorizes archival metadata and rights decisions.
 
 ## Citation
 
-For living-atlas results, cite **CuHalide Atlas, continuously curated Cu(I) halide knowledge portal**, report the access date, and use the current public provenance metadata. For exact historical reproduction, cite **Archived scientific snapshot 3.0.2 (2026-08-11)**, verified through 2026-06-30.
+Before formal public release, treat the portal as a prepublication review resource rather than a deposited public dataset. For living-atlas results shared during review, report the access date and Current Curated revision. For exact historical reproduction, use **Archived scientific snapshot 3.0.2 (2026-08-11)**, verified through 2026-06-30.
