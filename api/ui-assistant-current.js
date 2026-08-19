@@ -13,7 +13,10 @@ function normalize(body){
     .split('current-curated-r6').join('current-curated-r7')
     .split('current-r6').join('current-r7')
     .split('18 Aug 2026').join('19 Aug 2026')
-    .split('2026-08-18').join('2026-08-19');
+    .split('18 August 2026').join('19 August 2026')
+    .split('2026-08-18').join('2026-08-19')
+    .split('cc.live_revision||6').join('cc.live_revision||7')
+    .split('This revision adds four primary-evidence-reviewed articles and eight SCXRD structure determinations while preserving the immutable archived scientific snapshot 3.0.2.').join('Rev.7 completes a full structure-truth re-audit across the 946-row Current Curated snapshot while preserving the immutable archived scientific snapshot 3.0.2.');
 }
 
 export default async function handler(req,res){
