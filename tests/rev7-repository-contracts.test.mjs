@@ -29,6 +29,14 @@ test('canonical routes terminate at rev.7 wrappers, not historical renderer prov
   assert.match(candidate,/record-current/);
 });
 
+test('Vercel Hobby function budget is locked while base renderer stays internal',()=>{
+  const apiFiles=fs.readdirSync(url('api')).filter(name=>name.endsWith('.js'));
+  assert.ok(apiFiles.length<=12,`Vercel Hobby limit exceeded: ${apiFiles.length} serverless functions`);
+  assert.ok(!apiFiles.includes('site.js'),'base site renderer must not be deployed as a standalone function');
+  assert.ok(fs.existsSync(url('lib/site-renderer.js')),'internal base site renderer missing');
+  assert.match(read('api/ui-site.js'),/\.\.\/lib\/site-renderer\.js/);
+});
+
 test('rev.7 wrappers normalize living UI and record provenance without rewriting validated base renderers',()=>{
   const ui=read('api/ui-site.js'),assistant=read('api/ui-assistant-current.js'),record=read('api/record-current.js');
   for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R7','Current Curated rev.7','19 Aug 2026','Smart RAG 9.19.0','cc.verified_space_group_rows||684','cc.strict_polar_rows||87','cc.strict_polar_articles||54'])assert.ok(ui.includes(token),`UI promotion missing ${token}`);
@@ -39,7 +47,7 @@ test('rev.7 wrappers normalize living UI and record provenance without rewriting
 
 test('metadata health and manifest carry exact rev.7 denominators',()=>{
   const meta=read('api/meta.js');
-  for(const token of ["META_VERSION='50.2'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:624','motif_unresolved_rows:322',"public_data_version:'2.14.0'","smart_rag_version:'9.19.0'","research_assistant_version:'10.4.0'"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
+  for(const token of ["META_VERSION='50.3'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:628','motif_unresolved_rows:318',"public_data_version:'2.14.0'","smart_rag_version:'9.19.0'","research_assistant_version:'10.4.0'"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
   assert.match(meta,/frontend v50 active; backend rev\.7 deterministic contract/);
 });
 
@@ -52,7 +60,7 @@ test('assistant proxy exposes rev.7 / 10.4 / 9.19 while preserving non-idempoten
 
 test('Motif Atlas reflects the adjudicated rev.7 taxonomy without formula completion',()=>{
   const motifs=read('api/motifs.js');
-  for(const token of ["REV='7'","CONTENT_DATE='2026-08-19'",'motif_resolved_rows??624','motif_unresolved_rows??322',"version:'current-r7'",'Current Curated rev.7'])assert.ok(motifs.includes(token),`motif contract missing ${token}`);
+  for(const token of ["REV='7'","CONTENT_DATE='2026-08-19'",'motif_resolved_rows??628','motif_unresolved_rows??318',"version:'current-r7'",'Current Curated rev.7'])assert.ok(motifs.includes(token),`motif contract missing ${token}`);
   assert.match(motifs,/local motif and global dimensionality are independent fields/i);
   assert.match(motifs,/never rounded or truncated/i);
 });

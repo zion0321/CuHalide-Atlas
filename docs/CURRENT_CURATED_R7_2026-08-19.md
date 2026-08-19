@@ -15,8 +15,8 @@
 - Verified space-group rows: **684**
 - Verified polar rows: **97**
 - Strict-polar rows: **87** across **54** articles
-- Motif taxonomy: **946** rows = **624 resolved / 322 unresolved**, including **35** unresolved legacy-category rows
-- Global dimensionality intentionally unresolved at final structure grain: **61** rows
+- Motif taxonomy: **946** rows = **628 resolved / 318 unresolved**, including **35** unresolved legacy-category rows
+- Global dimensionality intentionally unresolved at final structure grain: **57** rows
 - Current RAG documents: **1329 / 1329 embedded** with `@cf/baai/bge-m3`
 
 ## Scientific changes in rev.7
@@ -33,11 +33,13 @@ Rev.7 is a structure-truth hostile-audit promotion. Frozen Release 3.0.2 is not 
 8. **Record 154 / 10.1021/jacs.7b04550.** The earlier mixed-dimensional interpretation is rejected. The primary JACS article defines the All-in-One structures as **finite molecular clusters that retain cluster molecular identity**. All ten Record 154 AIO rows are therefore 0D molecular clusters with compound-specific Cu2I4 / Cu3I5 / Cu4I6 / Cu6I8 composition.
 9. **Record 159.** The five newly characterized CCDC 1013280–1013284 CuI(L) determinations are resolved as **1D**; exact local motif remains unresolved where no compound-specific topology statement supports a stronger claim.
 10. **Record 165.** The mixed Cl/Br member CUH-165-S02 is resolved as **0D finite Cu2X4-fragment architecture**. Its local integer Cu-X motif remains unresolved because fractional mixed occupancies are never rounded.
-11. **Record 172 / 10.1021/ic801574k.** The compound-specific set is resolved across **1D, 2D and 3D** global networks. The CN-only member retains no strict Cu-Cl/Br/I motif despite its resolved 3D coordination network.
-12. **Record 185 / 10.1021/ic0005341.** [CuBrL(HMTA)] is 0D with a Cu2Br2 dimeric local component; [(CuBrL)2(Pyz)] and [(CuBrL)2(Bpy)] are **1D chains** built from local rhomboidal Cu2Br2 units. Legacy multi-compound aggregate rows remain context/unresolved rather than receiving a fabricated single topology.
-13. **Record 186 / 10.1039/a902290b.** All four triazine-linked compounds are **3D global coordination networks**. Local Cu-X columns/chains/layers are kept separately and are not confused with global dimensionality.
-14. **Record 246 / 10.1039/c7dt00262a.** Compound 1 is **0D [Cu4I8]4−**, compound 2 is a **1D [Cu2I4]2− chain**, and Cu11I15 / Cu11Br15 are **2D microporous layers**. Family-level `0D/1D/2D` is no longer copied to each member.
-15. **Record 341 / 10.1021/acsmaterialslett.3c01594.** Four Cu4I4 polymorphs are atomized as distinct determinations; fractional reduced CIF formulae are not used as compound identities. Compound 2 remains the distinct 1D coordination polymer.
+11. **Record 170 / 10.1021/cg901438x.** Exact crystallographic-cell matching to COD, cross-anchored by the article-associated sequential COD series, resolves the two same-formula bromide ligand isomers without using space group as a topology proxy: CUH-170-S01 is compound 9 **[CuBr(L2)]n, 1D chain, COD 4502603**; CUH-170-S02 is compound 6 **[CuBr(L1)]n, 2D (4,8²) layer, COD 4502600**. Both use CuBr as the extended repeat composition.
+12. **Record 172 / 10.1021/ic801574k.** The compound-specific set is resolved across **1D, 2D and 3D** global networks. The CN-only member retains no strict Cu-Cl/Br/I motif despite its resolved 3D coordination network.
+13. **Record 185 / 10.1021/ic0005341.** [CuBrL(HMTA)] is 0D with a Cu2Br2 dimeric local component; [(CuBrL)2(Pyz)] and [(CuBrL)2(Bpy)] are **1D chains** built from local rhomboidal Cu2Br2 units. Legacy multi-compound aggregate rows remain context/unresolved rather than receiving a fabricated single topology.
+14. **Record 186 / 10.1039/a902290b.** All four triazine-linked compounds are **3D global coordination networks**. Local Cu-X columns/chains/layers are kept separately and are not confused with global dimensionality.
+15. **Record 246 / 10.1039/c7dt00262a.** Compound 1 is **0D [Cu4I8]4−**, compound 2 is a **1D [Cu2I4]2− chain**, and Cu11I15 / Cu11Br15 are **2D microporous layers**. Family-level `0D/1D/2D` is no longer copied to each member.
+16. **Record 328 / 10.1016/j.cej.2025.171438.** Primary article compound/formula/accession mapping closes both previously unresolved structures: **PZ-ACN = C4H12Cu2I4N2, 1D edge-sharing CuI4 chain, CCDC 2444174**; **PZ-HI = C8H26Cu2I6N4O, 0D Cu2I6 cluster phase, CCDC 2402042**.
+17. **Record 341 / 10.1021/acsmaterialslett.3c01594.** Four Cu4I4 polymorphs are atomized as distinct determinations; fractional reduced CIF formulae are not used as compound identities. Compound 2 remains the distinct 1D coordination polymer.
 
 ## Final audit semantics
 
@@ -80,4 +82,4 @@ The final rev.7 production snapshot passes the following gates:
 
 ## Deliberately unresolved structures
 
-The final snapshot contains **61** rows whose global dimensionality remains explicitly unresolved. These are not a backlog. Typical reasons are: an aggregate/context row spans multiple compound topologies; a formula/SG row cannot be mapped one-to-one to the compound number or ligand isomer that carries the topology statement; a primary source identifies a local Cu-X unit but does not establish long-range connectivity rank; or the row is a non-core boundary/excluded context for which strict Cu-X topology is deliberately not promoted. Examples include Gua6Cu4I10 where local Cu3I6 units are known but long-range rank is not mapped, Record 170 where two same-formula ligand-isomer structures correspond to 1D/2D compounds but cannot be safely assigned by SG alone, and polymeric Record 271 structures whose exact connectivity rank requires atomic-graph reconstruction. These remain unresolved by design.
+The final snapshot contains **57** rows whose global dimensionality remains explicitly unresolved. These are not a backlog. Typical reasons are: an aggregate/context row spans multiple compound topologies; a formula/SG row cannot be mapped one-to-one to the compound number or ligand isomer that carries the topology statement; a primary source identifies a local Cu-X unit but does not establish long-range connectivity rank; or the row is a non-core boundary/excluded context for which strict Cu-X topology is deliberately not promoted. Examples include Gua6Cu4I10 where local Cu3I6 units are known but long-range rank is not mapped, the direct-CIF Record 158 series where local Cu2I2 rhomboid dimers are established but individual CIF blocks lack one-to-one global-rank mapping, and polymeric Record 271 structures whose exact connectivity rank is not stated at structure grain in the mapped primary evidence. These remain unresolved by design.
