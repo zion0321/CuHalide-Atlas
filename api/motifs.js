@@ -3,7 +3,7 @@ const DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas
 const PUBLIC='https://cuhalide-atlas-v3.vercel.app',RELEASE='3.0.2',REV='7',CONTENT_DATE='2026-08-19';
 const RETRIES=3,ATTEMPT_TIMEOUT_MS=7000,RETRY_DELAY_MS=180,CACHE_TTL_MS=60000,MAX_CACHE_ENTRIES=32;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sha=v=>`'sha256-${crypto.createHash('sha256').update(v).digest('base64')}'`;
 const display=v=>v==='Hybrid Ionic'?'Ionic / Hybrid Ionic':v;
 const atlasCache=new Map();
