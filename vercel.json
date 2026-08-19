@@ -2,15 +2,18 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "node scripts/vercel-production-gate.mjs",
   "functions": {
-    "api/site.js": { "includeFiles": "public/index.html" },
-    "api/ui-site.js": { "includeFiles": "public/index.html" }
+    "api/ui-site.js": { "includeFiles": "public/index.html" },
+    "api/ui-assistant-current.js": { "includeFiles": "public/index.html" }
   },
   "rewrites": [
-    { "source": "/", "destination": "/api/ui-site" },
-    { "source": "/index.html", "destination": "/api/ui-site" },
+    { "source": "/", "destination": "/api/ui-assistant-current" },
+    { "source": "/index.html", "destination": "/api/ui-assistant-current" },
+    { "source": "/api/site", "destination": "/api/ui-site" },
+    { "source": "/api/ui-assistant", "destination": "/api/ui-assistant-current" },
+    { "source": "/api/record", "destination": "/api/record-current" },
     { "source": "/motifs", "destination": "/api/motifs" },
-    { "source": "/article/:id", "destination": "/api/record?kind=article&id=:id" },
-    { "source": "/structure/:id", "destination": "/api/record?kind=structure&id=:id" },
+    { "source": "/article/:id", "destination": "/api/record-current?kind=article&id=:id" },
+    { "source": "/structure/:id", "destination": "/api/record-current?kind=structure&id=:id" },
     { "source": "/robots.txt", "destination": "/api/meta?asset=robots" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/release-manifest.json", "destination": "/api/meta?asset=manifest" },

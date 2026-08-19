@@ -55,8 +55,8 @@ jobs:
           cat candidate-server.log >&2 || true
           exit 1
 
-      - name: Install Chromium and system dependencies
-        run: npx playwright install --with-deps chromium
+      - name: Install locked Chromium
+        run: npx playwright install chromium
 
       - name: Run required Lighthouse quality gate
         run: npm run qa:lighthouse

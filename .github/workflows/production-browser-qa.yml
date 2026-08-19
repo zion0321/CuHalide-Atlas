@@ -37,11 +37,11 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Run repository and deployment preflight contracts
         run: npm run qa:preflight
-      - name: Install Chromium and system dependencies
-        run: npx playwright install --with-deps chromium
-      - name: Run pre-merge production rev.6 backend readiness
+      - name: Install locked Chromium
+        run: npx playwright install chromium
+      - name: Run pre-merge production rev.7 backend readiness
         if: github.event_name == 'pull_request'
-        run: npm run qa:browser -- --grep "pre-merge production backend rev.6 is ready while frontend may remain v50"
+        run: npm run qa:browser -- --grep "pre-merge production backend rev.7 is ready"
       - name: Run full post-merge production browser QA
         if: github.event_name != 'pull_request'
         run: npm run qa:browser

@@ -3,22 +3,16 @@ name: Vercel preview QA
 on:
   pull_request:
     branches: [main]
-  deployment_status:
 
 permissions:
   contents: read
 
 concurrency:
-  group: vercel-preview-qa-${{ github.event_name }}-${{ github.event.pull_request.head.sha || github.event.deployment.ref || github.event.deployment.sha }}
+  group: vercel-preview-qa-${{ github.event.pull_request.head.sha }}
   cancel-in-progress: true
 
 jobs:
   preview-chromium:
-    if: >-
-      github.event_name == 'pull_request' ||
-      (github.event.deployment_status.state == 'success' &&
-       github.event.deployment.environment == 'Preview' &&
-       (github.event.deployment_status.environment_url != '' || github.event.deployment_status.target_url != ''))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -28,18 +22,14 @@ jobs:
       - name: Checkout exact candidate commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.deployment.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Attest candidate provenance
         shell: bash
         run: |
           set -euo pipefail
-          EXPECTED="${{ github.event.pull_request.head.sha || github.event.deployment.sha }}"
+          EXPECTED="${{ github.event.pull_request.head.sha }}"
           test "$(git rev-parse HEAD)" = "$EXPECTED"
           test -f scripts/local-candidate-server.mjs
-          if [ "${{ github.event_name }}" = "deployment_status" ]; then
-            URL="${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}"
-            case "$URL" in https://*.vercel.app*) ;; *) echo "Unexpected preview URL: $URL" >&2; exit 1 ;; esac
-          fi
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -63,22 +53,24 @@ jobs:
           done
           cat candidate-server.log >&2 || true
           exit 1
-      - name: Install Chromium and system dependencies
-        run: npx playwright install --with-deps chromium
+      - name: Install locked Chromium
+        run: npx playwright install chromium
       - name: Run comprehensive site quality regression gate
         run: npm run qa:site-quality
-      - name: Verify v50 portal contract
-        run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.6"
-      - name: Verify rev.6 runtime health
-        run: npm run qa:browser -- --grep "runtime health is exact rev.6 contract"
+      - name: Verify v50 portal rev.7 contract
+        run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.7"
+      - name: Verify rev.7 runtime health
+        run: npm run qa:browser -- --grep "runtime health is exact final rev.7 contract"
       - name: Verify manifest sitemap and Motif Atlas
-        run: npm run qa:browser -- --grep "manifest, sitemap and Motif Atlas agree with rev.6"
+        run: npm run qa:browser -- --grep "manifest sitemap and Motif Atlas agree with final rev.7"
       - name: Verify Research Assistant runtime contract
-        run: npm run qa:browser -- --grep "Research Assistant reports 10.3 / 9.18 and rev.6 full-current RAG"
-      - name: Verify new structure-truth boundaries
-        run: npm run qa:browser -- --grep "new structure-truth boundaries are live"
-      - name: Verify rev.6 primary-evidence boundaries
-        run: npm run qa:browser -- --grep "rev.6 primary-evidence boundaries remain deterministic"
+        run: npm run qa:browser -- --grep "Research Assistant reports 10.4 / 9.19 and complete rev.7 RAG"
+      - name: Verify rev.7 structure-truth corrections
+        run: npm run qa:browser -- --grep "final rev.7 structure-truth corrections are exposed at structure grain"
+      - name: Verify local/global connectivity boundaries
+        run: npm run qa:browser -- --grep "local motif versus global dimensionality boundaries remain live"
+      - name: Verify rev.7 deterministic identity boundaries
+        run: npm run qa:browser -- --grep "rev.7 exact-count and identity boundaries remain deterministic"
       - name: Verify deleted placeholders and export privacy boundary
         run: npm run qa:browser -- --grep "review/perspective placeholders stay absent and export stays disabled"
       - name: Stop local candidate runtime
@@ -90,7 +82,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: preview-candidate-browser-${{ github.event.pull_request.head.sha || github.event.deployment.sha }}-${{ github.run_id }}
+          name: preview-candidate-browser-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
           path: |
             playwright-report/
             test-results/
@@ -99,11 +91,6 @@ jobs:
           retention-days: 30
 
   preview-lighthouse:
-    if: >-
-      github.event_name == 'pull_request' ||
-      (github.event.deployment_status.state == 'success' &&
-       github.event.deployment.environment == 'Preview' &&
-       (github.event.deployment_status.environment_url != '' || github.event.deployment_status.target_url != ''))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -113,18 +100,14 @@ jobs:
       - name: Checkout exact candidate commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.deployment.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Attest candidate provenance
         shell: bash
         run: |
           set -euo pipefail
-          EXPECTED="${{ github.event.pull_request.head.sha || github.event.deployment.sha }}"
+          EXPECTED="${{ github.event.pull_request.head.sha }}"
           test "$(git rev-parse HEAD)" = "$EXPECTED"
           test -f scripts/local-candidate-server.mjs
-          if [ "${{ github.event_name }}" = "deployment_status" ]; then
-            URL="${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}"
-            case "$URL" in https://*.vercel.app*) ;; *) echo "Unexpected preview URL: $URL" >&2; exit 1 ;; esac
-          fi
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -148,8 +131,8 @@ jobs:
           done
           cat candidate-server.log >&2 || true
           exit 1
-      - name: Install Chromium and system dependencies
-        run: npx playwright install --with-deps chromium
+      - name: Install locked Chromium
+        run: npx playwright install chromium
       - name: Run Lighthouse gate against exact candidate runtime
         run: npm run qa:lighthouse
       - name: Stop exact candidate runtime
@@ -161,7 +144,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: preview-candidate-lighthouse-${{ github.event.pull_request.head.sha || github.event.deployment.sha }}-${{ github.run_id }}
+          name: preview-candidate-lighthouse-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
           path: |
             lighthouse-report/
             candidate-server.log
