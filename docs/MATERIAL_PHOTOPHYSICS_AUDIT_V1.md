@@ -1,6 +1,14 @@
 # CuHalide Atlas material-grain photophysics audit
 
-Status: workstream scaffold for Current Curated rev.7+; not a formal release.
+Status: active private curation workstream for Current Curated rev.7+; not a formal release and not a public dataset layer.
+
+## Canonical database source of truth
+
+The active curation model is the private `atlas_internal.cuhalide_photophysics_*_v1` schema. It separates article review, sample/state, measurement, spectral band, typed value, decay component, evidence, conflict and curve-registry grains. The active structure-mapping health gate resolves structure identifiers through `atlas_internal.cuhalide_current_structure_registry_v1`, which is currently pinned to Current Curated rev.7 rather than to a superseded hard-coded structure table.
+
+An earlier material-grain prototype exists under `public.cuhalide_atlas_material_entities` and `public.cuhalide_atlas_photophysics_*`. Those objects were always protected by RLS/revokes and were never a public product projection. They are now explicitly deprecated and frozen read-only for `service_role` so that historical rows remain auditable without allowing parallel curation to diverge from the canonical `atlas_internal` model. The prototype migrations remain versioned because they were applied to production and are part of the database migration history.
+
+Primary evidence, evidence excerpts/locators, source filenames/hashes, conflict adjudication and unpublished normalized curation remain private. No public photophysics endpoint or bulk export is enabled by this workstream.
 
 ## Scientific objective
 
@@ -44,9 +52,11 @@ Every curated measurement or mechanism assignment requires a private evidence ob
 
 Each article receives an explicit review state and completeness counters. `qc_passed` means the main article/SI available to the project were read, reported material identities were mapped at the finest defensible grain, measurements were normalized with units/conditions, and unresolved items were retained rather than inferred.
 
+The canonical health function is fail-closed for orphaned entities, duplicate measurement/band keys, missing measurement evidence, eligible values without evidence, inconsistent conflict flags, unresolved conflict records without an adjudication basis, invalid intrinsic-scope claims, invalid structure-exact mappings, unknown property keys, pending row-level QC and completed reviews that do not satisfy the two-pass gate.
+
 ## Website target
 
-The public interface will add a Photophysics/Spectra layer after the private audit reaches sufficient QC coverage. Planned capabilities:
+The public interface will add a Photophysics/Spectra layer only after the private audit reaches sufficient QC coverage and a separate publication decision is made. Planned capabilities:
 
 - material-level property cards on article pages;
 - structure pages show properties only for exact structure mappings, otherwise a clear material/article-level boundary note;
