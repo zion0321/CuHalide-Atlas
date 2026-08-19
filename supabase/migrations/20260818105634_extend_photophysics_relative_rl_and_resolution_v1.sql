@@ -1,0 +1,11 @@
+insert into atlas_internal.cuhalide_photophysics_property_dictionary_v1
+(property_key,domain,canonical_unit,definition,structure_property_default,condition_sensitive,allow_text_value,notes)
+values
+('oscillator_strength','excited_state','','Source-reported singlet oscillator strength under the stated computational/experimental basis.',false,true,false,'Retain state and method basis; do not mix with radiative rates.'),
+('relative_rl_photon_number','scintillation','','Relative integrated radioluminescence photon number normalized to an explicitly named reference under the stated X-ray conditions.',false,true,false,'Reference scintillator and X-ray conditions are mandatory.'),
+('relative_rl_intensity_ratio','scintillation','','Relative radioluminescence intensity ratio between two explicitly stated X-ray conditions or samples.',false,true,false,'Numerator/denominator conditions must be encoded in qualifier/reference basis.'),
+('luminescence_intensity_retention','stability','%','Fraction of initial luminescence intensity retained after a stated stress/storage protocol.',false,true,false,'Protocol and sample state are mandatory.'),
+('spatial_resolution_length','imaging','um','Spatial resolution expressed as a real-space length under the source-defined imaging criterion.',false,true,false,'Keep separate from line-pair resolution.'),
+('homo_energy','electronic_structure','eV','HOMO energy reported from the stated experimental or computational method.',false,true,false,'Method basis is mandatory.'),
+('lumo_energy','electronic_structure','eV','LUMO energy reported from the stated experimental or computational method.',false,true,false,'Method basis is mandatory.')
+on conflict (property_key) do update set domain=excluded.domain,canonical_unit=excluded.canonical_unit,definition=excluded.definition,structure_property_default=excluded.structure_property_default,condition_sensitive=excluded.condition_sensitive,allow_text_value=excluded.allow_text_value,notes=excluded.notes,active=true;
