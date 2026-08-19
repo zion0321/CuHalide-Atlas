@@ -1,7 +1,7 @@
-const DATA_UPSTREAM='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
+const DATA_UPSTREAM='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v2';
 const CONTRACT_UPSTREAM='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-runtime-contract-v1-public';
 const PUBLIC_ORIGIN='https://cuhalide-atlas-v3.vercel.app';
-const PUBLIC_DATA_VERSION='2.13.0';
+const PUBLIC_DATA_VERSION='2.14.0';
 const CURRENT_REVISION='7';
 const TOTAL_TIMEOUT_MS=12000,FIRST_ATTEMPT_TIMEOUT_MS=5000,RETRY_DELAY_MS=120;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
