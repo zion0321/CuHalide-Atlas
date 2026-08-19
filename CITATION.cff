@@ -1,26 +1,23 @@
 cff-version: 1.2.0
-message: "If you use CuHalide Atlas, cite the versioned frozen release and include the access date when required. Current Curated additions are separately identified and do not rewrite the frozen release."
+message: "CuHalide Atlas is currently a prepublication review resource, not a formally deposited public dataset. For living-atlas results shared during review, report the access date and Current Curated revision. Archived scientific snapshot 3.0.2 remains the immutable historical baseline for exact reproduction."
 title: "CuHalide Atlas"
-version: "3.0.2"
-date-released: "2026-08-11"
+version: "Current Curated rev.7 (prepublication review)"
 type: dataset
 authors:
   - name: "CuHalide Atlas Project"
 url: "https://cuhalide-atlas-v3.vercel.app/"
 repository-code: "https://github.com/zion0321/CuHalide-Atlas"
 abstract: >-
-  Evidence-grounded, structure-resolved public knowledge portal for
-  organic-containing Cu(I) chlorides, bromides and iodides. Release 3.0.2 is a
-  scientific hotfix over 3.0.1 that physically incorporates four confirmed
-  Record 13 structural-dimensionality corrections while preserving all frozen
-  scientific denominators and adding no new literature. Public access is
-  query-and-view through selected bibliographic, structural, crystallographic
-  and article-grain scientific fields plus evidence-grounded Smart RAG. A
-  separate Current Curated layer may advance after primary article/SI/CIF
-  curation and quality control without mutating this frozen release. Complete
-  normalized tables, exact stored publisher abstracts, primary PDF/SI/CIF
-  files and internal curation/audit artifacts are not distributed through the
-  public website.
+  Prepublication review resource for an evidence-grounded, structure-resolved
+  knowledge base covering organic-containing Cu(I) chlorides, bromides and
+  iodides. Current Curated rev.7 is reviewed through 2026-08-19 and separates
+  reported composition, local Cu-X motif and global connectivity dimensionality
+  at the appropriate evidence grain. Archived scientific snapshot 3.0.2 is
+  retained as an immutable historical baseline. Direct-link review access is
+  query-and-view; search-engine indexing, bulk normalized exports, exact stored
+  publisher abstracts, primary PDF/SI/CIF files and internal curation/audit
+  artifacts remain outside the public release boundary. No permanent DOI,
+  blanket license or formal public-release date is asserted until owner approval.
 keywords:
   - copper(I) halide
   - Cu(I)-I
