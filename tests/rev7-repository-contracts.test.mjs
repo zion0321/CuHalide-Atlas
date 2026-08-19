@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
 const url=p=>new URL(`../${p}`,import.meta.url);
 const read=p=>fs.readFileSync(url(p),'utf8');
 
@@ -29,6 +30,14 @@ test('prepublication repository metadata cannot claim formal public release',()=
   assert.match(license,/Current Curated rev\.7/);
   assert.match(license,/prepublication review state/i);
   assert.match(license,/does not assert a permanent DOI or formal public-release date/i);
+});
+
+test('public repository tracks no private evidence, bulk-data, archive or credential file types',()=>{
+  const tracked=execFileSync('git',['ls-files'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
+  const forbidden=tracked.filter(p=>/\.(?:pdf|cif|xlsx?|csv|tsv|docx|pptx|zip|7z|rar|pem|key|p12|pfx)$/i.test(p)||/(^|\/)\.env(?:\.|$)/i.test(p));
+  assert.deepEqual(forbidden,[],`private/bulk file types are tracked: ${forbidden.join(', ')}`);
+  const ignore=read('.gitignore');
+  for(const token of ['.env','*.pdf','*.cif','*.xlsx','*.csv','*.docx','*.zip','private/','primary-evidence/','curation-private/'])assert.ok(ignore.includes(token),`.gitignore missing ${token}`);
 });
 
 test('preview QA has one PR trigger while Vercel deployment status remains independently mandatory',()=>{
