@@ -5,6 +5,7 @@ const UI_VERSION='50.2';
 const CURRENT_REVISION='7';
 const CONTENT_DATE='2026-08-19';
 const LAST_MODIFIED=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
+const ROBOTS_META='<meta name="robots" content="noindex,nofollow,noarchive">';
 const ICON_LINK='<link rel="icon" href="/favicon.svg" type="image/svg+xml">';
 const STYLE_LINK='<link rel="stylesheet" href="/ui-v48-2.css?v=50.2">';
 const LIVING_STYLE_LINK='<link rel="stylesheet" href="/ui-living-knowledge.css?v=20260819">';
@@ -37,6 +38,7 @@ function promoteRev7(body){
 function enhanceHtml(input){
   if(typeof input!=='string'||!input.includes('</head>')||!input.includes('</body>'))return input;
   let body=promoteRev7(input);
+  body=all(body,'<meta name="robots" content="index,follow,max-image-preview:large">',ROBOTS_META);
   body=body.split('<nav class="nav" id="nav" aria-label="Primary"><a data-route="home" href="#home">Overview</a><a data-route="articles" href="#articles">Explore</a><a data-route="structures" href="#structures">Structures</a><a data-route="polar" href="#polar">Polar Set</a><a data-route="rag" href="#rag">Smart RAG</a><a data-route="watch" href="#watch">Literature Watch</a><a data-route="methods" href="#methods">Methods</a><a data-route="citation" href="#citation">Citation</a></nav>').join('<nav class="nav" id="nav" aria-label="Primary"><a data-route="home" href="#home">Overview</a><a data-route="articles" href="#articles">Literature</a><a data-route="structures" href="#structures">Structures</a><a href="/motifs">Motifs</a><a data-route="polar" href="#polar">Polar</a><a data-route="rag" href="#rag">Smart RAG</a><a data-route="citation" href="#citation">About data</a></nav>');
   body=body.split('Citation & data availability').join('Data provenance & citation');
   body=body.split('Use and cite CuHalide Atlas').join('Cite the living atlas or reproduce a snapshot');
@@ -45,8 +47,8 @@ function enhanceHtml(input){
   body=body.split('<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Citation</a><a href="#watch">Literature Watch</a></div>').join('<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Data provenance</a><a href="#watch">Literature Watch</a></div>');
   if(!body.includes('/ui-v48-2.css'))body=body.replace('</head>',`${ICON_LINK}\n${STYLE_LINK}\n${LIVING_STYLE_LINK}\n</head>`);
   if(!body.includes('/ui-v48-2.js'))body=body.replace('</body>',`${SCRIPT_LINK}\n${UI_MARKER}\n</body>`);
-  for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R7','CUHALIDE_UI_V50_2_CURRENT_R7','Curated through 19 Aug 2026','Curated through 19 August 2026','Core-Included · n=886','All structure / phase rows · n=946','Rev.7 completes a full structure-truth re-audit across the 946-row Current Curated snapshot'])if(!body.includes(token))throw new Error(`v50/rev7 UI contract missing: ${token}`);
-  for(const stale of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R6','CUHALIDE_UI_V50_2_CURRENT_R6','Current Curated rev.6','Curated through 18 Aug 2026','Curated through 18 August 2026','Core-Included · n=864','All structure / phase rows · n=924','cc.live_revision||6','This revision adds four primary-evidence-reviewed articles and eight SCXRD structure determinations'])if(body.includes(stale))throw new Error(`stale UI token: ${stale}`);
+  for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R7','CUHALIDE_UI_V50_2_CURRENT_R7','Curated through 19 Aug 2026','Curated through 19 August 2026','Core-Included · n=886','All structure / phase rows · n=946','Rev.7 completes a full structure-truth re-audit across the 946-row Current Curated snapshot',ROBOTS_META])if(!body.includes(token))throw new Error(`v50/rev7 UI contract missing: ${token}`);
+  for(const stale of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R6','CUHALIDE_UI_V50_2_CURRENT_R6','Current Curated rev.6','Curated through 18 Aug 2026','Curated through 18 August 2026','Core-Included · n=864','All structure / phase rows · n=924','cc.live_revision||6','This revision adds four primary-evidence-reviewed articles and eight SCXRD structure determinations','<meta name="robots" content="index,follow,max-image-preview:large">'])if(body.includes(stale))throw new Error(`stale UI token: ${stale}`);
   return body;
 }
 
@@ -54,10 +56,11 @@ function inlineScriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\
 function syncCsp(html,res){const current=String(res.getHeader?.('Content-Security-Policy')||'');if(!current)return;const hashes=inlineScriptHashes(html);if(!hashes.length)return;const next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src 'self' ${hashes.join(' ')};`);if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');res.setHeader('Content-Security-Policy',next)}
 
 export default async function handler(req,res){
+  res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');
   res.setHeader('X-CuHalide-UI-Version',UI_VERSION);
   res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);
   res.setHeader('Last-Modified',LAST_MODIFIED);
-  const bridge={setHeader:(name,value)=>{const lower=String(name).toLowerCase();if(lower==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(lower==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},getHeader:name=>res.getHeader?.(name),removeHeader:name=>res.removeHeader?.(name),end:body=>{const out=enhanceHtml(body);if(typeof out==='string'&&out.includes('</html>'))syncCsp(out,res);res.removeHeader?.('Content-Length');return res.end(out)}};
+  const bridge={setHeader:(name,value)=>{const lower=String(name).toLowerCase();if(lower==='x-robots-tag')return res.setHeader(name,'noindex, nofollow, noarchive');if(lower==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(lower==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},getHeader:name=>res.getHeader?.(name),removeHeader:name=>res.removeHeader?.(name),end:body=>{const out=enhanceHtml(body);if(typeof out==='string'&&out.includes('</html>'))syncCsp(out,res);res.removeHeader?.('Content-Length');return res.end(out)}};
   Object.defineProperty(bridge,'statusCode',{get:()=>res.statusCode,set:value=>{res.statusCode=value}});
   return siteHandler(req,bridge);
 }
