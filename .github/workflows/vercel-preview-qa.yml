@@ -3,22 +3,16 @@ name: Vercel preview QA
 on:
   pull_request:
     branches: [main]
-  deployment_status:
 
 permissions:
   contents: read
 
 concurrency:
-  group: vercel-preview-qa-${{ github.event_name }}-${{ github.event.pull_request.head.sha || github.event.deployment.ref || github.event.deployment.sha }}
+  group: vercel-preview-qa-${{ github.event.pull_request.head.sha }}
   cancel-in-progress: true
 
 jobs:
   preview-chromium:
-    if: >-
-      github.event_name == 'pull_request' ||
-      (github.event.deployment_status.state == 'success' &&
-       github.event.deployment.environment == 'Preview' &&
-       (github.event.deployment_status.environment_url != '' || github.event.deployment_status.target_url != ''))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -28,18 +22,14 @@ jobs:
       - name: Checkout exact candidate commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.deployment.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Attest candidate provenance
         shell: bash
         run: |
           set -euo pipefail
-          EXPECTED="${{ github.event.pull_request.head.sha || github.event.deployment.sha }}"
+          EXPECTED="${{ github.event.pull_request.head.sha }}"
           test "$(git rev-parse HEAD)" = "$EXPECTED"
           test -f scripts/local-candidate-server.mjs
-          if [ "${{ github.event_name }}" = "deployment_status" ]; then
-            URL="${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}"
-            case "$URL" in https://*.vercel.app*) ;; *) echo "Unexpected preview URL: $URL" >&2; exit 1 ;; esac
-          fi
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -92,7 +82,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: preview-candidate-browser-${{ github.event.pull_request.head.sha || github.event.deployment.sha }}-${{ github.run_id }}
+          name: preview-candidate-browser-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
           path: |
             playwright-report/
             test-results/
@@ -101,11 +91,6 @@ jobs:
           retention-days: 30
 
   preview-lighthouse:
-    if: >-
-      github.event_name == 'pull_request' ||
-      (github.event.deployment_status.state == 'success' &&
-       github.event.deployment.environment == 'Preview' &&
-       (github.event.deployment_status.environment_url != '' || github.event.deployment_status.target_url != ''))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -115,18 +100,14 @@ jobs:
       - name: Checkout exact candidate commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.deployment.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Attest candidate provenance
         shell: bash
         run: |
           set -euo pipefail
-          EXPECTED="${{ github.event.pull_request.head.sha || github.event.deployment.sha }}"
+          EXPECTED="${{ github.event.pull_request.head.sha }}"
           test "$(git rev-parse HEAD)" = "$EXPECTED"
           test -f scripts/local-candidate-server.mjs
-          if [ "${{ github.event_name }}" = "deployment_status" ]; then
-            URL="${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}"
-            case "$URL" in https://*.vercel.app*) ;; *) echo "Unexpected preview URL: $URL" >&2; exit 1 ;; esac
-          fi
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -163,7 +144,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: preview-candidate-lighthouse-${{ github.event.pull_request.head.sha || github.event.deployment.sha }}-${{ github.run_id }}
+          name: preview-candidate-lighthouse-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
           path: |
             lighthouse-report/
             candidate-server.log
