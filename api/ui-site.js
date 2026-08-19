@@ -19,6 +19,7 @@ function promoteRev7(body){
   body=all(body,'current-curated-r6','current-curated-r7');
   body=all(body,'current-r6','current-r7');
   body=all(body,'18 Aug 2026','19 Aug 2026');
+  body=all(body,'18 August 2026','19 August 2026');
   body=all(body,'2026-08-18','2026-08-19');
   body=all(body,'Resolved structure rows · n = 713','Resolved structure rows · n = 710');
   body=all(body,'<div class="polar-num"><strong>85</strong><small>strict-polar rows · 53 articles</small></div>','<div class="polar-num"><strong>87</strong><small>strict-polar rows · 54 articles</small></div>');
@@ -26,8 +27,10 @@ function promoteRev7(body){
   body=all(body,'cc.verified_space_group_rows||687','cc.verified_space_group_rows||684');
   body=all(body,'cc.strict_polar_rows||85','cc.strict_polar_rows||87');
   body=all(body,'cc.strict_polar_articles||53','cc.strict_polar_articles||54');
+  body=all(body,'cc.live_revision||6','cc.live_revision||7');
   body=all(body,'Smart RAG 9.18.0','Smart RAG 9.19.0');
   body=all(body,'backend rev.6 deterministic contract','backend rev.7 deterministic contract');
+  body=all(body,'This revision adds four primary-evidence-reviewed articles and eight SCXRD structure determinations while preserving the immutable archived scientific snapshot 3.0.2.','Rev.7 completes a full structure-truth re-audit across the 946-row Current Curated snapshot while preserving the immutable archived scientific snapshot 3.0.2.');
   return body;
 }
 
@@ -42,8 +45,8 @@ function enhanceHtml(input){
   body=body.split('<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Citation</a><a href="#watch">Literature Watch</a></div>').join('<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Data provenance</a><a href="#watch">Literature Watch</a></div>');
   if(!body.includes('/ui-v48-2.css'))body=body.replace('</head>',`${ICON_LINK}\n${STYLE_LINK}\n${LIVING_STYLE_LINK}\n</head>`);
   if(!body.includes('/ui-v48-2.js'))body=body.replace('</body>',`${SCRIPT_LINK}\n${UI_MARKER}\n</body>`);
-  for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R7','CUHALIDE_UI_V50_2_CURRENT_R7','Curated through 19 Aug 2026','Core-Included · n=886','All structure / phase rows · n=946'])if(!body.includes(token))throw new Error(`v50/rev7 UI contract missing: ${token}`);
-  for(const stale of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R6','CUHALIDE_UI_V50_2_CURRENT_R6','Current Curated rev.6','Curated through 18 Aug 2026','Core-Included · n=864','All structure / phase rows · n=924'])if(body.includes(stale))throw new Error(`stale UI token: ${stale}`);
+  for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R7','CUHALIDE_UI_V50_2_CURRENT_R7','Curated through 19 Aug 2026','Curated through 19 August 2026','Core-Included · n=886','All structure / phase rows · n=946','Rev.7 completes a full structure-truth re-audit across the 946-row Current Curated snapshot'])if(!body.includes(token))throw new Error(`v50/rev7 UI contract missing: ${token}`);
+  for(const stale of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R6','CUHALIDE_UI_V50_2_CURRENT_R6','Current Curated rev.6','Curated through 18 Aug 2026','Curated through 18 August 2026','Core-Included · n=864','All structure / phase rows · n=924','cc.live_revision||6','This revision adds four primary-evidence-reviewed articles and eight SCXRD structure determinations'])if(body.includes(stale))throw new Error(`stale UI token: ${stale}`);
   return body;
 }
 
