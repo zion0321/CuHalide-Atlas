@@ -9,7 +9,7 @@
     "qa:site-quality": "playwright test tests/site-quality-v50-1.spec.js",
     "qa:lighthouse": "bash scripts/production-lighthouse.sh",
     "qa:deployment-gate": "node --test tests/vercel-production-gate.test.mjs",
-    "qa:contracts": "node --test tests/rev7-repository-contracts.test.mjs",
+    "qa:contracts": "node --test tests/rev7-repository-contracts.test.mjs tests/rev7-cleanup-contracts.test.mjs",
     "qa:preflight": "npm run qa:contracts && npm run qa:deployment-gate"
   },
   "devDependencies": {
