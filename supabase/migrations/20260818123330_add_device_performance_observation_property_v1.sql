@@ -1,0 +1,5 @@
+insert into atlas_internal.cuhalide_photophysics_property_dictionary_v1
+(property_key,domain,canonical_unit,definition,structure_property_default,condition_sensitive,allow_text_value,notes)
+values
+('device_performance_observation','device','','Qualitative source-reported device-performance comparison when no defensible exact scalar value is available.',false,true,true,'Use for statements such as substantially inferior/superior performance; do not digitize plots unless explicitly entered as digitized data.')
+on conflict (property_key) do update set domain=excluded.domain,canonical_unit=excluded.canonical_unit,definition=excluded.definition,structure_property_default=excluded.structure_property_default,condition_sensitive=excluded.condition_sensitive,allow_text_value=excluded.allow_text_value,notes=excluded.notes,active=true;
