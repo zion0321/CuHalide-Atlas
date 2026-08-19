@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
 const url=p=>new URL(`../${p}`,import.meta.url);
 const read=p=>fs.readFileSync(url(p),'utf8');
 
@@ -13,8 +14,30 @@ test('canonical public runtime exposes one rev.7 contract',()=>{
 
 test('README is locked to the same rev.7 living scientific state',()=>{
   const readme=read('README.md');
-  for(const token of ['Current Curated rev.7','2026-08-19','Article audit records | 383','Canonical verified articles | 369','Structure / phase rows | 946','Core-Included structure rows | 886','Resolved space-group rows | 710','Verified one-to-one SG rows | 684','Strict-polar rows | 87','RAG documents / embeddings | 1,329 / 1,329','628','318','Public Data: **2.14.0**','Smart RAG: **9.19.0**','Research Assistant: **10.4.0**'])assert.ok(readme.includes(token),`README missing current token ${token}`);
+  for(const token of ['Prepublication release status','Current Curated rev.7','2026-08-19','Article audit records | 383','Canonical verified articles | 369','Structure / phase rows | 946','Core-Included structure rows | 886','Resolved space-group rows | 710','Verified one-to-one SG rows | 684','Strict-polar rows | 87','RAG documents / embeddings | 1,329 / 1,329','628','318','Public Data: **2.14.0**','Smart RAG: **9.19.0**','Research Assistant: **10.4.0**'])assert.ok(readme.includes(token),`README missing current token ${token}`);
   for(const stale of ['Current Curated rev.5 — living default','Curated through **2026-08-17**','Structure / phase rows | 938','Core-Included structure rows | 878','581','357','Public Data: **2.12.0**','Smart RAG: **9.17.0**','Research Assistant: **10.2.0**'])assert.ok(!readme.includes(stale),`README stale token ${stale}`);
+});
+
+test('prepublication repository metadata cannot claim formal public release',()=>{
+  const citation=read('CITATION.cff'),codemeta=JSON.parse(read('codemeta.json')),license=read('LICENSE_STATUS.md');
+  assert.match(citation,/prepublication review resource/i);
+  assert.doesNotMatch(citation,/^date-released:/m);
+  assert.match(citation,/No permanent DOI/i);
+  assert.equal(codemeta.version,'prepublication-current-r7');
+  assert.ok(!Object.hasOwn(codemeta,'datePublished'));
+  assert.equal(codemeta.license,'NOASSERTION');
+  assert.match(codemeta.description,/search-engine indexing is disabled/i);
+  assert.match(license,/Current Curated rev\.7/);
+  assert.match(license,/prepublication review state/i);
+  assert.match(license,/does not assert a permanent DOI or formal public-release date/i);
+});
+
+test('public repository tracks no private evidence, bulk-data, archive or credential file types',()=>{
+  const tracked=execFileSync('git',['ls-files'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
+  const forbidden=tracked.filter(p=>/\.(?:pdf|cif|xlsx?|csv|tsv|docx|pptx|zip|7z|rar|pem|key|p12|pfx)$/i.test(p)||/(^|\/)\.env(?:\.|$)/i.test(p));
+  assert.deepEqual(forbidden,[],`private/bulk file types are tracked: ${forbidden.join(', ')}`);
+  const ignore=read('.gitignore');
+  for(const token of ['.env','*.pdf','*.cif','*.xlsx','*.csv','*.docx','*.zip','private/','primary-evidence/','curation-private/'])assert.ok(ignore.includes(token),`.gitignore missing ${token}`);
 });
 
 test('preview QA has one PR trigger while Vercel deployment status remains independently mandatory',()=>{
@@ -57,11 +80,12 @@ test('rev.7 wrappers normalize living UI and record provenance without rewriting
   assert.match(assistant,/Current Curated rev\.7/);
   assert.match(record,/Current Curated rev\.7 · primary-evidence reviewed through 19 Aug 2026/);
   assert.match(record,/content=\"7\"/);
+  assert.match(record,/noindex,nofollow,noarchive/);
 });
 
 test('metadata health and manifest carry exact rev.7 denominators',()=>{
   const meta=read('api/meta.js');
-  for(const token of ["META_VERSION='50.3'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:628','motif_unresolved_rows:318',"public_data_version:'2.14.0'","smart_rag_version:'9.19.0'","research_assistant_version:'10.4.0'"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
+  for(const token of ["META_VERSION='50.3'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:628','motif_unresolved_rows:318',"public_data_version:'2.14.0'","smart_rag_version:'9.19.0'","research_assistant_version:'10.4.0'", "release_state:'prepublication'", "indexing:'disabled-prepublication'"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
   assert.match(meta,/frontend v50 active; backend rev\.7 deterministic contract/);
 });
 
@@ -73,10 +97,12 @@ test('assistant proxy exposes rev.7 / 10.4 / 9.19 while preserving non-idempoten
 });
 
 test('Motif Atlas reflects the adjudicated rev.7 taxonomy without formula completion',()=>{
-  const motifs=read('api/motifs.js');
+  const motifs=read('api/motifs.js'),config=JSON.parse(read('vercel.json'));
   for(const token of ["REV='7'","CONTENT_DATE='2026-08-19'",'motif_resolved_rows??628','motif_unresolved_rows??318',"version:'current-r7'",'Current Curated rev.7'])assert.ok(motifs.includes(token),`motif contract missing ${token}`);
   assert.match(motifs,/local motif and global dimensionality are independent fields/i);
   assert.match(motifs,/never rounded or truncated/i);
+  const globalHeaders=config.headers.find(x=>x.source==='/(.*)')?.headers||[];
+  assert.equal(globalHeaders.find(x=>x.key==='X-Robots-Tag')?.value,'noindex, nofollow, noarchive');
 });
 
 test('sitemap denominators remain canonical and revision provenance advances only',()=>{
@@ -92,11 +118,15 @@ test('legacy data route remains compatibility-only and current',()=>{
   assert.match(publicData,/response\.status===429/);
 });
 
-test('Lighthouse gate still requires a clean console and is not weakened for rev.7',()=>{
+test('Lighthouse gate preserves quality while enforcing intentional prepublication noindex',()=>{
   const gate=read('scripts/assert-lighthouse.mjs');
   assert.match(gate,/metrics\.consoleErrors !== 1/);
   assert.match(gate,/accessibility: 1\.00/);
   assert.match(gate,/'best-practices': 0\.95/);
+  assert.match(gate,/seo: 0\.90/);
+  assert.match(gate,/is-crawlable/);
+  assert.match(gate,/metrics\.crawlable !== 0/);
+  assert.match(gate,/seoQualityExcludingIntentionalNoindex/);
 });
 
 test('public privacy boundary remains query-and-view',()=>{
