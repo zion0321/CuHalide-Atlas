@@ -39,7 +39,7 @@ test('rev.7 wrappers normalize living UI and record provenance without rewriting
 
 test('metadata health and manifest carry exact rev.7 denominators',()=>{
   const meta=read('api/meta.js');
-  for(const token of ["META_VERSION='50.2'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:596','motif_unresolved_rows:350',"smart_rag_version:'9.19.0'","research_assistant_version:'10.4.0'"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
+  for(const token of ["META_VERSION='50.2'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:607','motif_unresolved_rows:339',"smart_rag_version:'9.19.0'","research_assistant_version:'10.4.0'"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
   assert.match(meta,/frontend v50 active; backend rev\.7 deterministic contract/);
 });
 
@@ -52,7 +52,7 @@ test('assistant proxy exposes rev.7 / 10.4 / 9.19 while preserving non-idempoten
 
 test('Motif Atlas reflects the adjudicated rev.7 taxonomy without formula completion',()=>{
   const motifs=read('api/motifs.js');
-  for(const token of ["REV='7'","CONTENT_DATE='2026-08-19'",'motif_resolved_rows??596','motif_unresolved_rows??350',"version:'current-r7'",'Current Curated rev.7'])assert.ok(motifs.includes(token),`motif contract missing ${token}`);
+  for(const token of ["REV='7'","CONTENT_DATE='2026-08-19'",'motif_resolved_rows??607','motif_unresolved_rows??339',"version:'current-r7'",'Current Curated rev.7'])assert.ok(motifs.includes(token),`motif contract missing ${token}`);
   assert.match(motifs,/local motif and global dimensionality are independent fields/i);
   assert.match(motifs,/never rounded or truncated/i);
 });
