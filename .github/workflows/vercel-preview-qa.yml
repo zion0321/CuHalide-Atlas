@@ -70,13 +70,13 @@ jobs:
       - name: Verify v50 portal rev.7 contract
         run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.7"
       - name: Verify rev.7 runtime health
-        run: npm run qa:browser -- --grep "runtime health is exact rev.7 contract"
+        run: npm run qa:browser -- --grep "runtime health is exact final rev.7 contract"
       - name: Verify manifest sitemap and Motif Atlas
-        run: npm run qa:browser -- --grep "manifest, sitemap and Motif Atlas agree with rev.7"
+        run: npm run qa:browser -- --grep "manifest sitemap and Motif Atlas agree with final rev.7"
       - name: Verify Research Assistant runtime contract
-        run: npm run qa:browser -- --grep "Research Assistant reports 10.4 / 9.19 and rev.7 full-current RAG"
+        run: npm run qa:browser -- --grep "Research Assistant reports 10.4 / 9.19 and complete rev.7 RAG"
       - name: Verify rev.7 structure-truth corrections
-        run: npm run qa:browser -- --grep "rev.7 structure-truth corrections are exposed at structure grain"
+        run: npm run qa:browser -- --grep "final rev.7 structure-truth corrections are exposed at structure grain"
       - name: Verify local/global connectivity boundaries
         run: npm run qa:browser -- --grep "local motif versus global dimensionality boundaries remain live"
       - name: Verify rev.7 deterministic identity boundaries
