@@ -17,6 +17,14 @@ test('README is locked to the same rev.7 living scientific state',()=>{
   for(const stale of ['Current Curated rev.5 — living default','Curated through **2026-08-17**','Structure / phase rows | 938','Core-Included structure rows | 878','581','357','Public Data: **2.12.0**','Smart RAG: **9.17.0**','Research Assistant: **10.2.0**'])assert.ok(!readme.includes(stale),`README stale token ${stale}`);
 });
 
+test('preview QA has one PR trigger while Vercel deployment status remains independently mandatory',()=>{
+  const workflow=read('.github/workflows/vercel-preview-qa.yml'),gate=read('scripts/vercel-production-gate.mjs');
+  assert.ok(!workflow.includes('deployment_status:'),'deployment_status must not create duplicate required check names');
+  assert.match(workflow,/ref: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/);
+  assert.match(gate,/REQUIRED_VERCEL_STATUS = 'Vercel'/);
+  assert.match(gate,/has no trusted successful Vercel preview status/);
+});
+
 test('canonical routes terminate at rev.7 wrappers, not historical renderer provenance',()=>{
   const config=JSON.parse(read('vercel.json')),middleware=read('middleware.js'),candidate=read('scripts/local-candidate-server.mjs');
   const route=source=>config.rewrites.find(x=>x.source===source)?.destination;
