@@ -20,7 +20,8 @@ const postAuditMigrationNames = [
   '20260819161520_internal_photophysics_fk_indexes_v1.sql',
   '20260819164952_photophysics_current_structure_registry_r7.sql',
   '20260819170527_retire_public_photophysics_prototype_v1.sql',
-  '20260820024437_photophysics_mechanism_registry_v1.sql'
+  '20260820024437_photophysics_mechanism_registry_v1.sql',
+  '20260820030453_extend_photophysics_mechanism_vocabulary_v1.sql'
 ];
 
 test('canonical photophysics schema history is versioned without private curation rows', () => {
@@ -68,6 +69,17 @@ test('typed mechanism registry preserves evidence, claim polarity and fail-close
 
   const privateCurationDml = /(?:insert\s+into|update|delete\s+from)\s+atlas_internal\.cuhalide_photophysics_mechanism_v1\b/i;
   assert.equal(privateCurationDml.test(mechanism), false, 'mechanism migration must contain schema/ontology only, not private mechanism curation rows');
+});
+
+test('expanded mechanism vocabulary preserves mixed and ligand-localized assignments without forced remapping', () => {
+  const vocabulary = read('supabase/migrations/20260820030453_extend_photophysics_mechanism_vocabulary_v1.sql');
+  assert.match(vocabulary, /'MXLCT'/);
+  assert.match(vocabulary, /'ligand_centered'/);
+  assert.match(vocabulary, /'excimer'/);
+  assert.match(vocabulary, /'intraligand_charge_transfer'/);
+  assert.match(vocabulary, /do not decompose it into separate metal-centered and XLCT claims without evidence/i);
+  assert.match(vocabulary, /Do not map this term to LLCT/i);
+  assert.doesNotMatch(vocabulary, /cuhalide_photophysics_mechanism_v1\s*\(/i);
 });
 
 test('superseded public-schema prototype is frozen read-only and explicitly non-canonical', () => {
