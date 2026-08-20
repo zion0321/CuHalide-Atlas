@@ -21,7 +21,8 @@ const postAuditMigrationNames = [
   '20260819164952_photophysics_current_structure_registry_r7.sql',
   '20260819170527_retire_public_photophysics_prototype_v1.sql',
   '20260820024437_photophysics_mechanism_registry_v1.sql',
-  '20260820030453_extend_photophysics_mechanism_vocabulary_v1.sql'
+  '20260820030453_extend_photophysics_mechanism_vocabulary_v1.sql',
+  '20260820031911_extend_photophysics_decay_mechanism_v1.sql'
 ];
 
 test('canonical photophysics schema history is versioned without private curation rows', () => {
@@ -80,6 +81,15 @@ test('expanded mechanism vocabulary preserves mixed and ligand-localized assignm
   assert.match(vocabulary, /do not decompose it into separate metal-centered and XLCT claims without evidence/i);
   assert.match(vocabulary, /Do not map this term to LLCT/i);
   assert.doesNotMatch(vocabulary, /cuhalide_photophysics_mechanism_v1\s*\(/i);
+});
+
+test('nonradiative relaxation requires an explicit facilitating context rather than low PLQY alone', () => {
+  const decay = read('supabase/migrations/20260820031911_extend_photophysics_decay_mechanism_v1.sql');
+  assert.match(decay, /'nonradiative_relaxation'/);
+  assert.match(decay, /decay_pathway/);
+  assert.match(decay, /facilitating structural\/solvent\/phonon factor must remain in assignment_text/i);
+  assert.match(decay, /a low PLQY alone does not establish this mechanism/i);
+  assert.doesNotMatch(decay, /cuhalide_photophysics_mechanism_v1\s*\(/i);
 });
 
 test('superseded public-schema prototype is frozen read-only and explicitly non-canonical', () => {
