@@ -1,0 +1,9 @@
+insert into atlas_internal.cuhalide_photophysics_property_dictionary_v1
+(property_key,domain,canonical_unit,definition,structure_property_default,condition_sensitive,allow_text_value,notes)
+values
+('g_cd_abs','chiroptical','','Magnitude of circular-dichroism anisotropy factor when the source does not explicitly state the sign in text.',false,true,false,'Use instead of signed g_cd when only magnitudes are source-resolved.'),
+('afterglow_to_background_time','scintillation','s','Source-reported time after cessation of X-ray excitation for relative afterglow intensity to decay to background.',false,true,false,'Criterion/background definition should be retained.'),
+('plqy_retention','stability','%','Fraction of initial photoluminescence quantum yield retained after a stated storage or stress protocol.',false,true,false,'Do not substitute luminescence-intensity retention when the source explicitly refers to PLQY/efficiency.'),
+('stokes_shift','spectral','nm','Source-reported Stokes shift between excitation/absorption and emission maxima under the stated sample state.',false,true,false,'Retain the source definition of the input maxima.'),
+('xray_power_response_range','scintillation','W','X-ray tube power interval over which the source reports a response relationship.',false,true,false,'Preserve tube/source conditions and response model.')
+on conflict (property_key) do update set domain=excluded.domain,canonical_unit=excluded.canonical_unit,definition=excluded.definition,structure_property_default=excluded.structure_property_default,condition_sensitive=excluded.condition_sensitive,allow_text_value=excluded.allow_text_value,notes=excluded.notes,active=true;
