@@ -19,7 +19,8 @@ const postAuditMigrationNames = [
   '20260819160303_material_photophysics_layer_v1_8.sql',
   '20260819161520_internal_photophysics_fk_indexes_v1.sql',
   '20260819164952_photophysics_current_structure_registry_r7.sql',
-  '20260819170527_retire_public_photophysics_prototype_v1.sql'
+  '20260819170527_retire_public_photophysics_prototype_v1.sql',
+  '20260820024437_photophysics_mechanism_registry_v1.sql'
 ];
 
 test('canonical photophysics schema history is versioned without private curation rows', () => {
@@ -29,7 +30,7 @@ test('canonical photophysics schema history is versioned without private curatio
   assert.equal(canonicalMigrationNames.length, 27, `expected 27 canonical schema/ontology migrations, found ${canonicalMigrationNames.length}`);
   for (const name of postAuditMigrationNames) assert.ok(migrations.includes(name), `missing production-versioned migration ${name}`);
 
-  const shorthand = migrations.filter(name => /^20260819_(?:material_photophysics_layer|internal_photophysics_fk_indexes)|^20260820_photophysics_current_structure_registry/.test(name));
+  const shorthand = migrations.filter(name => /^20260819_(?:material_photophysics_layer|internal_photophysics_fk_indexes)|^20260820_(?!024437_photophysics_mechanism_registry_v1)/.test(name));
   assert.deepEqual(shorthand, [], `shorthand migration filenames must not coexist with production versions: ${shorthand.join(', ')}`);
 
   for (const name of canonicalMigrationNames) {
@@ -52,6 +53,23 @@ test('active structure mapping health is revision-independent and currently reso
   assert.match(registry, /revoke all on atlas_internal\.cuhalide_current_structure_registry_v1 from public, anon, authenticated/i);
 });
 
+test('typed mechanism registry preserves evidence, claim polarity and fail-closed QC', () => {
+  const mechanism = read('supabase/migrations/20260820024437_photophysics_mechanism_registry_v1.sql');
+  assert.match(mechanism, /create table if not exists atlas_internal\.cuhalide_photophysics_mechanism_dictionary_v1/i);
+  assert.match(mechanism, /create table if not exists atlas_internal\.cuhalide_photophysics_mechanism_v1/i);
+  assert.match(mechanism, /claim_polarity[^\n]+supported[^\n]+consistent_with[^\n]+ruled_out[^\n]+unresolved/i);
+  assert.match(mechanism, /claim_basis[^\n]+author_assignment[^\n]+experimentally_supported[^\n]+computationally_supported[^\n]+author_inference[^\n]+atlas_interpretation/i);
+  assert.match(mechanism, /evidence_id bigint not null references atlas_internal\.cuhalide_photophysics_evidence_v1\(evidence_id\) on delete restrict/i);
+  assert.match(mechanism, /Short Cu-Cu distance alone does not establish this mechanism\./);
+  assert.match(mechanism, /broad emission alone is not sufficient\./i);
+  assert.match(mechanism, /mechanism_evidence_mismatch/);
+  assert.match(mechanism, /analysis_eligible_unresolved_mechanisms/);
+  assert.match(mechanism, /revoke all on atlas_internal\.cuhalide_photophysics_mechanism_v1 from public, anon, authenticated/i);
+
+  const privateCurationDml = /(?:insert\s+into|update|delete\s+from)\s+atlas_internal\.cuhalide_photophysics_mechanism_v1\b/i;
+  assert.equal(privateCurationDml.test(mechanism), false, 'mechanism migration must contain schema/ontology only, not private mechanism curation rows');
+});
+
 test('superseded public-schema prototype is frozen read-only and explicitly non-canonical', () => {
   const freeze = read('supabase/migrations/20260819170527_retire_public_photophysics_prototype_v1.sql');
   const doc = read('docs/MATERIAL_PHOTOPHYSICS_AUDIT_V1.md');
@@ -72,6 +90,6 @@ test('superseded public-schema prototype is frozen read-only and explicitly non-
 
 test('runtime API does not expose the private photophysics staging schema', () => {
   const apiFiles = fs.readdirSync(root('api')).filter(name => name.endsWith('.js'));
-  const exposed = apiFiles.filter(name => /atlas_internal\.cuhalide_photophysics|cuhalide_photophysics_(?:article_review|sample_state|measurement|band|value|evidence|conflict)_v1/i.test(read(`api/${name}`)));
+  const exposed = apiFiles.filter(name => /atlas_internal\.cuhalide_photophysics|cuhalide_photophysics_(?:article_review|sample_state|measurement|band|value|evidence|conflict|mechanism|mechanism_dictionary)_v1/i.test(read(`api/${name}`)));
   assert.deepEqual(exposed, [], `private photophysics schema referenced by public runtime: ${exposed.join(', ')}`);
 });
