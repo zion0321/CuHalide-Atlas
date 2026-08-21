@@ -3,10 +3,26 @@ import assistantHandler from './ui-assistant.js';
 const CURRENT_REVISION='7';
 const CONTENT_DATE='2026-08-19';
 const LAST_MODIFIED=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
+const SAMPLE_GRAIN_MARKER='CUHALIDE_PHOTOPHYSICS_SAMPLE_GRAIN_UI_V1';
+
+function hardenSourceCards(body){
+  if(!body.includes('function renderSources(rows)'))return body;
+  const pattern=/function renderSources\(rows\)\{[\s\S]*?\}\nasync function loadWatch/;
+  const matches=body.match(new RegExp(pattern.source,'g'))||[];
+  if(matches.length!==1)throw new Error(`photophysics sample-grain renderer: expected one source renderer, found ${matches.length}`);
+  const hardened=`function sourceKind(s){const isPhoto=String(s.evidence_scope||'').toLowerCase().includes('photophysics'),form=String(s.sample_form||'').toLowerCase();if(!isPhoto)return 'Structure';if(form==='crystal'||form==='single_crystal')return 'Crystal photophysics sample';if(form==='powder')return 'Powder photophysics sample';if(form==='pellet')return 'Pellet photophysics sample';if(form==='composite'||form==='film')return 'Composite photophysics sample';if(form==='device')return 'Device photophysics sample';return 'Photophysics sample'}
+function sourceScopeLine(s,fallback){const isPhoto=String(s.evidence_scope||'').toLowerCase().includes('photophysics');if(!isPhoto)return scopeLine(s,fallback);const parts=[s.evidence_scope||fallback];if(s.sample_form)parts.push('form='+String(s.sample_form).replaceAll('_',' '));if(s.mapping_status)parts.push('mapping='+s.mapping_status);if(s.property_scope)parts.push('scope='+s.property_scope);if(s.photophysics_analysis_eligible===true)parts.push('quantitative-correlation eligible');else if(s.photophysics_analysis_eligible===false)parts.push('not quantitative-correlation eligible');return '<small class="scope">'+esc(parts.join(' · '))+'</small>'}
+function renderSources(rows){$('sources').innerHTML=rows.length?rows.map(s=>s.type==='structure'?'<div class="source"><button data-structure="'+esc(s.id)+'">[S:'+esc(s.id)+'] '+esc(compact(s.title||'Structure',78))+'</button><small>'+esc(sourceKind(s))+' · Record '+esc(s.record_id||'—')+'</small>'+sourceScopeLine(s,'structure identity/crystallography only')+'</div>':s.type==='article'?'<div class="source"><button data-article="'+esc(s.id)+'">[A:'+esc(s.id)+'] '+esc(compact(s.title||'Article',78))+'</button><small>Article'+(s.doi?' · '+esc(s.doi):'')+'</small>'+sourceScopeLine(s,'article-grain curated evidence')+'</div>':s.type==='web'?'<div class="source"><a href="'+safeUrl(s.url)+'" target="_blank" rel="noreferrer">'+esc(compact(s.title||s.doi||'Candidate',78))+'</a><small>Literature Watch candidate · not yet curated evidence</small></div>':'').join(''):'<div class="no-evidence"><strong>Conversational reply</strong><p>No database evidence was needed for this answer.</p></div>'}
+/* ${SAMPLE_GRAIN_MARKER} */
+async function loadWatch`;
+  const out=body.replace(pattern,hardened);
+  if(!out.includes(SAMPLE_GRAIN_MARKER))throw new Error('photophysics sample-grain renderer marker missing');
+  return out;
+}
 
 function normalize(body){
   if(typeof body!=='string')return body;
-  return body
+  let out=body
     .split('CUHALIDE_UI_V50_2_CURRENT_R6').join('CUHALIDE_UI_V50_2_CURRENT_R7')
     .split('CUHALIDE_SITE_V50_CURRENT_CURATED_R6').join('CUHALIDE_SITE_V50_CURRENT_CURATED_R7')
     .split('Current Curated rev.6').join('Current Curated rev.7')
@@ -17,6 +33,8 @@ function normalize(body){
     .split('2026-08-18').join('2026-08-19')
     .split('cc.live_revision||6').join('cc.live_revision||7')
     .split('This revision adds four primary-evidence-reviewed articles and eight SCXRD structure determinations while preserving the immutable archived scientific snapshot 3.0.2.').join('Rev.7 completes a full structure-truth re-audit across the 946-row Current Curated snapshot while preserving the immutable archived scientific snapshot 3.0.2.');
+  out=hardenSourceCards(out);
+  return out;
 }
 
 export default async function handler(req,res){
