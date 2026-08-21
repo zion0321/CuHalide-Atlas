@@ -27,7 +27,11 @@ function inlineScriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\
 function syncCsp(html,res){const current=String(res.getHeader?.('Content-Security-Policy')||'');if(!current)return;const hashes=inlineScriptHashes(html);if(!hashes.length)return;const next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src ${hashes.join(' ')};`);if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');res.setHeader('Content-Security-Policy',next)}
 
 async function fetchPhotophysics(req){
-  const q=req?.query||{},kind=String(one(q.kind)||'').toLowerCase(),id=String(one(q.id)||'').trim();
+  const q=req?.query||{};
+  let incoming;
+  try{incoming=new URL(String(req?.url||'/'),'http://local')}catch{incoming=new URL('http://local/')}
+  const kind=String(one(q.kind)||incoming.searchParams.get('kind')||'').toLowerCase();
+  const id=String(one(q.id)||incoming.searchParams.get('id')||'').trim();
   if(!['article','structure'].includes(kind)||!id)return null;
   try{
     const u=new URL(PUBLIC_DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);
