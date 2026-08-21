@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import assistantHandler from './ui-assistant.js';
 
 const CURRENT_REVISION='7';
@@ -37,6 +38,22 @@ function normalize(body){
   return out;
 }
 
+function inlineScriptHashes(html){
+  const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;
+  while((m=re.exec(String(html)))!==null){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}
+  return [...new Set(out)];
+}
+function syncCsp(html,res){
+  const current=String(res.getHeader?.('Content-Security-Policy')||'');
+  if(!current)throw new Error('Missing Content-Security-Policy after assistant rendering');
+  const hashes=inlineScriptHashes(html);
+  if(!hashes.length)throw new Error('No inline scripts found after sample-grain UI rewrite');
+  const next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src 'self' ${hashes.join(' ')};`);
+  if(next===current)throw new Error('Content-Security-Policy script-src could not be resynchronized');
+  if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');
+  res.setHeader('Content-Security-Policy',next);
+}
+
 export default async function handler(req,res){
   res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);
   res.setHeader('Last-Modified',LAST_MODIFIED);
@@ -44,7 +61,7 @@ export default async function handler(req,res){
     setHeader:(name,value)=>{const k=String(name).toLowerCase();if(k==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(k==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
     getHeader:name=>res.getHeader?.(name),
     removeHeader:name=>res.removeHeader?.(name),
-    end:body=>{const out=normalize(body);res.removeHeader?.('Content-Length');return res.end(out)}
+    end:body=>{const out=normalize(body);if(typeof out==='string'&&out.includes('</html>'))syncCsp(out,res);res.removeHeader?.('Content-Length');return res.end(out)}
   };
   Object.defineProperty(bridge,'statusCode',{get:()=>res.statusCode,set:value=>{res.statusCode=value}});
   return assistantHandler(req,bridge);
