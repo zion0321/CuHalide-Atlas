@@ -1,6 +1,6 @@
 # CuHalide Atlas material-grain photophysics audit
 
-Status: active private curation workstream for Current Curated rev.7+; not a formal release and not a public dataset layer.
+Status: active curation workstream for Current Curated rev.7+ with a fail-closed, read-only public projection of the subset that has passed the defined two-pass primary-evidence QC gate. This is not a bulk public dataset layer or a formal release.
 
 ## Canonical database source of truth
 
@@ -8,9 +8,9 @@ The active curation model is the private `atlas_internal.cuhalide_photophysics_*
 
 Mechanism curation is normalized through `atlas_internal.cuhalide_photophysics_mechanism_dictionary_v1` and `atlas_internal.cuhalide_photophysics_mechanism_v1`. A mechanism claim is not a free-text synonym for a spectral band: it records the controlled mechanism code, claim scope, claim polarity (`supported`, `consistent_with`, `ruled_out`, or `unresolved`), claim basis (`author_assignment`, experimental/computational support, author inference, Atlas interpretation, or unresolved), direct evidence linkage, mapping/evidence confidence, and QC state. This permits explicit negative evidence—for example a source ruling out defect emission—without treating absence of a mechanism as evidence against it.
 
-An earlier material-grain prototype exists under `public.cuhalide_atlas_material_entities` and `public.cuhalide_atlas_photophysics_*`. Those objects were always protected by RLS/revokes and were never a public product projection. They are now explicitly deprecated and frozen read-only for `service_role` so that historical rows remain auditable without allowing parallel curation to diverge from the canonical `atlas_internal` model. The prototype migrations remain versioned because they were applied to production and are part of the database migration history.
+An earlier material-grain prototype exists under `public.cuhalide_atlas_material_entities` and `public.cuhalide_atlas_photophysics_*`. Those objects were always protected by RLS/revokes and were never a public product projection. They are explicitly deprecated and frozen read-only for `service_role` so that historical rows remain auditable without allowing parallel curation to diverge from the canonical `atlas_internal` model. The prototype migrations remain versioned because they were applied to production and are part of the database migration history.
 
-Primary evidence, evidence excerpts/locators, source filenames/hashes, conflict adjudication and unpublished normalized curation remain private. No public photophysics endpoint or bulk export is enabled by this workstream.
+Primary evidence, evidence excerpts/locators, source filenames/hashes, conflict-adjudication internals and unpublished normalized curation remain private. The active public photophysics projection is a separately whitelisted service contract: it exposes normalized rows only after `qc_passed` + Pass A complete + Pass B complete + two-pass agreement. It exposes no raw primary files, source filenames, raw evidence locators or internal sample identifiers, and bulk export remains disabled.
 
 ## Scientific objective
 
@@ -61,37 +61,40 @@ Numeric values are stored only when explicitly reported or transparently marked 
 
 ## Evidence contract
 
-Every curated measurement or mechanism assignment requires a private evidence object containing source type and the best available locator (page, section, table and/or figure). Verbatim excerpts and private source filenames remain private. The public layer may expose normalized values, a compact citation/locator label and evidence confidence after QC, but never publisher PDFs/SI/CIF payloads or long copyrighted excerpts.
+Every curated measurement or mechanism assignment requires a private evidence object containing source type and the best available locator (page, section, table and/or figure). Verbatim excerpts and private source filenames remain private. The public layer may expose normalized values, public sample/state labels, structure links only when the mapping is exact/phase-exact/sample-exact, mechanism polarity/basis, analysis-eligibility state and a generic discrepancy warning after QC. It never exposes publisher PDFs/SI/CIF payloads, private source filenames, raw evidence locators or long copyrighted excerpts.
 
 ## Review status
 
-Each article receives an explicit review state and completeness counters. `qc_passed` means the main article/SI available to the project were read, reported material identities were mapped at the finest defensible grain, measurements were normalized with units/conditions, and unresolved items were retained rather than inferred.
+Each article receives an explicit review state and completeness counters. `qc_passed` means the main article/SI available to the project were read, reported material identities were mapped at the finest defensible grain, measurements were normalized with units/conditions, and unresolved items were retained rather than inferred. Public photophysics additionally requires Pass A and Pass B to be complete with explicit two-pass agreement.
 
 The canonical health function is fail-closed for orphaned entities, duplicate measurement/band keys, missing measurement evidence, eligible values without evidence, inconsistent conflict flags, unresolved conflict records without an adjudication basis, invalid intrinsic-scope claims, invalid structure-exact mappings, unknown property keys, pending row-level QC and completed reviews that do not satisfy the two-pass gate. Its mechanism extension additionally fails on mechanism sample/measurement/evidence orphans, band-to-measurement mismatches, evidence-to-claim mismatches, inactive mechanism codes, pending mechanism QC, and analysis-eligible mechanism rows whose mapping/evidence/QC state is unresolved.
 
-## Website target
+## Website target and active projection
 
-The public interface will add a Photophysics/Spectra layer only after the private audit reaches sufficient QC coverage and a separate publication decision is made. Planned capabilities:
+The prepublication review interface now has a deliberately narrow Photophysics/Spectra projection for the verified subset. It is not a signal that the entire 383-article queue is complete. Active capabilities are designed to support:
 
-- material-level property cards on article pages;
-- structure pages show properties only for exact structure mappings, otherwise a clear material/article-level boundary note;
-- filters for emission wavelength, PLQY, lifetime, mechanism, sample state, temperature, dimensionality, motif, halogen and application;
-- mechanism filters that can distinguish positive assignments from source-supported exclusions and can expose claim basis/confidence rather than flattening all interpretations into one label;
-- comparisons such as emission vs PLQY, lifetime vs PLQY and scintillation light yield, using only QC-passed normalized measurements;
-- material-specific Smart RAG queries with evidence-grain labels and DOI/locator citations;
-- explicit `reported`, `derived`, `unresolved` and `not applicable` states.
+- material-level property cards on article pages only after the two-pass gate;
+- structure pages showing properties only for exact structure/phase/sample mappings, otherwise retaining the material/article-level boundary;
+- deterministic queries for emission wavelength, PLQY, lifetime, optical gap, scintillation performance and mechanism with sample-state labels;
+- mechanism output that distinguishes positive assignments, source-supported exclusions, unresolved claims and claim basis/confidence rather than flattening all interpretations into one label;
+- structure–property comparison only where `analysis_eligible=true`, while still allowing verified non-intrinsic/process/device values to be viewed with their state labels;
+- material-specific Smart RAG queries using the same two-pass public contract instead of legacy article-level hint propagation;
+- explicit `reported`, `derived`, `unresolved`, `not applicable`, and quantitative-analysis-eligibility states.
+
+Bulk download of the normalized photophysics corpus remains disabled.
 
 ## Publication gate
 
-No new public photophysics endpoint/view should be enabled merely because the schema exists. Public exposure requires:
+Public exposure is not enabled merely because the private schema exists. A row enters the public projection only after:
 
 1. row-level scientific QC;
 2. material-to-article/structure referential checks;
 3. unit/range validation;
-4. evidence-locator coverage checks;
+4. private evidence-locator coverage checks;
 5. mechanism-claim provenance and contradiction checks;
 6. privacy/copyright checks;
-7. browser and API regression tests;
-8. RAG unsupported-claim tests.
+7. independent Pass A / Pass B completion and agreement;
+8. browser and API regression tests;
+9. RAG unsupported-claim tests.
 
-The current prepublication noindex and no-bulk-export governance remains unchanged.
+The current prepublication noindex and no-bulk-export governance remains unchanged. The public projection can grow article-by-article without weakening any of these gates.

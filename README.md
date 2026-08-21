@@ -91,17 +91,18 @@ The rev.7 review runtime contract is:
 - Site: **v50**
 - UI: **50.2**
 - Metadata gateway: **50.3**
-- Public Data: **2.14.0**
+- Public Data: **2.15.0**
+- Structured Photophysics contract: **1.0.1**
 - Smart RAG: **9.19.0**
 - Research Assistant: **10.4.0**
 - Motif Atlas: **1.2**
 - Current evidence corpus: **1,329 BGE-M3 documents / 1,329 embeddings**
 
-Current queries use the rev.7 full-current evidence corpus. Exact counts and protected structure-grain scientific boundaries remain deterministic. Frozen 3.0.2 evidence is consulted only when a question explicitly asks for the archived snapshot or historical denominator. Literature Watch candidate metadata remains outside curated evidence until promotion through the defined review/QC gate.
+Current queries use the rev.7 full-current evidence corpus. Exact counts and protected structure-grain scientific boundaries remain deterministic. The structured photophysics projection is fail-closed: only article reviews that pass Pass A, Pass B and explicit agreement expose normalized sample/measurement/value/mechanism records. Every exposed value retains its sample-state grain and a separate quantitative-analysis-eligibility flag. Frozen 3.0.2 evidence is consulted only when a question explicitly asks for the archived snapshot or historical denominator. Literature Watch candidate metadata remains outside curated evidence until promotion through the defined review/QC gate.
 
 ## Public/private boundary
 
-Review access is intentionally **query-and-view**, not bulk redistribution. Review pages expose selected bibliographic, structural, crystallographic, motif, scope and evidence-status fields. The following remain private research assets: complete normalized tables/raw payloads, exact stored publisher abstracts, primary PDF/SI/CIF files, field-evidence excerpts and locators, candidate scores/reason codes/source payloads, and internal QA/adjudication artifacts. `/api/export` is intentionally unavailable.
+Review access is intentionally **query-and-view**, not bulk redistribution. Review pages expose selected bibliographic, structural, crystallographic, motif, scope, evidence-status and two-pass-verified photophysics fields. The photophysics projection does **not** expose primary source filenames, raw publisher files, raw evidence locators, internal sample IDs or unpublished adjudication notes; processed/composite/device states remain distinct from crystallographic structure rows. The following remain private research assets: complete normalized tables/raw payloads, exact stored publisher abstracts, primary PDF/SI/CIF files, field-evidence excerpts and locators, candidate scores/reason codes/source payloads, and internal QA/adjudication artifacts. `/api/export` is intentionally unavailable.
 
 A manuscript-specific minimal dataset can be deposited separately when required for reproducibility. No permanent repository DOI or blanket project-wide license is asserted until the owner authorizes archival metadata and rights decisions.
 
