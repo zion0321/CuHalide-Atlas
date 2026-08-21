@@ -107,11 +107,25 @@ test('superseded public-schema prototype is frozen read-only and explicitly non-
   }
   assert.match(doc, /active curation model is the private `atlas_internal\.cuhalide_photophysics_\*_v1` schema/i);
   assert.match(doc, /deprecated and frozen read-only/i);
-  assert.match(doc, /No public photophysics endpoint or bulk export is enabled/i);
+  assert.match(doc, /fail-closed, read-only public projection/i);
+  assert.match(doc, /qc_passed[^\n]+Pass A complete[^\n]+Pass B complete[^\n]+two-pass agreement/i);
+  assert.match(doc, /exposes no raw primary files, source filenames, raw evidence locators or internal sample identifiers/i);
+  assert.match(doc, /bulk export remains disabled/i);
 });
 
 test('runtime API does not expose the private photophysics staging schema', () => {
   const apiFiles = fs.readdirSync(root('api')).filter(name => name.endsWith('.js'));
   const exposed = apiFiles.filter(name => /atlas_internal\.cuhalide_photophysics|cuhalide_photophysics_(?:article_review|sample_state|measurement|band|value|evidence|conflict|mechanism|mechanism_dictionary)_v1/i.test(read(`api/${name}`)));
   assert.deepEqual(exposed, [], `private photophysics schema referenced by public runtime: ${exposed.join(', ')}`);
+});
+
+test('public record renderer reaches photophysics only through the whitelisted public contract', () => {
+  const record = read('api/record-current.js');
+  const proxy = read('api/public-data.js');
+  assert.match(record, /cuhalide-atlas-public-data-v2/);
+  assert.match(record, /PHOTOPHYSICS_CONTRACT='1\.0\.1'/);
+  assert.match(record, /Two-pass verified/);
+  assert.doesNotMatch(record, /evidence_locator|source_file|source_sha256|atlas_internal/i);
+  assert.match(proxy, /PUBLIC_DATA_VERSION='2\.15\.0'/);
+  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.0\.1'/);
 });
