@@ -2,9 +2,15 @@ import crypto from 'node:crypto';
 import recordHandler from './record.js';
 
 const CURRENT_REVISION='7';
-const CONTENT_DATE='2026-08-19';
-const LAST_MODIFIED=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
+const CURATED_DATE='2026-08-19';
+const PAGE_DATE='2026-08-21';
+const LAST_MODIFIED=new Date(`${PAGE_DATE}T00:00:00Z`).toUTCString();
 const ROBOTS_META='<meta name="robots" content="noindex,nofollow,noarchive">';
+const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v2';
+const PHOTOPHYSICS_CONTRACT='1.0.1';
+
+const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const one=(v)=>Array.isArray(v)?v[0]:v;
 
 function normalize(body){
   if(typeof body!=='string')return body;
@@ -14,20 +20,94 @@ function normalize(body){
     .split('<meta name="robots" content="noindex,nofollow">').join(ROBOTS_META)
     .split('Current Curated rev.6 · primary-evidence reviewed through 18 Aug 2026').join('Current Curated rev.7 · primary-evidence reviewed through 19 Aug 2026')
     .split('current-r6').join('current-r7')
-    .split('2026-08-18').join('2026-08-19');
+    .split('2026-08-18').join(CURATED_DATE);
 }
+
 function inlineScriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))!==null){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
 function syncCsp(html,res){const current=String(res.getHeader?.('Content-Security-Policy')||'');if(!current)return;const hashes=inlineScriptHashes(html);if(!hashes.length)return;const next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src ${hashes.join(' ')};`);if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');res.setHeader('Content-Security-Policy',next)}
+
+async function fetchPhotophysics(req){
+  const q=req?.query||{},kind=String(one(q.kind)||'').toLowerCase(),id=String(one(q.id)||'').trim();
+  if(!['article','structure'].includes(kind)||!id)return null;
+  try{
+    const u=new URL(PUBLIC_DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);
+    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Photophysics/1.0.1'},signal:AbortSignal.timeout(6500)});
+    if(!r.ok)return null;
+    const x=await r.json();
+    return x?.photophysics&&typeof x.photophysics==='object'?x.photophysics:null;
+  }catch(error){console.error('[record-photophysics]',error);return null}
+}
+
+const propertyLabels={
+  plqy:'PLQY',average_lifetime:'Lifetime',optical_band_gap:'Optical gap',stokes_shift:'Stokes shift',
+  thermal_activation_energy:'Activation energy',light_yield:'Light yield',xray_lod:'X-ray LOD',spatial_resolution:'Spatial resolution',
+  glum:'g_lum',tadf_fraction:'TADF fraction',phosphorescence_fraction:'Phosphorescence fraction',
+  pl_intensity_retention:'PL intensity retention',rl_stability_outcome:'RL stability',thermal_decomposition_temperature:'Thermal decomposition'
+};
+const propertyPriority=['plqy','average_lifetime','optical_band_gap','thermal_activation_energy','light_yield','xray_lod','spatial_resolution','glum','tadf_fraction','phosphorescence_fraction','stokes_shift','pl_intensity_retention','rl_stability_outcome','thermal_decomposition_temperature'];
+function unitText(u){return String(u||'').replace(/^us$/,'μs').replace(/^degC$/,'°C').replace(/MeV-1/g,'MeV⁻¹').replace(/mm-1/g,'mm⁻¹').replace(/s-1/g,'s⁻¹')}
+function fmtNumber(v){const n=Number(v);if(!Number.isFinite(n))return String(v??'');if(Math.abs(n)>=10000)return n.toLocaleString('en-US',{maximumFractionDigits:3});return String(v)}
+function formatProperty(v){
+  const key=String(v?.property_key||''),label=propertyLabels[key]||key.replaceAll('_',' '),unit=unitText(v?.unit);
+  if(v?.value_text!==undefined&&v?.value_text!==null&&String(v.value_text).trim())return `${label}: ${String(v.value_text).trim()}${unit?` ${unit}`:''}`;
+  if(v?.value_numeric===undefined||v?.value_numeric===null)return '';
+  let raw=fmtNumber(v.value_numeric),prefix='';
+  const q=String(v?.qualifier||'');
+  if(/^\s*>/.test(q))prefix='>';
+  else if(/^\s*</.test(q))prefix='<';
+  else if(/approx|approximately|~|∼/i.test(q))prefix='≈';
+  return `${label}: ${prefix}${raw}${unit?` ${unit}`:''}`;
+}
+function sampleFacts(sample){
+  const ms=Array.isArray(sample?.measurements)?sample.measurements:[],bands=[],values=[];
+  for(const m of ms){
+    for(const b of Array.isArray(m?.bands)?m.bands:[]){if(b?.domain==='emission'&&b?.peak_nm!==null&&b?.peak_nm!==undefined)bands.push(`Emission: ${fmtNumber(b.peak_nm)} nm${b.fwhm_nm!==null&&b.fwhm_nm!==undefined?` (FWHM ${fmtNumber(b.fwhm_nm)} nm)`:''}`)}
+    for(const v of Array.isArray(m?.values)?m.values:[])values.push(v);
+  }
+  const unique=[];for(const x of bands){if(!unique.includes(x))unique.push(x)}
+  const sorted=[...values].sort((a,b)=>{const ai=propertyPriority.indexOf(a?.property_key),bi=propertyPriority.indexOf(b?.property_key);return(ai<0?999:ai)-(bi<0?999:bi)});
+  for(const v of sorted){const x=formatProperty(v);if(x&&!unique.includes(x))unique.push(x);if(unique.length>=7)break}
+  return unique;
+}
+function mechanismSummary(samples){
+  const out=[];
+  for(const s of samples||[])for(const m of s?.measurements||[])for(const z of m?.mechanisms||[]){
+    const label=z?.label||z?.mechanism_code||'Mechanism',polarity=z?.claim_polarity||'unresolved',basis=z?.claim_basis==='author_assignment'?'source-assigned':z?.claim_basis==='experimentally_supported'?'experimentally supported':z?.claim_basis==='computationally_supported'?'computationally supported':z?.claim_basis||'';
+    const x=`${label} (${polarity}${basis?`; ${basis}`:''})`;if(!out.includes(x))out.push(x);if(out.length>=5)return out;
+  }
+  return out;
+}
+function photophysicsCard(ph){
+  if(!ph||ph.ok===false)return '';
+  const state=String(ph.public_state||'');
+  if(state==='curation_in_progress')return `<section class="card"><p class="eyebrow">Photophysics</p><p class="fine"><strong>Curation in progress.</strong> Structured photophysical values are withheld from this public record until the two-pass primary-evidence QC gate is complete.</p></section>`;
+  if(state==='withheld')return `<section class="card"><p class="eyebrow">Photophysics</p><p class="fine"><strong>Curated values withheld.</strong> The photophysics review has an unresolved QC blocker; source values are not silently reconciled.</p></section>`;
+  if(state==='verified_no_reported_data'||state==='no_relevant_data')return `<section class="card"><p class="eyebrow">Photophysics</p><span class="status">Two-pass reviewed</span><p class="fine">No reportable photophysics measurement is exposed for this record at the reviewed sample grain.</p></section>`;
+  if(state!=='verified')return '';
+  const samples=Array.isArray(ph.samples)?ph.samples:[],shown=samples.slice(0,8),mechanisms=mechanismSummary(samples),counts=ph.counts||{};
+  const sampleHtml=shown.map(s=>{
+    const facts=sampleFacts(s),detail=facts.length?facts.join(' · '):s.measurement_status==='no_measurement_reported'?'No photophysics measurement reported in the reviewed source set.':'Curated measurement state; no compact scalar summary.';
+    const scope=[s.sample_form,s.mapping_status,s.property_scope].filter(Boolean).join(' · ');
+    return `<div class="component"><strong>${esc(s.sample_label||s.reported_compound_label||'Curated sample')}</strong><span>${esc(scope)}</span><span>${esc(detail)}</span></div>`;
+  }).join('');
+  const overflow=samples.length>shown.length?`<p class="fine">${esc(samples.length-shown.length)} additional curated sample state${samples.length-shown.length===1?'':'s'} remain available through the query interface.</p>`:'';
+  const mechanismHtml=mechanisms.length?`<p class="fine"><strong>Mechanism curation:</strong> ${esc(mechanisms.join(' · '))}</p>`:'';
+  const conflictCount=Number(counts.conflicts||0),conflictHtml=conflictCount?`<p class="fine"><strong>Source discrepancy notice:</strong> ${esc(conflictCount)} curated conflict${conflictCount===1?' is':'s are'} retained explicitly; conflicting primary-source values are not silently harmonized.</p>`:'';
+  return `<section class="card"><p class="eyebrow">Photophysics</p><span class="status">Two-pass verified</span><p class="fine">${esc(counts.samples??samples.length)} curated sample state${Number(counts.samples??samples.length)===1?'':'s'} · ${esc(counts.measurements??0)} measurements · ${esc(counts.values??0)} normalized values. Crystal-intrinsic, processed, composite, and device states remain separate; quantitative-analysis eligibility is independently gated.</p>${sampleHtml?`<div class="components">${sampleHtml}</div>`:''}${overflow}${mechanismHtml}${conflictHtml}</section>`;
+}
+function injectPhotophysics(html,ph){const card=photophysicsCard(ph);if(!card)return html;const marker='<div class="data-note">';return html.includes(marker)?html.replace(marker,`${card}${marker}`):html}
 
 export default async function handler(req,res){
   res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');
   res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);
+  res.setHeader('X-CuHalide-Photophysics-Contract',PHOTOPHYSICS_CONTRACT);
   res.setHeader('Last-Modified',LAST_MODIFIED);
+  const photophysics=await fetchPhotophysics(req);
   const bridge={
     setHeader:(name,value)=>{const k=String(name).toLowerCase();if(k==='x-robots-tag')return res.setHeader(name,'noindex, nofollow, noarchive');if(k==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(k==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
     getHeader:name=>res.getHeader?.(name),
     removeHeader:name=>res.removeHeader?.(name),
-    end:body=>{const out=normalize(body);if(typeof out==='string'&&out.includes('</html>')){if(!out.includes(ROBOTS_META))throw new Error('prepublication record page missing noindex meta');syncCsp(out,res)}res.removeHeader?.('Content-Length');return res.end(out)}
+    end:body=>{let out=normalize(body);if(typeof out==='string'&&out.includes('</html>')){out=injectPhotophysics(out,photophysics);if(!out.includes(ROBOTS_META))throw new Error('prepublication record page missing noindex meta');syncCsp(out,res)}res.removeHeader?.('Content-Length');return res.end(out)}
   };
   Object.defineProperty(bridge,'statusCode',{get:()=>res.statusCode,set:value=>{res.statusCode=value}});
   return recordHandler(req,bridge);
