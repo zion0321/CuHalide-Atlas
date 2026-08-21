@@ -41,6 +41,7 @@ test('pre-merge production backend rev.7 is ready', async ({ request }) => {
     rag_documents: 1329,
     rag_embedded: 1329,
   });
+  expect(x.photophysics).toMatchObject({ok:true,version:'1.0.1',two_pass_gate:true,primary_files_exposed:false,raw_evidence_locators_exposed:false});
 });
 
 test('v50 living portal exposes Current Curated rev.7', async ({ page, request }) => {
@@ -93,6 +94,9 @@ test('runtime health is exact final rev.7 contract', async ({ request }) => {
     frozen_release_contract: true,
     current_curated_contract: true,
     motif_taxonomy_contract: true,
+    photophysics_contract: true,
+    photophysics_two_pass_gate: true,
+    photophysics_private_evidence_guard: true,
     rag_embeddings_complete: true,
     local_motif_global_dimension_separation: true,
   });
@@ -117,10 +121,12 @@ test('manifest sitemap and Motif Atlas agree with final rev.7', async ({ request
   });
   expect(j.runtime).toMatchObject({
     meta_version: '50.3',
-    public_data_version: '2.14.0',
+    public_data_version: '2.15.0',
+    photophysics_contract_version: '1.0.1',
     smart_rag_version: '9.19.0',
     research_assistant_version: '10.4.0',
   });
+  expect(j.photophysics).toMatchObject({public_projection:'two-pass-verified-only',raw_primary_files:false,raw_evidence_locators:false,analysis_eligibility_explicit:true});
   expect(j.frozen_release).toMatchObject({ version: '3.0.2', structure_phase_rows: 878, immutable: true });
 
   const s = await request.get(`${BASE}/sitemap.xml`);
