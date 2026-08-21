@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Production browser, accessibility, performance, repository-contract and SEO quality gates for CuHalide Atlas.",
   "scripts": {
-    "qa:browser": "playwright test tests/production-browser-v50.spec.js tests/rev7-production-copy.spec.js tests/prepublication-indexing.spec.js",
+    "qa:browser": "playwright test tests/production-browser-v50.spec.js tests/rev7-production-copy.spec.js tests/prepublication-indexing.spec.js tests/photophysics-rag-sample-grain.spec.js",
     "qa:site-quality": "playwright test tests/site-quality-v50-1.spec.js",
     "qa:lighthouse": "bash scripts/production-lighthouse.sh",
     "qa:deployment-gate": "node --test tests/vercel-production-gate.test.mjs",
