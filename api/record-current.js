@@ -7,7 +7,7 @@ const PAGE_DATE='2026-08-21';
 const LAST_MODIFIED=new Date(`${PAGE_DATE}T00:00:00Z`).toUTCString();
 const ROBOTS_META='<meta name="robots" content="noindex,nofollow,noarchive">';
 const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v2';
-const PHOTOPHYSICS_CONTRACT='1.0.1';
+const PHOTOPHYSICS_CONTRACT='1.2.0';
 
 const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const one=(v)=>Array.isArray(v)?v[0]:v;
@@ -35,7 +35,7 @@ async function fetchPhotophysics(req){
   if(!['article','structure'].includes(kind)||!id)return null;
   try{
     const u=new URL(PUBLIC_DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);
-    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Photophysics/1.0.1'},signal:AbortSignal.timeout(6500)});
+    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Photophysics/1.2.0'},signal:AbortSignal.timeout(6500)});
     if(!r.ok)return null;
     const x=await r.json();
     return x?.photophysics&&typeof x.photophysics==='object'?x.photophysics:null;
