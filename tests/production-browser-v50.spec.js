@@ -41,7 +41,7 @@ test('pre-merge production backend rev.7 is ready', async ({ request }) => {
     rag_documents: 1329,
     rag_embedded: 1329,
   });
-  expect(x.photophysics).toMatchObject({ok:true,version:'1.0.1',two_pass_gate:true,primary_files_exposed:false,raw_evidence_locators_exposed:false});
+  expect(x.photophysics).toMatchObject({ok:true,version:'1.2.0',two_pass_gate:true,primary_files_exposed:false,raw_evidence_locators_exposed:false});
 });
 
 test('v50 living portal exposes Current Curated rev.7', async ({ page, request }) => {
@@ -122,7 +122,7 @@ test('manifest sitemap and Motif Atlas agree with final rev.7', async ({ request
   expect(j.runtime).toMatchObject({
     meta_version: '50.3',
     public_data_version: '2.15.0',
-    photophysics_contract_version: '1.0.1',
+    photophysics_contract_version: '1.2.0',
     smart_rag_version: '9.19.0',
     research_assistant_version: '10.4.1',
   });
