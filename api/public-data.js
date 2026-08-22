@@ -3,7 +3,7 @@ const CONTRACT_UPSTREAM='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/c
 const PUBLIC_ORIGIN='https://cuhalide-atlas-v3.vercel.app';
 const PUBLIC_DATA_VERSION='2.15.0';
 const CURRENT_REVISION='7';
-const PHOTOPHYSICS_CONTRACT='1.0.1';
+const PHOTOPHYSICS_CONTRACT='1.2.0';
 const TOTAL_TIMEOUT_MS=12000,FIRST_ATTEMPT_TIMEOUT_MS=5000,RETRY_DELAY_MS=120;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function targetUrl(incoming){const action=String(incoming.searchParams.get('action')||'health').toLowerCase(),control=action==='health'||action==='bootstrap',upstream=new URL(control?CONTRACT_UPSTREAM:DATA_UPSTREAM);for(const[key,value]of incoming.searchParams.entries()){if(key==='action'&&action==='health')continue;upstream.searchParams.append(key,value)}if(action==='health')upstream.searchParams.set('action','public-health');return upstream}
