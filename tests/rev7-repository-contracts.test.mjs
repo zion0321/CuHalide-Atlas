@@ -14,7 +14,7 @@ test('canonical public runtime exposes one rev.7 contract',()=>{
 
 test('README is locked to the same rev.7 living scientific state',()=>{
   const readme=read('README.md');
-  for(const token of ['Prepublication release status','Current Curated rev.7','2026-08-19','Article audit records | 383','Canonical verified articles | 369','Structure / phase rows | 946','Core-Included structure rows | 886','Resolved space-group rows | 710','Verified one-to-one SG rows | 684','Strict-polar rows | 87','RAG documents / embeddings | 1,329 / 1,329','628','318','Public Data: **2.15.0**','Structured Photophysics contract: **1.0.1**','Smart RAG: **9.19.0**','Research Assistant: **10.4.0**'])assert.ok(readme.includes(token),`README missing current token ${token}`);
+  for(const token of ['Prepublication release status','Current Curated rev.7','2026-08-19','Article audit records | 383','Canonical verified articles | 369','Structure / phase rows | 946','Core-Included structure rows | 886','Resolved space-group rows | 710','Verified one-to-one SG rows | 684','Strict-polar rows | 87','RAG documents / embeddings | 1,329 / 1,329','628','318','Public Data: **2.15.0**','Structured Photophysics contract: **1.0.1**','Smart RAG: **9.19.0**','Research Assistant: **10.4.1**'])assert.ok(readme.includes(token),`README missing current token ${token}`);
   for(const stale of ['Current Curated rev.5 — living default','Curated through **2026-08-17**','Structure / phase rows | 938','Core-Included structure rows | 878','581','357','Public Data: **2.12.0**','Smart RAG: **9.17.0**','Research Assistant: **10.2.0**'])assert.ok(!readme.includes(stale),`README stale token ${stale}`);
 });
 
@@ -87,13 +87,13 @@ test('rev.7 wrappers normalize living UI and record provenance without rewriting
 
 test('metadata health and manifest carry exact rev.7 denominators',()=>{
   const meta=read('api/meta.js');
-  for(const token of ["META_VERSION='50.3'","PUBLIC_DATA_VERSION='2.15.0'","PHOTOPHYSICS_VERSION='1.0.1'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:628','motif_unresolved_rows:318','photophysics_contract_version:PHOTOPHYSICS_VERSION',"smart_rag_version:'9.19.0'","research_assistant_version:'10.4.0'", "release_state:'prepublication'", "indexing:'disabled-prepublication'","structured_photophysics:true"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
+  for(const token of ["META_VERSION='50.3'","PUBLIC_DATA_VERSION='2.15.0'","PHOTOPHYSICS_VERSION='1.0.1'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:628','motif_unresolved_rows:318','photophysics_contract_version:PHOTOPHYSICS_VERSION',"smart_rag_version:'9.19.0'","research_assistant_version:'10.4.1'", "release_state:'prepublication'", "indexing:'disabled-prepublication'","structured_photophysics:true"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
   assert.match(meta,/frontend v50 active; backend rev\.7 deterministic contract/);
 });
 
 test('assistant proxy exposes rev.7 / 10.4 / 9.19 while preserving non-idempotent retry guard',()=>{
   const agent=read('api/agent.js');
-  for(const token of ["ASSISTANT_VERSION='10.4.0'","EVIDENCE_VERSION='9.19.0'","CURRENT_REVISION='7'"])assert.ok(agent.includes(token));
+  for(const token of ["ASSISTANT_VERSION='10.4.1'","EVIDENCE_VERSION='9.19.0'","CURRENT_REVISION='7'"])assert.ok(agent.includes(token));
   assert.match(agent,/attempts=isPost\?1:3/);
   assert.match(agent,/X-Robots-Tag/);
 });
