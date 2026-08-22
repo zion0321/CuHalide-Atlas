@@ -123,9 +123,9 @@ test('public record renderer reaches photophysics only through the whitelisted p
   const record = read('api/record-current.js');
   const proxy = read('api/public-data.js');
   assert.match(record, /cuhalide-atlas-public-data-v2/);
-  assert.match(record, /PHOTOPHYSICS_CONTRACT='1\.0\.1'/);
+  assert.match(record, /PHOTOPHYSICS_CONTRACT='1\.2\.0'/);
   assert.match(record, /Two-pass verified/);
   assert.doesNotMatch(record, /evidence_locator|source_file|source_sha256|atlas_internal/i);
   assert.match(proxy, /PUBLIC_DATA_VERSION='2\.15\.0'/);
-  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.0\.1'/);
+  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.2\.0'/);
 });

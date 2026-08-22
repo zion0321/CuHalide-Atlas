@@ -92,7 +92,7 @@ The rev.7 review runtime contract is:
 - UI: **50.2**
 - Metadata gateway: **50.3**
 - Public Data: **2.15.0**
-- Structured Photophysics contract: **1.0.1**
+- Structured Photophysics contract: **1.2.0**
 - Smart RAG: **9.19.0**
 - Research Assistant: **10.4.1**
 - Motif Atlas: **1.2**
