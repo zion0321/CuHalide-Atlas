@@ -1,6 +1,6 @@
 const CONTRACT='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-runtime-contract-v1-public';
 const PUBLIC='https://cuhalide-atlas-v3.vercel.app';
-const RELEASE='3.0.2',META_VERSION='50.3',PUBLIC_DATA_VERSION='2.15.0',PHOTOPHYSICS_VERSION='1.0.1',CURRENT_REVISION='7';
+const RELEASE='3.0.2',META_VERSION='50.3',PUBLIC_DATA_VERSION='2.15.0',PHOTOPHYSICS_VERSION='1.2.0',CURRENT_REVISION='7';
 const RETRIES=3,ATTEMPT_TIMEOUT_MS=7000,RETRY_DELAY_MS=180;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const CURRENT={curated_through:'2026-08-19',article_audit_records:383,chemically_included_articles:372,canonical_verified_articles:369,structure_phase_rows:946,core_included_structure_rows:886,resolved_space_group_rows:710,verified_space_group_rows:684,verified_polar_rows:97,strict_polar_rows:87,strict_polar_articles:54,rag_documents:1329,rag_embedded:1329,taxonomy_rows:946,motif_resolved_rows:628,motif_unresolved_rows:318,motif_unresolved_legacy_category_rows:35};
