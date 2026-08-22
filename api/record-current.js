@@ -7,7 +7,7 @@ const PAGE_DATE='2026-08-21';
 const LAST_MODIFIED=new Date(`${PAGE_DATE}T00:00:00Z`).toUTCString();
 const ROBOTS_META='<meta name="robots" content="noindex,nofollow,noarchive">';
 const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v2';
-const PHOTOPHYSICS_CONTRACT='1.0.1';
+const PHOTOPHYSICS_CONTRACT='1.0.2';
 
 const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const one=(v)=>Array.isArray(v)?v[0]:v;
@@ -35,7 +35,7 @@ async function fetchPhotophysics(req){
   if(!['article','structure'].includes(kind)||!id)return null;
   try{
     const u=new URL(PUBLIC_DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);
-    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Photophysics/1.0.1'},signal:AbortSignal.timeout(6500)});
+    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Photophysics/1.0.2'},signal:AbortSignal.timeout(6500)});
     if(!r.ok)return null;
     const x=await r.json();
     return x?.photophysics&&typeof x.photophysics==='object'?x.photophysics:null;
@@ -45,10 +45,17 @@ async function fetchPhotophysics(req){
 const propertyLabels={
   plqy:'PLQY',average_lifetime:'Lifetime',optical_band_gap:'Optical gap',stokes_shift:'Stokes shift',
   thermal_activation_energy:'Activation energy',light_yield:'Light yield',xray_lod:'X-ray LOD',spatial_resolution:'Spatial resolution',
-  glum:'g_lum',tadf_fraction:'TADF fraction',phosphorescence_fraction:'Phosphorescence fraction',
-  pl_intensity_retention:'PL intensity retention',rl_stability_outcome:'RL stability',thermal_decomposition_temperature:'Thermal decomposition'
+  luminescence_dissymmetry_factor:'g_lum',tadf_fraction:'TADF fraction',phosphorescence_fraction:'Phosphorescence fraction',
+  pl_intensity_retention:'PL intensity retention',rl_stability_outcome:'RL stability',thermal_decomposition_temperature:'Thermal decomposition',
+  peak_eqe:'Peak EQE',external_quantum_efficiency:'EQE',max_luminance:'Max luminance',t50:'T50',
+  charge_carrier_mobility:'Carrier mobility',hole_mobility:'Hole mobility',electron_mobility:'Electron mobility',trmc_yield_mobility:'TRMC yield mobility',
+  electrical_conductivity:'Conductivity',relative_permittivity:'Relative permittivity',trap_density:'Trap density',trap_filled_limit_voltage:'VTFL',
+  film_thickness:'Film thickness',arithmetic_mean_roughness:'Surface roughness Ra',device_active_area:'Device area',
+  exciton_binding_energy:'Exciton binding energy',huang_rhys_factor:'Huang–Rhys factor',phonon_energy:'Phonon energy',
+  radiative_rate:'Radiative rate',nonradiative_rate:'Non-radiative rate',interfacial_hydrogen_bond_energy:'Interfacial H-bond energy',
+  cie_x:'CIE x',cie_y:'CIE y',correlated_color_temperature:'CCT',color_rendering_index:'CRI'
 };
-const propertyPriority=['plqy','average_lifetime','optical_band_gap','thermal_activation_energy','light_yield','xray_lod','spatial_resolution','glum','tadf_fraction','phosphorescence_fraction','stokes_shift','pl_intensity_retention','rl_stability_outcome','thermal_decomposition_temperature'];
+const propertyPriority=['plqy','average_lifetime','optical_band_gap','peak_eqe','external_quantum_efficiency','max_luminance','light_yield','xray_lod','spatial_resolution','thermal_activation_energy','exciton_binding_energy','luminescence_dissymmetry_factor','tadf_fraction','phosphorescence_fraction','stokes_shift','charge_carrier_mobility','hole_mobility','electron_mobility','trap_density','film_thickness','pl_intensity_retention','rl_stability_outcome','thermal_decomposition_temperature'];
 function unitText(u){return String(u||'').replace(/^us$/,'μs').replace(/^degC$/,'°C').replace(/MeV-1/g,'MeV⁻¹').replace(/mm-1/g,'mm⁻¹').replace(/s-1/g,'s⁻¹')}
 function fmtNumber(v){const n=Number(v);if(!Number.isFinite(n))return String(v??'');if(Math.abs(n)>=10000)return n.toLocaleString('en-US',{maximumFractionDigits:3});return String(v)}
 function formatProperty(v){
@@ -81,6 +88,21 @@ function mechanismSummary(samples){
   }
   return out;
 }
+function conflictSummary(ph){
+  const out=[];
+  for(const c of Array.isArray(ph?.conflicts)?ph.conflicts:[]){
+    const key=String(c?.property_key||'source discrepancy'),label=propertyLabels[key]||key.replaceAll('_',' '),status=String(c?.adjudication_status||'unresolved'),preferred=String(c?.preferred_value||'').trim();
+    let x='';
+    if(status==='preferred_source_identified'&&preferred)x=`${label}: source discrepancy; preferred ${preferred}`;
+    else if(status==='retain_both')x=`${label}: conflicting source values retained`;
+    else if(status==='not_comparable')x=`${label}: source values retained as non-comparable`;
+    else if(status==='resolved_typographical')x=`${label}: typographical discrepancy adjudicated${preferred?`; preferred ${preferred}`:''}`;
+    else x=`${label}: curated source discrepancy`;
+    if(!out.includes(x))out.push(x);
+    if(out.length>=5)break;
+  }
+  return out;
+}
 function photophysicsCard(ph){
   if(!ph||ph.ok===false)return '';
   const state=String(ph.public_state||'');
@@ -88,7 +110,7 @@ function photophysicsCard(ph){
   if(state==='withheld')return `<section class="card"><p class="eyebrow">Photophysics</p><p class="fine"><strong>Curated values withheld.</strong> The photophysics review has an unresolved QC blocker; source values are not silently reconciled.</p></section>`;
   if(state==='verified_no_reported_data'||state==='no_relevant_data')return `<section class="card"><p class="eyebrow">Photophysics</p><span class="status">Two-pass reviewed</span><p class="fine">No reportable photophysics measurement is exposed for this record at the reviewed sample grain.</p></section>`;
   if(state!=='verified')return '';
-  const samples=Array.isArray(ph.samples)?ph.samples:[],shown=samples.slice(0,8),mechanisms=mechanismSummary(samples),counts=ph.counts||{};
+  const samples=Array.isArray(ph.samples)?ph.samples:[],shown=samples.slice(0,8),mechanisms=mechanismSummary(samples),conflictDetails=conflictSummary(ph),counts=ph.counts||{};
   const sampleHtml=shown.map(s=>{
     const facts=sampleFacts(s),detail=facts.length?facts.join(' · '):s.measurement_status==='no_measurement_reported'?'No photophysics measurement reported in the reviewed source set.':'Curated measurement state; no compact scalar summary.';
     const scope=[s.sample_form,s.mapping_status,s.property_scope].filter(Boolean).join(' · ');
@@ -96,7 +118,8 @@ function photophysicsCard(ph){
   }).join('');
   const overflow=samples.length>shown.length?`<p class="fine">${esc(samples.length-shown.length)} additional curated sample state${samples.length-shown.length===1?'':'s'} remain available through the query interface.</p>`:'';
   const mechanismHtml=mechanisms.length?`<p class="fine"><strong>Mechanism curation:</strong> ${esc(mechanisms.join(' · '))}</p>`:'';
-  const conflictCount=Number(counts.conflicts||0),conflictHtml=conflictCount?`<p class="fine"><strong>Source discrepancy notice:</strong> ${esc(conflictCount)} curated conflict${conflictCount===1?' is':'s are'} retained explicitly; conflicting primary-source values are not silently harmonized.</p>`:'';
+  const conflictCount=Number(counts.conflicts||0),extraConflicts=Math.max(0,conflictCount-conflictDetails.length),conflictText=conflictDetails.length?`${conflictDetails.join(' · ')}${extraConflicts?` · +${extraConflicts} additional curated conflict${extraConflicts===1?'':'s'}`:''}`:`${conflictCount} curated conflict${conflictCount===1?'':'s'} retained explicitly`;
+  const conflictHtml=conflictCount?`<p class="fine"><strong>Source discrepancies:</strong> ${esc(conflictText)}. Conflicting primary-source values are not silently harmonized; unresolved scalars remain withheld from numeric queries.</p>`:'';
   return `<section class="card"><p class="eyebrow">Photophysics</p><span class="status">Two-pass verified</span><p class="fine">${esc(counts.samples??samples.length)} curated sample state${Number(counts.samples??samples.length)===1?'':'s'} · ${esc(counts.measurements??0)} measurements · ${esc(counts.values??0)} normalized values. Crystal-intrinsic, processed, composite, and device states remain separate; quantitative-analysis eligibility is independently gated.</p>${sampleHtml?`<div class="components">${sampleHtml}</div>`:''}${overflow}${mechanismHtml}${conflictHtml}</section>`;
 }
 function injectPhotophysics(html,ph){const card=photophysicsCard(ph);if(!card)return html;const marker='<div class="data-note">';return html.includes(marker)?html.replace(marker,`${card}${marker}`):html}
