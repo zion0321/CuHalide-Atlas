@@ -94,7 +94,7 @@ The rev.7 review runtime contract is:
 - Public Data: **2.15.0**
 - Structured Photophysics contract: **1.0.1**
 - Smart RAG: **9.19.0**
-- Research Assistant: **10.4.0**
+- Research Assistant: **10.4.1**
 - Motif Atlas: **1.2**
 - Current evidence corpus: **1,329 BGE-M3 documents / 1,329 embeddings**
 

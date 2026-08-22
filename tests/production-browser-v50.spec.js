@@ -124,7 +124,7 @@ test('manifest sitemap and Motif Atlas agree with final rev.7', async ({ request
     public_data_version: '2.15.0',
     photophysics_contract_version: '1.0.1',
     smart_rag_version: '9.19.0',
-    research_assistant_version: '10.4.0',
+    research_assistant_version: '10.4.1',
   });
   expect(j.photophysics).toMatchObject({public_projection:'two-pass-verified-only',raw_primary_files:false,raw_evidence_locators:false,analysis_eligibility_explicit:true});
   expect(j.frozen_release).toMatchObject({ version: '3.0.2', structure_phase_rows: 878, immutable: true });
@@ -144,7 +144,7 @@ test('Research Assistant reports 10.4 / 9.19 and complete rev.7 RAG', async ({ r
   const r = await request.get(`${BASE}/api/agent`);
   expect(r.status()).toBe(200);
   const x = await r.json();
-  expect(x.assistant_version).toBe('10.4.0');
+  expect(x.assistant_version).toBe('10.4.1');
   expect(x.version).toBe('9.19.0');
   expect(x.current_curated).toMatchObject({
     layer: 'current-curated-r7',
