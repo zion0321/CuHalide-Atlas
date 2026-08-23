@@ -41,7 +41,24 @@ jobs:
         run: npx playwright install chromium
       - name: Run pre-merge production rev.7 backend readiness
         if: github.event_name == 'pull_request'
-        run: npm run qa:browser -- --grep "pre-merge production backend rev.7 is ready"
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const base=process.env.CUHALIDE_BASE_URL;
+          const r=await fetch(`${base}/health.json`,{headers:{accept:'application/json'}});
+          if(!r.ok) throw new Error(`production health ${r.status}`);
+          const x=await r.json();
+          const fail=(m)=>{throw new Error(m)};
+          if(x.ok!==true) fail('production health is not OK');
+          if(x.current_curated?.live_revision!==7) fail(`expected production rev.7, got ${x.current_curated?.live_revision}`);
+          const c=x.current_curated?.counts||{};
+          for(const [k,v] of Object.entries({structure_phase_rows:946,core_included_structure_rows:886,resolved_space_group_rows:710,verified_space_group_rows:684,strict_polar_rows:87,strict_polar_articles:54,rag_documents:1329,rag_embedded:1329})) if(c[k]!==v) fail(`production ${k}: expected ${v}, got ${c[k]}`);
+          if(x.meta_version!=='50.3'||x.gateway_meta_version!=='50.3') fail(`pre-merge production Meta must remain exactly 50.3, got ${x.meta_version}/${x.gateway_meta_version}`);
+          if(x.public_data?.version!=='2.15.0') fail(`pre-merge production Public Data must remain 2.15.0, got ${x.public_data?.version}`);
+          if(x.photophysics?.version!=='1.2.0'||x.photophysics?.two_pass_gate!==true||x.checks?.photophysics_two_pass_gate!==true) fail('pre-merge production two-pass photophysics 1.2.0 baseline is not intact');
+          if(x.smart_rag?.version!=='9.19.0'||x.research_assistant?.version!=='10.4.1') fail('pre-merge production RAG/Research Assistant baseline changed unexpectedly');
+          console.log('Pre-merge production rev.7 / Meta 50.3 / Public Data 2.15.0 / Photophysics 1.2.0 baseline PASS');
+          NODE
       - name: Run full post-merge production browser QA
         if: github.event_name != 'pull_request'
         run: npm run qa:browser
