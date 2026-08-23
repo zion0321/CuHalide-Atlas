@@ -41,7 +41,19 @@ test('pre-merge production backend rev.7 is ready', async ({ request }) => {
     rag_documents: 1329,
     rag_embedded: 1329,
   });
-  expect(x.photophysics).toMatchObject({ok:true,version:'1.2.0',two_pass_gate:true,primary_files_exposed:false,raw_evidence_locators_exposed:false});
+  expect(x.photophysics).toMatchObject({
+    ok: true,
+    version: '1.3.0',
+    publication_policy: 'pass_a_curated_or_two_pass_verified',
+    checks: {
+      invalid_published_pass_a_gate: 0,
+      ineligible_measurement_projection_leaks: 0,
+      raw_primary_files_exposed: false,
+      raw_evidence_locators_exposed: false,
+      two_pass_status_preserved: true,
+      conflicts_fail_closed: true,
+    },
+  });
 });
 
 test('v50 living portal exposes Current Curated rev.7', async ({ page, request }) => {
@@ -95,11 +107,12 @@ test('runtime health is exact final rev.7 contract', async ({ request }) => {
     current_curated_contract: true,
     motif_taxonomy_contract: true,
     photophysics_contract: true,
-    photophysics_two_pass_gate: true,
+    photophysics_staged_publication: true,
     photophysics_private_evidence_guard: true,
     rag_embeddings_complete: true,
     local_motif_global_dimension_separation: true,
   });
+  expect(x.checks).not.toHaveProperty('photophysics_two_pass_gate');
 });
 
 test('manifest sitemap and Motif Atlas agree with final rev.7', async ({ request, page }) => {
@@ -120,13 +133,21 @@ test('manifest sitemap and Motif Atlas agree with final rev.7', async ({ request
     motif_unresolved_rows: 318,
   });
   expect(j.runtime).toMatchObject({
-    meta_version: '50.3',
-    public_data_version: '2.15.0',
-    photophysics_contract_version: '1.2.0',
+    meta_version: '50.4',
+    public_data_version: '2.16.0',
+    photophysics_contract_version: '1.3.0',
     smart_rag_version: '9.19.0',
     research_assistant_version: '10.4.1',
   });
-  expect(j.photophysics).toMatchObject({public_projection:'two-pass-verified-only',raw_primary_files:false,raw_evidence_locators:false,analysis_eligibility_explicit:true});
+  expect(j.photophysics).toMatchObject({
+    public_projection: 'pass-a-curated-or-two-pass-verified',
+    verification_stage_explicit: true,
+    two_pass_identity_preserved: true,
+    measurement_conflicts_fail_closed: true,
+    raw_primary_files: false,
+    raw_evidence_locators: false,
+    analysis_eligibility_explicit: true,
+  });
   expect(j.frozen_release).toMatchObject({ version: '3.0.2', structure_phase_rows: 878, immutable: true });
 
   const s = await request.get(`${BASE}/sitemap.xml`);
