@@ -101,7 +101,7 @@ The rev.7 staged-review runtime contract is:
 Current queries use the rev.7 full-current evidence corpus. Exact counts and protected structure-grain scientific boundaries remain deterministic. Structured photophysics uses an explicit staged-verification policy:
 
 - **Pass A curated** means the primary-evidence curation gate is complete for the article and its exposed sample/measurement/value records. It does **not** mean that independent Pass B verification has been completed.
-- **Two-pass verified** means Pass A and independent Pass B are complete and the article-level review agrees.
+- **Two-pass verified** means Pass A and independent Pass B are complete and the article-level review agrees. The machine-readable verification stage for this state is `two_pass_verified` (the human-readable label is also referred to as “two-pass verified”).
 - Measurement-level QC remains fail-closed in both stages. A source-conflicted, unresolved or otherwise ineligible measurement stays withheld even when other measurements from the same Pass A article are exposed.
 - Quantitative-analysis eligibility is a separate flag and is never implied merely by publication-stage eligibility.
 
