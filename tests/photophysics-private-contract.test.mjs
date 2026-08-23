@@ -31,18 +31,13 @@ test('canonical photophysics schema history is versioned without private curatio
   assert.ok(migrations.includes('20260818133430_add_scintillation_performance_observation_v1.sql'));
   assert.equal(canonicalMigrationNames.length, 27, `expected 27 canonical schema/ontology migrations, found ${canonicalMigrationNames.length}`);
   for (const name of postAuditMigrationNames) assert.ok(migrations.includes(name), `missing production-versioned migration ${name}`);
-
   const shorthand = migrations.filter(name => /^20260819_(?:material_photophysics_layer|internal_photophysics_fk_indexes)|^20260820_(?!024437_photophysics_mechanism_registry_v1)/.test(name));
   assert.deepEqual(shorthand, [], `shorthand migration filenames must not coexist with production versions: ${shorthand.join(', ')}`);
-
   for (const name of canonicalMigrationNames) {
     const text = read(`supabase/migrations/${name}`);
-    const disallowedInsert = /insert\s+into\s+atlas_internal\.cuhalide_photophysics_(?!property_dictionary_v1)/i.test(text);
-    const disallowedUpdate = /update\s+atlas_internal\.cuhalide_photophysics_/i.test(text);
-    const disallowedDelete = /delete\s+from\s+atlas_internal\.cuhalide_photophysics_/i.test(text);
-    assert.equal(disallowedInsert, false, `${name} contains private curation INSERT`);
-    assert.equal(disallowedUpdate, false, `${name} contains private curation UPDATE`);
-    assert.equal(disallowedDelete, false, `${name} contains private curation DELETE`);
+    assert.equal(/insert\s+into\s+atlas_internal\.cuhalide_photophysics_(?!property_dictionary_v1)/i.test(text), false, `${name} contains private curation INSERT`);
+    assert.equal(/update\s+atlas_internal\.cuhalide_photophysics_/i.test(text), false, `${name} contains private curation UPDATE`);
+    assert.equal(/delete\s+from\s+atlas_internal\.cuhalide_photophysics_/i.test(text), false, `${name} contains private curation DELETE`);
   }
 });
 
@@ -67,9 +62,7 @@ test('typed mechanism registry preserves evidence, claim polarity and fail-close
   assert.match(mechanism, /mechanism_evidence_mismatch/);
   assert.match(mechanism, /analysis_eligible_unresolved_mechanisms/);
   assert.match(mechanism, /revoke all on atlas_internal\.cuhalide_photophysics_mechanism_v1 from public, anon, authenticated/i);
-
-  const privateCurationDml = /(?:insert\s+into|update|delete\s+from)\s+atlas_internal\.cuhalide_photophysics_mechanism_v1\b/i;
-  assert.equal(privateCurationDml.test(mechanism), false, 'mechanism migration must contain schema/ontology only, not private mechanism curation rows');
+  assert.equal(/(?:insert\s+into|update|delete\s+from)\s+atlas_internal\.cuhalide_photophysics_mechanism_v1\b/i.test(mechanism), false, 'mechanism migration must contain schema/ontology only, not private mechanism curation rows');
 });
 
 test('expanded mechanism vocabulary preserves mixed and ligand-localized assignments without forced remapping', () => {
@@ -95,13 +88,7 @@ test('nonradiative relaxation requires an explicit facilitating context rather t
 test('superseded public-schema prototype is frozen read-only and explicitly non-canonical', () => {
   const freeze = read('supabase/migrations/20260819170527_retire_public_photophysics_prototype_v1.sql');
   const doc = read('docs/MATERIAL_PHOTOPHYSICS_AUDIT_V1.md');
-  for (const table of [
-    'cuhalide_atlas_material_entities',
-    'cuhalide_atlas_photophysics_measurements',
-    'cuhalide_atlas_photophysics_mechanisms',
-    'cuhalide_atlas_photophysics_evidence',
-    'cuhalide_atlas_photophysics_review'
-  ]) {
+  for (const table of ['cuhalide_atlas_material_entities','cuhalide_atlas_photophysics_measurements','cuhalide_atlas_photophysics_mechanisms','cuhalide_atlas_photophysics_evidence','cuhalide_atlas_photophysics_review']) {
     assert.match(freeze, new RegExp(`revoke all on public\\.${table} from service_role`, 'i'));
     assert.match(freeze, new RegExp(`grant select on public\\.${table} to service_role`, 'i'));
   }
@@ -119,13 +106,16 @@ test('runtime API does not expose the private photophysics staging schema', () =
   assert.deepEqual(exposed, [], `private photophysics schema referenced by public runtime: ${exposed.join(', ')}`);
 });
 
-test('public record renderer reaches photophysics only through the whitelisted public contract', () => {
+test('public record renderer reaches staged photophysics only through the whitelisted public contract', () => {
   const record = read('api/record-current.js');
   const proxy = read('api/public-data.js');
-  assert.match(record, /cuhalide-atlas-public-data-v2/);
-  assert.match(record, /PHOTOPHYSICS_CONTRACT='1\.2\.0'/);
+  assert.match(record, /cuhalide-atlas-public-data-v3/);
+  assert.match(record, /PHOTOPHYSICS_CONTRACT='1\.3\.0'/);
+  assert.match(record, /Pass A curated/);
   assert.match(record, /Two-pass verified/);
+  assert.match(record, /Pass B verification has not yet been completed/);
   assert.doesNotMatch(record, /evidence_locator|source_file|source_sha256|atlas_internal/i);
-  assert.match(proxy, /PUBLIC_DATA_VERSION='2\.15\.0'/);
-  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.2\.0'/);
+  assert.match(proxy, /PUBLIC_DATA_VERSION='2\.16\.0'/);
+  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.3\.0'/);
+  assert.match(proxy, /cuhalide-atlas-public-data-v3/);
 });
