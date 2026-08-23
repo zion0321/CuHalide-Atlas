@@ -86,23 +86,32 @@ See [`docs/CURRENT_CURATED_R7_2026-08-19.md`](docs/CURRENT_CURATED_R7_2026-08-19
 
 ## Public runtime contract
 
-The rev.7 review runtime contract is:
+The rev.7 staged-review runtime contract is:
 
 - Site: **v50**
 - UI: **50.2**
-- Metadata gateway: **50.3**
-- Public Data: **2.15.0**
-- Structured Photophysics contract: **1.2.0**
+- Metadata gateway: **50.4**
+- Public Data: **2.16.0**
+- Structured Photophysics contract: **1.3.0**
 - Smart RAG: **9.19.0**
 - Research Assistant: **10.4.1**
 - Motif Atlas: **1.2**
 - Current evidence corpus: **1,329 BGE-M3 documents / 1,329 embeddings**
 
-Current queries use the rev.7 full-current evidence corpus. Exact counts and protected structure-grain scientific boundaries remain deterministic. The structured photophysics projection is fail-closed: only article reviews that pass Pass A, Pass B and explicit agreement expose normalized sample/measurement/value/mechanism records. Every exposed value retains its sample-state grain and a separate quantitative-analysis-eligibility flag. Frozen 3.0.2 evidence is consulted only when a question explicitly asks for the archived snapshot or historical denominator. Literature Watch candidate metadata remains outside curated evidence until promotion through the defined review/QC gate.
+Current queries use the rev.7 full-current evidence corpus. Exact counts and protected structure-grain scientific boundaries remain deterministic. Structured photophysics uses an explicit staged-verification policy:
+
+- **Pass A curated** means the primary-evidence curation gate is complete for the article and its exposed sample/measurement/value records. It does **not** mean that independent Pass B verification has been completed.
+- **Two-pass verified** means Pass A and independent Pass B are complete and the article-level review agrees.
+- Measurement-level QC remains fail-closed in both stages. A source-conflicted, unresolved or otherwise ineligible measurement stays withheld even when other measurements from the same Pass A article are exposed.
+- Quantitative-analysis eligibility is a separate flag and is never implied merely by publication-stage eligibility.
+
+This staged policy allows the living review portal to expose carefully curated first-pass evidence without falsely presenting it as independently double-verified. Pass B can subsequently promote or correct individual records without rewriting the scientific entity model. Frozen 3.0.2 evidence is consulted only when a question explicitly asks for the archived snapshot or historical denominator. Literature Watch candidate metadata remains outside curated evidence until promotion through the defined review/QC gate.
 
 ## Public/private boundary
 
-Review access is intentionally **query-and-view**, not bulk redistribution. Review pages expose selected bibliographic, structural, crystallographic, motif, scope, evidence-status and two-pass-verified photophysics fields. The photophysics projection does **not** expose primary source filenames, raw publisher files, raw evidence locators, internal sample IDs or unpublished adjudication notes; processed/composite/device states remain distinct from crystallographic structure rows. The following remain private research assets: complete normalized tables/raw payloads, exact stored publisher abstracts, primary PDF/SI/CIF files, field-evidence excerpts and locators, candidate scores/reason codes/source payloads, and internal QA/adjudication artifacts. `/api/export` is intentionally unavailable.
+Review access is intentionally **query-and-view**, not bulk redistribution. Review pages may expose selected bibliographic, structural, crystallographic, motif, scope, evidence-status and staged photophysics fields. The photophysics projection does **not** expose primary source filenames, raw publisher files, raw evidence locators, internal sample IDs or unpublished adjudication notes; processed/composite/device states remain distinct from crystallographic structure rows.
+
+The following remain private research assets: complete normalized tables/raw payloads, exact stored publisher abstracts, primary PDF/SI/CIF files, field-evidence excerpts and raw evidence locators, candidate scores/reason codes/source payloads, and internal QA/adjudication artifacts. `/api/export` is intentionally unavailable.
 
 A manuscript-specific minimal dataset can be deposited separately when required for reproducibility. No permanent repository DOI or blanket project-wide license is asserted until the owner authorizes archival metadata and rights decisions.
 
