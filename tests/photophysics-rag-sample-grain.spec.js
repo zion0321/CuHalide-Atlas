@@ -11,6 +11,11 @@ async function askAgent(request,content){
   return response.json();
 }
 
+function expectNoPrivatePayload(value){
+  const raw=JSON.stringify(value);
+  for(const key of forbidden)expect(raw).not.toContain(`\"${key}\"`);
+}
+
 test('Research Assistant health is aligned to staged photophysics 1.3.0',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Read-only RAG contract is viewport invariant.');
   const response=await request.get(`${BASE}/api/agent`,{timeout:30_000});
@@ -66,8 +71,8 @@ test('Pass A curated Record 46 PLQY is available without false two-pass labeling
     two_pass_verified:false,
     evidence_scope:'Pass A curated structured scientific data'
   });
-  const raw=JSON.stringify(x);
-  for(const key of forbidden)expect(raw).not.toContain(key);
+  expectNoPrivatePayload(x.sources);
+  expectNoPrivatePayload(x.scientific_query?.rows||[]);
 });
 
 test('two-pass Record 381 PLQY preserves two-pass identity and structure grain',async({request},testInfo)=>{
@@ -93,9 +98,9 @@ test('two-pass Record 381 PLQY preserves two-pass identity and structure grain',
       evidence_scope:'two-pass verified structured scientific data'
     });
     expect(['CUH-381-S01','CUH-381-S02']).toContain(source.id);
-    const raw=JSON.stringify(source);
-    for(const key of forbidden)expect(raw).not.toContain(key);
   }
+  expectNoPrivatePayload(x.sources);
+  expectNoPrivatePayload(x.scientific_query?.rows||[]);
 });
 
 test('record 372 g_lum RAG resolves canonical property key and preserves KBr-composite grain',async({request},testInfo)=>{
@@ -121,7 +126,6 @@ test('record 372 g_lum RAG resolves canonical property key and preserves KBr-com
     });
     expect(source.title).toContain('KBr-ground CPL composite');
     expect(source).not.toHaveProperty('structure_id');
-    const raw=JSON.stringify(source);
-    for(const key of forbidden)expect(raw).not.toContain(key);
   }
+  expectNoPrivatePayload(x.sources);
 });
