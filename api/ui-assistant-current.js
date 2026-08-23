@@ -7,6 +7,7 @@ const LAST_MODIFIED=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
 const SAMPLE_GRAIN_MARKER='CUHALIDE_PHOTOPHYSICS_SAMPLE_GRAIN_UI_V1';
 const VISIBLE_PHOTOPHYSICS_MARKER='CUHALIDE_VISIBLE_PHOTOPHYSICS_UI_V1';
 const PHOTOPHYSICS_ROUTE_MARKER='CUHALIDE_PHOTOPHYSICS_NATIVE_ROUTE_V1';
+const PORTAL_UX_MARKER='CUHALIDE_PORTAL_UX_V1';
 
 function hardenSourceCards(body){
   if(!body.includes('function renderSources(rows)'))return body;
@@ -43,6 +44,15 @@ function injectVisiblePhotophysicsAssets(body){
   return out;
 }
 
+function injectPortalUxAssets(body){
+  if(body.includes(PORTAL_UX_MARKER))return body;
+  if(!body.includes('</head>')||!body.includes('</body>'))throw new Error('portal UX: document shell markers missing');
+  let out=body.replace('</head>',`<link rel="stylesheet" href="/ui-ux-v1.css?v=1.0.0">\n<!-- ${PORTAL_UX_MARKER} -->\n</head>`);
+  out=out.replace('</body>','<script src="/ui-ux-v1.js?v=1.0.0" defer></script>\n</body>');
+  if(!out.includes(PORTAL_UX_MARKER)||!out.includes('ui-ux-v1.js'))throw new Error('portal UX asset injection failed');
+  return out;
+}
+
 function normalize(body){
   if(typeof body!=='string')return body;
   let out=body
@@ -59,6 +69,7 @@ function normalize(body){
   out=hardenSourceCards(out);
   out=extendPhotophysicsRoute(out);
   out=injectVisiblePhotophysicsAssets(out);
+  out=injectPortalUxAssets(out);
   return out;
 }
 
