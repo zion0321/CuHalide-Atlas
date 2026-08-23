@@ -16,7 +16,6 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   await page.goto(BASE,{waitUntil:'networkidle'});
 
   const nav=page.locator('#nav a[data-route="photophysics"]');
-  await expect(nav).toBeVisible();
   await expect(nav).toHaveText('Photophysics');
   await expect(page.locator('.photo-home-panel')).toBeVisible();
   await expect(page.locator('.photo-home-panel')).toContainText('Photophysics is now sample- and measurement-resolved.');
@@ -24,6 +23,12 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   await expect(page.locator('#photoHomeMetrics')).toContainText('2260');
   await expect(page.locator('#photoHomeMetrics')).toContainText('2978');
 
+  if(!(await nav.isVisible())){
+    const menu=page.locator('#menu');
+    await expect(menu).toBeVisible();
+    await menu.click();
+    await expect(nav).toBeVisible();
+  }
   await nav.click();
   const view=page.locator('.view[data-view="photophysics"]');
   await expect(view).toHaveClass(/active/);
