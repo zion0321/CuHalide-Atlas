@@ -91,7 +91,8 @@ test('rev.7 wrappers normalize living UI and staged photophysics provenance with
 test('metadata health and manifest carry exact rev.7 denominators and staged verification policy',()=>{
   const meta=read('api/meta.js');
   for(const token of ["META_VERSION='50.4'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_VERSION='1.3.0'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:628','motif_unresolved_rows:318','photophysics_contract_version:PHOTOPHYSICS_VERSION',"smart_rag_version:'9.19.0'","research_assistant_version:'10.4.1'", "release_state:'prepublication'", "indexing:'disabled-prepublication'","structured_photophysics:true","photophysics_publication_policy='pass-a-curated-or-two-pass-verified'","public_projection:'pass-a-curated-or-two-pass-verified'","two_pass_identity_preserved:true","measurement_conflicts_fail_closed:true"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
-  assert.match(meta,/frontend v50 active; backend rev\.7 deterministic contract; staged photophysics verification preview/);
+  assert.match(meta,/frontend v50 active; backend Current Curated rev\.7 deterministic contract; Structured Photophysics 1\.3\.0 staged publication/);
+  assert.doesNotMatch(meta,/staged photophysics verification preview/);
 });
 
 test('assistant proxy exposes rev.7 / 10.4 / 9.19 while preserving non-idempotent retry guard',()=>{
