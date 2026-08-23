@@ -6,6 +6,7 @@ const CONTENT_DATE='2026-08-19';
 const LAST_MODIFIED=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
 const SAMPLE_GRAIN_MARKER='CUHALIDE_PHOTOPHYSICS_SAMPLE_GRAIN_UI_V1';
 const VISIBLE_PHOTOPHYSICS_MARKER='CUHALIDE_VISIBLE_PHOTOPHYSICS_UI_V1';
+const PHOTOPHYSICS_ROUTE_MARKER='CUHALIDE_PHOTOPHYSICS_NATIVE_ROUTE_V1';
 
 function hardenSourceCards(body){
   if(!body.includes('function renderSources(rows)'))return body;
@@ -19,6 +20,17 @@ function renderSources(rows){$('sources').innerHTML=rows.length?rows.map(s=>s.ty
 async function loadWatch`;
   const out=body.replace(pattern,hardened);
   if(!out.includes(SAMPLE_GRAIN_MARKER))throw new Error('photophysics sample-grain renderer marker missing');
+  return out;
+}
+
+function extendPhotophysicsRoute(body){
+  if(body.includes(PHOTOPHYSICS_ROUTE_MARKER))return body;
+  const from="const name=['home','articles','structures','polar','rag','watch','methods','citation'].includes(base)?base:'home';";
+  const to="const name=['home','articles','structures','photophysics','polar','rag','watch','methods','citation'].includes(base)?base:'home';/* "+PHOTOPHYSICS_ROUTE_MARKER+" */";
+  const count=body.split(from).length-1;
+  if(count!==1)throw new Error(`visible photophysics route: expected one core route allowlist, found ${count}`);
+  const out=body.replace(from,to);
+  if(!out.includes(PHOTOPHYSICS_ROUTE_MARKER))throw new Error('visible photophysics route marker missing');
   return out;
 }
 
@@ -45,6 +57,7 @@ function normalize(body){
     .split('cc.live_revision||6').join('cc.live_revision||7')
     .split('This revision adds four primary-evidence-reviewed articles and eight SCXRD structure determinations while preserving the immutable archived scientific snapshot 3.0.2.').join('Rev.7 completes a full structure-truth re-audit across the 946-row Current Curated snapshot while preserving the immutable archived scientific snapshot 3.0.2.');
   out=hardenSourceCards(out);
+  out=extendPhotophysicsRoute(out);
   out=injectVisiblePhotophysicsAssets(out);
   return out;
 }
