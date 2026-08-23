@@ -7,7 +7,7 @@ const AXE_TAGS=['wcag2a','wcag2aa','wcag21aa','wcag22aa'];
 
 async function openArticle(page,id){
   await page.locator(`.view[data-view="photophysics"] button[data-article="${id}"]`).click();
-  await expect(page.locator('#modal')).toHaveClass(/open/);
+  await expect(page.locator('#modal')).toBeVisible({timeout:12000});
   await expect(page.locator('#modalBody .photo-modal-section')).toBeVisible({timeout:15000});
   return page.locator('#modalBody .photo-modal-section');
 }
@@ -56,7 +56,7 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   for(const key of forbidden)expect(verifiedText).not.toContain(key);
 
   await page.keyboard.press('Escape');
-  await expect(page.locator('#modal')).not.toHaveClass(/open/);
+  await expect(page.locator('#modal')).toBeHidden();
 
   const passA=await openArticle(page,46);
   await expect(passA).toContainText('Pass A curated');
