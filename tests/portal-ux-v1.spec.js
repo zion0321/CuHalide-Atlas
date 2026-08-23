@@ -17,6 +17,8 @@ test('home presents four research paths and a global search affordance',async({p
   await expect(page.locator('.ux-start-grid')).toContainText('Structures');
   await expect(page.locator('.ux-start-grid')).toContainText('Photophysics');
   await expect(page.locator('.ux-start-grid')).toContainText('Research Assistant');
+  await expect(page.locator('#nav [data-route="photophysics"]')).toHaveText('Photophysics');
+  await expect(page.locator('#nav [data-route="rag"]')).toHaveText('Research Assistant');
   await expect(page.locator('.ux-review-chip')).toContainText('Prepublication review');
   await expect(page.locator('#nav [data-route="home"]')).toHaveAttribute('aria-current','page');
   await axe(page,'home with UX layer');
