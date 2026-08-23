@@ -7,6 +7,8 @@ const LAST_MODIFIED=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
 const SAMPLE_GRAIN_MARKER='CUHALIDE_PHOTOPHYSICS_SAMPLE_GRAIN_UI_V1';
 const VISIBLE_PHOTOPHYSICS_MARKER='CUHALIDE_VISIBLE_PHOTOPHYSICS_UI_V1';
 const PHOTOPHYSICS_ROUTE_MARKER='CUHALIDE_PHOTOPHYSICS_NATIVE_ROUTE_V1';
+const PORTAL_UX_MARKER='CUHALIDE_PORTAL_UX_V1';
+const PORTAL_UX_SHELL_MARKER='CUHALIDE_PORTAL_UX_SHELL_V1';
 
 function hardenSourceCards(body){
   if(!body.includes('function renderSources(rows)'))return body;
@@ -43,6 +45,51 @@ function injectVisiblePhotophysicsAssets(body){
   return out;
 }
 
+function injectPortalUxShell(body){
+  if(body.includes(PORTAL_UX_SHELL_MARKER))return body;
+  let out=body;
+  const oldHero='<h1>Evidence-grounded Cu(I) halide literature and structures.</h1><p class="hero-copy">Search primary-evidence-reviewed literature, 946 atomic/context structure records and structure-resolved relationships. Current Curated rev.7 explicitly separates reported composition, local Cu–X motif and global connectivity dimensionality; unresolved values remain unresolved rather than inferred.</p>';
+  const newHero='<h1>Evidence-grounded Cu(I) halide knowledge, from structure to photophysics.</h1><p class="hero-copy">Search curated literature, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or ask the Research Assistant for evidence-linked scientific synthesis.</p>';
+  if(out.includes(oldHero))out=out.replace(oldHero,newHero);
+  else if(!out.includes('from structure to photophysics.'))throw new Error('portal UX shell: hero copy anchor missing');
+
+  out=out.split('<a data-route="rag" href="#rag">Smart RAG</a>').join('<a data-route="rag" href="#rag">Research Assistant</a>');
+  if(!out.includes('data-route="photophysics"')){
+    const polar='<a data-route="polar" href="#polar">Polar</a>';
+    const count=out.split(polar).length-1;
+    if(count!==1)throw new Error(`portal UX shell: expected one Polar navigation anchor, found ${count}`);
+    out=out.replace(polar,'<a data-route="photophysics" href="#photophysics">Photophysics</a>'+polar);
+  }
+  if(!out.includes('<a data-route="rag" href="#rag">Research Assistant</a>')||!out.includes('<a data-route="photophysics" href="#photophysics">Photophysics</a>'))throw new Error('portal UX shell: primary navigation normalization failed');
+
+  if(!out.includes('id="uxHeroSearch"')){
+    const tag='<div class="tags">';
+    const count=out.split(tag).length-1;
+    if(count<1)throw new Error('portal UX shell: hero tags anchor missing');
+    out=out.replace(tag,'<form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search" autocomplete="off" placeholder="Search title, DOI, formula, space group…"><button type="submit">Search</button></form><small class="ux-hero-search-hint">Searches the curated literature and Core-Included structure register.</small>'+tag);
+  }
+
+  if(!out.includes('<section class="shell ux-start">')){
+    const dashboard='<div class="shell dashboard section">';
+    const count=out.split(dashboard).length-1;
+    if(count!==1)throw new Error(`portal UX shell: expected one home dashboard anchor, found ${count}`);
+    const paths='<section class="shell ux-start"><div class="ux-start-head"><div><p class="eyebrow">Research paths</p><h2>Start with the evidence layer you need.</h2></div><p>Each route preserves its own scientific grain. Article evidence, structure identity and sample-resolved photophysics are not silently merged.</p></div><div class="ux-start-grid"><a class="ux-start-card" href="#articles"><span>01 · Literature</span><strong>Find the source article</strong><small>Search DOI, title, compound families and curated article-level evidence.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#structures"><span>02 · Structures</span><strong>Resolve crystallography</strong><small>Inspect formula, phase, dimensionality, space group, confidence and source mapping.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#photophysics"><span>03 · Photophysics</span><strong>Inspect measurements</strong><small>Keep crystal, powder, composite, film and device measurements at the correct sample grain.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#rag"><span>04 · Research Assistant</span><strong>Ask across evidence</strong><small>Use conversational LLM synthesis with automatic retrieval when Atlas evidence is required.</small><i aria-hidden="true">→</i></a></div></section>';
+    out=out.replace(dashboard,paths+dashboard);
+  }
+  out=out.replace('</main>',`<!-- ${PORTAL_UX_SHELL_MARKER} -->\n</main>`);
+  if(!out.includes(PORTAL_UX_SHELL_MARKER)||!out.includes('id="uxHeroSearch"')||!out.includes('<section class="shell ux-start">'))throw new Error('portal UX shell injection failed');
+  return out;
+}
+
+function injectPortalUxAssets(body){
+  if(body.includes(PORTAL_UX_MARKER))return body;
+  if(!body.includes('</head>')||!body.includes('</body>'))throw new Error('portal UX: document shell markers missing');
+  let out=body.replace('</head>',`<link rel="stylesheet" href="/ui-ux-v1.css?v=1.0.0">\n<!-- ${PORTAL_UX_MARKER} -->\n</head>`);
+  out=out.replace('</body>','<script src="/ui-ux-v1.js?v=1.0.0" defer></script>\n</body>');
+  if(!out.includes(PORTAL_UX_MARKER)||!out.includes('ui-ux-v1.js'))throw new Error('portal UX asset injection failed');
+  return out;
+}
+
 function normalize(body){
   if(typeof body!=='string')return body;
   let out=body
@@ -59,6 +106,8 @@ function normalize(body){
   out=hardenSourceCards(out);
   out=extendPhotophysicsRoute(out);
   out=injectVisiblePhotophysicsAssets(out);
+  out=injectPortalUxShell(out);
+  out=injectPortalUxAssets(out);
   return out;
 }
 

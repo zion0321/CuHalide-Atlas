@@ -3,14 +3,13 @@ import recordHandler from './record.js';
 
 const CURRENT_REVISION='7';
 const CURATED_DATE='2026-08-19';
-const PAGE_DATE='2026-08-23';
+const PAGE_DATE='2026-08-24';
 const LAST_MODIFIED=new Date(`${PAGE_DATE}T00:00:00Z`).toUTCString();
 const ROBOTS_META='<meta name="robots" content="noindex,nofollow,noarchive">';
 const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3';
 const PHOTOPHYSICS_CONTRACT='1.3.0';
 
 const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const one=(v)=>Array.isArray(v)?v[0]:v;
 
 function normalize(body){
   if(typeof body!=='string')return body;
@@ -20,18 +19,19 @@ function normalize(body){
     .split('<meta name="robots" content="noindex,nofollow">').join(ROBOTS_META)
     .split('Current Curated rev.6 · primary-evidence reviewed through 18 Aug 2026').join('Current Curated rev.7 · primary-evidence reviewed through 19 Aug 2026')
     .split('current-r6').join('current-r7')
-    .split('2026-08-18').join(CURATED_DATE);
+    .split('2026-08-18').join(CURATED_DATE)
+    .split('<a href="https://cuhalide-atlas-v3.vercel.app/#structures">Structures</a><a href="https://cuhalide-atlas-v3.vercel.app/motifs">Motifs</a><a href="https://cuhalide-atlas-v3.vercel.app/#rag">Smart RAG</a>')
+    .join('<a href="https://cuhalide-atlas-v3.vercel.app/#structures">Structures</a><a href="https://cuhalide-atlas-v3.vercel.app/motifs">Motifs</a><a href="https://cuhalide-atlas-v3.vercel.app/#photophysics">Photophysics</a><a href="https://cuhalide-atlas-v3.vercel.app/#rag">Research Assistant</a>');
 }
 
 function inlineScriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))!==null){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
 function syncCsp(html,res){const current=String(res.getHeader?.('Content-Security-Policy')||'');if(!current)return;const hashes=inlineScriptHashes(html);if(!hashes.length)return;const next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src ${hashes.join(' ')};`);if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');res.setHeader('Content-Security-Policy',next)}
 
 async function fetchPhotophysics(req){
-  const q=req?.query||{};
   let incoming;
   try{incoming=new URL(String(req?.url||'/'),'http://local')}catch{incoming=new URL('http://local/')}
-  const kind=String(one(q.kind)||incoming.searchParams.get('kind')||'').toLowerCase();
-  const id=String(one(q.id)||incoming.searchParams.get('id')||'').trim();
+  const kind=String(incoming.searchParams.get('kind')||'').toLowerCase();
+  const id=String(incoming.searchParams.get('id')||'').trim();
   if(!['article','structure'].includes(kind)||!id)return null;
   try{
     const u=new URL(PUBLIC_DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);
