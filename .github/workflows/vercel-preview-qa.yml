@@ -69,6 +69,8 @@ jobs:
         run: npm run qa:browser -- --grep "manifest sitemap and Motif Atlas agree with final rev.7"
       - name: Verify Research Assistant runtime contract
         run: npm run qa:browser -- --grep "Research Assistant reports 10.4 / 9.19 and complete rev.7 RAG"
+      - name: Verify staged photophysics through Research Assistant
+        run: npx playwright test tests/photophysics-rag-sample-grain.spec.js --project=desktop-chromium
       - name: Verify rev.7 structure-truth corrections
         run: npm run qa:browser -- --grep "final rev.7 structure-truth corrections are exposed at structure grain"
       - name: Verify local/global connectivity boundaries
