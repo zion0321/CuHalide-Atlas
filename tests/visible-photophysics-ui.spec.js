@@ -1,7 +1,9 @@
 import {test,expect} from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 const BASE=process.env.CUHALIDE_BASE_URL||'https://cuhalide-atlas-v3.vercel.app';
 const forbidden=['evidence_locator','raw_evidence_locator','source_file','private_path','internal_sample_id','candidate_score','reason_code'];
+const AXE_TAGS=['wcag2a','wcag2aa','wcag21aa','wcag22aa'];
 
 async function openArticle(page,id){
   await page.locator(`.view[data-view="photophysics"] button[data-article="${id}"]`).click();
@@ -63,6 +65,14 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   for(const key of forbidden)expect(passAText).not.toContain(key);
 
   expect(pageErrors,`page errors: ${pageErrors.join(' | ')}`).toEqual([]);
+});
+
+test('photophysics destination passes WCAG AA automated scan',async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=='desktop-chromium','single-project accessibility gate');
+  await page.goto(`${BASE}/#photophysics`,{waitUntil:'networkidle'});
+  await expect(page.locator('.view[data-view="photophysics"]')).toBeVisible();
+  const results=await new AxeBuilder({page}).withTags(AXE_TAGS).analyze();
+  expect(results.violations,results.violations.map(v=>`${v.id}:${v.nodes.length}`).join(', ')).toEqual([]);
 });
 
 test('visible photophysics remains usable without horizontal overflow on mobile',async({page},testInfo)=>{
