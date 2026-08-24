@@ -115,7 +115,7 @@ test('branded missing records remain 404 while carrying review-access governance
   expect(html).not.toContain('<script type="application/ld+json">');
 });
 
-test('manifest health data gateway and citation expose one governance state',async({request},testInfo)=>{
+test('manifest health data gateway citation assistant export and sitemap expose one governance state',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Governance metadata is viewport invariant; run once on desktop.');
 
   const manifestResponse=await request.get(`${BASE}/release-manifest.json`);
@@ -141,6 +141,31 @@ test('manifest health data gateway and citation expose one governance state',asy
   const data=await dataResponse.json();
   expect(data.data_scope).toBe('frozen_release');
   expect(data.record_context).toMatchObject({serving_context:'current_curated',serving_revision:7,core_record_origin:'frozen_release',core_record_origin_release:'3.0.2',attached_photophysics_context:'current_curated',attached_photophysics_contract:'1.3.0'});
+
+  const assistantResponse=await request.get(`${BASE}/api/agent`);
+  expect(assistantResponse.status()).toBe(200);
+  expect(header(assistantResponse,'x-cuhalide-publication-state')).toBe(STATE);
+  const assistant=await assistantResponse.json();
+  expect(assistant.publication_state).toBe(STATE);
+  expect(assistant.assistant_version).toBe('10.4.1');
+  expect(assistant.version).toBe('9.19.0');
+  expect(assistant.current_curated?.live_revision).toBe(7);
+
+  const exportResponse=await request.get(`${BASE}/api/export`);
+  expect(exportResponse.status()).toBe(410);
+  expect(header(exportResponse,'x-cuhalide-publication-state')).toBe(STATE);
+  const exportBody=await exportResponse.json();
+  expect(exportBody).toMatchObject({release:'3.0.2',publication_state:STATE,release_state:'prepublication',public_access:'query-and-view'});
+  expect(exportBody.error).toContain('prepublication review');
+
+  const sitemapResponse=await request.get(`${BASE}/sitemap.xml`);
+  expect(sitemapResponse.status()).toBe(200);
+  expect(header(sitemapResponse,'x-robots-tag')).toContain('noindex');
+  expect(header(sitemapResponse,'x-cuhalide-publication-state')).toBe(STATE);
+  expect(header(sitemapResponse,'x-cuhalide-sitemap-urls')).toBe('1257');
+  const sitemap=await sitemapResponse.text();
+  expect(sitemap).toContain('CuHalide Atlas prepublication-review sitemap');
+  expect((sitemap.match(/<url>/g)||[]).length).toBe(1257);
 
   const cffResponse=await request.get(`${BASE}/citation.cff`);
   expect(cffResponse.status()).toBe(200);
