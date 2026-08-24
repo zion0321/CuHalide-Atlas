@@ -82,7 +82,7 @@ Connectivity, stereochemistry and abbreviations are never inferred from analogy.
 
 ## Public ingress architecture
 
-The prepublication site uses a small number of intentional anonymous, read-only ingress functions. Historical compatibility functions behind them are **service-role-only upstreams** or explicit retirement stubs.
+The prepublication site uses a small number of intentional anonymous, read-only ingress functions. Historical compatibility functions behind them are **service-role-only upstreams**, narrow canonical aliases, or explicit retirement stubs.
 
 ### Public data
 
@@ -96,7 +96,7 @@ The Motif Atlas Vercel renderer also calls canonical `cuhalide-atlas-public-data
 
 The Vercel gateway and canonical v3 function both use explicit public-action allowlists. Unknown actions fail closed. Article and structure query RPCs enforce server-side page caps (24 and 50 respectively). Motif example results are capped at **24** during prepublication review.
 
-The historical `cuhalide-atlas-public-data-v2` slug is retired as HTTP 410. It has no database or service-role capability and is not part of any current runtime dependency chain.
+The historical `cuhalide-atlas-public-data-v2` slug is retained only as a **no-credential compatibility alias to canonical Public Data v3** for deterministic internal RAG components that still reference the historical slug. It has no database/service-role capability, performs no direct `/rest/v1` access, uses the same public action allowlist and Motif cap, and therefore cannot restore historical v2 data semantics. New code must use v3 directly; the alias may be retired after all internal references are migrated.
 
 ### Research Assistant
 
@@ -157,11 +157,11 @@ The Edge-function sources in this directory **are** expected to mirror the curre
 
 Temporary indexing, debugging, export, benchmark and obsolete compatibility endpoints must be removed or retained only as one of:
 
-1. a tightly scoped synchronized compatibility shim only while an active dependency still exists;
+1. a tightly scoped synchronized compatibility alias with no stronger privileges than the canonical endpoint;
 2. a service-role-only internal upstream with JWT verification enabled; or
 3. an HTTP 410 retirement stub.
 
-An `ACTIVE` Supabase function can therefore still be a safe retirement stub; source behavior and JWT configuration are authoritative. Once a live dependency is migrated to the canonical ingress, the compatibility slug should be retired rather than preserved indefinitely.
+An `ACTIVE` Supabase function can therefore still be a safe retirement stub; source behavior and JWT configuration are authoritative. Compatibility aliases must not possess database/service credentials and must not expose superseded semantics.
 
 ## Operational validation
 
