@@ -29,6 +29,7 @@ test('pre-merge production backend rev.7 is ready', async ({ request }) => {
   expect(r.status()).toBe(200);
   const x = await r.json();
   expect(x.ok).toBe(true);
+  expect(x.publication_state).toBe('prepublication-review');
   expect(x.current_curated.live_revision).toBe(7);
   expect(x.current_curated.counts).toMatchObject({
     structure_phase_rows: 946,
@@ -78,7 +79,7 @@ test('runtime health is exact final rev.7 contract', async ({ request }) => {
   const r = await request.get(`${BASE}/health.json`);
   expect(r.status()).toBe(200);
   const x = await r.json();
-  expect(x).toMatchObject({ ok: true, status: 'PASS', site_readiness: 'PASS' });
+  expect(x).toMatchObject({ ok: true, status: 'PASS', site_readiness: 'PASS', meta_version: '50.5', gateway_meta_version: '50.5', publication_state: 'prepublication-review' });
   expect(x.current_curated.live_revision).toBe(7);
   expect(x.current_curated.current_curated_through).toBe('2026-08-19');
   expect(x.current_curated.counts).toMatchObject({
@@ -119,6 +120,7 @@ test('manifest sitemap and Motif Atlas agree with final rev.7', async ({ request
   const m = await request.get(`${BASE}/release-manifest.json`);
   expect(m.status()).toBe(200);
   const j = await m.json();
+  expect(j.publication_state).toBe('prepublication-review');
   expect(j.current_curated).toMatchObject({
     revision: 7,
     curated_through: '2026-08-19',
@@ -133,7 +135,7 @@ test('manifest sitemap and Motif Atlas agree with final rev.7', async ({ request
     motif_unresolved_rows: 318,
   });
   expect(j.runtime).toMatchObject({
-    meta_version: '50.4',
+    meta_version: '50.5',
     public_data_version: '2.16.0',
     photophysics_contract_version: '1.3.0',
     smart_rag_version: '9.19.0',
