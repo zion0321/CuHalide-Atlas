@@ -32,7 +32,10 @@ function projectMotifAtlas(atlas,limit=24){
   }));
   const examples=(Array.isArray(a.examples)?a.examples:[]).slice(0,limit).map(r=>({
     structure_id:r?.structure_id??null,
+    record_id:r?.record_id??null,
     label:r?.label??null,
+    formula:r?.formula??null,
+    space_group:r?.space_group??null,
     primary_category:r?.primary_category??null,
     motif_formula:r?.motif_formula??null,
     dimensionality:r?.dimensionality??null,
