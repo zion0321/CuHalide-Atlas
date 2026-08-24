@@ -4,7 +4,9 @@ export default async function middleware(request){
   const incoming=new URL(request.url);
   const isRecord=incoming.pathname==='/api/record'||incoming.pathname==='/api/record-current';
   const isAssistantCompat=incoming.pathname==='/api/ui-assistant';
-  const target=new URL(isRecord?'/api/record-evidence-current':'/api/ui-assistant-current',request.url);
+  const assistantTarget=new URL('/api/ui-assistant-current',request.url);
+  const recordTarget=new URL('/api/record-evidence-current',request.url);
+  const target=isRecord?recordTarget:assistantTarget;
   if(isRecord||isAssistantCompat)target.search=incoming.search;
   const response=await fetch(target,{method:request.method,headers:request.headers,redirect:'follow'});
   const headers=new Headers(response.headers);
