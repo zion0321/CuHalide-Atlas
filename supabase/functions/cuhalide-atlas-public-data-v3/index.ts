@@ -1,43 +1,75 @@
-declare const Deno:any;
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
-const BASE=Deno.env.get('SUPABASE_URL')!,KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,REST=`${BASE}/rest/v1`;
-const UP=`${BASE}/functions/v1/cuhalide-atlas-public-data-v302-public`,RELEASE='3.0.2',VERSION='2.16.0',REV='7',PUBLIC='https://cuhalide-atlas-v3.vercel.app',PHOTOPHYSICS_CONTRACT='1.3.0',ORGANIC_COMPONENTS_CONTRACT='1.1.0';
+import { projectOrganic, organicComponentHealth } from './organic-components.ts';
+
+const BASE=Deno.env.get('SUPABASE_URL'), KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'), REST=`${BASE}/rest/v1`;
+const UP=`${BASE}/functions/v1/cuhalide-atlas-public-data-v302-public`;
+const RELEASE='3.0.2', VERSION='2.16.0', REV='7', PUBLIC='https://cuhalide-atlas-v3.vercel.app';
+const PHOTOPHYSICS_CONTRACT='1.3.0', ORGANIC_COMPONENTS_CONTRACT='1.1.0';
 const ALLOWED=new Set([PUBLIC,'http://localhost:8765','http://127.0.0.1:8765']);
 const AUTH={apikey:KEY,authorization:`Bearer ${KEY}`,accept:'application/json','content-type':'application/json'};
-type DepictionMeta={formula:string;charge:number;name?:string};
-const DEPICTIONS:Record<string,DepictionMeta>={
-'acetonitrile':{formula:'C2H3N',charge:0},'me2nh2':{formula:'C2H8N+',charge:1,name:'Dimethylammonium'},'gua':{formula:'CH6N3+',charge:1,name:'Guanidinium'},'tetraethylammonium':{formula:'C8H20N+',charge:1},'tetrapropylammonium':{formula:'C12H28N+',charge:1},'18c6':{formula:'C12H24O6',charge:0,name:'18-crown-6'},'toluene':{formula:'C7H8',charge:0},'2-methylpyridine':{formula:'C6H7N',charge:0},'2-ethylpyridine':{formula:'C7H9N',charge:0},'26-dimethylpyridine':{formula:'C7H9N',charge:0,name:'2,6-dimethylpyridine'},'35-dimethylpyridine':{formula:'C7H9N',charge:0,name:'3,5-dimethylpyridine'},'3-pic':{formula:'C6H7N',charge:0,name:'3-picoline'},'4-pic':{formula:'C6H7N',charge:0,name:'4-picoline'},'quinoline':{formula:'C9H7N',charge:0},'4-phenoxypyridine':{formula:'C11H9NO',charge:0},'pph3':{formula:'C18H15P',charge:0,name:'Triphenylphosphine'},'bis-diphenylphosphino-methane':{formula:'C25H22P2',charge:0},'1-2-bis-diphenylphosphino-benzene':{formula:'C30H24P2',charge:0},'1-3-di-4-pyridyl-propane':{formula:'C13H14N2',charge:0},'bpp':{formula:'C13H14N2',charge:0},'phs-c3-sph':{formula:'C15H16S2',charge:0},'phs-c5-sph':{formula:'C17H20S2',charge:0},'ptols-c5-stolp':{formula:'C19H24S2',charge:0},'1-4-dibenzyl-dabco-dication':{formula:'C20H26N2+2',charge:2},'1-4-bis-4-chlorobenzyl-dabco-dication':{formula:'C20H24Cl2N2+2',charge:2},'pr2-dabco':{formula:'C12H26N2+2',charge:2},
-'tetrabutylammonium':{formula:'C16H36N+',charge:1},'tert-butylammonium':{formula:'C4H12N+',charge:1},'tetraphenylphosphonium':{formula:'C24H20P+',charge:1},'triphenylphosphine':{formula:'C18H15P',charge:0},'trimethylsulfonium':{formula:'C3H9S+',charge:1},'ethyltrimethylammonium':{formula:'C5H14N+',charge:1},'ethyltripropylammonium':{formula:'C11H26N+',charge:1},'isopropyltriphenylphosphonium':{formula:'C21H22P+',charge:1},'n-butyltriphenylphosphonium':{formula:'C22H24P+',charge:1},'ethyltriphenylphosphonium':{formula:'C20H20P+',charge:1},'methyltriphenylphosphonium':{formula:'C19H18P+',charge:1},'tetraphenylarsonium':{formula:'C24H20As+',charge:1},'triphenylarsine':{formula:'C18H15As',charge:0},'acetamidinium':{formula:'C2H7N2+',charge:1},'imidazolium':{formula:'C3H5N2+',charge:1},'tetraethylphosphonium':{formula:'C8H20P+',charge:1},'tetramethylammonium':{formula:'C4H12N+',charge:1},'methylammonium':{formula:'CH6N+',charge:1},'n-octylammonium':{formula:'C8H20N+',charge:1},'n-hexylammonium':{formula:'C6H16N+',charge:1},'piperazinium':{formula:'C4H12N2+2',charge:2},'pyrazine':{formula:'C4H4N2',charge:0},'pyrrolidinium':{formula:'C4H10N+',charge:1},'triphenylphosphine-oxide':{formula:'C18H15OP',charge:0},'2-diphenylphosphino-pyridine':{formula:'C17H14NP',charge:0},'bis-2-diphenylphosphinophenyl-ether':{formula:'C36H28OP2',charge:0},'tri-p-tolylphosphine':{formula:'C21H21P',charge:0},'tri-o-tolylphosphine':{formula:'C21H21P',charge:0},'tris-3-methylphenyl-phosphine':{formula:'C21H21P',charge:0},'pyrimidine':{formula:'C4H4N2',charge:0},'2-methylpyrimidine':{formula:'C5H6N2',charge:0},'4-methylpyrimidine':{formula:'C5H6N2',charge:0},'3-methylmorpholine':{formula:'C5H11NO',charge:0},'2-methylpiperidine':{formula:'C6H13N',charge:0},'2-methylpyrrolidine':{formula:'C5H11N',charge:0},'3-piperidinol':{formula:'C5H11NO',charge:0}
-};
-const ALIASES:Record<string,string>={tea:'tetraethylammonium',tpa:'tetrapropylammonium',tms:'trimethylsulfonium',etma:'ethyltrimethylammonium',etpa:'ethyltripropylammonium',ipp:'isopropyltriphenylphosphonium',buph3p:'n-butyltriphenylphosphonium',pph3nbu:'n-butyltriphenylphosphonium',etph3p:'ethyltriphenylphosphonium',pph3et:'ethyltriphenylphosphonium',meph3p:'methyltriphenylphosphonium',mepph3:'methyltriphenylphosphonium',pph3me:'methyltriphenylphosphonium',ph3mep:'methyltriphenylphosphonium',pph3ipr:'isopropyltriphenylphosphonium',asph4:'tetraphenylarsonium',ph4as:'tetraphenylarsonium',asph3:'triphenylarsine',ph3as:'triphenylarsine',ph3p:'triphenylphosphine',ph3po:'triphenylphosphine-oxide',tep:'tetraethylphosphonium',me4n:'tetramethylammonium',menh3:'methylammonium',oa:'n-octylammonium',ha:'n-hexylammonium','diphenyl-2-pyridylphosphine':'2-diphenylphosphino-pyridine','r-3-methylmorpholine':'3-methylmorpholine','s-3-methylmorpholine':'3-methylmorpholine','rac-3-methylmorpholine':'3-methylmorpholine','r-2-methylpiperidine':'2-methylpiperidine','s-2-methylpiperidine':'2-methylpiperidine','r-2-methylpyrrolidine':'2-methylpyrrolidine','s-2-methylpyrrolidine':'2-methylpyrrolidine','r-3-piperidinol':'3-piperidinol','s-3-piperidinol':'3-piperidinol'};
-const NON_ORGANIC=new Set(['h','k2','rb2','cs3']);
-const COLLISION=new Set(['bttmpe']);
-const GENERIC=new Set(['nheterocycle']);
-function cors(req:Request){const o=req.headers.get('origin')||'';return{'access-control-allow-origin':ALLOWED.has(o)?o:PUBLIC,'access-control-allow-methods':'GET,HEAD,OPTIONS','access-control-allow-headers':'accept,content-type','vary':'Origin'}}
-function hdr(req:Request,ct='application/json; charset=utf-8'){return{...cors(req),'content-type':ct,'cache-control':'no-store','x-content-type-options':'nosniff','x-robots-tag':'noindex, nofollow','x-cuhalide-release':RELEASE,'x-cuhalide-public-data-version':VERSION,'x-cuhalide-public-access':'query-and-view','x-cuhalide-current-curated-revision':REV,'x-cuhalide-photophysics-contract':PHOTOPHYSICS_CONTRACT,'x-cuhalide-organic-components-contract':ORGANIC_COMPONENTS_CONTRACT}}
-const send=(req:Request,x:any,s=200)=>new Response(req.method==='HEAD'?null:JSON.stringify(x),{status:s,headers:hdr(req)});
-function patch(x:any){if(!x||typeof x!=='object')return x;x.version=VERSION;x.current_curated_revision=7;x.architecture=x.architecture||'full-current-atomic-structure-snapshot';if(typeof x.public_note==='string')x.public_note=x.public_note.replace(/rev\.6/g,'rev.7').replace(/2026-08-18/g,'2026-08-19');if(x.current_curated&&typeof x.current_curated==='object'&&x.current_curated.current_state)x.current_curated.current_state.live_revision=7;return x}
-async function rpc(name:string,body:any={}){const r=await fetch(`${REST}/rpc/${name}`,{method:'POST',headers:AUTH,body:JSON.stringify(body),signal:AbortSignal.timeout(30000)}),raw=await r.text();let x:any;try{x=raw?JSON.parse(raw):null}catch{x={error:'invalid contract response'}}if(!r.ok)throw Error(`${name} ${r.status}: ${x?.message||x?.error||raw.slice(0,160)}`);return x}
-function positiveInt(v:string|null){const n=Number(v);return Number.isInteger(n)&&n>0?n:null}
-function structureIds(raw:string|null){const out=[...new Set(String(raw||'').split(',').map(x=>x.trim()).filter(Boolean))];if(!out.length||out.length>40)return null;if(out.some(x=>!/^[A-Za-z0-9_-]{3,80}$/.test(x)))return null;return out}
-function unresolved(reason:string){return{status:'unresolved',reason}}
-function verified(canonical:string){const d=DEPICTIONS[canonical];if(!d)return unresolved('connectivity_not_uniquely_verified');return{status:'verified_connectivity',key:`oc-${canonical}`,canonical_name:d.name||canonical.replaceAll('-',' '),molecular_formula:d.formula,formal_charge:d.charge,stereochemistry:'not_encoded',renderer:'RDKit 2025.09.4 coordinate layout + browser SVG'}}
-function classify(row:any){const k=String(row.component_key||'').trim().toLowerCase(),sid=String(row.structure_id||''),name=String(row.display_name||'').trim().toLowerCase();
- if(k==='tba')return name==='t-ba'||name==='t–ba'?verified('tert-butylammonium'):verified('tetrabutylammonium');
- if(k==='tpp'){if(sid==='CUH-082-S01')return verified('tetraphenylphosphonium');if(sid==='CUH-218-S01'||sid.startsWith('CUH-250-S'))return verified('triphenylphosphine');return unresolved('component_key_collision')}
- if(k==='pz'){if(sid==='CUH-061-S01')return verified('piperazinium');if(sid.startsWith('CUH-357-S'))return verified('pyrazine');return unresolved('component_key_collision')}
- if(k==='pyr')return sid==='CUH-013-S04'?verified('pyrrolidinium'):unresolved('component_key_collision');
- if(k==='pph4')return sid==='CUH-119-S03'?unresolved('mapping_identity_conflict'):verified('tetraphenylphosphonium');
- if(k==='aca')return sid==='CUH-293-S02'?verified('acetamidinium'):unresolved('mapping_identity_conflict');
- if(k==='im')return sid==='CUH-293-S03'?verified('imidazolium'):unresolved('mapping_identity_conflict');
- if(NON_ORGANIC.has(k))return unresolved('not_organic_component');
- if(COLLISION.has(k)||/^l\d+$/.test(k))return unresolved('abbreviation_collision');
- if(k==='pypzph')return unresolved('connectivity_not_uniquely_verified');
- if(GENERIC.has(k))return unresolved('generic_or_mixture_identity');
- const canonical=ALIASES[k]||(DEPICTIONS[k]?k:'');return canonical?verified(canonical):unresolved('identity_not_uniquely_verified')}
-function projectOrganic(row:any){return{structure_id:row.structure_id,component_key:row.component_key,display_name:row.display_name,abbreviation:row.abbreviation||null,role:row.role,normalization_confidence:row.normalization_confidence,depiction:classify(row)}}
-async function photophysics(recordId:number,structureId:string|null){return rpc('cuhalide_atlas_public_photophysics_record_v2',{p_record_id:recordId,p_structure_id:structureId||null})}
-async function organicComponents(ids:string[]){const rows:any[]=await rpc('cuhalide_atlas_public_organic_components_v1',{p_structure_ids:ids});return rows.map(projectOrganic)}
-async function allOrganicRows(){const select='structure_id,component_key,display_name,abbreviation,role,normalization_confidence',url=`${REST}/cuhalide_atlas_structure_organic_components?select=${encodeURIComponent(select)}&qc_status=eq.passed&order=${encodeURIComponent('structure_id.asc,component_key.asc')}&limit=1000`;const r=await fetch(url,{headers:AUTH,signal:AbortSignal.timeout(30000)}),raw=await r.text();let rows:any[]=[];try{rows=raw?JSON.parse(raw):[]}catch{throw Error('invalid organic component health response')}if(!r.ok)throw Error(`organic component health ${r.status}: ${raw.slice(0,160)}`);return rows}
-async function organicHealth(){const rows=await allOrganicRows(),items=rows.map(projectOrganic),structures=new Set(rows.map(x=>x.structure_id)),keys=new Set(rows.map(x=>String(x.component_key||'').toLowerCase())),verifiedItems=items.filter(x=>x.depiction.status==='verified_connectivity'),reasons:Record<string,number>={};for(const x of items)if(x.depiction.status==='unresolved')reasons[x.depiction.reason]=(reasons[x.depiction.reason]||0)+1;const verifiedStructures=new Set(verifiedItems.map(x=>x.structure_id)),classified=items.filter(x=>x.depiction.status==='verified_connectivity'||x.depiction.status==='unresolved').length;const checks={all_rows_classified:classified===rows.length,mapping_baseline_stable:rows.length===495&&structures.size===453&&keys.size===260,raw_primary_files_exposed:false,raw_evidence_locators_exposed:false,private_evidence_fields_exposed:false};return{ok:Object.values(checks).every(Boolean),contract_version:ORGANIC_COMPONENTS_CONTRACT,component_rows:rows.length,mapped_structures:structures.size,distinct_raw_component_keys:keys.size,verified_connectivity_rows:verifiedItems.length,unresolved_rows:rows.length-verifiedItems.length,structures_with_verified_connectivity:verifiedStructures.size,verified_connectivity_graph_keys:new Set(verifiedItems.map(x=>x.depiction.key)).size,unresolved_reason_counts:reasons,checks}}
-Deno.serve(async(req:Request)=>{if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req)});if(!['GET','HEAD'].includes(req.method))return send(req,{error:'read-only endpoint'},405);try{const u=new URL(req.url),action=String(u.searchParams.get('action')||'health').toLowerCase();if(action==='photophysics-health'){const x=await rpc('cuhalide_atlas_public_photophysics_health_v2');return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV)});}if(action==='photophysics'){const id=positiveInt(u.searchParams.get('id')||u.searchParams.get('record_id'));if(!id)return send(req,{ok:false,error:'valid record id required'},400);const structure=String(u.searchParams.get('structure')||u.searchParams.get('structure_id')||'').trim()||null;const x=await photophysics(id,structure);return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV)});}if(action==='organic-components-health'){const x=await organicHealth();return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV)});}if(action==='organic-components'){const ids=structureIds(u.searchParams.get('structure_ids')||u.searchParams.get('structure_id'));if(!ids)return send(req,{ok:false,error:'1-40 valid structure ids required'},400);const items=await organicComponents(ids);return send(req,{ok:true,contract_version:ORGANIC_COMPONENTS_CONTRACT,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV),requested_structure_count:ids.length,mapped_structure_count:new Set(items.map(x=>x.structure_id)).size,items});}const r=await fetch(UP+u.search,{method:req.method,headers:{accept:req.headers.get('accept')||'application/json','user-agent':`CuHalide-Atlas-Canonical-Public-Data/${VERSION}`},signal:AbortSignal.timeout(60000)});if(req.method==='HEAD')return new Response(null,{status:r.status,headers:hdr(req,r.headers.get('content-type')||undefined)});const raw=await r.text();let x:any;try{x=JSON.parse(raw)}catch{return new Response(raw,{status:r.status,headers:hdr(req,r.headers.get('content-type')||'text/plain; charset=utf-8')})}x=patch(x);if(r.ok&&x?.item&&(action==='article'||action==='structure')){if(action==='structure'&&typeof x.item==='object'&&x.item)delete x.item.organic_components;const rid=positiveInt(String(x.item.record_id||u.searchParams.get('id')||''));if(rid){const sid=action==='structure'?String(x.item.structure_id||u.searchParams.get('id')||'').trim()||null:null;try{x.photophysics=await photophysics(rid,sid)}catch(e){console.error('[photophysics-attach]',e);x.photophysics={ok:false,public_state:'temporarily_unavailable',samples:[],conflicts:[]}}if(action==='structure'&&sid){try{const items=await organicComponents([sid]);x.organic_components=items;x.item.organic_components=items}catch(e){console.error('[organic-components-attach]',e);x.organic_components=[];x.item.organic_components=[]}}}}return send(req,x,r.status)}catch(e){console.error('[canonical-public-data-v2160]',e);return send(req,{ok:false,error:'public data unavailable',release:RELEASE,version:VERSION},503)}});
+
+function cors(req){const o=req.headers.get('origin')||'';return{'access-control-allow-origin':ALLOWED.has(o)?o:PUBLIC,'access-control-allow-methods':'GET,HEAD,OPTIONS','access-control-allow-headers':'accept,content-type','vary':'Origin'}}
+function hdr(req,ct='application/json; charset=utf-8'){return{...cors(req),'content-type':ct,'cache-control':'no-store','x-content-type-options':'nosniff','x-robots-tag':'noindex, nofollow','x-cuhalide-release':RELEASE,'x-cuhalide-public-data-version':VERSION,'x-cuhalide-public-access':'query-and-view','x-cuhalide-current-curated-revision':REV,'x-cuhalide-photophysics-contract':PHOTOPHYSICS_CONTRACT,'x-cuhalide-organic-components-contract':ORGANIC_COMPONENTS_CONTRACT}}
+const send=(req,x,s=200)=>new Response(req.method==='HEAD'?null:JSON.stringify(x),{status:s,headers:hdr(req)});
+function patch(x){if(!x||typeof x!=='object')return x;x.version=VERSION;x.current_curated_revision=7;x.architecture=x.architecture||'full-current-atomic-structure-snapshot';if(typeof x.public_note==='string')x.public_note=x.public_note.replace(/rev\.6/g,'rev.7').replace(/2026-08-18/g,'2026-08-19');if(x.current_curated&&typeof x.current_curated==='object'&&x.current_curated.current_state)x.current_curated.current_state.live_revision=7;return x}
+async function rpc(name,body={}){const r=await fetch(`${REST}/rpc/${name}`,{method:'POST',headers:AUTH,body:JSON.stringify(body),signal:AbortSignal.timeout(30000)}),raw=await r.text();let x;try{x=raw?JSON.parse(raw):null}catch{x={error:'invalid contract response'}}if(!r.ok)throw Error(`${name} ${r.status}: ${x?.message||x?.error||raw.slice(0,160)}`);return x}
+function positiveInt(v){const n=Number(v);return Number.isInteger(n)&&n>0?n:null}
+function structureIds(raw){const out=[...new Set(String(raw||'').split(',').map(x=>x.trim()).filter(Boolean))];if(!out.length||out.length>40)return null;if(out.some(x=>!/^[A-Za-z0-9_-]{3,80}$/.test(x)))return null;return out}
+async function photophysics(recordId,structureId){return rpc('cuhalide_atlas_public_photophysics_record_v2',{p_record_id:recordId,p_structure_id:structureId||null})}
+async function organicComponents(ids){const rows=await rpc('cuhalide_atlas_public_organic_components_v1',{p_structure_ids:ids});return rows.map(projectOrganic)}
+async function allOrganicRows(){
+  const select='structure_id,component_key,display_name,abbreviation,role,normalization_confidence';
+  const url=`${REST}/cuhalide_atlas_structure_organic_components?select=${encodeURIComponent(select)}&qc_status=eq.passed&order=${encodeURIComponent('structure_id.asc,component_key.asc')}&limit=1000`;
+  const r=await fetch(url,{headers:AUTH,signal:AbortSignal.timeout(30000)}),raw=await r.text();let rows=[];
+  try{rows=raw?JSON.parse(raw):[]}catch{throw Error('invalid organic component health response')}
+  if(!r.ok)throw Error(`organic component health ${r.status}: ${raw.slice(0,160)}`);
+  return rows;
+}
+
+Deno.serve(async req=>{
+  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req)});
+  if(!['GET','HEAD'].includes(req.method))return send(req,{error:'read-only endpoint'},405);
+  try{
+    const u=new URL(req.url), action=String(u.searchParams.get('action')||'health').toLowerCase();
+    if(action==='photophysics-health'){
+      const x=await rpc('cuhalide_atlas_public_photophysics_health_v2');
+      return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV)});
+    }
+    if(action==='photophysics'){
+      const id=positiveInt(u.searchParams.get('id')||u.searchParams.get('record_id'));
+      if(!id)return send(req,{ok:false,error:'valid record id required'},400);
+      const structure=String(u.searchParams.get('structure')||u.searchParams.get('structure_id')||'').trim()||null;
+      const x=await photophysics(id,structure);
+      return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV)});
+    }
+    if(action==='organic-components-health'){
+      const x=organicComponentHealth(await allOrganicRows());
+      return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV)});
+    }
+    if(action==='organic-components'){
+      const ids=structureIds(u.searchParams.get('structure_ids')||u.searchParams.get('structure_id'));
+      if(!ids)return send(req,{ok:false,error:'1-40 valid structure ids required'},400);
+      const items=await organicComponents(ids);
+      return send(req,{ok:true,contract_version:ORGANIC_COMPONENTS_CONTRACT,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV),requested_structure_count:ids.length,mapped_structure_count:new Set(items.map(x=>x.structure_id)).size,items});
+    }
+    const r=await fetch(UP+u.search,{method:req.method,headers:{accept:req.headers.get('accept')||'application/json','user-agent':`CuHalide-Atlas-Canonical-Public-Data/${VERSION}`},signal:AbortSignal.timeout(60000)});
+    if(req.method==='HEAD')return new Response(null,{status:r.status,headers:hdr(req,r.headers.get('content-type')||undefined)});
+    const raw=await r.text();let x;try{x=JSON.parse(raw)}catch{return new Response(raw,{status:r.status,headers:hdr(req,r.headers.get('content-type')||'text/plain; charset=utf-8')})}
+    x=patch(x);
+    if(r.ok&&x?.item&&(action==='article'||action==='structure')){
+      if(action==='structure'&&typeof x.item==='object')delete x.item.organic_components;
+      const rid=positiveInt(String(x.item.record_id||u.searchParams.get('id')||''));
+      if(rid){
+        const sid=action==='structure'?String(x.item.structure_id||u.searchParams.get('id')||'').trim()||null:null;
+        try{x.photophysics=await photophysics(rid,sid)}catch(e){console.error('[photophysics-attach]',e);x.photophysics={ok:false,public_state:'temporarily_unavailable',samples:[],conflicts:[]}}
+        if(action==='structure'&&sid){
+          try{const items=await organicComponents([sid]);x.organic_components=items;x.item.organic_components=items}catch(e){console.error('[organic-components-attach]',e);x.organic_components=[];x.item.organic_components=[]}
+        }
+      }
+    }
+    return send(req,x,r.status);
+  }catch(e){
+    console.error('[canonical-public-data-v2160]',e);
+    return send(req,{ok:false,error:'public data unavailable',release:RELEASE,version:VERSION},503);
+  }
+});
