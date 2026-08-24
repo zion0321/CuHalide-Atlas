@@ -3,15 +3,16 @@ import { projectOrganic, organicComponentHealth } from './organic-components-ext
 
 const BASE=Deno.env.get('SUPABASE_URL'), KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'), REST=`${BASE}/rest/v1`;
 const UP=`${BASE}/functions/v1/cuhalide-atlas-public-data-v302-public`;
-const RELEASE='3.0.2', VERSION='2.16.0', REV='7', PUBLIC='https://cuhalide-atlas-v3.vercel.app';
+const RELEASE='3.0.2', VERSION='2.16.0', REV='7', PUBLIC='https://cuhalide-atlas-v3.vercel.app', PUBLICATION_STATE='prepublication-review';
 const PHOTOPHYSICS_CONTRACT='1.3.0', ORGANIC_COMPONENTS_CONTRACT='1.1.0';
 const ALLOWED=new Set([PUBLIC,'http://localhost:8765','http://127.0.0.1:8765']);
+const PUBLIC_ACTIONS=new Set(['health','bootstrap','articles','structures','polar','article','structure','article-structures','search','current-curated','candidates','status','errata','motifs','photophysics-health','photophysics','organic-components-health','organic-components']);
 const AUTH={apikey:KEY,authorization:`Bearer ${KEY}`,accept:'application/json','content-type':'application/json'};
 
 function cors(req){const o=req.headers.get('origin')||'';return{'access-control-allow-origin':ALLOWED.has(o)?o:PUBLIC,'access-control-allow-methods':'GET,HEAD,OPTIONS','access-control-allow-headers':'accept,content-type','vary':'Origin'}}
-function hdr(req,ct='application/json; charset=utf-8'){return{...cors(req),'content-type':ct,'cache-control':'no-store','x-content-type-options':'nosniff','x-robots-tag':'noindex, nofollow','x-cuhalide-release':RELEASE,'x-cuhalide-public-data-version':VERSION,'x-cuhalide-public-access':'query-and-view','x-cuhalide-current-curated-revision':REV,'x-cuhalide-photophysics-contract':PHOTOPHYSICS_CONTRACT,'x-cuhalide-organic-components-contract':ORGANIC_COMPONENTS_CONTRACT}}
+function hdr(req,ct='application/json; charset=utf-8'){return{...cors(req),'content-type':ct,'cache-control':'no-store','x-content-type-options':'nosniff','x-robots-tag':'noindex, nofollow, noarchive','x-cuhalide-release':RELEASE,'x-cuhalide-public-data-version':VERSION,'x-cuhalide-public-access':'query-and-view','x-cuhalide-publication-state':PUBLICATION_STATE,'x-cuhalide-current-curated-revision':REV,'x-cuhalide-photophysics-contract':PHOTOPHYSICS_CONTRACT,'x-cuhalide-organic-components-contract':ORGANIC_COMPONENTS_CONTRACT}}
 const send=(req,x,s=200)=>new Response(req.method==='HEAD'?null:JSON.stringify(x),{status:s,headers:hdr(req)});
-function patch(x){if(!x||typeof x!=='object')return x;x.version=VERSION;x.current_curated_revision=7;x.architecture=x.architecture||'full-current-atomic-structure-snapshot';if(typeof x.public_note==='string')x.public_note=x.public_note.replace(/rev\.6/g,'rev.7').replace(/2026-08-18/g,'2026-08-19');if(x.current_curated&&typeof x.current_curated==='object'&&x.current_curated.current_state)x.current_curated.current_state.live_revision=7;return x}
+function patch(x){if(!x||typeof x!=='object')return x;x.version=VERSION;x.current_curated_revision=7;x.publication_state=PUBLICATION_STATE;x.architecture=x.architecture||'full-current-atomic-structure-snapshot';if(typeof x.public_note==='string')x.public_note=x.public_note.replace(/rev\.6/g,'rev.7').replace(/2026-08-18/g,'2026-08-19');if(x.current_curated&&typeof x.current_curated==='object'&&x.current_curated.current_state)x.current_curated.current_state.live_revision=7;return x}
 async function rpc(name,body={}){const r=await fetch(`${REST}/rpc/${name}`,{method:'POST',headers:AUTH,body:JSON.stringify(body),signal:AbortSignal.timeout(30000)}),raw=await r.text();let x;try{x=raw?JSON.parse(raw):null}catch{x={error:'invalid contract response'}}if(!r.ok)throw Error(`${name} ${r.status}: ${x?.message||x?.error||raw.slice(0,160)}`);return x}
 function positiveInt(v){const n=Number(v);return Number.isInteger(n)&&n>0?n:null}
 function structureIds(raw){const out=[...new Set(String(raw||'').split(',').map(x=>x.trim()).filter(Boolean))];if(!out.length||out.length>40)return null;if(out.some(x=>!/^[A-Za-z0-9_-]{3,80}$/.test(x)))return null;return out}
@@ -27,32 +28,34 @@ async function allOrganicRows(){
 }
 
 Deno.serve(async req=>{
-  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req)});
-  if(!['GET','HEAD'].includes(req.method))return send(req,{error:'read-only endpoint'},405);
+  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:hdr(req)});
+  if(!['GET','HEAD'].includes(req.method))return send(req,{error:'read-only endpoint',publication_state:PUBLICATION_STATE},405);
   try{
     const u=new URL(req.url), action=String(u.searchParams.get('action')||'health').toLowerCase();
+    if(!PUBLIC_ACTIONS.has(action))return send(req,{ok:false,error:'unknown public action',publication_state:PUBLICATION_STATE},404);
     if(action==='photophysics-health'){
       const x=await rpc('cuhalide_atlas_public_photophysics_health_v2');
-      return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV)});
+      return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV),publication_state:PUBLICATION_STATE});
     }
     if(action==='photophysics'){
       const id=positiveInt(u.searchParams.get('id')||u.searchParams.get('record_id'));
-      if(!id)return send(req,{ok:false,error:'valid record id required'},400);
+      if(!id)return send(req,{ok:false,error:'valid record id required',publication_state:PUBLICATION_STATE},400);
       const structure=String(u.searchParams.get('structure')||u.searchParams.get('structure_id')||'').trim()||null;
       const x=await photophysics(id,structure);
-      return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV)});
+      return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV),publication_state:PUBLICATION_STATE});
     }
     if(action==='organic-components-health'){
       const x=organicComponentHealth(await allOrganicRows());
-      return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV)});
+      return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV),publication_state:PUBLICATION_STATE});
     }
     if(action==='organic-components'){
       const ids=structureIds(u.searchParams.get('structure_ids')||u.searchParams.get('structure_id'));
-      if(!ids)return send(req,{ok:false,error:'1-40 valid structure ids required'},400);
+      if(!ids)return send(req,{ok:false,error:'1-40 valid structure ids required',publication_state:PUBLICATION_STATE},400);
       const items=await organicComponents(ids);
-      return send(req,{ok:true,contract_version:ORGANIC_COMPONENTS_CONTRACT,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV),requested_structure_count:ids.length,mapped_structure_count:new Set(items.map(x=>x.structure_id)).size,items});
+      return send(req,{ok:true,contract_version:ORGANIC_COMPONENTS_CONTRACT,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV),publication_state:PUBLICATION_STATE,requested_structure_count:ids.length,mapped_structure_count:new Set(items.map(x=>x.structure_id)).size,items});
     }
-    const r=await fetch(UP+u.search,{method:req.method,headers:{accept:req.headers.get('accept')||'application/json','user-agent':`CuHalide-Atlas-Canonical-Public-Data/${VERSION}`},signal:AbortSignal.timeout(60000)});
+    const upstreamHeaders={...AUTH,accept:req.headers.get('accept')||'application/json','user-agent':`CuHalide-Atlas-Canonical-Public-Data/${VERSION}`};
+    const r=await fetch(UP+u.search,{method:req.method,headers:upstreamHeaders,signal:AbortSignal.timeout(60000)});
     if(req.method==='HEAD')return new Response(null,{status:r.status,headers:hdr(req,r.headers.get('content-type')||undefined)});
     const raw=await r.text();let x;try{x=JSON.parse(raw)}catch{return new Response(raw,{status:r.status,headers:hdr(req,r.headers.get('content-type')||'text/plain; charset=utf-8')})}
     x=patch(x);
@@ -70,6 +73,6 @@ Deno.serve(async req=>{
     return send(req,x,r.status);
   }catch(e){
     console.error('[canonical-public-data-v2160]',e);
-    return send(req,{ok:false,error:'public data unavailable',release:RELEASE,version:VERSION},503);
+    return send(req,{ok:false,error:'public data unavailable',release:RELEASE,version:VERSION,publication_state:PUBLICATION_STATE},503);
   }
 });
