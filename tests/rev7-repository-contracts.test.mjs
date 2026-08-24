@@ -120,9 +120,11 @@ test('Motif Atlas reflects the adjudicated rev.7 taxonomy without formula comple
   assert.equal(globalHeaders.find(x=>x.key==='X-CuHalide-Publication-State')?.value,'prepublication-review');
 });
 
-test('sitemap denominators remain canonical and revision provenance advances only',()=>{
+test('prepublication sitemap preserves rev.7 provenance without exposing record denominators as URLs',()=>{
   const sitemap=read('api/sitemap.js');
-  for(const token of ["CONTENT_DATE='2026-08-19'","CURRENT_REVISION='7'",'EXPECTED_ARTICLES=369','EXPECTED_STRUCTURES=886','EXPECTED_URLS=1257'])assert.ok(sitemap.includes(token));
+  for(const token of ["CONTENT_DATE='2026-08-19'","CURRENT_REVISION='7'",'prepublication-non-enumerating','X-CuHalide-Sitemap-URLs'])assert.ok(sitemap.includes(token),`sitemap contract missing ${token}`);
+  assert.doesNotMatch(sitemap,/EXPECTED_ARTICLES=369|EXPECTED_STRUCTURES=886|EXPECTED_URLS=1257/);
+  assert.doesNotMatch(sitemap,/\/article\/\$\{|\/structure\/\$\{/);
 });
 
 test('legacy data route remains compatibility-only and delegates to the current canonical contract',()=>{

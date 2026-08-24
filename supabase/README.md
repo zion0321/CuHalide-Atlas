@@ -4,150 +4,169 @@ This directory versions the **public-safe Supabase runtime and database contract
 
 ## Current production identities
 
+- Publication state: **prepublication review**. Direct-link review is allowed; formal public release/indexing is not.
 - Frozen scientific base: **Release 3.0.2** — immutable; snapshot coverage inclusive through **2026-06-30**.
-- Current Curated: **rev.3** — curated through **2026-08-14**.
-- Public Data: **2.10.0**.
-- Research Assistant: **10.0.0**.
-- Smart RAG evidence engine: **9.15.0**.
-- Scientific metadata/health core: **48.4**; public composite health gateway: **48.5**.
+- Current Curated: **rev.7** — curated through **2026-08-19**.
+- Site / UI: **50 / 50.2**.
+- Metadata gateway: **50.5**.
+- Public Data: **2.16.0**.
+- Structured Photophysics: **1.3.0**.
+- Organic Components: **1.1.0**.
+- Research Assistant: **10.4.1**.
+- Smart RAG evidence engine: **9.19.0**.
 - Motif Atlas schema: **1.2**.
-- Unified RAG corpus: **1,322 / 1,322** documents/embeddings.
+- Active Current RAG corpus: **1,329 / 1,329** documents/embeddings.
 
-The canonical public wrappers contain no write path. Anonymous availability of an Edge wrapper is not equivalent to anonymous database access.
-
-## Current Curated rev.3 health contract
+## Current Curated rev.7 deterministic health contract
 
 Expected Current Curated counts:
 
-- article audit: **373**
-- chemically included: **362**
-- canonical verified: **359**
-- structure/phase: **949**
-- Core-Included: **887**
-- resolved space-group rows: **719**
-- verified one-to-one space-group mappings: **694**
+- article audit: **383**
+- chemically included: **372**
+- canonical verified: **369**
+- structure/phase: **946**
+- Core-Included: **886**
+- resolved space-group rows: **710**
+- verified one-to-one space-group mappings: **684**
 - verified polar rows: **97**
-- strict-polar rows: **77**
-- strict-polar articles: **46**
-- RAG documents / embedded: **1,322 / 1,322**
+- strict-polar rows: **87**
+- strict-polar articles: **54**
+- RAG documents / embedded: **1,329 / 1,329**
 
-Expected immutable Frozen Release 3.0.2 guard:
+Expected immutable Frozen Release 3.0.2 guard remains:
 
-**346 / 335 / 332 / 878 / 816 / 650 / 625 / 87 / 67 / 42**, with **1,224 / 1,224** Frozen RAG documents/embeddings.
+**346 / 335 / 332 / 878 / 816 / 650 / 625 / 87 / 67 / 42**, with **1,224** Frozen archival RAG documents.
 
-The Current overlay contains **27 reviewed article records** and **71 reviewed structure/phase determinations**, including **19 frozen-snapshot coverage backfills** and **8 post-snapshot additions**. These do not rewrite Frozen Release 3.0.2.
+Current Curated is a living full-current article/atomic-structure snapshot anchored to immutable Frozen Release 3.0.2. Corrections and later primary-evidence additions do not rewrite the frozen snapshot.
 
-## Public-data chain
+## Structured Photophysics 1.3.0
 
-`Vercel /api/public-data`
-→ `cuhalide-atlas-public-data-v2`
-→ `cuhalide-atlas-public-data-v302-public`
-→ `cuhalide-atlas-public-data-v302`
-→ private Frozen/Current projections and service-role-only RPCs.
+Current staged publication contract:
 
-Public Data 2.10.0 adds Current Curated rev.3 and the Motif Atlas 1.2 conservative fractional/mixed-occupancy contract while retaining the established structure/detail interfaces. Raw taxonomy/component relations are not publicly selectable.
+- article queue: **383**
+- Pass A complete: **383**, pending **0**
+- Pass A curated: **275**
+- two-pass verified: **54**
+- verified-no-reported-data: **54**
+- publishable samples: **940**
+- publishable measurements: **2,260**
+- publishable normalized values: **2,978**
+- quantitative-analysis eligible values: **281**
+- publishable mechanism claims: **476**
+- conflicted measurements withheld: **9**
 
-## Research Assistant 10.0 and Smart RAG 9.15
-
-`Vercel /api/agent`
-→ `cuhalide-atlas-research-assistant-v1-public`
-→ automatic route to either:
-
-- `cuhalide-atlas-conversation-v1-internal` for ordinary conversation/general stable scientific explanation; or
-- `cuhalide-atlas-smart-rag-v302-current-public` for Atlas/material/evidence-grounded scientific claims.
-
-The conversation layer is JWT-protected internally and uses Qwen3-30B-A3B-FP8 through the existing Cloudflare Workers AI environment. It cannot assert Atlas corpus-specific facts from memory: an escaped Atlas factual request is rerouted to the evidence engine.
-
-The evidence layer remains Smart RAG **9.15.0** over the unified **1,322 / 1,322** corpus. Structure-grain motif identity is allowed only from the independent structure taxonomy; article-grain photophysics is not silently reassigned to named structure/phase rows.
-
-Current evidence internals retain historical slugs for compatibility:
-
-- `cuhalide-atlas-current-rag-r1-internal` — deterministic Current/temporal/Motif Atlas exact service, serving rev.3.
-- `cuhalide-atlas-current-rag-r1-unified-internal` — unified Frozen + Current BGE-M3/lexical/RRF retrieval, covering rev.1 through rev.3.
-- `cuhalide_atlas_hybrid_search_current_v1` — service-role-only unified retrieval RPC.
-- `cuhalide_atlas_update_current_rag_embeddings_v1` — service-role-only, Current-Curated-scoped BGE-M3 embedding writer; it cannot modify Frozen/legacy releases.
-
-### Separate conversation/evidence rate domains
-
-Research Assistant 10.0 deliberately separates ordinary chat quota from the stricter evidence-query quota.
-
-- Existing Smart RAG evidence requests continue to use `cuhalide_atlas_agent_rate_limit` and its conservative evidence-query budget.
-- Conversational turns use `cuhalide_atlas_conversation_rate_limit_v10`, backed by a private RLS-enabled usage table.
-- Conversation budget: **60/hour**, **240/day** per fingerprint; **1,200/day** global conversation ceiling.
-- `anon` and `authenticated` have no table access and cannot execute the conversation rate RPC directly; it is service-role-only.
-- The usage table has an explicit **RESTRICTIVE deny-all RLS policy** for `anon` and `authenticated`, making the fail-closed posture independently auditable even though direct table privileges are already revoked.
-- Provider quota exhaustion still degrades to `SAFE_CONVERSATION_FALLBACK` and does not disable deterministic evidence retrieval.
-
-This prevents ordinary back-and-forth conversation from consuming the scientific evidence-search allowance while retaining a public-abuse boundary.
+`pass_a_curated` means primary-evidence curation is complete but independent Pass B is not yet complete. `two_pass_verified` means independent Pass A/Pass B agreement. Conflicts fail closed at measurement grain. Article-grain photophysics is never silently reassigned to a named structure/phase row.
 
 ## Motif Atlas 1.2
 
-Motif Atlas separates three primary material classes:
+Current structure-grain taxonomy:
 
-- **Coordination**
-- **Ionic / Hybrid Ionic**
-- **All-in-One (AIO)**
+- taxonomy rows: **946**
+- resolved local Cu-X motifs: **628**
+- unresolved local motifs: **318**
+- unresolved legacy material-category mappings: **35**
+- global connectivity dimensionality unresolved: **57 structure rows**
 
-Legacy mixed or insufficiently specified category assignments remain **Unresolved legacy mapping** rather than being forced into one of the three classes.
+Local Cu-X motif and global connectivity dimensionality are independent fields. Fractional or mixed-occupancy stoichiometry is not rounded or truncated into an integer motif without independent structure-grain evidence.
 
-Three denominators are kept distinct: article reports, crystallographic determinations, and normalized reported identity groups. Organic components are evidence-tiered into primary-evidence curated components versus legacy label-derived candidates.
+## Organic Components 1.1.0
 
-Schema 1.2 adds a strict conservative rule: **fractional or mixed-occupancy Cu/halide labels remain motif-unresolved unless an independent structure-grain mapping establishes a discrete integer Cu–X core.** The rev.3 audit corrected 15 legacy over-parsed rows. Current taxonomy totals are **949 total / 816 motif-resolved / 133 motif-unresolved**, with 40 unresolved legacy-category rows.
+- QC-passed mappings: **495** across **453** structures
+- raw component keys: **260**
+- verified-connectivity rows: **253**
+- structures with verified connectivity: **241**
+- graph identities: **81**
+- unresolved / fail-closed: **242**
 
-## Privacy and access boundary
+Connectivity, stereochemistry and abbreviations are never inferred from analogy. Public depictions are deterministic RDKit 2025.09.4 outputs from verified connectivity only.
 
-Security requirements:
+## Public ingress architecture
 
-- protected raw/current/taxonomy/component/conversation-usage tables have RLS enabled;
-- `anon` and `authenticated` have no direct raw/current-table or conversation-usage SELECT/write privilege;
-- public browser requests do not execute private projection/RPC objects directly;
-- complete normalized tables, exact publisher abstracts, primary PDF/SI/CIF, field-evidence excerpts/locators and internal candidate/QC data remain private;
-- bulk normalized export remains retired (`/api/export` = HTTP 410).
+The prepublication site uses a small number of intentional anonymous, read-only ingress functions. Historical compatibility functions behind them are **service-role-only upstreams** or explicit retirement stubs.
 
-The canonical public endpoints remain field-whitelisted, read-only wrappers. Historical compatibility slugs are either synchronized proxies, JWT-protected internals, or retirement stubs; an old slug is not allowed to restore a bulk-export surface.
+### Public data
 
-## Migration governance
+`Vercel /api/public-data`
+→ `cuhalide-atlas-public-data-v3` (**canonical anonymous read-only ingress**)
+→ service-authenticated `cuhalide-atlas-public-data-v302-public`
+→ service-authenticated `cuhalide-atlas-public-data-v302`
+→ private projections / service-role-only RPCs.
 
-The production project has a longer historical migration ledger than the **public-safe** migration subset in this repository. Some historical production migrations contain private corpus rows, one-time operational provisioning, Vault/credential handling or other material that must not be copied into a public repository merely to reconstruct migration history.
+The Motif Atlas Vercel renderer also calls canonical `cuhalide-atlas-public-data-v3` directly; it does not traverse a historical compatibility slug.
+
+The Vercel gateway and canonical v3 function both use explicit public-action allowlists. Unknown actions fail closed. Article and structure query RPCs enforce server-side page caps (24 and 50 respectively). Motif example results are capped at **24** during prepublication review.
+
+The historical `cuhalide-atlas-public-data-v2` slug is retired as HTTP 410. It has no database or service-role capability and is not part of any current runtime dependency chain.
+
+### Research Assistant
+
+`Vercel /api/agent`
+→ `cuhalide-atlas-research-assistant-v1-public` (**canonical anonymous conversational ingress**)
+→ service-authenticated `cuhalide-atlas-smart-rag-v302-current-public`
+→ protected Current/Frozen RAG internals and service-role-only retrieval RPCs.
+
+Both Vercel and Supabase ingress layers whitelist request content. Caller-controlled top-level fields are not spread into downstream evidence/model requests; only normalized user/assistant messages plus server-selected mode/depth are forwarded. Request size/history limits remain enforced.
+
+### Runtime contract
+
+`cuhalide-atlas-runtime-contract-v1-public` is the anonymous deterministic health/bootstrap contract. It exposes only public-safe aggregate metadata. During prepublication review its sitemap action is **non-enumerating** and reports only `/` and `/motifs`; record identifiers are not returned in sitemap payloads.
+
+## Prepublication indexing and redistribution boundary
+
+Every public machine response must preserve:
+
+- `X-Robots-Tag: noindex, nofollow, noarchive`
+- `X-CuHalide-Publication-State: prepublication-review`
+- `Cache-Control: no-store` where the response contains live query/runtime data
+
+The prepublication sitemap contains only the portal root and Motif Atlas landing page. Record-level article/structure sitemap enumeration is intentionally withheld until formal release.
+
+Public access remains **query-and-view**. The following remain private:
+
+- primary PDF / SI / CIF files
+- exact publisher abstracts
+- raw ingestion payloads
+- field-evidence excerpts and locators
+- internal candidate scores/reasons
+- internal QC/adjudication objects
+- complete normalized bulk tables
+
+`/api/export` remains HTTP 410. A combination of public query parameters must not recreate a bulk normalized export surface.
+
+## Database privilege boundary
+
+Protected raw/current/taxonomy/component/photophysics tables remain behind RLS/privilege controls. Public-facing SECURITY DEFINER query/RPC objects used by Edge functions have browser-role EXECUTE revoked unless explicitly documented otherwise. Current article and structure query RPCs are service-role mediated and internally clamp pagination.
+
+Anonymous availability of a canonical Edge ingress is **not** equivalent to anonymous database access. Historical upstream Edge functions that possess service-role capability must additionally require the exact service bearer token and service `apikey` before executing.
+
+## Source-of-truth and migration governance
+
+The production project has a longer historical migration ledger than the public-safe migration subset in this repository. Historical production migrations can contain private corpus rows, one-time provisioning, Vault/credential handling, or other material that must not be copied into a public repository merely to reconstruct history.
 
 Therefore:
 
-- `supabase/migrations/` is **not** treated as a complete replayable clone of the production database history;
+- `supabase/migrations/` is **not** treated as a complete replayable clone of production history;
 - `supabase/contracts/` contains sanitized, non-executable/current-state contract mirrors used for audit and recovery planning;
 - private promoted row payloads are not committed as public SQL dumps;
-- fake/no-op timestamp migrations must **not** be added simply to silence migration-history checks;
-- raw statements from `supabase_migrations.schema_migrations` must **not** be bulk-exported to this public repository.
+- fake/no-op migrations must not be added merely to silence history checks;
+- raw private migration statements must not be bulk-exported into this repository.
 
-As of 2026-08-14, production records **126** migration-history entries spanning `20260807140239` through `20260814093038`. The latest entry, `explicit_conversation_usage_deny_policy_v10`, adds an explicit restrictive deny policy for browser database roles on the private conversation-usage table; it complements `20260814084241 separate_conversation_rate_limit_v10`, changes no scientific data, and does not expand public privileges. The production ledger is internally consistent, but it is intentionally not reproduced verbatim in the public repository. See `contracts/REMOTE_MIGRATION_INVENTORY_2026-08-14.md` for the public-safe inventory boundary.
-
-### GitHub integration policy
-
-CuHalide Atlas uses a controlled Supabase deployment/curation workflow rather than treating the public Git repository as the authoritative source for replaying the complete production migration chain. Accordingly, **Supabase GitHub automatic migration deployment / automatic branching should remain disabled unless the project is later migrated to a complete sanitized canonical migration repository**.
-
-Vercel/GitHub remain the authoritative deployment and QA path for the public web application. Supabase schema/data changes are separately reviewed, applied, validated, security-audited and then mirrored into public-safe contracts where appropriate.
+The Edge-function sources in this directory **are** expected to mirror the currently intended public-safe runtime logic closely enough for review/recovery. Version drift between production and this source tree is treated as a defect and is covered by repository contracts.
 
 ## Retirement policy
 
-Temporary indexing, debugging, export and benchmark endpoints must be removed or retained only as JWT-required HTTP 410 retirement stubs where historical operational compatibility warrants a named endpoint. An `ACTIVE` function can therefore still be a safe retirement stub; source inspection and `verify_jwt` are authoritative. The rev.3 ephemeral BGE-M3 indexer was retired immediately after 17/17 new embeddings were written and now requires JWT while returning HTTP 410.
+Temporary indexing, debugging, export, benchmark and obsolete compatibility endpoints must be removed or retained only as one of:
+
+1. a tightly scoped synchronized compatibility shim only while an active dependency still exists;
+2. a service-role-only internal upstream with JWT verification enabled; or
+3. an HTTP 410 retirement stub.
+
+An `ACTIVE` Supabase function can therefore still be a safe retirement stub; source behavior and JWT configuration are authoritative. Once a live dependency is migrated to the canonical ingress, the compatibility slug should be retired rather than preserved indefinitely.
 
 ## Operational validation
 
-Production health:
+Canonical production health:
 
 `https://cuhalide-atlas-v3.vercel.app/health.json`
 
-A synchronized Current Curated rev.3 production state requires:
-
-- core health `PASS`;
-- `site_readiness=PASS` after the matching Vercel release is promoted;
-- Public Data **2.10.0**;
-- Research Assistant **10.0.0**;
-- Smart RAG evidence engine **9.15.0**;
-- scientific metadata core **48.4** and public composite health **48.5**;
-- Motif Atlas **1.2**;
-- Current Curated rev.3 counts above;
-- Frozen 3.0.2 guards above;
-- Record 13 physical corrections;
-- fractional/mixed-occupancy motif conservatism;
-- structure evidence-grain safeguards;
-- query-and-view access with no public bulk normalized export.
+A synchronized rev.7 production state requires Site **50**, Metadata **50.5**, Public Data **2.16.0**, Photophysics **1.3.0**, Organic Components **1.1.0**, Smart RAG **9.19.0**, Research Assistant **10.4.1**, Motif Atlas **1.2**, all rev.7 denominators above, complete **1,329 / 1,329** RAG embeddings, frozen-release guards intact, scientific-grain safeguards true, indexing disabled, and no public bulk normalized export.

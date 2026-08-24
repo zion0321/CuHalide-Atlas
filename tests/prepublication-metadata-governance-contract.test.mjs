@@ -89,6 +89,8 @@ test('assistant export and sitemap handlers independently expose governance stat
   assert.match(sitemap,/PUBLICATION_STATE='prepublication-review'/);
   assert.match(sitemap,/X-Robots-Tag','noindex, nofollow, noarchive'/);
   assert.match(sitemap,/X-CuHalide-Publication-State/);
-  assert.match(sitemap,/EXPECTED_URLS=1257/);
-  assert.match(sitemap,/prepublication-review sitemap/);
+  assert.match(sitemap,/prepublication-non-enumerating/);
+  assert.match(sitemap,/X-CuHalide-Sitemap-URLs/);
+  assert.match(sitemap,/Record-level enumeration is intentionally withheld until formal release/);
+  assert.doesNotMatch(sitemap,/EXPECTED_URLS=1257/);
 });
