@@ -38,7 +38,24 @@ test('article-linked photophysics evidence remains sample-labelled while retaini
   assert.ok(ui.includes("sourceScopeLine(s,'article-grain curated evidence')"));
 });
 
+test('structure modal photophysics stays fail-closed at structure grain',()=>{
+  const bootstrap=read('public/ui-ux-v1.js');
+  const modal=read('public/ui-structure-photophysics-v1.js');
+  assert.ok(bootstrap.includes("load('/ui-structure-photophysics-v1.js','structure-photophysics-v1')"));
+  for(const token of [
+    "action=structure&id=",
+    "ph.structure_mapping_state==='mapped_samples_present'",
+    'No structure-mapped data',
+    'Parent article ·',
+    'Only samples explicitly mapped to this crystallographic structure are shown here',
+    'does not assign article-level or other sample-grain measurements to this crystallographic structure',
+    'function exactMappedSamples(ph,id)'
+  ])assert.ok(modal.includes(token),`structure-modal grain contract missing ${token}`);
+  assert.match(modal,/String\(s\.structure_id\|\|''\)===id&&String\(s\.mapping_status\|\|''\)\.startsWith\('structure_'\)/);
+  assert.match(modal,/structure_mapping_state==='mapped_samples_present'&&mapped\.length>0/);
+});
+
 test('sample-grain UI hardening does not add private evidence fields',()=>{
-  const ui=read('api/ui-assistant-current.js');
-  for(const forbidden of ['source_file','source_sha256','evidence_locator','page_locator','internal_sample_id','evidence_excerpt','raw_payload','private_path'])assert.ok(!ui.includes(forbidden),`private field leaked into public UI source-card code: ${forbidden}`);
+  const sources=[read('api/ui-assistant-current.js'),read('public/ui-structure-photophysics-v1.js')].join('\n');
+  for(const forbidden of ['source_file','source_sha256','evidence_locator','page_locator','internal_sample_id','evidence_excerpt','raw_payload','private_path'])assert.ok(!sources.includes(forbidden),`private field leaked into public photophysics UI code: ${forbidden}`);
 });

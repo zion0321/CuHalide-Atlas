@@ -24,6 +24,7 @@ const STATIC_FILES=new Map([
 ['/ui-photophysics-v1.js',{file:path.join(PUBLIC_DIR,'ui-photophysics-v1.js'),type:'text/javascript; charset=utf-8'}],
 ['/ui-ux-v1.js',{file:path.join(PUBLIC_DIR,'ui-ux-v1.js'),type:'text/javascript; charset=utf-8'}],
 ['/ui-ux-core-v1.js',{file:path.join(PUBLIC_DIR,'ui-ux-core-v1.js'),type:'text/javascript; charset=utf-8'}],
+['/ui-structure-photophysics-v1.js',{file:path.join(PUBLIC_DIR,'ui-structure-photophysics-v1.js'),type:'text/javascript; charset=utf-8'}],
 ['/organic-components-v1.js',{file:path.join(PUBLIC_DIR,'organic-components-v1.js'),type:'text/javascript; charset=utf-8'}],
 ...Array.from({length:10},(_,i)=>[`/organic-components-graphs-${i+1}.js`,{file:path.join(PUBLIC_DIR,`organic-components-graphs-${i+1}.js`),type:'text/javascript; charset=utf-8'}])
 ]);

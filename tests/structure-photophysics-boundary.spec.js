@@ -29,6 +29,30 @@ test('standalone structure pages retain mapped photophysics while identifying ve
   await expect(main).not.toContainText('Independent Pass A and Pass B review agree for this exposed article-level photophysics state.');
 });
 
+test('interactive structure modal stays fail-closed when no sample is mapped to the structure',async({page})=>{
+  const response=await page.goto(`${BASE}/#structure/CUH-006-S01`,{waitUntil:'networkidle'});
+  expect(response?.status()).toBe(200);
+  const modal=page.locator('#modalBody');
+  await expect(modal).toContainText('No structure-mapped data');
+  await expect(modal).toContainText('Parent article · Two-pass verified');
+  await expect(modal).toContainText('does not assign article-level or other sample-grain measurements to this crystallographic structure');
+  await expect(modal).not.toContainText('0 curated sample states');
+  await expect(modal).not.toContainText('Photophysics evidence-grain boundary');
+});
+
+test('interactive structure modal exposes only explicitly mapped photophysics samples',async({page})=>{
+  const response=await page.goto(`${BASE}/#structure/CUH-381-S01`,{waitUntil:'networkidle'});
+  expect(response?.status()).toBe(200);
+  const modal=page.locator('#modalBody');
+  await expect(modal).toContainText('Measurements mapped to CUH-381-S01');
+  await expect(modal).toContainText('Parent article · Two-pass verified');
+  await expect(modal).toContainText('R-1 crystal / bulk crystalline sample');
+  await expect(modal).toContainText('PLQY');
+  await expect(modal).toContainText('89.84 %');
+  await expect(modal).not.toContainText('No structure-mapped data');
+  await expect(modal).not.toContainText('Photophysics evidence-grain boundary');
+});
+
 test('frozen-baseline article page owns Atlas provenance while source ScholarlyArticle stays publication-scoped',async({page})=>{
   const response=await page.goto(`${BASE}/article/46`,{waitUntil:'networkidle'});
   expect(response?.status()).toBe(200);
