@@ -133,3 +133,22 @@ test('Motif Atlas uses the same aggregate-only projection on canonical and compa
     expectNoPrivatePayload(x);
   }
 });
+
+test('Literature Watch candidates expose only the public metadata projection',async({request},testInfo)=>{
+  desktopOnly(testInfo);
+  const allowed=['candidate_id','doi','journal','source_url','status','title','year'].sort();
+  const forbidden=['abstract','authors','review_notes','source_payload','relevance_score','source','discovered_at','reviewed_at','updated_at','candidate_evidence_status','screening_version'];
+  for(const path of PUBLIC_DATA_ROUTES){
+    const r=await request.get(`${BASE}${path}?action=candidates&limit=12`);
+    expect(r.status(),path).toBe(200);
+    expect(r.headers()['x-robots-tag'],path).toBe('noindex, nofollow, noarchive');
+    expect(r.headers()['x-cuhalide-publication-state'],path).toBe('prepublication-review');
+    const x=await r.json();
+    expect(Array.isArray(x.items),path).toBeTruthy();
+    expect(x.items.length,path).toBeLessThanOrEqual(12);
+    for(const item of x.items){
+      expect(Object.keys(item).sort(),path).toEqual(allowed);
+      for(const key of forbidden)expect(item,path).not.toHaveProperty(key);
+    }
+  }
+});
