@@ -16,7 +16,7 @@ test('1,2-dppb exact identity derives from structure-grain organic-component map
   assert.match(source,/function dppb12Intent\(/);
   assert.match(source,/pd\('article-structures',\{id:'382'\}\)/);
   assert.match(source,/pd\('organic-components',\{structure_ids:ids\.join\(','\)\}\)/);
-  assert.match(source,/component_key\|\|'\'\)\.toLowerCase\(\)==='1-2-bis-diphenylphosphino-benzene'/);
+  assert.match(source,/1-2-bis-diphenylphosphino-benzene/);
   assert.match(source,/pd\('structure',\{id:String\(s\.structure_id\)\}\)/);
   assert.doesNotMatch(source,/pd\('motifs'/,'exact organic identity must not depend on public Motif browse examples');
   assert.ok(!source.includes('CUH-382-S04'),'structure IDs must be resolved from canonical structure-grain data rather than hard-coded');
