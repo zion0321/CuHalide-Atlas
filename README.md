@@ -93,6 +93,7 @@ The rev.7 staged-review runtime contract is:
 - Metadata gateway: **50.4**
 - Public Data: **2.16.0**
 - Structured Photophysics contract: **1.3.0**
+- Organic Components contract: **1.1.0**
 - Smart RAG: **9.19.0**
 - Research Assistant: **10.4.1**
 - Motif Atlas: **1.2**
@@ -107,9 +108,11 @@ Current queries use the rev.7 full-current evidence corpus. Exact counts and pro
 
 This staged policy allows the living review portal to expose carefully curated first-pass evidence without falsely presenting it as independently double-verified. Pass B can subsequently promote or correct individual records without rewriting the scientific entity model. Frozen 3.0.2 evidence is consulted only when a question explicitly asks for the archived snapshot or historical denominator. Literature Watch candidate metadata remains outside curated evidence until promotion through the defined review/QC gate.
 
+Organic Components 1.1.0 is a separate structure-grain identity/depiction contract. It audits all **495 QC-passed mappings across 453 structures and 260 raw component keys**. Every mapping is explicitly classified: the current audited state contains **253 verified-connectivity rows across 241 structures, using 81 graph identities**, while **242 rows remain fail-closed unresolved** because the molecular identity/connectivity is not uniquely supported. Verified depictions use deterministic RDKit 2025.09.4 2D coordinate layouts rendered as local browser SVG; no generative-image model or remote depiction service is used. Stereochemistry, ambiguous abbreviation expansions and conflicting component identities are never inferred to make a drawing appear complete.
+
 ## Public/private boundary
 
-Review access is intentionally **query-and-view**, not bulk redistribution. Review pages may expose selected bibliographic, structural, crystallographic, motif, scope, evidence-status and staged photophysics fields. The photophysics projection does **not** expose primary source filenames, raw publisher files, raw evidence locators, internal sample IDs or unpublished adjudication notes; processed/composite/device states remain distinct from crystallographic structure rows.
+Review access is intentionally **query-and-view**, not bulk redistribution. Review pages may expose selected bibliographic, structural, crystallographic, motif, scope, evidence-status, staged photophysics and structure-linked organic-component fields. The photophysics and organic-component projections do **not** expose primary source filenames, raw publisher files, raw evidence locators, internal sample IDs, source hashes, donor-atom internals, evidence-basis notes or unpublished adjudication notes; processed/composite/device states remain distinct from crystallographic structure rows.
 
 The following remain private research assets: complete normalized tables/raw payloads, exact stored publisher abstracts, primary PDF/SI/CIF files, field-evidence excerpts and raw evidence locators, candidate scores/reason codes/source payloads, and internal QA/adjudication artifacts. `/api/export` is intentionally unavailable.
 
