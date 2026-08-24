@@ -11,6 +11,13 @@ function websiteJsonLd(html){
   return null;
 }
 
+function firstJsonLd(html,type,name){
+  for(const match of String(html).matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)){
+    try{const x=JSON.parse(match[1]);if((!type||x?.['@type']===type)&&(!name||x?.name===name))return x}catch{}
+  }
+  return null;
+}
+
 test.describe.configure({mode:'serial'});
 
 test('root and site endpoint identify a prepublication review interface in HTML and machine metadata',async({request},testInfo)=>{
@@ -39,6 +46,25 @@ test('root and site endpoint identify a prepublication review interface in HTML 
   expect(html).not.toContain('<p class="eyebrow">Recommended citation</p>');
   expect(html).not.toContain('<h2>Public knowledge layer</h2>');
   expect(html).not.toContain('Public access is query-and-view.');
+});
+
+test('Motif Atlas is independently fail-closed for indexing and dataset review status',async({request},testInfo)=>{
+  test.skip(testInfo.project.name!=='desktop-chromium','Governance metadata is viewport invariant; run once on desktop.');
+  const r=await request.get(`${BASE}/motifs`);
+  expect(r.status()).toBe(200);
+  expect(header(r,'x-robots-tag')).toContain('noindex');
+  expect(header(r,'x-cuhalide-publication-state')).toBe(STATE);
+  const html=await r.text();
+  expect(html).toContain('<meta name="robots" content="noindex,nofollow,noarchive">');
+  expect(html).toContain('<meta name="cuhalide-publication-state" content="prepublication-review">');
+  expect(html).toContain('Prepublication review · Curated through 19 Aug 2026 · rev.7');
+  expect(html).toContain('review-access projection, not a formally released public dataset');
+  expect(html).not.toContain('<meta name="robots" content="index,follow,max-image-preview:large">');
+  const ld=firstJsonLd(html,'Dataset','CuHalide Atlas Motif Atlas');
+  expect(ld).not.toBeNull();
+  expect(ld.creativeWorkStatus).toBe('Prepublication review');
+  expect(ld.version).toBe('current-r7');
+  expect(ld.isPartOf?.version).toBe('current-r7');
 });
 
 test('standalone records expose review-access wording without changing source-article provenance',async({request},testInfo)=>{
