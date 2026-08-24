@@ -20,6 +20,17 @@ test('organic component API is structure-grain, deterministic and fail-closed',a
     expect(item).not.toHaveProperty('donor_atoms');
   }
 
+  const detail=await request.get(`${BASE}/api/public-data?action=structure&id=CUH-371-S01`);
+  expect(detail.status()).toBe(200);
+  const d=await detail.json();
+  expect(d.item.organic_components).toEqual(d.organic_components);
+  expect(d.item.organic_components).toHaveLength(2);
+  for(const item of d.item.organic_components){
+    expect(item).not.toHaveProperty('evidence_basis');
+    expect(item).not.toHaveProperty('donor_atoms');
+  }
+  expect(JSON.stringify(d)).not.toMatch(/evidence_basis|donor_atoms|raw_primary_files|raw_evidence_locators|source_hash|evidence_locator|internal_sample_id/i);
+
   const unresolved=await request.get(`${BASE}/api/public-data?action=organic-components&structure_id=CUH-080-S01`);
   expect(unresolved.status()).toBe(200);
   const u=await unresolved.json();
