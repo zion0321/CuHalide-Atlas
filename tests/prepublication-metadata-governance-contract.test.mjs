@@ -49,6 +49,14 @@ test('metadata gateway 50.5 carries explicit governance state without changing s
   assert.match(readme,/Publication\/governance state: \*\*prepublication-review\*\*/);
 });
 
+test('production readiness workflow is locked to the same governance and metadata baseline',()=>{
+  const workflow=read('.github/workflows/production-browser-qa.yml');
+  assert.match(workflow,/x\.publication_state!=='prepublication-review'/);
+  assert.match(workflow,/x\.meta_version!=='50\.5'\|\|x\.gateway_meta_version!=='50\.5'/);
+  assert.match(workflow,/Pre-merge production rev\.7 \/ prepublication-review \/ Meta 50\.5 \/ Public Data 2\.16\.0 \/ Photophysics 1\.3\.0 baseline PASS/);
+  assert.doesNotMatch(workflow,/Meta must remain exactly 50\.4/);
+});
+
 test('platform compatibility and public-data gateways fail closed on prepublication state',()=>{
   const config=JSON.parse(read('vercel.json')),middleware=read('middleware.js'),candidate=read('scripts/local-candidate-server.mjs'),publicData=read('api/public-data.js');
   const global=config.headers.find(x=>x.source==='/(.*)')?.headers||[];

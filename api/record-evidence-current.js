@@ -2,10 +2,21 @@ import recordCurrent from './record-current.js';
 import {applyRecordPrepublicationGovernance,PUBLICATION_STATE} from '../lib/prepublication-governance.js';
 
 const ZERO_SAMPLE_CARD=/<section class="card"><p class="eyebrow">Photophysics<\/p><span class="status">(Two-pass verified|Pass A curated)<\/span><p class="fine">[\s\S]*?0 curated sample states · 0 measurements · 0 normalized values\. Crystal-intrinsic, processed, composite, and device states remain separate; quantitative-analysis eligibility is independently gated\.<\/p><\/section>/g;
+const ARTICLE_JSONLD=/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
 const ARCHIVED_PROVENANCE='Part of archived scientific snapshot 3.0.2 · retained in the current corpus';
 const LIVING_INHERITED_PROVENANCE='Current Curated rev.7 context · core article record inherited from immutable Frozen Release 3.0.2 baseline';
-const ARCHIVED_JSON='"dateModified":"2026-08-11","isPartOf":{"@type":"Dataset","name":"CuHalide Atlas archived scientific snapshot 3.0.2","version":"3.0.2","url":"https://cuhalide-atlas-v3.vercel.app"}}';
-const LIVING_JSON='"dateModified":"2026-08-19","isPartOf":{"@type":"Dataset","name":"CuHalide Atlas living knowledge base","version":"current-r7","url":"https://cuhalide-atlas-v3.vercel.app"},"isBasedOn":{"@type":"Dataset","name":"CuHalide Atlas archived scientific snapshot 3.0.2","version":"3.0.2","url":"https://cuhalide-atlas-v3.vercel.app"}}';
+const LIVING_DATASET={
+  '@type':'Dataset',
+  name:'CuHalide Atlas living knowledge base',
+  version:'current-r7',
+  url:'https://cuhalide-atlas-v3.vercel.app'
+};
+const FROZEN_DATASET={
+  '@type':'Dataset',
+  name:'CuHalide Atlas archived scientific snapshot 3.0.2',
+  version:'3.0.2',
+  url:'https://cuhalide-atlas-v3.vercel.app'
+};
 
 function requestKind(req){
   try{return String(new URL(String(req?.url||'/'),'http://local').searchParams.get('kind')||'').toLowerCase()}
@@ -14,9 +25,55 @@ function requestKind(req){
 
 function hardenArticleProvenance(body,kind){
   if(kind!=='article'||typeof body!=='string')return body;
-  let out=body;
-  if(out.includes(ARCHIVED_PROVENANCE))out=out.split(ARCHIVED_PROVENANCE).join(LIVING_INHERITED_PROVENANCE);
-  if(out.includes(ARCHIVED_JSON))out=out.split(ARCHIVED_JSON).join(LIVING_JSON);
+  return body.includes(ARCHIVED_PROVENANCE)?body.split(ARCHIVED_PROVENANCE).join(LIVING_INHERITED_PROVENANCE):body;
+}
+
+function doiUrl(value){
+  const sameAs=String(value?.sameAs||'').trim();
+  if(/^https:\/\/doi\.org\//i.test(sameAs))return sameAs;
+  const identifier=String(value?.identifier||'').trim();
+  return identifier?`https://doi.org/${identifier}`:'';
+}
+
+function articlePageJsonLd(source){
+  const recordUrl=String(source?.url||'').trim();
+  const title=String(source?.name||source?.headline||'CuHalide Atlas article record').trim();
+  const sourceUrl=doiUrl(source);
+  const frozenOrigin=source?.isPartOf?.version==='3.0.2'||String(source?.isPartOf?.name||'').includes('archived scientific snapshot 3.0.2');
+  const article={
+    '@type':'ScholarlyArticle',
+    '@id':sourceUrl||`${recordUrl}#source-article`,
+    headline:String(source?.headline||title),
+    name:title,
+    identifier:source?.identifier,
+    ...(sourceUrl?{url:sourceUrl,sameAs:sourceUrl}:{}),
+    datePublished:source?.datePublished
+  };
+  for(const key of Object.keys(article))if(article[key]==null||article[key]==='')delete article[key];
+  return {
+    '@context':'https://schema.org',
+    '@type':'WebPage',
+    '@id':`${recordUrl}#record`,
+    url:recordUrl,
+    name:`${title} — CuHalide Atlas article record`,
+    dateModified:'2026-08-19',
+    isPartOf:{...LIVING_DATASET},
+    ...(frozenOrigin?{isBasedOn:{...FROZEN_DATASET}}:{}),
+    mainEntity:article
+  };
+}
+
+function separateArticleStructuredData(body,kind){
+  if(kind!=='article'||typeof body!=='string'||!body.includes('<script type="application/ld+json">'))return body;
+  let rewritten=0;
+  const out=body.replace(ARTICLE_JSONLD,(full,raw)=>{
+    let value;
+    try{value=JSON.parse(raw)}catch{return full}
+    if(value?.['@type']!=='ScholarlyArticle')return full;
+    rewritten+=1;
+    return `<script type="application/ld+json">${JSON.stringify(articlePageJsonLd(value))}</script>`;
+  });
+  if(!body.includes('Record not found')&&rewritten!==1)throw new Error(`article JSON-LD separation expected one ScholarlyArticle source, found ${rewritten}`);
   return out;
 }
 
@@ -40,6 +97,7 @@ export default async function handler(req,res){
     removeHeader:name=>res.removeHeader?.(name),
     end:body=>{
       let out=hardenArticleProvenance(body,kind);
+      out=separateArticleStructuredData(out,kind);
       out=hardenStructurePhotophysics(out,kind);
       out=applyRecordPrepublicationGovernance(out);
       res.removeHeader?.('Content-Length');

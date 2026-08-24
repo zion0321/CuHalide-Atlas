@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
+const PUBLIC='https://cuhalide-atlas-v3.vercel.app';
 const STATE='prepublication-review';
 const header=(response,name)=>response.headers()[String(name).toLowerCase()]||'';
 
@@ -67,7 +68,7 @@ test('Motif Atlas is independently fail-closed for indexing and dataset review s
   expect(ld.isPartOf?.version).toBe('current-r7');
 });
 
-test('standalone records expose review-access wording while scoping review status to Atlas datasets',async({request},testInfo)=>{
+test('standalone records expose review-access wording while article-page provenance stays separate from the published source',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Governance metadata is viewport invariant; run once on desktop.');
 
   const article=await request.get(`${BASE}/article/46`);
@@ -80,12 +81,18 @@ test('standalone records expose review-access wording while scoping review statu
   expect(ah).toContain('latest curated review-access record');
   expect(ah).toContain('Review pages expose only field-whitelisted information');
   expect(ah).not.toContain('latest curated public record');
-  const articleLd=firstJsonLd(ah,'ScholarlyArticle');
-  expect(articleLd?.isPartOf?.version).toBe('current-r7');
-  expect(articleLd?.isPartOf?.creativeWorkStatus).toBe('Prepublication review');
-  expect(articleLd?.isBasedOn?.version).toBe('3.0.2');
-  expect(articleLd?.isBasedOn?.creativeWorkStatus).toBeUndefined();
-  expect(articleLd?.creativeWorkStatus).toBeUndefined();
+  const recordLd=firstJsonLd(ah,'WebPage');
+  expect(recordLd).not.toBeNull();
+  expect(recordLd?.['@id']).toBe(`${PUBLIC}/article/46#record`);
+  expect(recordLd?.url).toBe(`${PUBLIC}/article/46`);
+  expect(recordLd?.dateModified).toBe('2026-08-19');
+  expect(recordLd?.isPartOf?.version).toBe('current-r7');
+  expect(recordLd?.isPartOf?.creativeWorkStatus).toBe('Prepublication review');
+  expect(recordLd?.isBasedOn?.version).toBe('3.0.2');
+  expect(recordLd?.isBasedOn?.creativeWorkStatus).toBeUndefined();
+  const sourceArticle=recordLd?.mainEntity;
+  expect(sourceArticle).toMatchObject({'@type':'ScholarlyArticle','@id':'https://doi.org/10.1038/s41377-025-01910-1',identifier:'10.1038/s41377-025-01910-1',url:'https://doi.org/10.1038/s41377-025-01910-1',sameAs:'https://doi.org/10.1038/s41377-025-01910-1',datePublished:'2025'});
+  for(const field of ['dateModified','isPartOf','isBasedOn','creativeWorkStatus'])expect(sourceArticle).not.toHaveProperty(field);
 
   const structure=await request.get(`${BASE}/structure/CUH-381-S01`);
   expect(structure.status()).toBe(200);

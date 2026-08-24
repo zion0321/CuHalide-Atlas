@@ -50,15 +50,16 @@ jobs:
           const x=await r.json();
           const fail=(m)=>{throw new Error(m)};
           if(x.ok!==true) fail('production health is not OK');
+          if(x.publication_state!=='prepublication-review') fail(`expected production prepublication-review state, got ${x.publication_state}`);
           if(x.current_curated?.live_revision!==7) fail(`expected production rev.7, got ${x.current_curated?.live_revision}`);
           const c=x.current_curated?.counts||{};
           for(const [k,v] of Object.entries({structure_phase_rows:946,core_included_structure_rows:886,resolved_space_group_rows:710,verified_space_group_rows:684,strict_polar_rows:87,strict_polar_articles:54,rag_documents:1329,rag_embedded:1329})) if(c[k]!==v) fail(`production ${k}: expected ${v}, got ${c[k]}`);
-          if(x.meta_version!=='50.4'||x.gateway_meta_version!=='50.4') fail(`pre-merge production Meta must remain exactly 50.4, got ${x.meta_version}/${x.gateway_meta_version}`);
+          if(x.meta_version!=='50.5'||x.gateway_meta_version!=='50.5') fail(`pre-merge production Meta must remain exactly 50.5, got ${x.meta_version}/${x.gateway_meta_version}`);
           if(x.public_data?.version!=='2.16.0'||x.public_data_version!=='2.16.0') fail(`pre-merge production Public Data must remain 2.16.0, got ${x.public_data?.version}/${x.public_data_version}`);
           if(x.photophysics?.version!=='1.3.0'||x.photophysics?.publication_policy!=='pass_a_curated_or_two_pass_verified'||x.photophysics?.pass_a_complete_articles!==383||x.photophysics?.pass_a_pending_articles!==0) fail('pre-merge production staged photophysics 1.3.0 baseline is not intact');
           if(x.checks?.photophysics_contract!==true||x.checks?.photophysics_staged_publication!==true||x.checks?.photophysics_private_evidence_guard!==true) fail('pre-merge production photophysics health gates are not intact');
           if(x.smart_rag?.version!=='9.19.0'||x.research_assistant?.version!=='10.4.1') fail('pre-merge production RAG/Research Assistant baseline changed unexpectedly');
-          console.log('Pre-merge production rev.7 / Meta 50.4 / Public Data 2.16.0 / Photophysics 1.3.0 baseline PASS');
+          console.log('Pre-merge production rev.7 / prepublication-review / Meta 50.5 / Public Data 2.16.0 / Photophysics 1.3.0 baseline PASS');
           NODE
       - name: Run full post-merge production browser QA
         if: github.event_name != 'pull_request'

@@ -40,6 +40,22 @@ test('structure evidence wrapper separates parent-article verification from stru
   assert.match(wrapper,/only photophysics samples explicitly mapped to this structure/);
 });
 
+test('article structured data separates Atlas WebPage provenance from the published source article',()=>{
+  const wrapper=read('api/record-evidence-current.js');
+  assert.match(wrapper,/function separateArticleStructuredData/);
+  assert.match(wrapper,/function articlePageJsonLd/);
+  assert.match(wrapper,/'@type':'WebPage'/);
+  assert.match(wrapper,/'@type':'ScholarlyArticle'/);
+  assert.match(wrapper,/dateModified:'2026-08-19'/);
+  assert.match(wrapper,/isPartOf:\{\.\.\.LIVING_DATASET\}/);
+  assert.match(wrapper,/frozenOrigin\?\{isBasedOn:\{\.\.\.FROZEN_DATASET\}\}:\{\}/);
+  assert.match(wrapper,/mainEntity:article/);
+  assert.match(wrapper,/'@id':sourceUrl\|\|`\$\{recordUrl\}#source-article`/);
+  assert.match(wrapper,/url:sourceUrl,sameAs:sourceUrl/);
+  assert.doesNotMatch(wrapper,/ARCHIVED_JSON/);
+  assert.doesNotMatch(wrapper,/LIVING_JSON/);
+});
+
 test('frozen-baseline article provenance remains explicit inside the living rev.7 record context',()=>{
   const wrapper=read('api/record-evidence-current.js');
   assert.match(wrapper,/Current Curated rev\.7 context · core article record inherited from immutable Frozen Release 3\.0\.2 baseline/);
