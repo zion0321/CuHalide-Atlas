@@ -9,7 +9,7 @@ test('public rev.7 copy contains no rev.6 release-language residues',async({requ
     expect(r.status()).toBe(200);
     const html=await r.text();
     expect(html).toContain('Current Curated rev.7');
-    expect(html).toContain('Curated through 19 August 2026');
+    expect(html).toContain('curated through 19 August 2026');
     expect(html).toContain('Rev.7 completes a full structure-truth re-audit across the 946-row Current Curated snapshot');
     expect(html).toContain('cc.live_revision||7');
     expect(html).not.toContain('Current Curated rev.6');
