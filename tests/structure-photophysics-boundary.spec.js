@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
+const PUBLIC='https://cuhalide-atlas-v3.vercel.app';
 
 test.describe.configure({mode:'serial'});
 
@@ -38,8 +39,8 @@ test('frozen-baseline article page owns Atlas provenance while source ScholarlyA
   await expect(main).not.toContainText('Part of archived scientific snapshot 3.0.2 · retained in the current corpus');
   const ld=JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
   expect(ld['@type']).toBe('WebPage');
-  expect(ld['@id']).toBe(`${BASE}/article/46#record`);
-  expect(ld.url).toBe(`${BASE}/article/46`);
+  expect(ld['@id']).toBe(`${PUBLIC}/article/46#record`);
+  expect(ld.url).toBe(`${PUBLIC}/article/46`);
   expect(ld.dateModified).toBe('2026-08-19');
   expect(ld.isPartOf?.name).toBe('CuHalide Atlas living knowledge base');
   expect(ld.isPartOf?.version).toBe('current-r7');
@@ -67,6 +68,7 @@ test('current article standalone pages retain article-stage photophysics and omi
   await expect(page.locator('main')).toContainText('PLQY: 89.84 %');
   const ld=JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
   expect(ld['@type']).toBe('WebPage');
+  expect(ld['@id']).toBe(`${PUBLIC}/article/381#record`);
   expect(ld.dateModified).toBe('2026-08-19');
   expect(ld.isPartOf?.version).toBe('current-r7');
   expect(ld.isBasedOn).toBeUndefined();
