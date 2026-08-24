@@ -84,13 +84,13 @@ Rev.7 re-adjudicates compound/phase identity, crystallographic mapping, local Cu
 
 See [`docs/CURRENT_CURATED_R7_2026-08-19.md`](docs/CURRENT_CURATED_R7_2026-08-19.md) for the current scientific baseline, audit semantics, QC gates and deliberately unresolved evidence boundaries.
 
-## Public runtime contract
+## Review runtime contract
 
-The rev.7 staged-review runtime contract is:
+The rev.7 prepublication-review runtime contract is:
 
 - Site: **v50**
 - UI: **50.2**
-- Metadata gateway: **50.4**
+- Metadata gateway: **50.5**
 - Public Data: **2.16.0**
 - Structured Photophysics contract: **1.3.0**
 - Organic Components contract: **1.1.0**
@@ -98,6 +98,7 @@ The rev.7 staged-review runtime contract is:
 - Research Assistant: **10.4.1**
 - Motif Atlas: **1.2**
 - Current evidence corpus: **1,329 BGE-M3 documents / 1,329 embeddings**
+- Publication/governance state: **prepublication-review**
 
 Current queries use the rev.7 full-current evidence corpus. Exact counts and protected structure-grain scientific boundaries remain deterministic. Structured photophysics uses an explicit staged-verification policy:
 
@@ -110,7 +111,7 @@ This staged policy allows the living review portal to expose carefully curated f
 
 Organic Components 1.1.0 is a separate structure-grain identity/depiction contract. It audits all **495 QC-passed mappings across 453 structures and 260 raw component keys**. Every mapping is explicitly classified: the current audited state contains **253 verified-connectivity rows across 241 structures, using 81 graph identities**, while **242 rows remain fail-closed unresolved** because the molecular identity/connectivity is not uniquely supported. Verified depictions use deterministic RDKit 2025.09.4 2D coordinate layouts rendered as local browser SVG; no generative-image model or remote depiction service is used. Stereochemistry, ambiguous abbreviation expansions and conflicting component identities are never inferred to make a drawing appear complete.
 
-## Public/private boundary
+## Review/private boundary
 
 Review access is intentionally **query-and-view**, not bulk redistribution. Review pages may expose selected bibliographic, structural, crystallographic, motif, scope, evidence-status, staged photophysics and structure-linked organic-component fields. The photophysics and organic-component projections do **not** expose primary source filenames, raw publisher files, raw evidence locators, internal sample IDs, source hashes, donor-atom internals, evidence-basis notes or unpublished adjudication notes; processed/composite/device states remain distinct from crystallographic structure rows.
 
