@@ -34,6 +34,18 @@ test('canonical public data is allowlisted and clamps browse-sized motif results
   assert.match(edge,/const upstreamHeaders=\{\.\.\.AUTH/,'canonical v3 must authenticate its legacy internal upstream');
 });
 
+test('public record renderers use canonical Public Data v3 rather than protected legacy upstreams',()=>{
+  for(const path of ['api/record.js','api/record-current.js']){
+    const source=read(path);
+    assert.match(source,/cuhalide-atlas-public-data-v3/,`${path} must use canonical Public Data v3`);
+    assert.doesNotMatch(source,/cuhalide-atlas-public-data-v302-public/,`${path} must not call the protected legacy v302-public upstream directly`);
+  }
+  const routes=read('vercel.json');
+  assert.match(routes,/\/article\/:id/);
+  assert.match(routes,/\/structure\/:id/);
+  assert.match(routes,/record-evidence-current/);
+});
+
 test('Motif Atlas uses canonical Public Data v3 and Public Data v2 is retired after RAG migration',()=>{
   const motifs=read('api/motifs.js');
   assert.match(motifs,/cuhalide-atlas-public-data-v3/);
