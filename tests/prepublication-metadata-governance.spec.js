@@ -67,7 +67,7 @@ test('Motif Atlas is independently fail-closed for indexing and dataset review s
   expect(ld.isPartOf?.version).toBe('current-r7');
 });
 
-test('standalone records expose review-access wording without changing source-article provenance',async({request},testInfo)=>{
+test('standalone records expose review-access wording while scoping review status to Atlas datasets',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Governance metadata is viewport invariant; run once on desktop.');
 
   const article=await request.get(`${BASE}/article/46`);
@@ -80,9 +80,11 @@ test('standalone records expose review-access wording without changing source-ar
   expect(ah).toContain('latest curated review-access record');
   expect(ah).toContain('Review pages expose only field-whitelisted information');
   expect(ah).not.toContain('latest curated public record');
-  const articleLd=[...ah.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1])).find(x=>x?.['@type']==='ScholarlyArticle');
+  const articleLd=firstJsonLd(ah,'ScholarlyArticle');
   expect(articleLd?.isPartOf?.version).toBe('current-r7');
+  expect(articleLd?.isPartOf?.creativeWorkStatus).toBe('Prepublication review');
   expect(articleLd?.isBasedOn?.version).toBe('3.0.2');
+  expect(articleLd?.isBasedOn?.creativeWorkStatus).toBeUndefined();
   expect(articleLd?.creativeWorkStatus).toBeUndefined();
 
   const structure=await request.get(`${BASE}/structure/CUH-381-S01`);
@@ -93,6 +95,24 @@ test('standalone records expose review-access wording without changing source-ar
   expect(sh).toContain('PLQY: 89.84 %');
   expect(sh).toContain('latest curated review-access record');
   expect(sh).toContain('Review pages expose only field-whitelisted information');
+  const structureLd=firstJsonLd(sh,'Dataset');
+  expect(structureLd?.identifier).toBe('CUH-381-S01');
+  expect(structureLd?.creativeWorkStatus).toBe('Prepublication review');
+  expect(structureLd?.isPartOf?.creativeWorkStatus).toBe('Prepublication review');
+});
+
+test('branded missing records remain 404 while carrying review-access governance',async({request},testInfo)=>{
+  test.skip(testInfo.project.name!=='desktop-chromium','Governance metadata is viewport invariant; run once on desktop.');
+  const r=await request.get(`${BASE}/article/999999`);
+  expect(r.status()).toBe(404);
+  expect(header(r,'x-robots-tag')).toContain('noindex');
+  expect(header(r,'x-cuhalide-publication-state')).toBe(STATE);
+  const html=await r.text();
+  expect(html).toContain('<meta name="cuhalide-publication-state" content="prepublication-review">');
+  expect(html).toContain('Record not found');
+  expect(html).toContain('No current review-access CuHalide Atlas record matches this identifier.');
+  expect(html).not.toContain('No current public CuHalide Atlas record matches this identifier.');
+  expect(html).not.toContain('<script type="application/ld+json">');
 });
 
 test('manifest health data gateway and citation expose one governance state',async({request},testInfo)=>{
