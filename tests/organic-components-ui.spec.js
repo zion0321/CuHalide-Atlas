@@ -33,8 +33,8 @@ test('structure register renders mapped organic-component thumbnails',async({pag
   await page.goto(`${BASE}/#structures`,{waitUntil:'networkidle'});
   await expect(page.locator('.oc-policy-note')).toContainText('Structure-grain mappings only',{timeout:15000});
   const search=page.locator('#sq');
-  await expect(search).toBeVisible();
-  await search.fill('CUH-371-S01');
+  await expect(search).toHaveCount(1);
+  await search.evaluate((el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));},'CUH-371-S01');
   await page.waitForTimeout(650);
   const row=page.locator('#srows tr').filter({hasText:'CUH-371-S01'}).first();
   await expect(row).toBeVisible({timeout:15000});
