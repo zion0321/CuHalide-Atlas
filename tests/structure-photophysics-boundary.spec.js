@@ -28,7 +28,7 @@ test('standalone structure pages retain mapped photophysics while identifying ve
   await expect(main).not.toContainText('Independent Pass A and Pass B review agree for this exposed article-level photophysics state.');
 });
 
-test('frozen-baseline articles are presented in the living rev.7 context without erasing frozen provenance',async({page})=>{
+test('frozen-baseline article page owns Atlas provenance while source ScholarlyArticle stays publication-scoped',async({page})=>{
   const response=await page.goto(`${BASE}/article/46`,{waitUntil:'networkidle'});
   expect(response?.status()).toBe(200);
   const main=page.locator('main');
@@ -37,16 +37,42 @@ test('frozen-baseline articles are presented in the living rev.7 context without
   await expect(main).toContainText('PLQY: 41.5 %');
   await expect(main).not.toContainText('Part of archived scientific snapshot 3.0.2 · retained in the current corpus');
   const ld=JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
+  expect(ld['@type']).toBe('WebPage');
+  expect(ld['@id']).toBe(`${BASE}/article/46#record`);
+  expect(ld.url).toBe(`${BASE}/article/46`);
   expect(ld.dateModified).toBe('2026-08-19');
   expect(ld.isPartOf?.name).toBe('CuHalide Atlas living knowledge base');
   expect(ld.isPartOf?.version).toBe('current-r7');
+  expect(ld.isPartOf?.creativeWorkStatus).toBe('Prepublication review');
   expect(ld.isBasedOn?.name).toBe('CuHalide Atlas archived scientific snapshot 3.0.2');
   expect(ld.isBasedOn?.version).toBe('3.0.2');
+  expect(ld.mainEntity).toMatchObject({
+    '@type':'ScholarlyArticle',
+    '@id':'https://doi.org/10.1038/s41377-025-01910-1',
+    identifier:'10.1038/s41377-025-01910-1',
+    url:'https://doi.org/10.1038/s41377-025-01910-1',
+    sameAs:'https://doi.org/10.1038/s41377-025-01910-1',
+    datePublished:'2025'
+  });
+  expect(ld.mainEntity).not.toHaveProperty('dateModified');
+  expect(ld.mainEntity).not.toHaveProperty('isPartOf');
+  expect(ld.mainEntity).not.toHaveProperty('isBasedOn');
+  expect(ld.mainEntity).not.toHaveProperty('creativeWorkStatus');
 });
 
-test('current article standalone pages retain article-stage photophysics',async({page})=>{
+test('current article standalone pages retain article-stage photophysics and omit frozen-page provenance',async({page})=>{
   const verified=await page.goto(`${BASE}/article/381`,{waitUntil:'networkidle'});
   expect(verified?.status()).toBe(200);
   await expect(page.locator('main')).toContainText('Two-pass verified');
   await expect(page.locator('main')).toContainText('PLQY: 89.84 %');
+  const ld=JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
+  expect(ld['@type']).toBe('WebPage');
+  expect(ld.dateModified).toBe('2026-08-19');
+  expect(ld.isPartOf?.version).toBe('current-r7');
+  expect(ld.isBasedOn).toBeUndefined();
+  expect(ld.mainEntity?.['@type']).toBe('ScholarlyArticle');
+  expect(ld.mainEntity?.identifier).toBe('10.1021/acs.inorgchem.5c06028');
+  expect(ld.mainEntity?.url).toBe('https://doi.org/10.1021/acs.inorgchem.5c06028');
+  expect(ld.mainEntity).not.toHaveProperty('dateModified');
+  expect(ld.mainEntity).not.toHaveProperty('isBasedOn');
 });
