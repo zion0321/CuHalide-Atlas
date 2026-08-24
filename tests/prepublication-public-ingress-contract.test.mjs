@@ -34,14 +34,19 @@ test('canonical public data is allowlisted and clamps browse-sized motif results
   assert.match(edge,/const upstreamHeaders=\{\.\.\.AUTH/,'canonical v3 must authenticate its legacy internal upstream');
 });
 
-test('deprecated public-data-v2 is motifs-only and cannot restore legacy API semantics',()=>{
+test('Motif Atlas uses canonical Public Data v3 and obsolete v2 is a static retirement stub',()=>{
+  const motifs=read('api/motifs.js');
+  assert.match(motifs,/cuhalide-atlas-public-data-v3/);
+  assert.doesNotMatch(motifs,/cuhalide-atlas-public-data-v2/);
+  assert.match(motifs,/u\.searchParams\.set\('limit','24'\)/);
   const source=read('supabase/functions/cuhalide-atlas-public-data-v2/index.ts');
-  assert.match(source,/action!=='motifs'/);
-  assert.match(source,/deprecated compatibility endpoint now serves Motif Atlas only/);
-  assert.match(source,/},410\)/);
-  assert.match(source,/cuhalide-atlas-public-data-v3/);
-  assert.match(source,/Math\.min\(24,/);
-  assert.ok(!source.includes('cuhalide-atlas-public-data-v302-public'),'v2 compatibility shim must not bypass canonical v3');
+  assert.match(source,/status:'retired'/);
+  assert.match(source,/status:410/);
+  assert.match(source,/Public Data v2 is retired/);
+  assert.match(source,/noindex, nofollow, noarchive/);
+  assert.match(source,/prepublication-review/);
+  assert.ok(!source.includes('/rest/v1'),'retired v2 must not access the database');
+  assert.ok(!source.includes('SUPABASE_SERVICE_ROLE_KEY'),'retired v2 must not possess service credentials');
 });
 
 test('legacy Supabase upstreams are service-role-only in the versioned source',()=>{
