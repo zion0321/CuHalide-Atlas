@@ -44,6 +44,8 @@ function enhanceHtml(input){
   body=body.split('Use and cite CuHalide Atlas').join('Cite the living atlas or reproduce a snapshot');
   body=body.split('Citation metadata').join('Snapshot citation metadata');
   body=body.split('Release manifest').join('Machine provenance');
+  body=body.split('Evidence-grounded Smart RAG query access').join('Evidence-grounded Research Assistant query access');
+  body=body.split('<summary>Smart RAG evidence boundary</summary>').join('<summary>Research Assistant evidence boundary</summary>');
   body=body.split('<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Citation</a><a href="#watch">Literature Watch</a></div>').join('<div class="footer-links"><a href="#methods">Methods</a><a href="#citation">Data provenance</a><a href="#watch">Literature Watch</a></div>');
   if(!body.includes('/ui-v48-2.css'))body=body.replace('</head>',`${ICON_LINK}\n${STYLE_LINK}\n${LIVING_STYLE_LINK}\n</head>`);
   if(!body.includes('/ui-v48-2.js'))body=body.replace('</body>',`${SCRIPT_LINK}\n${UI_MARKER}\n</body>`);
