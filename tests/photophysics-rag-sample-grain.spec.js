@@ -31,8 +31,8 @@ test('Research Assistant health is aligned to staged photophysics 1.3.0',async({
     article_queue:383,
     pass_a_complete_articles:383,
     pass_a_pending_articles:0,
-    pass_a_curated_articles:275,
-    two_pass_verified_articles:54,
+    pass_a_curated_articles:248,
+    two_pass_verified_articles:81,
     verified_no_data_articles:54,
     publishable_samples:940,
     publishable_measurements:2260,
@@ -45,6 +45,8 @@ test('Research Assistant health is aligned to staged photophysics 1.3.0',async({
     primary_files_exposed:false,
     raw_evidence_locators_exposed:false
   });
+  expect(x.photophysics.pass_a_curated_articles+x.photophysics.two_pass_verified_articles+x.photophysics.verified_no_data_articles).toBe(x.photophysics.article_queue);
+  expect(x.photophysics.pass_a_complete_articles).toBe(x.photophysics.article_queue);
 });
 
 test('Pass A curated Record 46 PLQY is available without false two-pass labeling',async({request},testInfo)=>{
