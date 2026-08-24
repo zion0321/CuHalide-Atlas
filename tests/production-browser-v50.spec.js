@@ -154,8 +154,13 @@ test('manifest sitemap and Motif Atlas agree with final rev.7', async ({ request
 
   const s = await request.get(`${BASE}/sitemap.xml`);
   expect(s.status()).toBe(200);
+  expect(s.headers()['x-cuhalide-sitemap-urls']).toBe('2');
   const xml = await s.text();
-  expect((xml.match(/<url>/g) || []).length).toBe(1257);
+  expect((xml.match(/<url>/g) || []).length).toBe(2);
+  expect(xml).toContain('CuHalide Atlas prepublication-review sitemap');
+  expect(xml).toContain('https://cuhalide-atlas-v3.vercel.app/motifs');
+  expect(xml).not.toContain('/article/');
+  expect(xml).not.toContain('/structure/');
 
   const mr = await page.goto(`${BASE}/motifs`, { waitUntil: 'domcontentloaded' });
   expect(mr?.status()).toBe(200);
