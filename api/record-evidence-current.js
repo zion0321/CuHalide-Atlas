@@ -2,7 +2,7 @@ import recordCurrent from './record-current.js';
 
 const ZERO_SAMPLE_CARD=/<section class="card"><p class="eyebrow">Photophysics<\/p><span class="status">(Two-pass verified|Pass A curated)<\/span><p class="fine">[\s\S]*?0 curated sample states · 0 measurements · 0 normalized values\. Crystal-intrinsic, processed, composite, and device states remain separate; quantitative-analysis eligibility is independently gated\.<\/p><\/section>/g;
 const ARCHIVED_PROVENANCE='Part of archived scientific snapshot 3.0.2 · retained in the current corpus';
-const LIVING_INHERITED_PROVENANCE='Current Curated rev.7 · record inherited from immutable Frozen Release 3.0.2 baseline';
+const LIVING_INHERITED_PROVENANCE='Current Curated rev.7 context · core article record inherited from immutable Frozen Release 3.0.2 baseline';
 const ARCHIVED_JSON='"dateModified":"2026-08-11","isPartOf":{"@type":"Dataset","name":"CuHalide Atlas archived scientific snapshot 3.0.2","version":"3.0.2","url":"https://cuhalide-atlas-v3.vercel.app"}}';
 const LIVING_JSON='"dateModified":"2026-08-19","isPartOf":{"@type":"Dataset","name":"CuHalide Atlas living knowledge base","version":"current-r7","url":"https://cuhalide-atlas-v3.vercel.app"},"isBasedOn":{"@type":"Dataset","name":"CuHalide Atlas archived scientific snapshot 3.0.2","version":"3.0.2","url":"https://cuhalide-atlas-v3.vercel.app"}}';
 
