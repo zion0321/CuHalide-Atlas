@@ -33,6 +33,10 @@ Deno.serve(async req=>{
   try{
     const u=new URL(req.url), action=String(u.searchParams.get('action')||'health').toLowerCase();
     if(!PUBLIC_ACTIONS.has(action))return send(req,{ok:false,error:'unknown public action',publication_state:PUBLICATION_STATE},404);
+    if(action==='motifs'){
+      const limit=Math.max(1,Math.min(24,Number(u.searchParams.get('limit')||24)||24));
+      u.searchParams.set('limit',String(limit));
+    }
     if(action==='photophysics-health'){
       const x=await rpc('cuhalide_atlas_public_photophysics_health_v2');
       return send(req,{...x,release:RELEASE,public_data_version:VERSION,current_curated_revision:Number(REV),publication_state:PUBLICATION_STATE});
