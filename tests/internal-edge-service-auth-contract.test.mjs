@@ -64,3 +64,36 @@ test('production internal RAG chain is explicit in repository source', async () 
   assert.match(r6, /cuhalide-atlas-current-rag-r1-internal/);
   assert.match(r1, /cuhalide-atlas-public-data-v3/, 'terminal fallback must use canonical Public Data v3');
 });
+
+test('candidate monitor is a repository-backed service-only curation endpoint', async () => {
+  const source=await readFile('supabase/functions/cuhalide-atlas-candidates-v2/index.ts','utf8');
+  assert.match(source,/VERSION='2\.3\.1'/);
+  assert.match(source,/SUPABASE_SERVICE_ROLE_KEY/);
+  assert.match(source,/req\.headers\.get\(['"]authorization['"]\)/);
+  assert.match(source,/req\.headers\.get\(['"]apikey['"]\)/);
+  assert.match(source,/internal service authorization required/);
+  assert.match(source,/,401\)/);
+  assert.match(source,/x-cuhalide-endpoint-state':'internal-service-only'/);
+  assert.match(source,/noindex, nofollow, noarchive/);
+  assert.match(source,/abstract/,'internal service may retain candidate abstracts for curation');
+  assert.match(source,/review_notes/,'internal service may retain review notes for curation');
+  assert.match(source,/source_payload/,'internal service may retain source payload for curation');
+  assert.match(source,/if\(!\['GET','HEAD'\]\.includes\(req\.method\)\)/,'candidate monitor must remain read-only');
+});
+
+test('obsolete Release 3.0.0 RAG indexer is an inert service-only tombstone', async () => {
+  const source=await readFile('supabase/functions/cuhalide-atlas-rag-indexer/index.ts','utf8');
+  assert.match(source,/retired-rag-indexer-release-3\.0\.0-1/);
+  assert.match(source,/SUPABASE_SERVICE_ROLE_KEY/);
+  assert.match(source,/req\.headers\.get\(['"]authorization['"]\)/);
+  assert.match(source,/req\.headers\.get\(['"]apikey['"]\)/);
+  assert.match(source,/internal service authorization required/);
+  assert.match(source,/,401\)/);
+  assert.match(source,/x-cuhalide-endpoint-state':'retired-internal-service-only'/);
+  assert.match(source,/noindex, nofollow, noarchive/);
+  assert.match(source,/status:'retired'/);
+  assert.match(source,/,410\)/);
+  assert.doesNotMatch(source,/api\.cloudflare\.com/,'retired indexer must not call the embedding provider');
+  assert.doesNotMatch(source,/\/rest\/v1\//,'retired indexer must not access the database');
+  assert.doesNotMatch(source,/rag_embeddings/,'retired indexer must not write embeddings');
+});
