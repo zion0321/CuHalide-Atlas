@@ -37,6 +37,7 @@ test('interactive structure modal stays fail-closed when no sample is mapped to 
   await expect(modal).toContainText('Parent article · Two-pass verified');
   await expect(modal).toContainText('does not assign article-level or other sample-grain measurements to this crystallographic structure');
   await expect(modal).not.toContainText('0 curated sample states');
+  await expect(modal).not.toContainText('Photophysics evidence-grain boundary');
 });
 
 test('interactive structure modal exposes only explicitly mapped photophysics samples',async({page})=>{
@@ -49,6 +50,7 @@ test('interactive structure modal exposes only explicitly mapped photophysics sa
   await expect(modal).toContainText('PLQY');
   await expect(modal).toContainText('89.84 %');
   await expect(modal).not.toContainText('No structure-mapped data');
+  await expect(modal).not.toContainText('Photophysics evidence-grain boundary');
 });
 
 test('frozen-baseline article page owns Atlas provenance while source ScholarlyArticle stays publication-scoped',async({page})=>{
