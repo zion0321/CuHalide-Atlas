@@ -3,7 +3,8 @@
   "ignoreCommand": "node scripts/vercel-production-gate.mjs",
   "functions": {
     "api/ui-site.js": { "includeFiles": "public/index.html" },
-    "api/ui-assistant-current.js": { "includeFiles": "public/index.html" }
+    "api/ui-assistant-current.js": { "includeFiles": "public/index.html" },
+    "api/meta.js": { "includeFiles": "CITATION.cff" }
   },
   "rewrites": [
     { "source": "/", "destination": "/api/ui-assistant-current" },
