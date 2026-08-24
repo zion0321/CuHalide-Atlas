@@ -10,7 +10,7 @@ const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalid
 const PHOTOPHYSICS_CONTRACT='1.3.0';
 const ORGANIC_COMPONENTS_CONTRACT='1.1.0';
 
-const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function requestTarget(req){
   let incoming;
