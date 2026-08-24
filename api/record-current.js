@@ -10,7 +10,7 @@ const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalid
 const PHOTOPHYSICS_CONTRACT='1.3.0';
 const ORGANIC_COMPONENTS_CONTRACT='1.1.0';
 
-const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 
 function requestTarget(req){
   let incoming;
@@ -32,7 +32,7 @@ function normalize(body){
 }
 
 function inlineScriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))!==null){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
-function addSelfDirective(csp,name){const re=new RegExp(`\b${name}\s+([^;]*);`,'i');if(re.test(csp))return csp.replace(re,(_,sources)=>`${name} 'self' ${String(sources).replace(/'self'\s*/gi,'').trim()};`);const trimmed=csp.trim();return `${trimmed}${trimmed.endsWith(';')?'':';'} ${name} 'self';`}
+function addSelfDirective(csp,name){const target=String(name).toLowerCase(),parts=String(csp).split(';').map(x=>x.trim()).filter(Boolean);let found=false;const next=parts.map(part=>{const first=part.split(/\s+/,1)[0].toLowerCase();if(first!==target)return part;found=true;const sources=part.slice(name.length).trim().replace(/'self'\s*/gi,'').trim();return `${name} 'self'${sources?` ${sources}`:''}`});if(!found)next.push(`${name} 'self'`);return `${next.join('; ')};`}
 function syncCsp(html,res,{allowSelf=false}={}){const current=String(res.getHeader?.('Content-Security-Policy')||'');if(!current)return;const hashes=inlineScriptHashes(html);if(!hashes.length)return;let next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src ${allowSelf?"'self' ":''}${hashes.join(' ')};`);if(allowSelf){next=addSelfDirective(next,'style-src');next=addSelfDirective(next,'connect-src')}if(/script-src[^;]*'unsafe-inline'/i.test(next)||/style-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');res.setHeader('Content-Security-Policy',next)}
 
 async function fetchRecordOverlay(req){
