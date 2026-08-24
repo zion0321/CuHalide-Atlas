@@ -23,9 +23,15 @@ test('record-current avoids Vercel req.query legacy parsing and exposes consiste
 });
 
 test('global search remains on public query-and-view endpoints only',()=>{
-  const ux=read('public/ui-ux-v1.js');
+  const bootstrap=read('public/ui-ux-v1.js');
+  const ux=read('public/ui-ux-core-v1.js');
+  assert.match(bootstrap,/ui-ux-core-v1\.js/);
+  assert.match(bootstrap,/organic-components-v1\.js/);
   assert.match(ux,/const DATA='\/api\/public-data'/);
   assert.match(ux,/api\('articles'/);
   assert.match(ux,/api\('structures'/);
-  for(const forbidden of ['atlas_internal','source_file','evidence_locator','internal_sample_id','/api/export'])assert.doesNotMatch(ux,new RegExp(forbidden));
+  for(const forbidden of ['atlas_internal','source_file','evidence_locator','internal_sample_id','/api/export']){
+    assert.doesNotMatch(ux,new RegExp(forbidden));
+    assert.doesNotMatch(bootstrap,new RegExp(forbidden));
+  }
 });
