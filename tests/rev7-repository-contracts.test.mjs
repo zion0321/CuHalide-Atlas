@@ -53,7 +53,8 @@ test('canonical routes terminate at rev.7 evidence wrappers, not historical rend
   const route=source=>config.rewrites.find(x=>x.source===source)?.destination;
   assert.equal(route('/'),'/api/ui-assistant-current');
   assert.equal(route('/index.html'),'/api/ui-assistant-current');
-  assert.equal(route('/api/site'),'/api/ui-site');
+  assert.equal(route('/api/site'),'/api/ui-assistant-current');
+  assert.equal(route('/api/ui-site'),'/api/ui-assistant-current');
   assert.equal(route('/api/ui-assistant'),'/api/ui-assistant-current');
   assert.equal(route('/api/record'),'/api/record-evidence-current');
   assert.equal(route('/article/:id'),'/api/record-evidence-current?kind=article&id=:id');
