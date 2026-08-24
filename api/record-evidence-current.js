@@ -1,4 +1,5 @@
 import recordCurrent from './record-current.js';
+import {applyRecordPrepublicationGovernance,PUBLICATION_STATE} from '../lib/prepublication-governance.js';
 
 const ZERO_SAMPLE_CARD=/<section class="card"><p class="eyebrow">Photophysics<\/p><span class="status">(Two-pass verified|Pass A curated)<\/span><p class="fine">[\s\S]*?0 curated sample states · 0 measurements · 0 normalized values\. Crystal-intrinsic, processed, composite, and device states remain separate; quantitative-analysis eligibility is independently gated\.<\/p><\/section>/g;
 const ARCHIVED_PROVENANCE='Part of archived scientific snapshot 3.0.2 · retained in the current corpus';
@@ -32,13 +33,15 @@ function hardenStructurePhotophysics(body,kind){
 
 export default async function handler(req,res){
   const kind=requestKind(req);
+  res.setHeader('X-CuHalide-Publication-State',PUBLICATION_STATE);
   const bridge={
-    setHeader:(name,value)=>res.setHeader(name,value),
+    setHeader:(name,value)=>String(name).toLowerCase()==='x-cuhalide-publication-state'?res.setHeader(name,PUBLICATION_STATE):res.setHeader(name,value),
     getHeader:name=>res.getHeader?.(name),
     removeHeader:name=>res.removeHeader?.(name),
     end:body=>{
       let out=hardenArticleProvenance(body,kind);
       out=hardenStructurePhotophysics(out,kind);
+      out=applyRecordPrepublicationGovernance(out);
       res.removeHeader?.('Content-Length');
       return res.end(out);
     }
