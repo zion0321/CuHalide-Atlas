@@ -1,0 +1,1 @@
+Temporary QA-only probe. This branch points the Vercel public-data proxy at the Supabase photophysics scope canary and adds network assertions for a zero-mapped structure (CUH-006-S01) and a structure-exact positive control (CUH-381-S01). This branch must not be merged.
