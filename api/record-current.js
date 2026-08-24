@@ -8,8 +8,15 @@ const LAST_MODIFIED=new Date(`${PAGE_DATE}T00:00:00Z`).toUTCString();
 const ROBOTS_META='<meta name="robots" content="noindex,nofollow,noarchive">';
 const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3';
 const PHOTOPHYSICS_CONTRACT='1.3.0';
+const ORGANIC_COMPONENTS_CONTRACT='1.1.0';
 
 const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function requestTarget(req){
+  let incoming;
+  try{incoming=new URL(String(req?.url||'/'),'http://local')}catch{incoming=new URL('http://local/')}
+  return{kind:String(incoming.searchParams.get('kind')||'').toLowerCase(),id:String(incoming.searchParams.get('id')||'').trim()};
+}
 
 function normalize(body){
   if(typeof body!=='string')return body;
@@ -25,21 +32,19 @@ function normalize(body){
 }
 
 function inlineScriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))!==null){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
-function syncCsp(html,res){const current=String(res.getHeader?.('Content-Security-Policy')||'');if(!current)return;const hashes=inlineScriptHashes(html);if(!hashes.length)return;const next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src ${hashes.join(' ')};`);if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');res.setHeader('Content-Security-Policy',next)}
+function addSelfDirective(csp,name){const target=String(name).toLowerCase(),parts=String(csp).split(';').map(x=>x.trim()).filter(Boolean);let found=false;const next=parts.map(part=>{const first=part.split(/\s+/,1)[0].toLowerCase();if(first!==target)return part;found=true;const sources=part.slice(name.length).trim().replace(/'self'\s*/gi,'').trim();return `${name} 'self'${sources?` ${sources}`:''}`});if(!found)next.push(`${name} 'self'`);return `${next.join('; ')};`}
+function syncCsp(html,res,{allowSelf=false}={}){const current=String(res.getHeader?.('Content-Security-Policy')||'');if(!current)return;const hashes=inlineScriptHashes(html);if(!hashes.length)return;let next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src ${allowSelf?"'self' ":''}${hashes.join(' ')};`);if(allowSelf){next=addSelfDirective(next,'style-src');next=addSelfDirective(next,'connect-src')}if(/script-src[^;]*'unsafe-inline'/i.test(next)||/style-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');res.setHeader('Content-Security-Policy',next)}
 
-async function fetchPhotophysics(req){
-  let incoming;
-  try{incoming=new URL(String(req?.url||'/'),'http://local')}catch{incoming=new URL('http://local/')}
-  const kind=String(incoming.searchParams.get('kind')||'').toLowerCase();
-  const id=String(incoming.searchParams.get('id')||'').trim();
-  if(!['article','structure'].includes(kind)||!id)return null;
+async function fetchRecordOverlay(req){
+  const {kind,id}=requestTarget(req),base={kind,id,available:false,photophysics:null,organic_components:null};
+  if(!['article','structure'].includes(kind)||!id)return base;
   try{
     const u=new URL(PUBLIC_DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);
-    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Photophysics/1.3.0'},signal:AbortSignal.timeout(6500)});
-    if(!r.ok)return null;
-    const x=await r.json();
-    return x?.photophysics&&typeof x.photophysics==='object'?x.photophysics:null;
-  }catch(error){console.error('[record-photophysics]',error);return null}
+    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Overlay/1.1.0'},signal:AbortSignal.timeout(6500)});
+    if(!r.ok)return base;
+    const x=await r.json(),items=kind==='structure'?(Array.isArray(x?.organic_components)?x.organic_components:Array.isArray(x?.item?.organic_components)?x.item.organic_components:[]):[];
+    return{kind,id,available:true,photophysics:x?.photophysics&&typeof x.photophysics==='object'?x.photophysics:null,organic_components:items};
+  }catch(error){console.error('[record-overlay]',error);return base}
 }
 
 const propertyLabels={
@@ -128,17 +133,36 @@ function photophysicsCard(ph){
 }
 function injectPhotophysics(html,ph){const card=photophysicsCard(ph);if(!card)return html;const marker='<div class="data-note">';return html.includes(marker)?html.replace(marker,`${card}${marker}`):html}
 
+const organicRoleLabel=r=>({counter_cation:'Counter-cation',coordinating_ligand:'Coordinating ligand',ancillary_ligand:'Ancillary ligand',mixed_role:'Mixed role',reported_organic_token:'Reported organic component'}[r]||String(r||'Organic component').replaceAll('_',' '));
+function organicComponentsCard(overlay){
+  if(overlay?.kind!=='structure'||!overlay.id)return '';
+  if(!overlay.available)return `<section class="card" data-oc-standalone="${esc(overlay.id)}"><p class="eyebrow">Organic components</p><p class="fine">The field-whitelisted Organic Components 1.1 projection is temporarily unavailable. Legacy evidence details are withheld rather than exposed.</p></section>`;
+  const items=Array.isArray(overlay.organic_components)?overlay.organic_components:[];
+  if(!items.length)return '';
+  const rows=items.map(item=>{const d=item?.depiction||{},state=d.status==='verified_connectivity'?'2D connectivity verified':'2D unresolved';return `<div class="component"><strong>${esc(item.display_name||item.component_key||'Unresolved')}</strong><span>${esc([item.abbreviation&&item.abbreviation!==item.display_name?item.abbreviation:'',organicRoleLabel(item.role),item.normalization_confidence,state].filter(Boolean).join(' · '))}</span></div>`}).join('');
+  return `<section class="card" data-oc-standalone="${esc(overlay.id)}"><p class="eyebrow">Organic components</p><p class="fine">Contract 1.1.0 · field-whitelisted structure-grain projection. Deterministic 2D connectivity is loaded only for independently verified identities; unresolved identities remain fail-closed.</p><div class="components">${rows}</div></section>`;
+}
+function injectOrganicComponents(html,overlay){
+  if(overlay?.kind!=='structure')return html;
+  const legacy=/<section class="card"><p class="eyebrow">Organic components<\/p>[\s\S]*?<\/section>/i,card=organicComponentsCard(overlay),hadLegacy=legacy.test(html);
+  let out=hadLegacy?html.replace(legacy,card):html;
+  if(!hadLegacy&&card){const marker='<div class="actions">';out=out.includes(marker)?out.replace(marker,`${card}${marker}`):out}
+  return out;
+}
+function injectOrganicClient(html,overlay){if(overlay?.kind!=='structure'||html.includes('/organic-components-v1.js'))return html;return html.replace('</body>','<script src="/organic-components-v1.js" defer></script></body>')}
+
 export default async function handler(req,res){
   res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');
   res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);
   res.setHeader('X-CuHalide-Photophysics-Contract',PHOTOPHYSICS_CONTRACT);
+  res.setHeader('X-CuHalide-Organic-Components-Contract',ORGANIC_COMPONENTS_CONTRACT);
   res.setHeader('Last-Modified',LAST_MODIFIED);
-  const photophysics=await fetchPhotophysics(req);
+  const overlay=await fetchRecordOverlay(req);
   const bridge={
-    setHeader:(name,value)=>{const k=String(name).toLowerCase();if(k==='x-robots-tag')return res.setHeader(name,'noindex, nofollow, noarchive');if(k==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(k==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
+    setHeader:(name,value)=>{const k=String(name).toLowerCase();if(k==='x-robots-tag')return res.setHeader(name,'noindex, nofollow, noarchive');if(k==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(k==='x-cuhalide-organic-components-contract')return res.setHeader(name,ORGANIC_COMPONENTS_CONTRACT);if(k==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
     getHeader:name=>res.getHeader?.(name),
     removeHeader:name=>res.removeHeader?.(name),
-    end:body=>{let out=normalize(body);if(typeof out==='string'&&out.includes('</html>')){out=injectPhotophysics(out,photophysics);if(!out.includes(ROBOTS_META))throw new Error('prepublication record page missing noindex meta');syncCsp(out,res)}res.removeHeader?.('Content-Length');return res.end(out)}
+    end:body=>{let out=normalize(body);if(typeof out==='string'&&out.includes('</html>')){out=injectOrganicComponents(out,overlay);out=injectPhotophysics(out,overlay.photophysics);out=injectOrganicClient(out,overlay);if(!out.includes(ROBOTS_META))throw new Error('prepublication record page missing noindex meta');syncCsp(out,res,{allowSelf:overlay.kind==='structure'})}res.removeHeader?.('Content-Length');return res.end(out)}
   };
   Object.defineProperty(bridge,'statusCode',{get:()=>res.statusCode,set:value=>{res.statusCode=value}});
   return recordHandler(req,bridge);

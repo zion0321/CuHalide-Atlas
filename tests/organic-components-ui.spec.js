@@ -87,3 +87,20 @@ test('verified and unresolved structure details preserve identity boundaries',as
   await expect(unresolved).toContainText('2D connectivity is not shown');
   await expect(unresolved).toContainText('normalized component key maps to incompatible molecular identities');
 });
+
+test('standalone structure page uses the same field-whitelisted deterministic depiction contract',async({page})=>{
+  const response=await page.goto(`${BASE}/structure/CUH-008-S01`,{waitUntil:'networkidle'});
+  expect(response?.status()).toBe(200);
+  expect(response?.headers()['x-cuhalide-organic-components-contract']).toBe('1.1.0');
+  const host=page.locator('main [data-oc-standalone="CUH-008-S01"]');
+  await expect(host).toBeVisible({timeout:15000});
+  await expect(host).toContainText('Contract 1.1.0');
+  await expect(host.locator('.oc-card')).toHaveCount(1);
+  await expect(host.locator('.oc-svg')).toHaveCount(1);
+  await expect(host).toContainText('C7H10N2');
+  const html=await page.content();
+  expect(html).not.toContain('donor_atoms');
+  expect(html).not.toContain('evidence_basis');
+  expect(html).not.toContain('source_hash');
+  expect(html).not.toContain('internal_sample_id');
+});

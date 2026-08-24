@@ -6,10 +6,10 @@ import {readFile} from 'node:fs/promises';
 const read=p=>readFile(new URL(`../${p}`,import.meta.url),'utf8');
 
 test('organic component public contract is structure-grain, classified and fail-closed', async()=>{
-  const [ui,css,proxy,edge,classifier,extra,migration,server]=await Promise.all([
+  const [ui,css,proxy,edge,classifier,extra,migration,server,record]=await Promise.all([
     read('public/organic-components-v1.js'),read('public/organic-components-v1.css'),read('api/public-data.js'),
     read('supabase/functions/cuhalide-atlas-public-data-v3/index.ts'),read('supabase/functions/cuhalide-atlas-public-data-v3/organic-components.ts'),
-    read('supabase/functions/cuhalide-atlas-public-data-v3/organic-components-extra.ts'),read('supabase/migrations/20260824024500_public_organic_components_read_rpc_v1.sql'),read('scripts/local-candidate-server.mjs')
+    read('supabase/functions/cuhalide-atlas-public-data-v3/organic-components-extra.ts'),read('supabase/migrations/20260824024500_public_organic_components_read_rpc_v1.sql'),read('scripts/local-candidate-server.mjs'),read('api/record-current.js')
   ]);
   assert.match(ui,/Contract 1\.1\.0/);
   assert.match(ui,/CHUNKS=10/);
@@ -17,6 +17,8 @@ test('organic component public contract is structure-grain, classified and fail-
   assert.match(ui,/2D connectivity is not shown/);
   assert.match(ui,/All curated structure-grain component rows are explicitly classified/);
   assert.match(ui,/deterministic RDKit-derived connectivity depiction/);
+  assert.match(ui,/enhanceStandalone/);
+  assert.match(ui,/same field-whitelisted Organic Components 1\.1 projection/);
   assert.match(css,/\.oc-svg/);
   assert.match(proxy,/ORGANIC_COMPONENTS_CONTRACT='1\.1\.0'/);
   assert.match(proxy,/X-CuHalide-Organic-Components-Contract/);
@@ -33,6 +35,14 @@ test('organic component public contract is structure-grain, classified and fail-
   assert.doesNotMatch(edge,/evidence_basis|donor_atoms/);
   assert.doesNotMatch(classifier,/evidence_basis|donor_atoms/);
   assert.doesNotMatch(extra,/evidence_basis|donor_atoms/);
+  assert.match(record,/ORGANIC_COMPONENTS_CONTRACT='1\.1\.0'/);
+  assert.match(record,/injectOrganicComponents/);
+  assert.match(record,/injectOrganicClient/);
+  assert.match(record,/organic-components-v1\.js/);
+  assert.match(record,/addSelfDirective/);
+  assert.match(record,/addSelfDirective\(next,'connect-src'\)/);
+  assert.match(record,/Legacy evidence details are withheld rather than exposed/);
+  assert.doesNotMatch(record,/donor_atoms/);
   assert.match(migration,/qc_status = 'passed'/);
   assert.match(migration,/revoke all .* from public, anon, authenticated/i);
   assert.match(migration,/grant execute .* to service_role/i);
@@ -67,8 +77,8 @@ test('organic component health contract has exact immutable mapping denominators
 });
 
 test('public organic component projections do not contain private evidence keys', async()=>{
-  const [ui,edge,classifier,extra]=await Promise.all([read('public/organic-components-v1.js'),read('supabase/functions/cuhalide-atlas-public-data-v3/index.ts'),read('supabase/functions/cuhalide-atlas-public-data-v3/organic-components.ts'),read('supabase/functions/cuhalide-atlas-public-data-v3/organic-components-extra.ts')]);
-  const sources=[['ui',ui],['edge',edge],['classifier',classifier],['extra',extra]];
+  const [ui,edge,classifier,extra,record]=await Promise.all([read('public/organic-components-v1.js'),read('supabase/functions/cuhalide-atlas-public-data-v3/index.ts'),read('supabase/functions/cuhalide-atlas-public-data-v3/organic-components.ts'),read('supabase/functions/cuhalide-atlas-public-data-v3/organic-components-extra.ts'),read('api/record-current.js')]);
+  const sources=[['ui',ui],['edge',edge],['classifier',classifier],['extra',extra],['record',record]];
   for(const forbidden of ['evidence_basis','donor_atoms','source_hash','internal_sample_id']){
     for(const [name,src] of sources)assert.equal(src.includes(forbidden),false,`${forbidden} leaked into ${name}`);
   }
