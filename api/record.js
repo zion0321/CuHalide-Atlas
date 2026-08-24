@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 
 const PUBLIC_ORIGIN='https://cuhalide-atlas-v3.vercel.app';
-const DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v302-public';
+const DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3';
 const RELEASE='3.0.2',SITE_VERSION='50',CURRENT_REVISION='6',CURRENT_DATE='2026-08-18';
 const RETRIES=3,ATTEMPT_TIMEOUT_MS=7000,RETRY_DELAY_MS=180;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
