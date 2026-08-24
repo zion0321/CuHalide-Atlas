@@ -15,5 +15,6 @@ test('runtime citation metadata reads canonical repository CITATION.cff',()=>{
   assert.match(cff,/prepublication review resource/i);
   assert.doesNotMatch(cff,/^date-released:/m);
   assert.doesNotMatch(cff,/\bdoi:\s*\S+/im);
-  assert.match(cff,/family-names:\s*"CuHalide Atlas Project"/);
+  assert.match(cff,/^authors:\s*\n\s*-\s+name:\s*"CuHalide Atlas Project"/m);
+  assert.doesNotMatch(cff,/^authors:\s*\n\s*-\s+family-names:/m);
 });
