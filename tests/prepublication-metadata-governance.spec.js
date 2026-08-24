@@ -177,8 +177,12 @@ test('manifest health data gateway citation assistant export and sitemap expose 
   const cffResponse=await request.get(`${BASE}/citation.cff`);
   expect(cffResponse.status()).toBe(200);
   expect(header(cffResponse,'x-cuhalide-publication-state')).toBe(STATE);
+  expect(header(cffResponse,'x-cuhalide-meta-version')).toBe('50.5');
   const cff=await cffResponse.text();
   expect(cff).toContain('prepublication review resource');
-  expect(cff).toContain('Prepublication review interface');
+  expect(cff).toContain('not a formally deposited public dataset');
+  expect(cff).toContain('Current Curated rev.7 (prepublication review)');
+  expect(cff).toContain('name: "CuHalide Atlas Project"');
   expect(cff).not.toMatch(/^date-released:/m);
+  expect(cff).not.toMatch(/\bdoi:\s*\S+/im);
 });

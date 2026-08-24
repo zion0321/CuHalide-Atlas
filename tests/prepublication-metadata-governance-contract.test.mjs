@@ -40,11 +40,16 @@ test('canonical HTML renderers use explicit prepublication response and page met
 });
 
 test('metadata gateway 50.5 carries explicit governance state without changing scientific contracts',()=>{
-  const meta=read('api/meta.js'),readme=read('README.md');
+  const meta=read('api/meta.js'),readme=read('README.md'),cff=read('CITATION.cff');
   for(const token of ["META_VERSION='50.5'","PUBLICATION_STATE='prepublication-review'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_VERSION='1.3.0'","ORGANIC_COMPONENTS_VERSION='1.1.0'","CURRENT_REVISION='7'",'publication_state=PUBLICATION_STATE',"publication_state:PUBLICATION_STATE","governance_state:PUBLICATION_STATE","release_state:'prepublication'","indexing:'disabled-prepublication'"])assert.ok(meta.includes(token),`metadata governance contract missing ${token}`);
   assert.match(meta,/X-CuHalide-Publication-State/);
   assert.match(meta,/CuHalide-Atlas-Meta\/50\.5/);
-  assert.match(meta,/Prepublication review interface/);
+  assert.match(meta,/fs\.readFileSync\(CITATION_PATH,'utf8'\)/);
+  assert.doesNotMatch(meta,/Prepublication review interface/);
+  assert.match(cff,/prepublication review resource/i);
+  assert.match(cff,/not a formally deposited public dataset/i);
+  assert.doesNotMatch(cff,/^date-released:/m);
+  assert.doesNotMatch(cff,/\bdoi:\s*\S+/im);
   assert.match(readme,/Metadata gateway: \*\*50\.5\*\*/);
   assert.match(readme,/Publication\/governance state: \*\*prepublication-review\*\*/);
 });
