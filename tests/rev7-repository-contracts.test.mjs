@@ -121,13 +121,11 @@ test('sitemap denominators remain canonical and revision provenance advances onl
   for(const token of ["CONTENT_DATE='2026-08-19'","CURRENT_REVISION='7'",'EXPECTED_ARTICLES=369','EXPECTED_STRUCTURES=886','EXPECTED_URLS=1257'])assert.ok(sitemap.includes(token));
 });
 
-test('legacy data route remains compatibility-only and current',()=>{
+test('legacy data route remains compatibility-only and delegates to the current canonical contract',()=>{
   const data=read('api/data.js'),publicData=read('api/public-data.js');
-  for(const token of ["PUBLIC_DATA_VERSION='2.16.0'","CURRENT_REVISION='7'","PHOTOPHYSICS_CONTRACT='1.3.0'",'prefer /api/public-data','RETRIES=3'])assert.ok(data.includes(token),`legacy data contract missing ${token}`);
-  assert.ok(publicData.includes("PUBLIC_DATA_VERSION='2.16.0'"));
-  assert.ok(publicData.includes("CURRENT_REVISION='7'"));
-  assert.ok(publicData.includes("PHOTOPHYSICS_CONTRACT='1.3.0'"));
-  assert.ok(publicData.includes('cuhalide-atlas-public-data-v3'));
+  for(const token of ["import publicDataHandler from './public-data.js'",'prefer /api/public-data','return publicDataHandler(req,res)'])assert.ok(data.includes(token),`legacy data contract missing ${token}`);
+  assert.doesNotMatch(data,/supabase\.co\/functions\/v1/);
+  for(const token of ["PUBLIC_DATA_VERSION='2.16.0'","CURRENT_REVISION='7'","PHOTOPHYSICS_CONTRACT='1.3.0'",'cuhalide-atlas-public-data-v3'])assert.ok(publicData.includes(token),`canonical public-data missing ${token}`);
   assert.match(publicData,/response\.status===429/);
 });
 
