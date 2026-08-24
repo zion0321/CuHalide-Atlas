@@ -1,8 +1,30 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {join,relative} from 'node:path';
 
+const ROOT=fileURLToPath(new URL('../',import.meta.url));
 const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
+const BULK_PATTERNS=['*.pdf','*.cif','*.mmcif','*.xlsx','*.xls','*.ods','*.csv','*.tsv','*.parquet','*.feather','*.arrow','*.sqlite','*.sqlite3','*.db','*.jsonl','*.ndjson','*.docx','*.pptx','*.zip','*.7z','*.rar','*.tar','*.tar.gz','*.tgz'];
+const BULK_SUFFIXES=BULK_PATTERNS.map(x=>x.slice(1));
+const SCAN_SKIP=new Set(['.git','node_modules','.vercel','.supabase','playwright-report','test-results','lighthouse-report']);
+function repositoryFiles(dir=ROOT,out=[]){
+  for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+    if(entry.isDirectory()&&SCAN_SKIP.has(entry.name))continue;
+    const path=join(dir,entry.name);
+    if(entry.isDirectory())repositoryFiles(path,out);else if(entry.isFile())out.push(path);
+  }
+  return out;
+}
+
+test('public repository blocks and contains no private or bulk artifact file types',()=>{
+  const ignore=read('.gitignore');
+  for(const pattern of BULK_PATTERNS)assert.ok(ignore.split(/\r?\n/).includes(pattern),`.gitignore must block ${pattern}`);
+  for(const dir of ['private/','private-data/','primary-evidence/','curation-private/','qa-private/'])assert.ok(ignore.split(/\r?\n/).includes(dir),`.gitignore must block ${dir}`);
+  const violations=repositoryFiles().map(path=>relative(ROOT,path).replaceAll('\\','/')).filter(path=>BULK_SUFFIXES.some(suffix=>path.toLowerCase().endsWith(suffix)));
+  assert.deepEqual(violations,[],'public repository source tree must not contain private/bulk artifacts');
+});
 
 test('prepublication sitemap is deliberately non-enumerating',()=>{
   const sitemap=read('api/sitemap.js');
