@@ -8,7 +8,7 @@ const FUNCTIONS = [
   ['r7 science exact', 'supabase/functions/cuhalide-atlas-current-rag-r7-science-exact-internal/index.ts', 'current-rag-r7-science-exact-1.1.1'],
   ['r7 exact', 'supabase/functions/cuhalide-atlas-current-rag-r7-exact-internal/index.ts', 'current-rag-r7.0.8'],
   ['r6 exact fallback', 'supabase/functions/cuhalide-atlas-current-rag-r6-exact-internal/index.ts', 'current-rag-r6.0.3'],
-  ['r1 fallback', 'supabase/functions/cuhalide-atlas-current-rag-r1-internal/index.ts', 'current-rag-r4.0.3'],
+  ['r1 fallback', 'supabase/functions/cuhalide-atlas-current-rag-r1-internal/index.ts', 'current-rag-r4.0.4'],
 ];
 
 for (const [name, path, expectedVersion] of FUNCTIONS) {
@@ -24,6 +24,7 @@ for (const [name, path, expectedVersion] of FUNCTIONS) {
     assert.match(source, /x-cuhalide-endpoint-state['"]\s*:\s*['"]internal-service-only/, 'must self-identify as internal-service-only');
     assert.match(source, /noindex, nofollow, noarchive/, 'internal responses must remain non-indexable and non-archivable');
     assert.ok(source.includes(expectedVersion), `must mirror deployed version ${expectedVersion}`);
+    assert.doesNotMatch(source, /cuhalide-atlas-public-data-v2/, 'production internal RAG must not depend on retired Public Data v2');
   });
 }
 
@@ -32,9 +33,11 @@ test('production internal RAG chain is explicit in repository source', async () 
   const science = await readFile('supabase/functions/cuhalide-atlas-current-rag-r7-science-exact-internal/index.ts', 'utf8');
   const exact = await readFile('supabase/functions/cuhalide-atlas-current-rag-r7-exact-internal/index.ts', 'utf8');
   const r6 = await readFile('supabase/functions/cuhalide-atlas-current-rag-r6-exact-internal/index.ts', 'utf8');
+  const r1 = await readFile('supabase/functions/cuhalide-atlas-current-rag-r1-internal/index.ts', 'utf8');
 
   assert.match(unified, /cuhalide-atlas-current-rag-r7-science-exact-internal/);
   assert.match(science, /cuhalide-atlas-current-rag-r7-exact-internal/);
   assert.match(exact, /cuhalide-atlas-current-rag-r6-exact-internal/);
   assert.match(r6, /cuhalide-atlas-current-rag-r1-internal/);
+  assert.match(r1, /cuhalide-atlas-public-data-v3/, 'terminal fallback must use canonical Public Data v3');
 });
