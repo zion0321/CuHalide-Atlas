@@ -34,6 +34,21 @@ test('canonical public data is allowlisted and clamps browse-sized motif results
   assert.match(edge,/const upstreamHeaders=\{\.\.\.AUTH/,'canonical v3 must authenticate its legacy internal upstream');
 });
 
+test('canonical Motif Atlas projection is aggregate-only and omits component inventories',()=>{
+  const edge=read('supabase/functions/cuhalide-atlas-public-data-v3/index.ts');
+  assert.match(edge,/function projectMotifAtlas\(atlas,limit=24\)/);
+  assert.match(edge,/public_projection:'motif-atlas-aggregate-v1'/);
+  assert.match(edge,/component_inventory_public:false/);
+  assert.match(edge,/action==='motifs'&&x\?\.atlas\)x\.atlas=projectMotifAtlas\(x\.atlas,motifLimit\)/);
+  assert.ok(!edge.includes('curated_components'),'canonical Motif Atlas must not expose the detailed curated-component inventory');
+  assert.ok(!edge.includes('label_derived_component_candidates'),'canonical Motif Atlas must not expose the label-derived candidate inventory');
+  assert.match(edge,/out\.length>40/,'organic-component batch lookup must remain capped at 40 structure ids');
+  for(const forbidden of ["'export'","'download'","'raw'","'payload'","'verified'"]){
+    const allowlist=edge.match(/PUBLIC_ACTIONS=new Set\(\[([^\]]+)\]\)/)?.[1]||'';
+    assert.ok(!allowlist.includes(forbidden),`${forbidden} must not be a public action`);
+  }
+});
+
 test('public record renderers use canonical Public Data v3 rather than protected legacy upstreams',()=>{
   for(const path of ['api/record.js','api/record-current.js']){
     const source=read(path);
