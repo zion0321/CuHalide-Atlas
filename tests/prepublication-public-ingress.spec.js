@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const BASE=process.env.CUHALIDE_BASE_URL||'https://cuhalide-atlas-v3.vercel.app';
 const PUBLIC='https://cuhalide-atlas-v3.vercel.app';
+const PUBLIC_DATA_ROUTES=['/api/public-data','/api/public-data.js','/api/data','/api/data.js'];
 const PRIVATE_KEYS=['source_file','source_sha256','evidence_locator','page_locator','internal_sample_id','evidence_excerpt','raw_payload','private_path'];
 
 function expectNoPrivatePayload(value){
@@ -27,8 +28,8 @@ test('prepublication sitemap is non-enumerating on canonical and direct filesyst
   }
 });
 
-test('public data fails closed for unknown actions on canonical and direct filesystem routes',async({request})=>{
-  for(const path of ['/api/public-data','/api/public-data.js','/api/data','/api/data.js']){
+test('public data fails closed for unknown actions on canonical and compatibility routes',async({request})=>{
+  for(const path of PUBLIC_DATA_ROUTES){
     const r=await request.get(`${BASE}${path}?action=definitely-not-public`);
     expect(r.status(),path).toBe(404);
     expect(r.headers()['x-robots-tag'],path).toBe('noindex, nofollow, noarchive');
@@ -47,7 +48,7 @@ test('read-only public data rejects write methods without weakening governance h
   }
 });
 
-test('Motif Atlas remains browse-sized through deprecated compatibility route',async({request})=>{
+test('Motif Atlas remains browse-sized through the canonical route',async({request})=>{
   const r=await request.get(`${BASE}/api/public-data?action=motifs&limit=500`);
   expect(r.status()).toBe(200);
   const x=await r.json();
@@ -111,20 +112,24 @@ test('organic-component batch lookup is capped and bulk-like public actions fail
   expect(exportRoute.status()).toBe(410);
 });
 
-test('Motif Atlas exposes aggregate taxonomy plus bounded examples, not component inventories',async({request},testInfo)=>{
+test('Motif Atlas uses the same aggregate-only projection on canonical and compatibility ingress routes',async({request},testInfo)=>{
   desktopOnly(testInfo);
-  const r=await request.get(`${BASE}/api/public-data?action=motifs&limit=9999`);
-  expect(r.status()).toBe(200);
-  const x=await r.json();
-  expect(x.ok).toBeTruthy();
-  expect(x.atlas?.public_projection).toBe('motif-atlas-aggregate-v1');
-  expect(x.atlas?.component_inventory_public).toBe(false);
-  expect(x.atlas).not.toHaveProperty('curated_components');
-  expect(x.atlas).not.toHaveProperty('label_derived_component_candidates');
-  expect(Array.isArray(x.atlas?.examples)).toBeTruthy();
-  expect(x.atlas.examples.length).toBeLessThanOrEqual(24);
-  for(const example of x.atlas.examples){
-    expect(Object.keys(example).sort()).toEqual(['dimensionality','label','motif_formula','primary_category','structure_id'].sort());
+  for(const path of PUBLIC_DATA_ROUTES){
+    const r=await request.get(`${BASE}${path}?action=motifs&limit=9999`);
+    expect(r.status(),path).toBe(200);
+    expect(r.headers()['x-robots-tag'],path).toBe('noindex, nofollow, noarchive');
+    expect(r.headers()['x-cuhalide-publication-state'],path).toBe('prepublication-review');
+    const x=await r.json();
+    expect(x.ok,path).toBeTruthy();
+    expect(x.atlas?.public_projection,path).toBe('motif-atlas-aggregate-v1');
+    expect(x.atlas?.component_inventory_public,path).toBe(false);
+    expect(x.atlas,path).not.toHaveProperty('curated_components');
+    expect(x.atlas,path).not.toHaveProperty('label_derived_component_candidates');
+    expect(Array.isArray(x.atlas?.examples),path).toBeTruthy();
+    expect(x.atlas.examples.length,path).toBeLessThanOrEqual(24);
+    for(const example of x.atlas.examples){
+      expect(Object.keys(example).sort(),path).toEqual(['dimensionality','label','motif_formula','primary_category','structure_id'].sort());
+    }
+    expectNoPrivatePayload(x);
   }
-  expectNoPrivatePayload(x);
 });
