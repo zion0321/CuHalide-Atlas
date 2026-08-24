@@ -30,8 +30,11 @@ test('public rev.7 copy contains no rev.6 release-language residues',async({requ
     const health=await request.get(`${BASE}/health.json`);
     expect(health.status()).toBe(200);
     const h=await health.json();
-    expect(h.site_probe_mode).toBe('frontend v50 active; backend Current Curated rev.7 deterministic contract; Structured Photophysics 1.3.0 staged publication');
+    expect(h.site_probe_mode).toBe('frontend v50 active; backend Current Curated rev.7 deterministic contract; Structured Photophysics 1.3.0 staged publication; Organic Components 1.1.0 structure-grain fail-closed depiction contract');
     expect(h.site_probe_mode).not.toContain('preview');
+    expect(h.organic_components_contract_version).toBe('1.1.0');
+    expect(h.organic_components).toMatchObject({ok:true,contract_version:'1.1.0',component_rows:495,mapped_structures:453,distinct_raw_component_keys:260,verified_connectivity_rows:253,unresolved_rows:242,structures_with_verified_connectivity:241,verified_connectivity_graph_keys:81});
+    expect(h.organic_components.checks).toMatchObject({all_rows_classified:true,mapping_baseline_stable:true,verified_plus_unresolved_equals_total:true,raw_primary_files_exposed:false,raw_evidence_locators_exposed:false,private_evidence_fields_exposed:false});
 
     const exportResponse=await request.get(`${BASE}/api/export`);
     expect(exportResponse.status()).toBe(410);
