@@ -40,6 +40,7 @@ test('organic component public contract is structure-grain, classified and fail-
   assert.match(record,/injectOrganicClient/);
   assert.match(record,/organic-components-v1\.js/);
   assert.match(record,/addSelfDirective/);
+  assert.match(record,/addSelfDirective\(next,'connect-src'\)/);
   assert.match(record,/Legacy evidence details are withheld rather than exposed/);
   assert.doesNotMatch(record,/donor_atoms/);
   assert.match(migration,/qc_status = 'passed'/);
