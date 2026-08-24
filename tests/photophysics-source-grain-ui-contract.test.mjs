@@ -48,9 +48,11 @@ test('structure modal photophysics stays fail-closed at structure grain',()=>{
     'No structure-mapped data',
     'Parent article ·',
     'Only samples explicitly mapped to this crystallographic structure are shown here',
-    'does not assign article-level or other sample-grain measurements to this crystallographic structure'
+    'does not assign article-level or other sample-grain measurements to this crystallographic structure',
+    'function exactMappedSamples(ph,id)'
   ])assert.ok(modal.includes(token),`structure-modal grain contract missing ${token}`);
-  assert.match(modal,/samples\.filter\(s=>String\(s\.structure_id\|\|''\)===id\|\|String\(s\.mapping_status\|\|''\)\.startsWith\('structure_'\)\)/);
+  assert.match(modal,/String\(s\.structure_id\|\|''\)===id&&String\(s\.mapping_status\|\|''\)\.startsWith\('structure_'\)/);
+  assert.match(modal,/structure_mapping_state==='mapped_samples_present'&&mapped\.length>0/);
 });
 
 test('sample-grain UI hardening does not add private evidence fields',()=>{
