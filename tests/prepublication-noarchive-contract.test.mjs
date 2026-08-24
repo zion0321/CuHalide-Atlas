@@ -15,3 +15,11 @@ test('public machine handlers cannot weaken the prepublication noarchive contrac
   assert.match(legacy,/import publicDataHandler from '\.\/public-data\.js'/);
   assert.match(legacy,/return publicDataHandler\(req,res\)/);
 });
+
+test('exact candidate runtime mirrors Vercel filesystem suffix exposure for governed machine handlers',()=>{
+  const candidate=read('scripts/local-candidate-server.mjs');
+  for(const route of ['data','public-data','agent','export']){
+    const escaped=route.replaceAll('-','\\-');
+    assert.match(candidate,new RegExp(`p==='\\/api\\/${escaped}'\\|\\|p==='\\/api\\/${escaped}\\.js'`),`candidate runtime must mirror /api/${route}.js filesystem exposure`);
+  }
+});
