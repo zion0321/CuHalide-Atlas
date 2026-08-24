@@ -29,10 +29,22 @@ test('legacy public entry points are intercepted before stale filesystem functio
   assert.match(candidate,/p==='\/api\/ui-assistant'/);
 });
 
-test('structure evidence wrapper is fail-closed only when no structure-mapped photophysics exists',()=>{
+test('structure evidence wrapper separates parent-article verification from structure mapping',()=>{
   const wrapper=read('api/record-evidence-current.js');
   assert.match(wrapper,/kind!=='structure'/);
   assert.match(wrapper,/0 curated sample states · 0 measurements · 0 normalized values/);
   assert.match(wrapper,/No structure-mapped data/);
   assert.match(wrapper,/without an explicit structure mapping/);
+  assert.match(wrapper,/Parent article · Two-pass verified/);
+  assert.match(wrapper,/Parent article · Pass A curated/);
+  assert.match(wrapper,/only photophysics samples explicitly mapped to this structure/);
+});
+
+test('frozen-baseline article provenance remains explicit inside the living rev.7 record context',()=>{
+  const wrapper=read('api/record-evidence-current.js');
+  assert.match(wrapper,/Current Curated rev\.7 context · core article record inherited from immutable Frozen Release 3\.0\.2 baseline/);
+  assert.match(wrapper,/CuHalide Atlas living knowledge base/);
+  assert.match(wrapper,/current-r7/);
+  assert.match(wrapper,/isBasedOn/);
+  assert.match(wrapper,/CuHalide Atlas archived scientific snapshot 3\.0\.2/);
 });
