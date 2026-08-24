@@ -1,5 +1,5 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
-import { projectOrganic, organicComponentHealth } from './organic-components.ts';
+import { projectOrganic, organicComponentHealth } from './organic-components-extra.ts';
 
 const BASE=Deno.env.get('SUPABASE_URL'), KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'), REST=`${BASE}/rest/v1`;
 const UP=`${BASE}/functions/v1/cuhalide-atlas-public-data-v302-public`;
