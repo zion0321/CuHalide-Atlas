@@ -1,4 +1,4 @@
-const DATA_UPSTREAM='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3';
+const DATA_UPSTREAM='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3-scope-canary';
 const CONTRACT_UPSTREAM='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-runtime-contract-v1-public';
 const PUBLIC_ORIGIN='https://cuhalide-atlas-v3.vercel.app';
 const PUBLIC_DATA_VERSION='2.16.0';
