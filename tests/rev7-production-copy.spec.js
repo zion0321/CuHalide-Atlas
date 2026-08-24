@@ -32,5 +32,12 @@ test('public rev.7 copy contains no rev.6 release-language residues',async({requ
     const h=await health.json();
     expect(h.site_probe_mode).toBe('frontend v50 active; backend Current Curated rev.7 deterministic contract; Structured Photophysics 1.3.0 staged publication');
     expect(h.site_probe_mode).not.toContain('preview');
+
+    const exportResponse=await request.get(`${BASE}/api/export`);
+    expect(exportResponse.status()).toBe(410);
+    const exportBody=await exportResponse.json();
+    expect(exportBody.public_access).toBe('query-and-view');
+    expect(exportBody.guidance).toContain('Research Assistant');
+    expect(exportBody.guidance).not.toContain('Smart RAG');
   }
 });
