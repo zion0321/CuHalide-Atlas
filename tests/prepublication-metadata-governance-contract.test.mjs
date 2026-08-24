@@ -9,7 +9,10 @@ test('shared governance helper separates website review state from source-articl
   assert.match(helper,/PUBLICATION_STATE='prepublication-review'/);
   assert.match(helper,/applyRootPrepublicationGovernance/);
   assert.match(helper,/applyRecordPrepublicationGovernance/);
-  assert.match(helper,/creativeWorkStatus=PUBLICATION_LABEL/);
+  assert.match(helper,/governRecordJsonLd/);
+  assert.match(helper,/LIVING_DATASET_NAME='CuHalide Atlas living knowledge base'/);
+  assert.match(helper,/value\.isPartOf=\{\.\.\.value\.isPartOf,creativeWorkStatus:PUBLICATION_LABEL\}/);
+  assert.match(helper,/value\['@type'\]==='Dataset'/);
   assert.match(helper,/Prepublication review interface/);
   assert.match(helper,/Prepublication attribution/);
   assert.match(helper,/Review-access knowledge layer/);
@@ -46,7 +49,7 @@ test('metadata gateway 50.5 carries explicit governance state without changing s
   assert.match(readme,/Publication\/governance state: \*\*prepublication-review\*\*/);
 });
 
-test('platform, compatibility and data gateways fail closed on prepublication state',()=>{
+test('platform compatibility and public-data gateways fail closed on prepublication state',()=>{
   const config=JSON.parse(read('vercel.json')),middleware=read('middleware.js'),candidate=read('scripts/local-candidate-server.mjs'),publicData=read('api/public-data.js');
   const global=config.headers.find(x=>x.source==='/(.*)')?.headers||[];
   assert.equal(global.find(x=>x.key==='X-CuHalide-Publication-State')?.value,'prepublication-review');
@@ -55,4 +58,24 @@ test('platform, compatibility and data gateways fail closed on prepublication st
   assert.match(publicData,/PUBLICATION_STATE='prepublication-review'/);
   assert.match(publicData,/X-CuHalide-Publication-State/);
   assert.match(publicData,/PUBLIC_DATA_VERSION='2\.16\.0'/);
+});
+
+test('assistant export and sitemap handlers independently expose governance state',()=>{
+  const agent=read('api/agent.js'),exp=read('api/export.js'),sitemap=read('api/sitemap.js');
+  assert.match(agent,/PUBLICATION_STATE='prepublication-review'/);
+  assert.match(agent,/X-CuHalide-Publication-State/);
+  assert.match(agent,/function annotateCapabilityBody/);
+  assert.match(agent,/req\.method!=='GET'/);
+  assert.match(agent,/x\.publication_state=PUBLICATION_STATE/);
+  assert.match(agent,/attempts=isPost\?1:3/);
+  assert.match(exp,/PUBLICATION_STATE='prepublication-review'/);
+  assert.match(exp,/Bulk dataset exports are unavailable during prepublication review/);
+  assert.match(exp,/publication_state:PUBLICATION_STATE/);
+  assert.match(exp,/release_state:'prepublication'/);
+  assert.match(exp,/X-CuHalide-Publication-State/);
+  assert.match(sitemap,/PUBLICATION_STATE='prepublication-review'/);
+  assert.match(sitemap,/X-Robots-Tag','noindex, nofollow, noarchive'/);
+  assert.match(sitemap,/X-CuHalide-Publication-State/);
+  assert.match(sitemap,/EXPECTED_URLS=1257/);
+  assert.match(sitemap,/prepublication-review sitemap/);
 });
