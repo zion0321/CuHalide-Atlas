@@ -1,9 +1,9 @@
-export const config={matcher:['/','/index.html','/api/ui-assistant','/api/record','/api/record-current']};
+export const config={matcher:['/','/index.html','/api/site','/api/ui-site','/api/ui-assistant','/api/record','/api/record-current']};
 const LAST_MODIFIED=new Date('2026-08-19T00:00:00Z').toUTCString();
 export default async function middleware(request){
   const incoming=new URL(request.url);
   const isRecord=incoming.pathname==='/api/record'||incoming.pathname==='/api/record-current';
-  const isAssistantCompat=incoming.pathname==='/api/ui-assistant';
+  const isAssistantCompat=incoming.pathname==='/api/ui-assistant'||incoming.pathname==='/api/site'||incoming.pathname==='/api/ui-site';
   const assistantTarget=new URL('/api/ui-assistant-current',request.url);
   const recordTarget=new URL('/api/record-evidence-current',request.url);
   const target=isRecord?recordTarget:assistantTarget;

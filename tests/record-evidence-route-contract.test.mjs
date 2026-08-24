@@ -8,6 +8,8 @@ const read=p=>fs.readFileSync(url(p),'utf8');
 test('legacy public entry points are intercepted before stale filesystem functions',()=>{
   const config=JSON.parse(read('vercel.json'));
   const route=source=>config.rewrites.find(x=>x.source===source)?.destination;
+  assert.equal(route('/api/site'),'/api/ui-assistant-current');
+  assert.equal(route('/api/ui-site'),'/api/ui-assistant-current');
   assert.equal(route('/api/ui-assistant'),'/api/ui-assistant-current');
   assert.equal(route('/api/record'),'/api/record-evidence-current');
   assert.equal(route('/api/record-current'),'/api/record-evidence-current');
@@ -15,9 +17,9 @@ test('legacy public entry points are intercepted before stale filesystem functio
   assert.equal(route('/structure/:id'),'/api/record-evidence-current?kind=structure&id=:id');
 
   const middleware=read('middleware.js');
-  assert.match(middleware,/matcher:\['\/','\/index\.html','\/api\/ui-assistant','\/api\/record','\/api\/record-current'\]/);
+  assert.match(middleware,/matcher:\['\/','\/index\.html','\/api\/site','\/api\/ui-site','\/api\/ui-assistant','\/api\/record','\/api\/record-current'\]/);
   assert.match(middleware,/isRecord=incoming\.pathname==='\/api\/record'\|\|incoming\.pathname==='\/api\/record-current'/);
-  assert.match(middleware,/isAssistantCompat=incoming\.pathname==='\/api\/ui-assistant'/);
+  assert.match(middleware,/isAssistantCompat=incoming\.pathname==='\/api\/ui-assistant'\|\|incoming\.pathname==='\/api\/site'\|\|incoming\.pathname==='\/api\/ui-site'/);
   assert.match(middleware,/assistantTarget=new URL\('\/api\/ui-assistant-current'/);
   assert.match(middleware,/recordTarget=new URL\('\/api\/record-evidence-current'/);
   assert.match(middleware,/target=isRecord\?recordTarget:assistantTarget/);
@@ -26,7 +28,8 @@ test('legacy public entry points are intercepted before stale filesystem functio
   const candidate=read('scripts/local-candidate-server.mjs');
   assert.match(candidate,/record-evidence-current\.js/);
   assert.match(candidate,/p==='\/api\/record-current'/);
-  assert.match(candidate,/p==='\/api\/ui-assistant'/);
+  assert.match(candidate,/p==='\/api\/ui-assistant'\|\|p==='\/api\/site'\|\|p==='\/api\/ui-site'/);
+  assert.doesNotMatch(candidate,/import uiSiteHandler/);
 });
 
 test('structure evidence wrapper separates parent-article verification from structure mapping',()=>{

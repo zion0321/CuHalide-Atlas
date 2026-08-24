@@ -21,16 +21,26 @@ function firstJsonLd(html,type,name){
 
 test.describe.configure({mode:'serial'});
 
-test('root and site endpoint identify a prepublication review interface in HTML and machine metadata',async({request},testInfo)=>{
+test('all public site HTML entry points resolve to the current prepublication review UI',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Governance metadata is viewport invariant; run once on desktop.');
-  for(const path of ['/','/api/site']){
+  for(const path of ['/','/api/site','/api/ui-site','/api/ui-assistant']){
     const r=await request.get(`${BASE}${path}`);
     expect(r.status()).toBe(200);
     expect(header(r,'x-cuhalide-publication-state')).toBe(STATE);
+    expect(header(r,'x-cuhalide-ui-version')).toBe('50.2');
+    expect(header(r,'x-cuhalide-site-version')).toBe('50');
     const html=await r.text();
     expect(html).toContain('<meta name="cuhalide-publication-state" content="prepublication-review">');
     expect(html).toContain('prepublication review interface');
     expect(html).not.toContain('structure-resolved public knowledge portal');
+    expect(html).toContain('data-route="photophysics" href="#photophysics">Photophysics');
+    expect(html).toContain('data-route="rag" href="#rag">Research Assistant');
+    expect(html).toContain('CUHALIDE_VISIBLE_PHOTOPHYSICS_UI_V1');
+    expect(html).toContain('CUHALIDE_UI_V48_5_CONVERSATIONAL_RESEARCH_ASSISTANT');
+    expect(html).toContain('CuHalide Research Assistant');
+    expect(html).not.toContain('data-route="rag" href="#rag">Smart RAG');
+    expect(html).not.toContain('<h1>Smart RAG</h1>');
+    expect(html).not.toContain('>Ask Smart RAG<');
     const ld=websiteJsonLd(html);
     expect(ld).not.toBeNull();
     expect(ld.creativeWorkStatus).toBe('Prepublication review');
