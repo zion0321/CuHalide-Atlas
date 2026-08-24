@@ -13,6 +13,12 @@ test('all public record entry points terminate at the evidence-grain wrapper',()
   assert.equal(route('/article/:id'),'/api/record-evidence-current?kind=article&id=:id');
   assert.equal(route('/structure/:id'),'/api/record-evidence-current?kind=structure&id=:id');
 
+  const middleware=read('middleware.js');
+  assert.match(middleware,/matcher:\['\/','\/index\.html','\/api\/record','\/api\/record-current'\]/);
+  assert.match(middleware,/isRecord=incoming\.pathname==='\/api\/record'\|\|incoming\.pathname==='\/api\/record-current'/);
+  assert.match(middleware,/isRecord\?'\/api\/record-evidence-current':'\/api\/ui-assistant-current'/);
+  assert.match(middleware,/target\.search=incoming\.search/);
+
   const candidate=read('scripts/local-candidate-server.mjs');
   assert.match(candidate,/record-evidence-current\.js/);
   assert.match(candidate,/p==='\/api\/record-current'/);
