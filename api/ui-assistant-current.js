@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import assistantHandler from './ui-assistant.js';
+import {applyRootPrepublicationGovernance,PUBLICATION_STATE} from '../lib/prepublication-governance.js';
 
 const CURRENT_REVISION='7';
 const CONTENT_DATE='2026-08-19';
@@ -108,6 +109,7 @@ function normalize(body){
   out=injectVisiblePhotophysicsAssets(out);
   out=injectPortalUxShell(out);
   out=injectPortalUxAssets(out);
+  out=applyRootPrepublicationGovernance(out);
   return out;
 }
 
@@ -129,9 +131,10 @@ function syncCsp(html,res){
 
 export default async function handler(req,res){
   res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);
+  res.setHeader('X-CuHalide-Publication-State',PUBLICATION_STATE);
   res.setHeader('Last-Modified',LAST_MODIFIED);
   const bridge={
-    setHeader:(name,value)=>{const k=String(name).toLowerCase();if(k==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(k==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
+    setHeader:(name,value)=>{const k=String(name).toLowerCase();if(k==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(k==='x-cuhalide-publication-state')return res.setHeader(name,PUBLICATION_STATE);if(k==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
     getHeader:name=>res.getHeader?.(name),
     removeHeader:name=>res.removeHeader?.(name),
     end:body=>{const out=normalize(body);if(typeof out==='string'&&out.includes('</html>'))syncCsp(out,res);res.removeHeader?.('Content-Length');return res.end(out)}
