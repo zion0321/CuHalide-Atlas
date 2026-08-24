@@ -1,7 +1,7 @@
 /* CuHalide Atlas organic-component layer v1.1.0. Deterministic RDKit coordinate layouts -> browser SVG. */
 (() => {
 'use strict';
-const DATA='/api/public-data',CHUNKS=7,cache=new Map(),pending=new Map();
+const DATA='/api/public-data',CHUNKS=9,cache=new Map(),pending=new Map();
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const roleLabel=r=>({counter_cation:'Counter-cation',coordinating_ligand:'Coordinating ligand',ancillary_ligand:'Ancillary ligand',mixed_role:'Mixed role',reported_organic_token:'Reported organic component'}[r]||String(r||'Organic component').replaceAll('_',' '));
 const reasonLabel=r=>({identity_not_uniquely_verified:'molecular identity is not uniquely verified',connectivity_not_uniquely_verified:'molecular connectivity is not uniquely verified',abbreviation_collision:'the abbreviation is reused for different molecular identities',component_key_collision:'the normalized component key maps to incompatible molecular identities',mapping_identity_conflict:'the curated component token conflicts with the structure-level identity',generic_or_mixture_identity:'the reported token is generic or represents a mixture/family',not_organic_component:'the mapped token is not an organic molecular component',role_charge_conflict:'the reported role/charge state does not support a unique molecular depiction'}[r]||'the molecular identity/connectivity is not uniquely verified');
