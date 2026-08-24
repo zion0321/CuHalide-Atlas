@@ -6,7 +6,7 @@ const url=p=>new URL(`../${p}`,import.meta.url);
 const read=p=>fs.readFileSync(url(p),'utf8');
 
 test('canonical public runtime exposes one rev.7 contract',()=>{
-  const files=['api/ui-site.js','api/ui-assistant-current.js','api/meta.js','api/data.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record-current.js','middleware.js','vercel.json'];
+  const files=['api/ui-site.js','api/ui-assistant-current.js','api/meta.js','api/data.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record-current.js','api/record-evidence-current.js','middleware.js','vercel.json'];
   const text=files.map(read).join('\n');
   for(const token of ["CURRENT_REVISION='7'","2026-08-19","946","886","684","87","1329","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_CONTRACT='1.3.0'"])assert.ok(text.includes(token),`missing ${token}`);
   for(const stale of ["CURRENT_REVISION='4'","EXPECTED_STRUCTURES=864","EXPECTED_URLS=1225","PUBLIC_DATA_VERSION='2.11.0'","PUBLIC_DATA_VERSION='2.10.0'","EVIDENCE_VERSION='9.16.0'","ASSISTANT_VERSION='10.1.0'"])assert.ok(!text.includes(stale),`stale token ${stale}`);
@@ -48,34 +48,35 @@ test('preview QA has one PR trigger while Vercel deployment status remains indep
   assert.match(gate,/has no trusted successful Vercel preview status/);
 });
 
-test('canonical routes terminate at rev.7 wrappers, not historical renderer provenance',()=>{
+test('canonical routes terminate at rev.7 evidence wrappers, not historical renderer provenance',()=>{
   const config=JSON.parse(read('vercel.json')),middleware=read('middleware.js'),candidate=read('scripts/local-candidate-server.mjs');
   const route=source=>config.rewrites.find(x=>x.source===source)?.destination;
   assert.equal(route('/'),'/api/ui-assistant-current');
   assert.equal(route('/index.html'),'/api/ui-assistant-current');
   assert.equal(route('/api/site'),'/api/ui-site');
   assert.equal(route('/api/ui-assistant'),'/api/ui-assistant-current');
-  assert.equal(route('/api/record'),'/api/record-current');
-  assert.equal(route('/article/:id'),'/api/record-current?kind=article&id=:id');
-  assert.equal(route('/structure/:id'),'/api/record-current?kind=structure&id=:id');
+  assert.equal(route('/api/record'),'/api/record-evidence-current');
+  assert.equal(route('/article/:id'),'/api/record-evidence-current?kind=article&id=:id');
+  assert.equal(route('/structure/:id'),'/api/record-evidence-current?kind=structure&id=:id');
   assert.match(middleware,/new URL\('\/api\/ui-assistant-current'/);
   assert.match(middleware,/release-3\.0\.2-ui-v50\.2-current-r7/);
   assert.ok(middleware.includes("headers.set('x-cuhalide-current-curated-revision','7')"));
   assert.match(candidate,/release-3\.0\.2-ui-v50\.2-current-r7/);
   assert.match(candidate,/ui-assistant-current/);
-  assert.match(candidate,/record-current/);
+  assert.match(candidate,/record-evidence-current/);
 });
 
-test('Vercel Hobby function budget is locked while base renderer stays internal',()=>{
+test('Vercel Pro serverless surface stays bounded while base renderer stays internal',()=>{
   const apiFiles=fs.readdirSync(url('api')).filter(name=>name.endsWith('.js'));
-  assert.ok(apiFiles.length<=12,`Vercel Hobby limit exceeded: ${apiFiles.length} serverless functions`);
+  assert.ok(apiFiles.length<=13,`bounded serverless surface exceeded: ${apiFiles.length} functions`);
+  assert.ok(apiFiles.includes('record-evidence-current.js'),'evidence-grain record wrapper must be deployed');
   assert.ok(!apiFiles.includes('site.js'),'base site renderer must not be deployed as a standalone function');
   assert.ok(fs.existsSync(url('lib/site-renderer.js')),'internal base site renderer missing');
   assert.match(read('api/ui-site.js'),/\.\.\/lib\/site-renderer\.js/);
 });
 
 test('rev.7 wrappers normalize living UI and staged photophysics provenance without rewriting validated base renderers',()=>{
-  const ui=read('api/ui-site.js'),assistant=read('api/ui-assistant-current.js'),record=read('api/record-current.js');
+  const ui=read('api/ui-site.js'),assistant=read('api/ui-assistant-current.js'),record=read('api/record-current.js'),boundary=read('api/record-evidence-current.js');
   for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R7','Current Curated rev.7','19 Aug 2026','Smart RAG 9.19.0','cc.verified_space_group_rows||684','cc.strict_polar_rows||87','cc.strict_polar_articles||54'])assert.ok(ui.includes(token),`UI promotion missing ${token}`);
   assert.match(assistant,/Current Curated rev\.7/);
   assert.match(record,/Current Curated rev\.7 · primary-evidence reviewed through 19 Aug 2026/);
@@ -86,6 +87,10 @@ test('rev.7 wrappers normalize living UI and staged photophysics provenance with
   assert.match(record,/Pass B verification has not yet been completed/);
   assert.match(record,/Measurement-level QC and conflict gates remain fail-closed/);
   assert.match(record,/noindex,nofollow,noarchive/);
+  assert.match(boundary,/No structure-mapped data/);
+  assert.match(boundary,/parent article review stage/);
+  assert.match(boundary,/without an explicit structure mapping/);
+  assert.match(boundary,/kind!=='structure'/);
 });
 
 test('metadata health and manifest carry exact rev.7 denominators and staged verification policy',()=>{
