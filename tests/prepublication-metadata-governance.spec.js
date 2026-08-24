@@ -179,10 +179,13 @@ test('manifest health data gateway citation assistant export and sitemap expose 
   expect(sitemapResponse.status()).toBe(200);
   expect(header(sitemapResponse,'x-robots-tag')).toContain('noindex');
   expect(header(sitemapResponse,'x-cuhalide-publication-state')).toBe(STATE);
-  expect(header(sitemapResponse,'x-cuhalide-sitemap-urls')).toBe('1257');
+  expect(header(sitemapResponse,'x-cuhalide-sitemap-urls')).toBe('2');
   const sitemap=await sitemapResponse.text();
   expect(sitemap).toContain('CuHalide Atlas prepublication-review sitemap');
-  expect((sitemap.match(/<url>/g)||[]).length).toBe(1257);
+  expect((sitemap.match(/<url>/g)||[]).length).toBe(2);
+  expect(sitemap).toContain(`${PUBLIC}/motifs`);
+  expect(sitemap).not.toContain('/article/');
+  expect(sitemap).not.toContain('/structure/');
 
   const cffResponse=await request.get(`${BASE}/citation.cff`);
   expect(cffResponse.status()).toBe(200);
