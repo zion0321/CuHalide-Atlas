@@ -128,7 +128,7 @@ test('Motif Atlas uses the same aggregate-only projection on canonical and compa
     expect(Array.isArray(x.atlas?.examples),path).toBeTruthy();
     expect(x.atlas.examples.length,path).toBeLessThanOrEqual(24);
     for(const example of x.atlas.examples){
-      expect(Object.keys(example).sort(),path).toEqual(['dimensionality','label','motif_formula','primary_category','structure_id'].sort());
+      expect(Object.keys(example).sort(),path).toEqual(['dimensionality','formula','label','motif_formula','primary_category','record_id','space_group','structure_id'].sort());
     }
     expectNoPrivatePayload(x);
   }
