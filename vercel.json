@@ -9,7 +9,8 @@
   "rewrites": [
     { "source": "/", "destination": "/api/ui-assistant-current" },
     { "source": "/index.html", "destination": "/api/ui-assistant-current" },
-    { "source": "/api/site", "destination": "/api/ui-site" },
+    { "source": "/api/site", "destination": "/api/ui-assistant-current" },
+    { "source": "/api/ui-site", "destination": "/api/ui-assistant-current" },
     { "source": "/api/ui-assistant", "destination": "/api/ui-assistant-current" },
     { "source": "/api/record", "destination": "/api/record-evidence-current" },
     { "source": "/api/record-current", "destination": "/api/record-evidence-current" },
