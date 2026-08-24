@@ -5,10 +5,11 @@ import fs from 'node:fs';
 const source=fs.readFileSync(new URL('../supabase/functions/cuhalide-atlas-current-rag-r7-exact-internal/index.ts',import.meta.url),'utf8');
 
 test('rev7 exact RAG has a versioned recovery source with current governance headers',()=>{
-  assert.match(source,/VERSION='current-rag-r7\.0\.7'/);
+  assert.match(source,/VERSION='current-rag-r7\.0\.8'/);
   assert.match(source,/PHOTOPHYSICS_CONTRACT='1\.3\.0'/);
   assert.match(source,/noindex, nofollow, noarchive/);
   assert.match(source,/x-cuhalide-publication-state':'prepublication-review'/);
+  assert.match(source,/x-cuhalide-endpoint-state':'internal-service-only'/);
   assert.match(source,/cuhalide-atlas-current-rag-r6-exact-internal/,'generic exact behavior must preserve the existing fallback chain');
 });
 
