@@ -17,6 +17,6 @@ export default async function handler(req, res) {
     error: 'Bulk release exports are not publicly distributed.',
     release: RELEASE,
     public_access: 'query-and-view',
-    guidance: 'Use the CuHalide Atlas search, record pages, Smart RAG, citation metadata and manuscript-specific data-availability process.'
+    guidance: 'Use the CuHalide Atlas search, record pages, Research Assistant, citation metadata and manuscript-specific data-availability process.'
   }));
 }
