@@ -1,7 +1,13 @@
-export const config={matcher:['/','/index.html']};
+export const config={matcher:['/','/index.html','/api/ui-assistant','/api/record','/api/record-current']};
 const LAST_MODIFIED=new Date('2026-08-19T00:00:00Z').toUTCString();
 export default async function middleware(request){
-  const target=new URL('/api/ui-assistant-current',request.url);
+  const incoming=new URL(request.url);
+  const isRecord=incoming.pathname==='/api/record'||incoming.pathname==='/api/record-current';
+  const isAssistantCompat=incoming.pathname==='/api/ui-assistant';
+  const assistantTarget=new URL('/api/ui-assistant-current',request.url);
+  const recordTarget=new URL('/api/record-evidence-current',request.url);
+  const target=isRecord?recordTarget:assistantTarget;
+  if(isRecord||isAssistantCompat)target.search=incoming.search;
   const response=await fetch(target,{method:request.method,headers:request.headers,redirect:'follow'});
   const headers=new Headers(response.headers);
   headers.set('x-cuhalide-middleware','release-3.0.2-ui-v50.2-current-r7');
