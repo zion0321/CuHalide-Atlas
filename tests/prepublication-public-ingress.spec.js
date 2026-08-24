@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const BASE=process.env.CUHALIDE_BASE_URL||'https://cuhalide-atlas-v3.vercel.app';
+const PUBLIC='https://cuhalide-atlas-v3.vercel.app';
 
 test('prepublication sitemap is non-enumerating on canonical and direct filesystem routes',async({request})=>{
   for(const path of ['/sitemap.xml','/api/sitemap','/api/sitemap.js']){
@@ -10,7 +11,7 @@ test('prepublication sitemap is non-enumerating on canonical and direct filesyst
     expect(r.headers()['x-cuhalide-publication-state'],path).toBe('prepublication-review');
     expect(r.headers()['x-cuhalide-sitemap-urls'],path).toBe('2');
     const body=await r.text();
-    expect(body,path).toContain(`${BASE}/motifs`);
+    expect(body,path).toContain(`${PUBLIC}/motifs`);
     expect(body,path).not.toContain('/article/');
     expect(body,path).not.toContain('/structure/');
   }
