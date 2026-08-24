@@ -1,9 +1,11 @@
-export const config={matcher:['/','/index.html','/api/site','/api/ui-site','/api/ui-assistant','/api/record','/api/record-current']};
+export const config={matcher:['/','/index.html','/api/site','/api/ui-site','/api/ui-site.js','/api/ui-assistant','/api/ui-assistant.js','/api/record','/api/record.js','/api/record-current','/api/record-current.js']};
 const LAST_MODIFIED=new Date('2026-08-19T00:00:00Z').toUTCString();
 export default async function middleware(request){
   const incoming=new URL(request.url);
-  const isRecord=incoming.pathname==='/api/record'||incoming.pathname==='/api/record-current';
-  const isAssistantCompat=incoming.pathname==='/api/ui-assistant'||incoming.pathname==='/api/site'||incoming.pathname==='/api/ui-site';
+  const recordPaths=new Set(['/api/record','/api/record.js','/api/record-current','/api/record-current.js']);
+  const assistantCompatPaths=new Set(['/api/ui-assistant','/api/ui-assistant.js','/api/site','/api/ui-site','/api/ui-site.js']);
+  const isRecord=recordPaths.has(incoming.pathname);
+  const isAssistantCompat=assistantCompatPaths.has(incoming.pathname);
   const assistantTarget=new URL('/api/ui-assistant-current',request.url);
   const recordTarget=new URL('/api/record-evidence-current',request.url);
   const target=isRecord?recordTarget:assistantTarget;
