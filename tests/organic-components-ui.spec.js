@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
+const PRIVATE_KEY_RE=/\"(evidence_basis|donor_atoms|raw_primary_files|raw_evidence_locators|source_hash|evidence_locator|internal_sample_id)\"\s*:/i;
 
 test.describe.configure({mode:'serial'});
 
@@ -20,13 +21,24 @@ test('organic component API is structure-grain, deterministic and fail-closed',a
     expect(item).not.toHaveProperty('donor_atoms');
   }
 
+  const detail=await request.get(`${BASE}/api/public-data?action=structure&id=CUH-371-S01`);
+  expect(detail.status()).toBe(200);
+  const d=await detail.json();
+  expect(d.item.organic_components).toEqual(d.organic_components);
+  expect(d.item.organic_components).toHaveLength(2);
+  for(const item of d.item.organic_components){
+    expect(item).not.toHaveProperty('evidence_basis');
+    expect(item).not.toHaveProperty('donor_atoms');
+  }
+  expect(JSON.stringify(d)).not.toMatch(PRIVATE_KEY_RE);
+
   const unresolved=await request.get(`${BASE}/api/public-data?action=organic-components&structure_id=CUH-080-S01`);
   expect(unresolved.status()).toBe(200);
   const u=await unresolved.json();
   expect(u.items).toHaveLength(1);
   expect(u.items[0].component_key).toBe('mtpp');
   expect(u.items[0].depiction).toEqual({status:'unresolved'});
-  expect(JSON.stringify(u)).not.toMatch(/raw_primary_files|raw_evidence_locators|source_hash|evidence_locator|internal_sample_id/i);
+  expect(JSON.stringify(u)).not.toMatch(PRIVATE_KEY_RE);
 });
 
 test('structure register renders mapped organic-component thumbnails',async({page})=>{
