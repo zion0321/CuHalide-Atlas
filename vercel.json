@@ -11,6 +11,7 @@
     { "source": "/api/site", "destination": "/api/ui-site" },
     { "source": "/api/ui-assistant", "destination": "/api/ui-assistant-current" },
     { "source": "/api/record", "destination": "/api/record-evidence-current" },
+    { "source": "/api/record-current", "destination": "/api/record-evidence-current" },
     { "source": "/motifs", "destination": "/api/motifs" },
     { "source": "/article/:id", "destination": "/api/record-evidence-current?kind=article&id=:id" },
     { "source": "/structure/:id", "destination": "/api/record-evidence-current?kind=structure&id=:id" },
