@@ -14,8 +14,8 @@ test('runtime citation CFF exactly matches the repository source of truth',async
     expect(header(r,'x-cuhalide-meta-version')).toBe('50.5');
     expect(await r.text()).toBe(canonical);
   }
-  expect(canonical).toContain('family-names: "CuHalide Atlas Project"');
-  expect(canonical).toContain('Current Curated rev.7 (prepublication)');
+  expect(canonical).toContain('name: "CuHalide Atlas Project"');
+  expect(canonical).toContain('Current Curated rev.7 (prepublication review)');
   expect(canonical).not.toMatch(/^date-released:/m);
   expect(canonical).not.toMatch(/\bdoi:\s*\S+/im);
 });
