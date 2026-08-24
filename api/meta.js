@@ -1,9 +1,13 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 const CONTRACT='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-runtime-contract-v1-public';
 const PHOTOPHYSICS_HEALTH='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3?action=photophysics-health';
 const ORGANIC_COMPONENTS_HEALTH='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3?action=organic-components-health';
 const PUBLIC='https://cuhalide-atlas-v3.vercel.app';
 const RELEASE='3.0.2',META_VERSION='50.5',PUBLIC_DATA_VERSION='2.16.0',PHOTOPHYSICS_VERSION='1.3.0',ORGANIC_COMPONENTS_VERSION='1.1.0',CURRENT_REVISION='7',PUBLICATION_STATE='prepublication-review';
 const RETRIES=3,ATTEMPT_TIMEOUT_MS=7000,RETRY_DELAY_MS=180;
+const CITATION_PATH=path.join(process.cwd(),'CITATION.cff');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const CURRENT={curated_through:'2026-08-19',article_audit_records:383,chemically_included_articles:372,canonical_verified_articles:369,structure_phase_rows:946,core_included_structure_rows:886,resolved_space_group_rows:710,verified_space_group_rows:684,verified_polar_rows:97,strict_polar_rows:87,strict_polar_articles:54,rag_documents:1329,rag_embedded:1329,taxonomy_rows:946,motif_resolved_rows:628,motif_unresolved_rows:318,motif_unresolved_legacy_category_rows:35};
 const FROZEN={version:RELEASE,release_date:'2026-08-11',cutoff_inclusive_through:'2026-06-30',immutable:true,article_audit_records:346,chemically_included_articles:335,canonical_verified_articles:332,structure_phase_rows:878,core_included_structure_rows:816,resolved_space_group_rows:650,verified_space_group_rows:625,verified_polar_rows:87,strict_polar_rows:67,strict_polar_articles:42,rag_documents:1224};
@@ -83,7 +87,12 @@ function manifest(){
 }
 
 function citation(){
-  return `cff-version: 1.2.0\nmessage: "CuHalide Atlas is currently a prepublication review resource. If you use living-atlas results during review, report the access date and Current Curated revision. For exact historical reproduction, use archived scientific snapshot 3.0.2."\ntitle: "CuHalide Atlas"\ntype: dataset\nversion: "Current Curated rev.7 (prepublication review)"\nurl: "${PUBLIC}/"\nabstract: "Prepublication review interface for a continuously curated, evidence-grounded Cu(I) halide literature and structure knowledge base. Archived scientific snapshot 3.0.2 remains immutable through 2026-06-30."\n`;
+  const body=fs.readFileSync(CITATION_PATH,'utf8');
+  if(!/^cff-version:\s*1\.2\.0/m.test(body))throw new Error('CITATION.cff contract missing cff-version 1.2.0');
+  if(!/prepublication review resource/i.test(body))throw new Error('CITATION.cff contract missing prepublication review state');
+  if(/^date-released:/m.test(body))throw new Error('CITATION.cff must not assert a formal release date during prepublication review');
+  if(/\bdoi:\s*\S+/im.test(body))throw new Error('CITATION.cff must not assert a permanent DOI during prepublication review');
+  return body;
 }
 
 export default async function handler(req,res){
