@@ -17,8 +17,8 @@ test('shared governance helper separates website review state from source-articl
   assert.doesNotMatch(helper,/ScholarlyArticle.*creativeWorkStatus/s);
 });
 
-test('canonical HTML renderers use one governance helper and explicit response state',()=>{
-  const site=read('api/ui-site.js'),assistant=read('api/ui-assistant-current.js'),record=read('api/record-evidence-current.js');
+test('canonical HTML renderers use explicit prepublication response and page metadata',()=>{
+  const site=read('api/ui-site.js'),assistant=read('api/ui-assistant-current.js'),record=read('api/record-evidence-current.js'),motifs=read('api/motifs.js');
   for(const source of [site,assistant]){
     assert.match(source,/applyRootPrepublicationGovernance/);
     assert.match(source,/X-CuHalide-Publication-State/);
@@ -27,6 +27,13 @@ test('canonical HTML renderers use one governance helper and explicit response s
   assert.match(record,/applyRecordPrepublicationGovernance/);
   assert.match(record,/X-CuHalide-Publication-State/);
   assert.match(record,/PUBLICATION_STATE/);
+  assert.match(motifs,/PUBLICATION_STATE='prepublication-review'/);
+  assert.match(motifs,/meta name="robots" content="noindex,nofollow,noarchive"/);
+  assert.match(motifs,/meta name="cuhalide-publication-state" content="\$\{PUBLICATION_STATE\}"/);
+  assert.match(motifs,/creativeWorkStatus:'Prepublication review'/);
+  assert.match(motifs,/review-access projection, not a formally released public dataset/);
+  assert.match(motifs,/X-CuHalide-Publication-State/);
+  assert.doesNotMatch(motifs,/meta name="robots" content="index,follow,max-image-preview:large"/);
 });
 
 test('metadata gateway 50.5 carries explicit governance state without changing scientific contracts',()=>{
