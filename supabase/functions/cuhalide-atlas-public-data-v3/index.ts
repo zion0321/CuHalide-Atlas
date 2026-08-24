@@ -13,6 +13,52 @@ function cors(req){const o=req.headers.get('origin')||'';return{'access-control-
 function hdr(req,ct='application/json; charset=utf-8'){return{...cors(req),'content-type':ct,'cache-control':'no-store','x-content-type-options':'nosniff','x-robots-tag':'noindex, nofollow, noarchive','x-cuhalide-release':RELEASE,'x-cuhalide-public-data-version':VERSION,'x-cuhalide-public-access':'query-and-view','x-cuhalide-publication-state':PUBLICATION_STATE,'x-cuhalide-current-curated-revision':REV,'x-cuhalide-photophysics-contract':PHOTOPHYSICS_CONTRACT,'x-cuhalide-organic-components-contract':ORGANIC_COMPONENTS_CONTRACT}}
 const send=(req,x,s=200)=>new Response(req.method==='HEAD'?null:JSON.stringify(x),{status:s,headers:hdr(req)});
 function patch(x){if(!x||typeof x!=='object')return x;x.version=VERSION;x.current_curated_revision=7;x.publication_state=PUBLICATION_STATE;x.architecture=x.architecture||'full-current-atomic-structure-snapshot';if(typeof x.public_note==='string')x.public_note=x.public_note.replace(/rev\.6/g,'rev.7').replace(/2026-08-18/g,'2026-08-19');if(x.current_curated&&typeof x.current_curated==='object'&&x.current_curated.current_state)x.current_curated.current_state.live_revision=7;return x}
+function projectMotifAtlas(atlas,limit=24){
+  const a=atlas&&typeof atlas==='object'?atlas:{};
+  const coverage=a.coverage&&typeof a.coverage==='object'?a.coverage:{};
+  const categories=(Array.isArray(a.categories)?a.categories:[]).map(r=>({
+    primary_category:r?.primary_category??null,
+    structure_determinations:r?.structure_determinations??0,
+    article_count:r?.article_count??0,
+    identity_count:r?.identity_count??0,
+    motif_count:r?.motif_count??0,
+  }));
+  const motifs=(Array.isArray(a.motifs)?a.motifs:[]).map(r=>({
+    primary_category:r?.primary_category??null,
+    motif_formula:r?.motif_formula??null,
+    structure_determinations:r?.structure_determinations??0,
+    article_count:r?.article_count??0,
+    identity_count:r?.identity_count??0,
+  }));
+  const examples=(Array.isArray(a.examples)?a.examples:[]).slice(0,limit).map(r=>({
+    structure_id:r?.structure_id??null,
+    label:r?.label??null,
+    primary_category:r?.primary_category??null,
+    motif_formula:r?.motif_formula??null,
+    dimensionality:r?.dimensionality??null,
+  }));
+  return{
+    scope:a.scope??null,
+    coverage:{
+      total_taxonomy_rows:coverage.total_taxonomy_rows??0,
+      motif_resolved_rows:coverage.motif_resolved_rows??0,
+      motif_unresolved_rows:coverage.motif_unresolved_rows??0,
+      primary_classified_rows:coverage.primary_classified_rows??0,
+      unresolved_category_rows:coverage.unresolved_category_rows??0,
+      unresolved_legacy_category_rows:coverage.unresolved_legacy_category_rows??coverage.unresolved_category_rows??0,
+      label_candidate_structures:coverage.label_candidate_structures??0,
+      curated_component_structures:coverage.curated_component_structures??0,
+    },
+    categories,
+    motifs,
+    examples,
+    counting_note:a.counting_note??null,
+    component_note:'Detailed curated-component and label-derived candidate inventories are not part of the public Motif Atlas projection.',
+    schema_version:a.schema_version??'1.2',
+    public_projection:'motif-atlas-aggregate-v1',
+    component_inventory_public:false,
+  };
+}
 async function rpc(name,body={}){const r=await fetch(`${REST}/rpc/${name}`,{method:'POST',headers:AUTH,body:JSON.stringify(body),signal:AbortSignal.timeout(30000)}),raw=await r.text();let x;try{x=raw?JSON.parse(raw):null}catch{x={error:'invalid contract response'}}if(!r.ok)throw Error(`${name} ${r.status}: ${x?.message||x?.error||raw.slice(0,160)}`);return x}
 function positiveInt(v){const n=Number(v);return Number.isInteger(n)&&n>0?n:null}
 function structureIds(raw){const out=[...new Set(String(raw||'').split(',').map(x=>x.trim()).filter(Boolean))];if(!out.length||out.length>40)return null;if(out.some(x=>!/^[A-Za-z0-9_-]{3,80}$/.test(x)))return null;return out}
@@ -33,9 +79,10 @@ Deno.serve(async req=>{
   try{
     const u=new URL(req.url), action=String(u.searchParams.get('action')||'health').toLowerCase();
     if(!PUBLIC_ACTIONS.has(action))return send(req,{ok:false,error:'unknown public action',publication_state:PUBLICATION_STATE},404);
+    let motifLimit=24;
     if(action==='motifs'){
-      const limit=Math.max(1,Math.min(24,Number(u.searchParams.get('limit')||24)||24));
-      u.searchParams.set('limit',String(limit));
+      motifLimit=Math.max(1,Math.min(24,Number(u.searchParams.get('limit')||24)||24));
+      u.searchParams.set('limit',String(motifLimit));
     }
     if(action==='photophysics-health'){
       const x=await rpc('cuhalide_atlas_public_photophysics_health_v2');
@@ -63,6 +110,7 @@ Deno.serve(async req=>{
     if(req.method==='HEAD')return new Response(null,{status:r.status,headers:hdr(req,r.headers.get('content-type')||undefined)});
     const raw=await r.text();let x;try{x=JSON.parse(raw)}catch{return new Response(raw,{status:r.status,headers:hdr(req,r.headers.get('content-type')||'text/plain; charset=utf-8')})}
     x=patch(x);
+    if(r.ok&&action==='motifs'&&x?.atlas)x.atlas=projectMotifAtlas(x.atlas,motifLimit);
     if(r.ok&&x?.item&&(action==='article'||action==='structure')){
       if(action==='structure'&&typeof x.item==='object')delete x.item.organic_components;
       const rid=positiveInt(String(x.item.record_id||u.searchParams.get('id')||''));
