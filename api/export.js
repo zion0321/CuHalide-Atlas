@@ -4,7 +4,7 @@ const PUBLICATION_STATE='prepublication-review';
 function commonHeaders(res){
   res.setHeader('Cache-Control','no-store');
   res.setHeader('X-Content-Type-Options','nosniff');
-  res.setHeader('X-Robots-Tag','noindex, nofollow');
+  res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');
   res.setHeader('X-CuHalide-Release',RELEASE);
   res.setHeader('X-CuHalide-Publication-State',PUBLICATION_STATE);
   res.setHeader('X-CuHalide-Public-Access','query-and-view');
