@@ -59,6 +59,23 @@ test('legacy Supabase upstreams are service-role-only in the versioned source',(
   }
 });
 
+test('obsolete anonymous Supabase compatibility gateways are static 410 retirement stubs',()=>{
+  for(const path of [
+    'supabase/functions/cuhalide-atlas-meta/index.ts',
+    'supabase/functions/cuhalide-atlas-meta-v302-stable/index.ts',
+    'supabase/functions/cuhalide-atlas-smart-rag/index.ts',
+    'supabase/functions/cuhalide-atlas-public-data-v3-scope-canary/index.ts',
+  ]){
+    const source=read(path);
+    assert.match(source,/status:'retired'/,`${path} must advertise retirement`);
+    assert.match(source,/status:410/,`${path} must return Gone`);
+    assert.match(source,/noindex, nofollow, noarchive/);
+    assert.match(source,/prepublication-review/);
+    assert.ok(!source.includes('/rest/v1'),`${path} retirement stub must not access the database`);
+    assert.ok(!source.includes('SUPABASE_SERVICE_ROLE_KEY'),`${path} retirement stub must not possess service credentials`);
+  }
+});
+
 test('Research Assistant strips caller-controlled top-level parameters at both public ingress layers',()=>{
   const vercel=read('api/agent.js');
   assert.match(vercel,/JSON\.stringify\(\{messages\}\)/);
