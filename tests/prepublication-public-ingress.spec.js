@@ -56,7 +56,7 @@ test('Motif Atlas remains browse-sized through deprecated compatibility route',a
   expect(x.atlas.examples.length).toBeLessThanOrEqual(24);
 });
 
-test('hostile page-size requests cannot turn article or structure browsing into one-shot export',async({request},testInfo)=>{
+test('hostile page-size requests cannot turn article, structure, or polar browsing into one-shot export',async({request},testInfo)=>{
   desktopOnly(testInfo);
   const articles=await request.get(`${BASE}/api/public-data?action=articles&page=1&page_size=9999`);
   expect(articles.status()).toBe(200);
@@ -73,6 +73,14 @@ test('hostile page-size requests cannot turn article or structure browsing into 
   expect(Array.isArray(s.items)).toBeTruthy();
   expect(s.items.length).toBeLessThanOrEqual(50);
   expectNoPrivatePayload(s.items);
+
+  const polar=await request.get(`${BASE}/api/public-data?action=polar&page=1&page_size=9999&limit=9999`);
+  expect(polar.status()).toBe(200);
+  const p=await polar.json();
+  expect(p.pagination).toMatchObject({page:1,page_size:50,total:87,total_pages:2});
+  expect(Array.isArray(p.items)).toBeTruthy();
+  expect(p.items.length).toBeLessThanOrEqual(50);
+  expectNoPrivatePayload(p.items);
 });
 
 test('search ignores caller attempts to inflate result windows and stays on the public field whitelist',async({request},testInfo)=>{
