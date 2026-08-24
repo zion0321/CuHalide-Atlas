@@ -32,7 +32,7 @@ test('frozen-baseline articles are presented in the living rev.7 context without
   const response=await page.goto(`${BASE}/article/46`,{waitUntil:'networkidle'});
   expect(response?.status()).toBe(200);
   const main=page.locator('main');
-  await expect(main).toContainText('Current Curated rev.7 · record inherited from immutable Frozen Release 3.0.2 baseline');
+  await expect(main).toContainText('Current Curated rev.7 context · core article record inherited from immutable Frozen Release 3.0.2 baseline');
   await expect(main).toContainText('Pass A curated');
   await expect(main).toContainText('PLQY: 41.5 %');
   await expect(main).not.toContainText('Part of archived scientific snapshot 3.0.2 · retained in the current corpus');
