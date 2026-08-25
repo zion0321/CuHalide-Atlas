@@ -147,7 +147,7 @@ test('versioned Supabase recovery source is synchronized to the rev.7 runtime co
   assert.match(runtime,/PUBLIC_DATA_VERSION='2\.16\.0'/);
   assert.match(runtime,/EVIDENCE_VERSION='9\.19\.0'/);
   assert.match(runtime,/ASSISTANT_VERSION='10\.4\.1'/);
-  assert.match(runtime,/PHOTOPHYSICS_VERSION='1\.3\.0'/);
+  assert.match(runtime,/PHOTOPHYSICS_VERSION='1\.3\.1'/);
   assert.match(runtime,/CURRENT_REVISION=7/);
   assert.match(runtime,/SITE_VERSION='50'/);
   assert.match(runtime,/META_VERSION='50\.5'/);
