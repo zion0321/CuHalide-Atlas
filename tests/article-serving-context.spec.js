@@ -21,7 +21,7 @@ test('frozen-origin article keeps origin while declaring current serving and pho
     core_record_origin_release:'3.0.2',
     core_record_origin_revision:null,
     attached_photophysics_context:'current_curated',
-    attached_photophysics_contract:'1.3.0',
+    attached_photophysics_contract:'1.3.1',
     context_policy:'core_origin_preserved_current_overlays_explicit'
   });
   assertNoPrivateEvidence(x);
@@ -38,7 +38,7 @@ test('current-origin article uses the same serving contract without inventing a 
   expect(x.record_context?.core_record_origin_release).toBeNull();
   expect(x.record_context?.core_record_origin_revision).toBeGreaterThan(0);
   expect(x.record_context?.attached_photophysics_context).toBe('current_curated');
-  expect(x.record_context?.attached_photophysics_contract).toBe('1.3.0');
+  expect(x.record_context?.attached_photophysics_contract).toBe('1.3.1');
   expect(x.record_context?.context_policy).toBe('core_origin_preserved_current_overlays_explicit');
   assertNoPrivateEvidence(x);
 });
