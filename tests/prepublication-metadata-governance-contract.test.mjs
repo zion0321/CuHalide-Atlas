@@ -41,7 +41,7 @@ test('canonical HTML renderers use explicit prepublication response and page met
 
 test('metadata gateway 50.5 carries explicit governance state without changing scientific contracts',()=>{
   const meta=read('api/meta.js'),readme=read('README.md'),cff=read('CITATION.cff');
-  for(const token of ["META_VERSION='50.5'","PUBLICATION_STATE='prepublication-review'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_VERSION='1.3.1'","ORGANIC_COMPONENTS_VERSION='1.1.0'","CURRENT_REVISION='7'",'publication_state=PUBLICATION_STATE',"publication_state:PUBLICATION_STATE","governance_state:PUBLICATION_STATE","release_state:'prepublication'","indexing:'disabled-prepublication'"])assert.ok(meta.includes(token),`metadata governance contract missing ${token}`);
+  for(const token of ["META_VERSION='50.5'","PUBLICATION_STATE='prepublication-review'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_VERSION='1.3.2'","ORGANIC_COMPONENTS_VERSION='1.1.0'","CURRENT_REVISION='7'",'publication_state=PUBLICATION_STATE',"publication_state:PUBLICATION_STATE","governance_state:PUBLICATION_STATE","release_state:'prepublication'","indexing:'disabled-prepublication'"])assert.ok(meta.includes(token),`metadata governance contract missing ${token}`);
   assert.match(meta,/X-CuHalide-Publication-State/);
   assert.match(meta,/CuHalide-Atlas-Meta\/50\.5/);
   assert.match(meta,/fs\.readFileSync\(CITATION_PATH,'utf8'\)/);
@@ -58,7 +58,7 @@ test('production readiness workflow is locked to the same governance and metadat
   const workflow=read('.github/workflows/production-browser-qa.yml');
   assert.match(workflow,/x\.publication_state!=='prepublication-review'/);
   assert.match(workflow,/x\.meta_version!=='50\.5'\|\|x\.gateway_meta_version!=='50\.5'/);
-  assert.match(workflow,/Photophysics 1\.3\.1 invariant baseline PASS/);
+  assert.match(workflow,/Photophysics 1\.3\.2 invariant baseline PASS/);
   assert.match(workflow,/verification-stage accounting does not sum to article queue/);
   assert.doesNotMatch(workflow,/expected 85 two-pass \/ 244 Pass-A curated/);
   assert.match(workflow,/contract migration window/i);

@@ -7,7 +7,7 @@ const PAGE_DATE='2026-08-24';
 const LAST_MODIFIED=new Date(`${PAGE_DATE}T00:00:00Z`).toUTCString();
 const ROBOTS_META='<meta name="robots" content="noindex,nofollow,noarchive">';
 const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3';
-const PHOTOPHYSICS_CONTRACT='1.3.1';
+const PHOTOPHYSICS_CONTRACT='1.3.2';
 const ORGANIC_COMPONENTS_CONTRACT='1.1.0';
 
 const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

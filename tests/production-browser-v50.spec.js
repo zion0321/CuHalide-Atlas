@@ -44,7 +44,7 @@ test('pre-merge production backend rev.7 is ready', async ({ request }) => {
   });
   expect(x.photophysics).toMatchObject({
     ok: true,
-    version: '1.3.1',
+    version: '1.3.2',
     publication_policy: 'pass_a_curated_or_two_pass_verified',
     checks: {
       invalid_published_pass_a_gate: 0,
@@ -137,7 +137,7 @@ test('manifest sitemap and Motif Atlas agree with final rev.7', async ({ request
   expect(j.runtime).toMatchObject({
     meta_version: '50.5',
     public_data_version: '2.16.0',
-    photophysics_contract_version: '1.3.1',
+    photophysics_contract_version: '1.3.2',
     smart_rag_version: '9.19.0',
     research_assistant_version: '10.4.1',
   });
