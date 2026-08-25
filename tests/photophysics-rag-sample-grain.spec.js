@@ -16,7 +16,7 @@ function expectNoPrivatePayload(value){
   for(const key of forbidden)expect(raw).not.toContain(`\"${key}\"`);
 }
 
-test('Research Assistant health is aligned to staged photophysics 1.3.0',async({request},testInfo)=>{
+test('Research Assistant health is aligned to staged photophysics 1.3.1',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Read-only RAG contract is viewport invariant.');
   const response=await request.get(`${BASE}/api/agent`,{timeout:30_000});
   expect(response.status()).toBe(200);
@@ -26,17 +26,17 @@ test('Research Assistant health is aligned to staged photophysics 1.3.0',async({
   expect(x.assistant_version).toBe('10.4.1');
   expect(x.photophysics).toMatchObject({
     ok:true,
-    version:'1.3.0',
+    version:'1.3.1',
     publication_policy:'pass_a_curated_or_two_pass_verified',
     article_queue:383,
     pass_a_complete_articles:383,
     pass_a_pending_articles:0,
-    pass_a_curated_articles:248,
-    two_pass_verified_articles:81,
+    pass_a_curated_articles:244,
+    two_pass_verified_articles:85,
     verified_no_data_articles:54,
     publishable_samples:940,
-    publishable_measurements:2260,
-    publishable_values:2978,
+    publishable_measurements:2259,
+    publishable_values:2979,
     analysis_eligible_values:281,
     publishable_mechanism_claims:476,
     staged_publication:true,
@@ -54,7 +54,7 @@ test('Pass A curated Record 46 PLQY is available without false two-pass labeling
   test.setTimeout(120_000);
   const x=await askAgent(request,'What is the PLQY for Record 46? Keep the verification stage explicit.');
   expect(x.mode).toBe('deterministic-scientific-data');
-  expect(x.photophysics_contract).toBe('1.3.0');
+  expect(x.photophysics_contract).toBe('1.3.1');
   expect(x.answer).toContain('PLQY 41.5 %');
   expect(x.answer).toContain('Pass A curated');
   expect(x.answer.toLowerCase()).not.toContain('record 46 is two-pass verified');
@@ -82,7 +82,7 @@ test('two-pass Record 381 PLQY preserves two-pass identity and structure grain',
   test.setTimeout(120_000);
   const x=await askAgent(request,'What are the PLQY values for Record 381? Keep verification stage and structure mapping explicit.');
   expect(x.mode).toBe('deterministic-scientific-data');
-  expect(x.photophysics_contract).toBe('1.3.0');
+  expect(x.photophysics_contract).toBe('1.3.1');
   expect(x.answer).toContain('89.84 %');
   expect(x.answer).toContain('91.09 %');
   expect(x.answer).toContain('two-pass verified');
