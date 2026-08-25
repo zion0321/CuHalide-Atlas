@@ -83,15 +83,34 @@ test('Pass A QA follows the live verification stage instead of pinning a mutable
   assert.doesNotMatch(uiQa,/openArticleRoute\(page,\s*\d+\)/,'visible QA must resolve the live Pass A article dynamically');
 });
 
-test('corrected 1.3.2 scientific regressions are mandatory in both candidate and post-merge browser gates',()=>{
+test('photophysics migration regressions are mandatory and runtime declarations follow live evidence',()=>{
   const pkg=JSON.parse(read('package.json'));
-  const regression='tests/photophysics-1.3.2-corrections.spec.js';
-  assert.ok(String(pkg.scripts?.['qa:site-quality']||'').includes(regression),'candidate site-quality gate must run the 1.3.2 scientific regression');
-  assert.ok(String(pkg.scripts?.['qa:browser']||'').includes(regression),'post-merge production browser gate must run the 1.3.2 scientific regression');
+  const stableRegression='tests/photophysics-1.3.2-corrections.spec.js';
+  const migrationRegression='tests/photophysics-1.3.3-record297.spec.js';
+  for(const script of ['qa:site-quality','qa:browser']){
+    const command=String(pkg.scripts?.[script]||'');
+    assert.ok(command.includes(stableRegression),`${script} must retain corrected-record scientific regressions`);
+    assert.ok(command.includes(migrationRegression),`${script} must run the Record 297 activation-window regression`);
+  }
+
+  const contract=read('lib/photophysics-contract.js');
+  for(const token of ["'1.3.2'","'1.3.3'",'publishable_measurements:2262','publishable_measurements:2267','publishable_values:2985','publishable_values:2988','verification-stage accounting mismatch'])assert.ok(contract.includes(token),`dual-baseline classifier missing ${token}`);
+
   const visible=read('tests/visible-photophysics-ui.spec.js');
   const runtime=read('public/ui-photophysics-v1.js');
-  for(const token of ['2262','2985','Structured photophysics · contract 1.3.2'])assert.ok(visible.includes(token),`visible 1.3.2 QA missing ${token}`);
-  for(const token of ['Structured photophysics · contract 1.3.2',"ph.version||'1.3.2'"])assert.ok(runtime.includes(token),`visible Photophysics runtime missing ${token}`);
-  for(const stale of ['2259','2979','Structured photophysics · contract 1.3.1'])assert.ok(!visible.includes(stale),`visible QA still contains superseded 1.3.1 baseline token ${stale}`);
+  assert.ok(visible.includes('assertPhotophysicsHealth'));
+  assert.ok(visible.includes('state.expected.publishable_measurements'));
+  assert.ok(runtime.includes("const PHOTO_ALLOWED=new Set(['1.3.2','1.3.3'])"));
+  assert.ok(runtime.includes('id="photoContractVersion"'));
+  assert.ok(runtime.includes("contract.textContent=String(h.version||'unavailable')"));
+  assert.doesNotMatch(runtime,/Structured photophysics · contract 1\.3\.[123]/,'visible runtime must not hardcode an active photophysics contract');
+  assert.ok(!runtime.includes("ph.version||'1.3.2'"),'article modal must not fall back to the old contract');
   assert.ok(!runtime.includes('1.3.1'),'visible Photophysics runtime must not retain a 1.3.1 fallback or label');
+
+  const publicData=read('api/public-data.js');
+  const recordCurrent=read('api/record-current.js');
+  assert.ok(publicData.includes('snapshotPhotophysicsVersion'));
+  assert.ok(publicData.includes('normalizePhotophysicsVersion'));
+  assert.ok(recordCurrent.includes('normalizePhotophysicsVersion'));
+  assert.doesNotMatch(`${publicData}\n${recordCurrent}`,/PHOTOPHYSICS_CONTRACT\s*=\s*['"]1\.3\.[123]['"]/,'Vercel record/data surfaces must not statically declare a mutable photophysics contract');
 });
