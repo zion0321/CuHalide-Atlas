@@ -11,7 +11,9 @@ test('article context annotation preserves core origin and makes current overlay
   assert.match(source,/core_record_origin:origin/);
   assert.match(source,/core_record_origin_release:origin==='frozen_release'\?'3\.0\.2':null/);
   assert.match(source,/attached_photophysics_context:.*'current_curated'/);
-  assert.match(source,/attached_photophysics_contract:.*PHOTOPHYSICS_CONTRACT/);
+  assert.match(source,/attached_photophysics_contract:hasPhoto\?photoVersion:null/);
+  assert.match(source,/snapshotPhotophysicsVersion\(action,snapshot\)/);
+  assert.match(source,/bodyVersion&&headerVersion&&bodyVersion!==headerVersion/);
   assert.match(source,/context_policy:'core_origin_preserved_current_overlays_explicit'/);
   assert.doesNotMatch(source,/x\.data_scope\s*=/);
   assert.doesNotMatch(source,/x\.item\.curation_layer\s*=/);
