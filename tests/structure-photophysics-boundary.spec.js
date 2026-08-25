@@ -58,7 +58,9 @@ test('frozen-baseline article page owns Atlas provenance while source ScholarlyA
   expect(response?.status()).toBe(200);
   const main=page.locator('main');
   await expect(main).toContainText('Current Curated rev.7 context · core article record inherited from immutable Frozen Release 3.0.2 baseline');
-  await expect(main).toContainText('Pass A curated');
+  await expect(main).toContainText('Two-pass verified');
+  await expect(main).toContainText('Independent Pass A and Pass B review agree');
+  await expect(main).not.toContainText('Pass A curated');
   await expect(main).toContainText('PLQY: 41.5 %');
   await expect(main).not.toContainText('Part of archived scientific snapshot 3.0.2 · retained in the current corpus');
   const ld=JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());

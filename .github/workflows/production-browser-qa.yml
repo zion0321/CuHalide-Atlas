@@ -51,7 +51,10 @@ jobs:
             if(p?.version!=='1.3.1') fail(`${label}: expected Photophysics 1.3.1, got ${p?.version}`);
             if(p?.publication_policy!=='pass_a_curated_or_two_pass_verified') fail(`${label}: staged publication policy changed`);
             if(p?.article_queue!==383||p?.pass_a_complete_articles!==383||p?.pass_a_pending_articles!==0) fail(`${label}: Pass A article queue invariant changed`);
-            if(p?.two_pass_verified_articles!==85||p?.pass_a_curated_articles!==244||p?.verified_no_data_articles!==54) fail(`${label}: expected 85 two-pass / 244 Pass-A curated / 54 no-data`);
+            if(p?.verified_no_data_articles!==54) fail(`${label}: verified-no-data denominator changed`);
+            if(!Number.isInteger(p?.two_pass_verified_articles)||p.two_pass_verified_articles<0||!Number.isInteger(p?.pass_a_curated_articles)||p.pass_a_curated_articles<0) fail(`${label}: mutable verification-stage counts are invalid`);
+            if(p.pass_a_curated_articles+p.two_pass_verified_articles+p.verified_no_data_articles!==p.article_queue) fail(`${label}: verification-stage accounting does not sum to article queue`);
+            if(p?.publishable_samples!==940||p?.publishable_measurements!==2259||p?.publishable_values!==2979||p?.analysis_eligible_values!==281||p?.publishable_mechanism_claims!==476) fail(`${label}: stable photophysics content denominators changed`);
             if(p?.checks?.conflicts_fail_closed!==true||p?.checks?.two_pass_status_preserved!==true||p?.checks?.raw_primary_files_exposed!==false||p?.checks?.raw_evidence_locators_exposed!==false||p?.checks?.ineligible_measurement_projection_leaks!==0) fail(`${label}: photophysics privacy/QC guard changed`);
           };
 
@@ -68,17 +71,16 @@ jobs:
             validatePhotophysics(x.photophysics,'production health');
             if(x.checks?.photophysics_contract!==true||x.checks?.photophysics_staged_publication!==true||x.checks?.photophysics_private_evidence_guard!==true) fail('pre-merge production photophysics health gates are not intact');
             if(x.smart_rag?.version!=='9.19.0'||x.research_assistant?.version!=='10.4.1') fail('pre-merge production RAG/Research Assistant baseline changed unexpectedly');
-            console.log('Pre-merge production rev.7 / prepublication-review / Meta 50.5 / Public Data 2.16.0 / Photophysics 1.3.1 baseline PASS');
+            console.log('Pre-merge production rev.7 / prepublication-review / Meta 50.5 / Public Data 2.16.0 / Photophysics 1.3.1 invariant baseline PASS');
           }else{
-            // Controlled contract migration window: the private DB/Supabase backend may already be
-            // on 1.3.1 while the Vercel production metadata gateway is still the 1.3.0 main commit.
-            // Accept only that exact, independently healthy backend state. Any other outage fails.
+            // Controlled runtime-contract migration window. Accept only an independently healthy
+            // canonical public-data backend with the same rev.7/governance/version invariants.
             const pr=await fetch(`${base}/api/public-data?action=photophysics-health`,{headers:{accept:'application/json'}});
             if(!pr.ok) fail(`production health ${r.status}; contract migration backend probe ${pr.status}`);
             const p=await pr.json();
             validatePhotophysics(p,'contract migration window');
             if(p?.current_curated_revision!==7||p?.public_data_version!=='2.16.0'||p?.publication_state!=='prepublication-review') fail('contract migration window changed rev.7/public-data/governance baseline');
-            console.log('Pre-merge controlled contract migration window PASS: backend Photophysics 1.3.1 is healthy while Vercel production awaits this PR');
+            console.log('Pre-merge controlled contract migration window PASS: canonical Photophysics 1.3.1 backend is independently healthy');
           }
           NODE
       - name: Run full post-merge production browser QA

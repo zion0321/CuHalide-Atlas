@@ -87,7 +87,9 @@ test('standalone records expose review-access wording while article-page provena
   const ah=await article.text();
   expect(ah).toContain('<meta name="cuhalide-publication-state" content="prepublication-review">');
   expect(ah).toContain('Current Curated rev.7 context · core article record inherited from immutable Frozen Release 3.0.2 baseline');
-  expect(ah).toContain('Pass A curated');
+  expect(ah).toContain('Two-pass verified');
+  expect(ah).toContain('Independent Pass A and Pass B review agree');
+  expect(ah).not.toContain('Pass A curated');
   expect(ah).toContain('latest curated review-access record');
   expect(ah).toContain('Review pages expose only field-whitelisted information');
   expect(ah).not.toContain('latest curated public record');
