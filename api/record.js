@@ -26,6 +26,17 @@ async function getRecord(kind,id){
   throw lastError||Error('record backend unavailable');
 }
 
+async function resolveRecord(req,kind,id){
+  const snapshot=req?.__cuhalideRecordSnapshotPromise;
+  if(snapshot&&typeof snapshot.then==='function'){
+    try{
+      const overlay=await snapshot,result=overlay?.record_result;
+      if(result&&['ok','not-found','error'].includes(result.state))return result;
+    }catch(error){console.info('[record-snapshot-fallback]',error?.name||error?.message||'unavailable')}
+  }
+  return getRecord(kind,id);
+}
+
 function provenance(x){
   const rolling=x.curation_layer==='Current Curated'||Number(x.live_revision||0)>0;
   return rolling?{
@@ -87,7 +98,7 @@ export default async function handler(req,res){
   const valid=kind==='article'?/^\d+$/.test(id):kind==='structure'?/^CUH-[A-Za-z0-9_-]+$/i.test(id):false;
   if(!valid){const page=errorPage(400,'Invalid record identifier','The requested CuHalide Atlas record identifier is not valid.');res.statusCode=400;setCommonHeaders(res,page.csp);res.setHeader('Cache-Control','no-store');res.setHeader('X-Robots-Tag','noindex, nofollow');if(req.method==='HEAD')return res.end();return res.end(page.html)}
   try{
-    const result=await getRecord(kind,id);
+    const result=await resolveRecord(req,kind,id);
     if(result.state==='not-found'){const page=errorPage(404,'Record not found','No current public CuHalide Atlas record matches this identifier.');res.statusCode=404;setCommonHeaders(res,page.csp);res.setHeader('Cache-Control','no-store');res.setHeader('X-Robots-Tag','noindex, nofollow');if(req.method==='HEAD')return res.end();return res.end(page.html)}
     if(result.state!=='ok')throw Error(`record backend ${result.status||'unexpected response'}`);
     const page=kind==='article'?articlePage(result.item):structurePage(result.item);
