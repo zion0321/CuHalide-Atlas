@@ -92,7 +92,7 @@ The rev.7 prepublication-review runtime contract is:
 - UI: **50.2**
 - Metadata gateway: **50.5**
 - Public Data: **2.16.0**
-- Structured Photophysics contract: **1.3.1**
+- Structured Photophysics contract: **1.3.2**
 - Organic Components contract: **1.1.0**
 - Smart RAG: **9.19.0**
 - Research Assistant: **10.4.1**
@@ -100,7 +100,9 @@ The rev.7 prepublication-review runtime contract is:
 - Current evidence corpus: **1,329 BGE-M3 documents / 1,329 embeddings**
 - Publication/governance state: **prepublication-review**
 
-Structured Photophysics 1.3.1 is a controlled evidence-correction patch discovered during independent Pass B review. It adds source-explicit calculated-spectrum endpoints that were representable in the existing schema but omitted from 1.3.0; it does not alter the entity model, Frozen Release 3.0.2, or the structure-truth denominators.
+Structured Photophysics 1.3.2 is the controlled evidence-correction baseline activated after independent Pass B review of source-explicit omissions. The 1.3.2 activation preserves the scientific entity model, Frozen Release 3.0.2 and all rev.7 structure-truth denominators while locking **940 publishable sample states, 2,262 measurements, 2,985 normalized values, 281 quantitative-analysis-eligible values and 477 mechanism claims**. Verification-stage counts remain a living Pass B state and are intentionally validated by the invariant `Pass A curated + two-pass verified + verified-no-data = 383`, rather than by hardcoding the mutable Pass A/two-pass split.
+
+The 1.3.2 correction set preserves source grain explicitly. Record 310 keeps the 291 nm excitation-spectrum maximum and 14-day stability observation separate from the structure-mapped steady-state emission and from the device CRI; Record 312 adds the source-reported 180 nm FWHM to the existing 625 nm emission band; Record 313 keeps 302 nm as a steady-state excitation condition rather than a PLE peak and stores the 84.63 μs lifetime as a separate time-resolved measurement without inventing a structure mapping; Record 333 adds the source-reported approximately 260 °C thermal-stability/decomposition threshold while retaining the distinct 140 °C and 250 °C thermal events. These corrections do not expose raw primary files, source hashes or evidence locators.
 
 Current queries use the rev.7 full-current evidence corpus. Exact counts and protected structure-grain scientific boundaries remain deterministic. Structured photophysics uses an explicit staged-verification policy:
 
