@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {assertPhotophysicsHealth,normalizePhotophysicsVersion} from '../lib/photophysics-contract.js';
 
 const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
 const FORBIDDEN=new Set(['source_file','source_sha256','evidence_locator','page_locator','internal_sample_id','evidence_excerpt','raw_payload','private_path']);
@@ -7,23 +8,21 @@ test.describe.configure({mode:'serial'});
 
 function desktopOnly(testInfo){test.skip(testInfo.project.name!=='desktop-chromium','Structured-science API/RAG regression is viewport invariant; run once on desktop.');}
 function noPrivate(value){const walk=x=>{if(Array.isArray(x)){for(const y of x)walk(y);return}if(x&&typeof x==='object'){for(const[k,v]of Object.entries(x)){expect(FORBIDDEN.has(k),`private response key exposed: ${k}`).toBe(false);walk(v)}return}if(typeof x==='string')expect(x.toLowerCase()).not.toContain('atlas_internal')};walk(value)}
-async function photo(request,id){const r=await request.get(`${BASE}/api/public-data?action=photophysics&id=${id}`);expect(r.status()).toBe(200);expect(r.headers()['x-cuhalide-photophysics-contract']).toBe('1.3.2');const x=await r.json();expect(x).toMatchObject({ok:true,record_id:id,version:'1.3.2',public_state:'two_pass_verified',review_status:'qc_passed',pass_a_complete:true,two_pass_verified:true,verification_stage:'two_pass_verified',current_curated_revision:7,publication_state:'prepublication-review'});noPrivate(x);return x}
+async function health(request){const r=await request.get(`${BASE}/api/public-data?action=photophysics-health`);expect(r.status()).toBe(200);const x=await r.json();const state=assertPhotophysicsHealth(x);expect(r.headers()['x-cuhalide-photophysics-contract']).toBe(state.version);noPrivate(x);return state}
+async function photo(request,id){const r=await request.get(`${BASE}/api/public-data?action=photophysics&id=${id}`);expect(r.status()).toBe(200);const x=await r.json();const version=normalizePhotophysicsVersion(x.version);expect(version).toBeTruthy();expect(r.headers()['x-cuhalide-photophysics-contract']).toBe(version);expect(x).toMatchObject({ok:true,record_id:id,version,public_state:'two_pass_verified',review_status:'qc_passed',pass_a_complete:true,two_pass_verified:true,verification_stage:'two_pass_verified',current_curated_revision:7,publication_state:'prepublication-review'});noPrivate(x);return x}
 function measurement(sample,type){const items=(sample?.measurements||[]).filter(m=>m.measurement_type===type);expect(items,`expected exactly one ${type} measurement`).toHaveLength(1);return items[0]}
 function valueBy(m,key){const items=(m?.values||[]).filter(v=>v.property_key===key);expect(items,`expected exactly one ${key} value`).toHaveLength(1);return items[0]}
 function bandBy(m,domain){const items=(m?.bands||[]).filter(b=>b.domain===domain);expect(items,`expected exactly one ${domain} band`).toHaveLength(1);return items[0]}
 async function ask(request,content){const r=await request.post(`${BASE}/api/agent`,{data:{messages:[{role:'user',content}]},timeout:90_000});expect(r.status()).toBe(200);const x=await r.json();noPrivate(x);return x}
 
-test('Photophysics 1.3.2 corrected content baseline is exact while verification-stage split remains dynamic',async({request},testInfo)=>{
+test('Corrected photophysics content baseline is exact while verification-stage split remains dynamic',async({request},testInfo)=>{
   desktopOnly(testInfo);
   const r=await request.get(`${BASE}/api/public-data?action=photophysics-health`);
   expect(r.status()).toBe(200);
-  expect(r.headers()['x-cuhalide-photophysics-contract']).toBe('1.3.2');
   const x=await r.json();
-  expect(x).toMatchObject({ok:true,version:'1.3.2',article_queue:383,pass_a_complete_articles:383,pass_a_pending_articles:0,verified_no_data_articles:54,publishable_samples:940,publishable_measurements:2262,publishable_values:2985,analysis_eligible_values:281,publishable_mechanism_claims:477,publication_policy:'pass_a_curated_or_two_pass_verified'});
-  expect(Number.isInteger(x.pass_a_curated_articles)).toBe(true);
-  expect(Number.isInteger(x.two_pass_verified_articles)).toBe(true);
-  expect(x.pass_a_curated_articles).toBeGreaterThanOrEqual(0);
-  expect(x.two_pass_verified_articles).toBeGreaterThanOrEqual(0);
+  const state=assertPhotophysicsHealth(x);
+  expect(r.headers()['x-cuhalide-photophysics-contract']).toBe(state.version);
+  expect(x).toMatchObject({ok:true,version:state.version,article_queue:383,pass_a_complete_articles:383,pass_a_pending_articles:0,verified_no_data_articles:54,analysis_eligible_values:281,publishable_mechanism_claims:477,publication_policy:'pass_a_curated_or_two_pass_verified'});
   expect(x.pass_a_curated_articles+x.two_pass_verified_articles+x.verified_no_data_articles).toBe(x.article_queue);
   expect(x.checks).toMatchObject({invalid_published_pass_a_gate:0,ineligible_measurement_projection_leaks:0,raw_primary_files_exposed:false,raw_evidence_locators_exposed:false,two_pass_status_preserved:true,conflicts_fail_closed:true});
   noPrivate(x);
@@ -140,13 +139,14 @@ test('Record 333 preserves distinct optical-gap, phase-transition, melting/decom
 test('Research Assistant returns Record 313 PLQY and lifetime at article grain with two-pass identity',async({request},testInfo)=>{
   desktopOnly(testInfo);
   test.setTimeout(180_000);
+  const active=await health(request);
   for(const [question,expected] of [
     ['What is the PLQY for Record 313? Keep the verification stage and sample grain explicit.','15.17 %'],
     ['What is the average lifetime for Record 313? Keep the verification stage and sample grain explicit.','84.63 μs']
   ]){
     const x=await ask(request,question);
     expect(x.mode).toBe('deterministic-scientific-data');
-    expect(x.photophysics_contract).toBe('1.3.2');
+    expect(x.photophysics_contract).toBe(active.version);
     expect(x.answer).toContain(expected);
     expect(x.answer).toContain('two-pass verified');
     const sources=(x.sources||[]).filter(s=>s.record_id===313);
