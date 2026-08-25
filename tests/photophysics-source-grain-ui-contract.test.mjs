@@ -82,3 +82,13 @@ test('Pass A QA follows the live verification stage instead of pinning a mutable
   assert.doesNotMatch(qa,/record_id:\s*\d+\s*,\s*public_state:'pass_a_curated'/,'QA must not pin any record ID to the mutable Pass A stage');
   assert.doesNotMatch(uiQa,/openArticleRoute\(page,\s*\d+\)/,'visible QA must resolve the live Pass A article dynamically');
 });
+
+test('corrected 1.3.2 scientific regressions are mandatory in both candidate and post-merge browser gates',()=>{
+  const pkg=JSON.parse(read('package.json'));
+  const regression='tests/photophysics-1.3.2-corrections.spec.js';
+  assert.ok(String(pkg.scripts?.['qa:site-quality']||'').includes(regression),'candidate site-quality gate must run the 1.3.2 scientific regression');
+  assert.ok(String(pkg.scripts?.['qa:browser']||'').includes(regression),'post-merge production browser gate must run the 1.3.2 scientific regression');
+  const visible=read('tests/visible-photophysics-ui.spec.js');
+  for(const token of ['2262','2985','Structured photophysics · contract 1.3.2'])assert.ok(visible.includes(token),`visible 1.3.2 QA missing ${token}`);
+  for(const stale of ['2259','2979','Structured photophysics · contract 1.3.1'])assert.ok(!visible.includes(stale),`visible QA still contains superseded 1.3.1 baseline token ${stale}`);
+});
