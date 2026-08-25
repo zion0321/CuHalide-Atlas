@@ -79,5 +79,6 @@ test('Pass A QA follows the live verification stage instead of pinning a mutable
   assert.ok(uiQa.includes('findLivePassARecord(request,BASE)'));
   assert.doesNotMatch(helper,/release_status=/,'Pass A discovery must inspect the full reviewed article queue, not only canonical rows');
   assert.doesNotMatch(qa,/photophysics&id=8/,'QA must not pin Record 8 as a mutable Pass A fixture');
-  assert.doesNotMatch(qa,/openArticleRoute\(page,8\)/,'visible QA must not pin Record 8 as a mutable Pass A fixture');
+  assert.doesNotMatch(qa,/record_id:\s*\d+\s*,\s*public_state:'pass_a_curated'/,'QA must not pin any record ID to the mutable Pass A stage');
+  assert.doesNotMatch(uiQa,/openArticleRoute\(page,\s*\d+\)/,'visible QA must resolve the live Pass A article dynamically');
 });
