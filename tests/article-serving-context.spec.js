@@ -8,12 +8,13 @@ function assertNoPrivateEvidence(value){const forbidden=new Set(['source_file','
 
 async function fetchArticle(request,path,id){const r=await request.get(`${BASE}${path}?action=article&id=${id}`);expect(r.status()).toBe(200);return{response:r,json:await r.json()}}
 
-test('frozen-origin article keeps origin while declaring current serving and photophysics context',async({request})=>{
+test('frozen-origin article keeps origin while declaring current serving and promoted two-pass photophysics context',async({request})=>{
   const {json:x}=await fetchArticle(request,'/api/public-data',46);
   expect(x.data_scope).toBe('frozen_release');
   expect(x.item?.curation_layer).toBe('Frozen Release');
   expect(x.item?.live_revision).toBe(0);
-  expect(x.photophysics?.public_state).toBe('pass_a_curated');
+  expect(x.photophysics?.public_state).toBe('two_pass_verified');
+  expect(x.photophysics?.two_pass_verified).toBe(true);
   expect(x.record_context).toEqual({
     serving_context:'current_curated',
     serving_revision:7,
@@ -50,5 +51,6 @@ test('legacy /api/data is a compatibility alias of the canonical article context
   expect(legacy.json.record_context).toEqual(canonical.json.record_context);
   expect(legacy.json.data_scope).toBe(canonical.json.data_scope);
   expect(legacy.json.photophysics?.public_state).toBe(canonical.json.photophysics?.public_state);
+  expect(legacy.json.photophysics?.two_pass_verified).toBe(canonical.json.photophysics?.two_pass_verified);
   assertNoPrivateEvidence(legacy.json);
 });
