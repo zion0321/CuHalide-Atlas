@@ -10,7 +10,7 @@ const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalid
 const PHOTOPHYSICS_CONTRACT='1.3.0';
 const ORGANIC_COMPONENTS_CONTRACT='1.1.0';
 
-const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function requestTarget(req){
   let incoming;
@@ -165,7 +165,7 @@ export default async function handler(req,res){
     setHeader:(name,value)=>{const k=String(name).toLowerCase();if(k==='x-robots-tag')return res.setHeader(name,'noindex, nofollow, noarchive');if(k==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(k==='x-cuhalide-organic-components-contract')return res.setHeader(name,ORGANIC_COMPONENTS_CONTRACT);if(k==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
     getHeader:name=>res.getHeader?.(name),
     removeHeader:name=>res.removeHeader?.(name),
-    end:async body=>{const overlay=await overlayPromise;let out=normalize(body);if(typeof out==='string'&&out.includes('</html>')){out=injectOrganicComponents(out,overlay);out=injectPhotophysics(out,overlay.photophysics);out=injectOrganicClient(out,overlay);if(!out.includes(ROBOTS_META))throw new Error('prepublication record page missing noindex meta');syncCsp(out,res,{allowSelf:overlay.kind==='structure'})}res.removeHeader?.('Content-Length');return res.end(out)}
+    end:async body=>{const overlay=await overlayPromise;let out=normalize(body);if(typeof out==='string'&&out.includes('</html>')){const enrich=res.statusCode===200&&(overlay?.record_result?.state==='ok'||overlay?.record_result==null);if(enrich){out=injectOrganicComponents(out,overlay);out=injectPhotophysics(out,overlay.photophysics);out=injectOrganicClient(out,overlay)}if(!out.includes(ROBOTS_META))throw new Error('prepublication record page missing noindex meta');syncCsp(out,res,{allowSelf:enrich&&overlay.kind==='structure'})}res.removeHeader?.('Content-Length');return res.end(out)}
   };
   Object.defineProperty(bridge,'statusCode',{get:()=>res.statusCode,set:value=>{res.statusCode=value}});
   return recordHandler(req,bridge);
