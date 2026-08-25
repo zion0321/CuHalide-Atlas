@@ -36,15 +36,17 @@ function addSelfDirective(csp,name){const target=String(name).toLowerCase(),part
 function syncCsp(html,res,{allowSelf=false}={}){const current=String(res.getHeader?.('Content-Security-Policy')||'');if(!current)return;const hashes=inlineScriptHashes(html);if(!hashes.length)return;let next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src ${allowSelf?"'self' ":''}${hashes.join(' ')};`);if(allowSelf){next=addSelfDirective(next,'style-src');next=addSelfDirective(next,'connect-src')}if(/script-src[^;]*'unsafe-inline'/i.test(next)||/style-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');res.setHeader('Content-Security-Policy',next)}
 
 async function fetchRecordOverlay(req){
-  const {kind,id}=requestTarget(req),base={kind,id,available:false,photophysics:null,organic_components:null};
+  const {kind,id}=requestTarget(req),base={kind,id,available:false,photophysics:null,organic_components:null,record_result:null};
   if(!['article','structure'].includes(kind)||!id)return base;
   try{
     const u=new URL(PUBLIC_DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);
-    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Overlay/1.1.0'},signal:AbortSignal.timeout(6500)});
-    if(!r.ok)return base;
-    const x=await r.json(),items=kind==='structure'?(Array.isArray(x?.organic_components)?x.organic_components:Array.isArray(x?.item?.organic_components)?x.item.organic_components:[]):[];
-    return{kind,id,available:true,photophysics:x?.photophysics&&typeof x.photophysics==='object'?x.photophysics:null,organic_components:items};
-  }catch(error){console.error('[record-overlay]',error);return base}
+    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Overlay/1.2.0'},signal:AbortSignal.timeout(6500)}),raw=await r.text();
+    let x;try{x=raw?JSON.parse(raw):null}catch{x=null}
+    if(r.status===404)return{...base,record_result:{state:'not-found',status:404}};
+    if(!r.ok||!x?.item)return{...base,record_result:r.status<500&&r.status!==429?{state:'error',status:r.status}:null};
+    const items=kind==='structure'?(Array.isArray(x?.organic_components)?x.organic_components:Array.isArray(x?.item?.organic_components)?x.item.organic_components:[]):[];
+    return{kind,id,available:true,photophysics:x?.photophysics&&typeof x.photophysics==='object'?x.photophysics:null,organic_components:items,record_result:{state:'ok',item:x.item,status:r.status}};
+  }catch(error){console.info('[record-overlay-fallback]',error?.name||error?.message||'unavailable');return base}
 }
 
 const propertyLabels={
@@ -157,12 +159,13 @@ export default async function handler(req,res){
   res.setHeader('X-CuHalide-Photophysics-Contract',PHOTOPHYSICS_CONTRACT);
   res.setHeader('X-CuHalide-Organic-Components-Contract',ORGANIC_COMPONENTS_CONTRACT);
   res.setHeader('Last-Modified',LAST_MODIFIED);
-  const overlay=await fetchRecordOverlay(req);
+  const overlayPromise=fetchRecordOverlay(req);
+  req.__cuhalideRecordSnapshotPromise=overlayPromise;
   const bridge={
     setHeader:(name,value)=>{const k=String(name).toLowerCase();if(k==='x-robots-tag')return res.setHeader(name,'noindex, nofollow, noarchive');if(k==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(k==='x-cuhalide-organic-components-contract')return res.setHeader(name,ORGANIC_COMPONENTS_CONTRACT);if(k==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
     getHeader:name=>res.getHeader?.(name),
     removeHeader:name=>res.removeHeader?.(name),
-    end:body=>{let out=normalize(body);if(typeof out==='string'&&out.includes('</html>')){out=injectOrganicComponents(out,overlay);out=injectPhotophysics(out,overlay.photophysics);out=injectOrganicClient(out,overlay);if(!out.includes(ROBOTS_META))throw new Error('prepublication record page missing noindex meta');syncCsp(out,res,{allowSelf:overlay.kind==='structure'})}res.removeHeader?.('Content-Length');return res.end(out)}
+    end:async body=>{const overlay=await overlayPromise;let out=normalize(body);if(typeof out==='string'&&out.includes('</html>')){const enrich=res.statusCode===200&&(overlay?.record_result?.state==='ok'||overlay?.record_result==null);if(enrich){out=injectOrganicComponents(out,overlay);out=injectPhotophysics(out,overlay.photophysics);out=injectOrganicClient(out,overlay)}if(!out.includes(ROBOTS_META))throw new Error('prepublication record page missing noindex meta');syncCsp(out,res,{allowSelf:enrich&&overlay.kind==='structure'})}res.removeHeader?.('Content-Length');return res.end(out)}
   };
   Object.defineProperty(bridge,'statusCode',{get:()=>res.statusCode,set:value=>{res.statusCode=value}});
   return recordHandler(req,bridge);
