@@ -2,7 +2,7 @@ declare const Deno:any;
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 
 const BASE=Deno.env.get('SUPABASE_URL')!,KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const UP=`${BASE}/functions/v1/cuhalide-atlas-current-rag-r6-exact-internal`,PUBLIC_DATA=`${BASE}/functions/v1/cuhalide-atlas-public-data-v3`,REST=`${BASE}/rest/v1`,CURRENT='current-curated-r7',VERSION='current-rag-r7.0.8',PHOTOPHYSICS_CONTRACT='1.3.0';
+const UP=`${BASE}/functions/v1/cuhalide-atlas-current-rag-r6-exact-internal`,PUBLIC_DATA=`${BASE}/functions/v1/cuhalide-atlas-public-data-v3`,REST=`${BASE}/rest/v1`,CURRENT='current-curated-r7',VERSION='current-rag-r7.0.8',PHOTOPHYSICS_CONTRACT='1.3.1';
 const H={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-robots-tag':'noindex, nofollow, noarchive','x-cuhalide-release':'3.0.2','x-cuhalide-current-curated-revision':'7','x-cuhalide-photophysics-contract':PHOTOPHYSICS_CONTRACT,'x-cuhalide-publication-state':'prepublication-review','x-cuhalide-endpoint-state':'internal-service-only'};
 const send=(x:any,s=200)=>new Response(JSON.stringify(x),{status:s,headers:H});
 function internal(req:Request){return req.headers.get('authorization')===`Bearer ${KEY}`&&req.headers.get('apikey')===KEY}

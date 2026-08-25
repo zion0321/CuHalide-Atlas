@@ -92,13 +92,15 @@ The rev.7 prepublication-review runtime contract is:
 - UI: **50.2**
 - Metadata gateway: **50.5**
 - Public Data: **2.16.0**
-- Structured Photophysics contract: **1.3.0**
+- Structured Photophysics contract: **1.3.1**
 - Organic Components contract: **1.1.0**
 - Smart RAG: **9.19.0**
 - Research Assistant: **10.4.1**
 - Motif Atlas: **1.2**
 - Current evidence corpus: **1,329 BGE-M3 documents / 1,329 embeddings**
 - Publication/governance state: **prepublication-review**
+
+Structured Photophysics 1.3.1 is a controlled evidence-correction patch discovered during independent Pass B review. It adds source-explicit calculated-spectrum endpoints that were representable in the existing schema but omitted from 1.3.0; it does not alter the entity model, Frozen Release 3.0.2, or the structure-truth denominators.
 
 Current queries use the rev.7 full-current evidence corpus. Exact counts and protected structure-grain scientific boundaries remain deterministic. Structured photophysics uses an explicit staged-verification policy:
 

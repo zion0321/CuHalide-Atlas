@@ -1,7 +1,7 @@
 declare const Deno:any;
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 const BASE=Deno.env.get('SUPABASE_URL')!,KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,REST=`${BASE}/rest/v1`;
-const RELEASE='3.0.2',PUBLIC_DATA_VERSION='2.16.0',EVIDENCE_VERSION='9.19.0',ASSISTANT_VERSION='10.4.1',PHOTOPHYSICS_VERSION='1.3.0',CURRENT_REVISION=7;
+const RELEASE='3.0.2',PUBLIC_DATA_VERSION='2.16.0',EVIDENCE_VERSION='9.19.0',ASSISTANT_VERSION='10.4.1',PHOTOPHYSICS_VERSION='1.3.1',CURRENT_REVISION=7;
 const SITE_VERSION='50',META_VERSION='50.5',PUBLIC='https://cuhalide-atlas-v3.vercel.app',PUBLICATION_STATE='prepublication-review';
 const EXPECT={articles:383,included:372,canonical:369,structures:946,core:886,resolved:710,verified:684,polar:97,strict:87,strictArticles:54,rag:1329,taxonomy:946,motifResolved:628,motifUnresolved:318,motifLegacy:35};
 const AUTH={apikey:KEY,authorization:`Bearer ${KEY}`,accept:'application/json','content-type':'application/json'};

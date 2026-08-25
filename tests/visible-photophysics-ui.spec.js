@@ -22,8 +22,8 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   await expect(page.locator('.photo-home-panel')).toBeVisible();
   await expect(page.locator('.photo-home-panel')).toContainText('Photophysics is now sample- and measurement-resolved.');
   await expect(page.locator('#photoHomeMetrics')).toContainText('383');
-  await expect(page.locator('#photoHomeMetrics')).toContainText('2260');
-  await expect(page.locator('#photoHomeMetrics')).toContainText('2978');
+  await expect(page.locator('#photoHomeMetrics')).toContainText('2259');
+  await expect(page.locator('#photoHomeMetrics')).toContainText('2979');
 
   if(!(await nav.isVisible())){
     const menu=page.locator('#menu');
@@ -38,8 +38,8 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   await expect(view).toContainText('Photophysics at the correct experimental grain');
   await expect(page.locator('#photoStatusGrid')).toContainText('Pass A complete');
   await expect(page.locator('#photoStatusGrid')).toContainText('383');
-  await expect(page.locator('#photoStatusGrid')).toContainText('2260');
-  await expect(page.locator('#photoStatusGrid')).toContainText('2978');
+  await expect(page.locator('#photoStatusGrid')).toContainText('2259');
+  await expect(page.locator('#photoStatusGrid')).toContainText('2979');
   await expect(view).toContainText('Pass A curated');
   await expect(view).toContainText('Two-pass verified');
   await expect(view).toContainText('Article');

@@ -10,7 +10,7 @@ This directory versions the **public-safe Supabase runtime and database contract
 - Site / UI: **50 / 50.2**.
 - Metadata gateway: **50.5**.
 - Public Data: **2.16.0**.
-- Structured Photophysics: **1.3.0**.
+- Structured Photophysics: **1.3.1**.
 - Organic Components: **1.1.0**.
 - Research Assistant: **10.4.1**.
 - Smart RAG evidence engine: **9.19.0**.
@@ -39,23 +39,25 @@ Expected immutable Frozen Release 3.0.2 guard remains:
 
 Current Curated is a living full-current article/atomic-structure snapshot anchored to immutable Frozen Release 3.0.2. Corrections and later primary-evidence additions do not rewrite the frozen snapshot.
 
-## Structured Photophysics 1.3.0
+## Structured Photophysics 1.3.1
 
 Current staged publication contract:
 
 - article queue: **383**
 - Pass A complete: **383**, pending **0**
-- Pass A curated: **275**
-- two-pass verified: **54**
+- Pass A curated: **244**
+- two-pass verified: **85**
 - verified-no-reported-data: **54**
 - publishable samples: **940**
-- publishable measurements: **2,260**
-- publishable normalized values: **2,978**
+- publishable measurements: **2,259**
+- publishable normalized values: **2,979**
 - quantitative-analysis eligible values: **281**
 - publishable mechanism claims: **476**
 - conflicted measurements withheld: **9**
 
 `pass_a_curated` means primary-evidence curation is complete but independent Pass B is not yet complete. `two_pass_verified` means independent Pass A/Pass B agreement. Conflicts fail closed at measurement grain. Article-grain photophysics is never silently reassigned to a named structure/phase row.
+
+Contract **1.3.1** is a controlled evidence-correction patch discovered during independent Pass B review. It adds source-explicit calculated-spectrum endpoints that were already representable by the existing schema but were omitted from 1.3.0. The patch does not change the entity model, Frozen Release 3.0.2, structure-truth denominators, privacy boundary, or staged-publication policy. Private row-level curation and primary-evidence payloads remain outside this public repository.
 
 ## Motif Atlas 1.2
 
@@ -169,4 +171,4 @@ Canonical production health:
 
 `https://cuhalide-atlas-v3.vercel.app/health.json`
 
-A synchronized rev.7 production state requires Site **50**, Metadata **50.5**, Public Data **2.16.0**, Photophysics **1.3.0**, Organic Components **1.1.0**, Smart RAG **9.19.0**, Research Assistant **10.4.1**, Motif Atlas **1.2**, all rev.7 denominators above, complete **1,329 / 1,329** RAG embeddings, frozen-release guards intact, scientific-grain safeguards true, indexing disabled, and no public bulk normalized export.
+A synchronized rev.7 production state requires Site **50**, Metadata **50.5**, Public Data **2.16.0**, Photophysics **1.3.1**, Organic Components **1.1.0**, Smart RAG **9.19.0**, Research Assistant **10.4.1**, Motif Atlas **1.2**, all rev.7 denominators above, complete **1,329 / 1,329** RAG embeddings, frozen-release guards intact, scientific-grain safeguards true, indexing disabled, and no public bulk normalized export.

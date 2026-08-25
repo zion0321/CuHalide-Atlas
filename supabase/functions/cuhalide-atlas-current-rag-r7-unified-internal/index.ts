@@ -1,7 +1,7 @@
 declare const Deno:any;
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 const BASE=Deno.env.get('SUPABASE_URL')!,KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,CF_ACCOUNT=Deno.env.get('CLOUDFLARE_ACCOUNT_ID')||'',CF_TOKEN=Deno.env.get('CLOUDFLARE_API_TOKEN')||'';
-const EXACT=`${BASE}/functions/v1/cuhalide-atlas-current-rag-r7-science-exact-internal`,VERSION='current-rag-r7.2.1',RELEASE='3.0.2',CURRENT='current-curated-r7',EMBED='@cf/baai/bge-m3',RERANK='@cf/baai/bge-reranker-base',DOCS=1329,PHOTOPHYSICS_CONTRACT='1.3.0';
+const EXACT=`${BASE}/functions/v1/cuhalide-atlas-current-rag-r7-science-exact-internal`,VERSION='current-rag-r7.2.1',RELEASE='3.0.2',CURRENT='current-curated-r7',EMBED='@cf/baai/bge-m3',RERANK='@cf/baai/bge-reranker-base',DOCS=1329,PHOTOPHYSICS_CONTRACT='1.3.1';
 const H={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-robots-tag':'noindex, nofollow, noarchive','x-cuhalide-release':RELEASE,'x-cuhalide-current-curated-revision':'7','x-cuhalide-photophysics-contract':PHOTOPHYSICS_CONTRACT,'x-cuhalide-endpoint-state':'internal-service-only'};const json=(x:any,s=200)=>new Response(JSON.stringify(x),{status:s,headers:H});const zh=(s:string)=>/[\u3400-\u9fff]/.test(s);
 function internal(req:Request){return req.headers.get('authorization')===`Bearer ${KEY}`&&req.headers.get('apikey')===KEY}
 function lastUser(b:any){const m=Array.isArray(b?.messages)?b.messages:[];return String([...m].reverse().find((z:any)=>z?.role==='user'&&typeof z.content==='string')?.content||'').trim()}

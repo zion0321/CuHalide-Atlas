@@ -95,7 +95,9 @@ test('superseded public-schema prototype is frozen read-only and explicitly non-
   assert.match(doc, /active curation model is the private `atlas_internal\.cuhalide_photophysics_\*_v1` schema/i);
   assert.match(doc, /deprecated and frozen read-only/i);
   assert.match(doc, /fail-closed, read-only public projection/i);
-  assert.match(doc, /qc_passed[^\n]+Pass A complete[^\n]+Pass B complete[^\n]+two-pass agreement/i);
+  assert.match(doc, /`pass_a_curated` means the primary-evidence Pass A curation gate is complete/i);
+  assert.match(doc, /`two_pass_verified` \/ article `qc_passed` means an independent Pass B/i);
+  assert.match(doc, /Pass A and Pass B agree after any controlled corrections/i);
   assert.match(doc, /exposes no raw primary files, source filenames, raw evidence locators or internal sample identifiers/i);
   assert.match(doc, /bulk export remains disabled/i);
 });
@@ -110,12 +112,12 @@ test('public record renderer reaches staged photophysics only through the whitel
   const record = read('api/record-current.js');
   const proxy = read('api/public-data.js');
   assert.match(record, /cuhalide-atlas-public-data-v3/);
-  assert.match(record, /PHOTOPHYSICS_CONTRACT='1\.3\.0'/);
+  assert.match(record, /PHOTOPHYSICS_CONTRACT='1\.3\.1'/);
   assert.match(record, /Pass A curated/);
   assert.match(record, /Two-pass verified/);
   assert.match(record, /Pass B verification has not yet been completed/);
   assert.doesNotMatch(record, /evidence_locator|source_file|source_sha256|atlas_internal/i);
   assert.match(proxy, /PUBLIC_DATA_VERSION='2\.16\.0'/);
-  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.3\.0'/);
+  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.3\.1'/);
   assert.match(proxy, /cuhalide-atlas-public-data-v3/);
 });

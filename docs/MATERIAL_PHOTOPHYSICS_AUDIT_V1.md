@@ -1,6 +1,6 @@
 # CuHalide Atlas material-grain photophysics audit
 
-Status: active curation workstream for Current Curated rev.7+ with a fail-closed, read-only public projection of the subset that has passed the defined two-pass primary-evidence QC gate. This is not a bulk public dataset layer or a formal release.
+Status: active curation workstream for Current Curated rev.7+ with a fail-closed, read-only public projection. The projection explicitly distinguishes **Pass A curated** records from **two-pass verified** records; it is not a bulk public dataset layer or a formal release.
 
 ## Canonical database source of truth
 
@@ -10,7 +10,7 @@ Mechanism curation is normalized through `atlas_internal.cuhalide_photophysics_m
 
 An earlier material-grain prototype exists under `public.cuhalide_atlas_material_entities` and `public.cuhalide_atlas_photophysics_*`. Those objects were always protected by RLS/revokes and were never a public product projection. They are explicitly deprecated and frozen read-only for `service_role` so that historical rows remain auditable without allowing parallel curation to diverge from the canonical `atlas_internal` model. The prototype migrations remain versioned because they were applied to production and are part of the database migration history.
 
-Primary evidence, evidence excerpts/locators, source filenames/hashes, conflict-adjudication internals and unpublished normalized curation remain private. The active public photophysics projection is a separately whitelisted service contract: it exposes normalized rows only after `qc_passed` + Pass A complete + Pass B complete + two-pass agreement. It exposes no raw primary files, source filenames, raw evidence locators or internal sample identifiers, and bulk export remains disabled.
+Primary evidence, evidence excerpts/locators, source filenames/hashes, conflict-adjudication internals and unpublished normalized curation remain private. The active public photophysics projection is a separately whitelisted service contract. An article may enter the public projection after the Pass A primary-evidence curation gate and row-level QC are complete; that state is machine-readable as `pass_a_curated` and is never presented as independent verification. Articles that subsequently complete independent Pass B review and agreement are promoted to `two_pass_verified`. Measurement-level source conflicts, unresolved rows and other ineligible claims remain fail-closed in either article state. The projection exposes no raw primary files, source filenames, raw evidence locators or internal sample identifiers, and bulk export remains disabled.
 
 ## Scientific objective
 
@@ -51,13 +51,14 @@ For every in-scope article, read the main article and available SI/data files an
 - PL/TRPL/XEL lifetimes, fit context and individual components when reported;
 - Stokes shift, thermal activation energy, radiative/non-radiative rates;
 - temperature-dependent luminescence and thermochromic transitions;
+- explicitly reported calculated absorption/emission endpoints and associated calculated quantities when they are represented by the active property vocabulary;
 - reported/experimentally/computationally supported mechanism assignments such as STE, metal/cluster-centered transitions, MLCT/LMCT/XLCT/LLCT, TADF, phosphorescence, ISC/RISC and Cu(I)···Cu(I)-interaction-assisted behavior;
 - explicit source-supported exclusions of defect/surface-defect or other candidate mechanisms;
 - scintillation light yield, X-ray detection limit, spatial resolution, afterglow and dose-response metrics;
 - LED/device metrics such as EQE, CRI and CCT;
 - non-luminescent results when explicitly reported.
 
-Numeric values are stored only when explicitly reported or transparently marked as derived with a documented derivation. Curves are never fabricated from peak values. Figure-only spectra are not converted into fake numerical traces; digitization, if later performed, must be a separate provenance-labelled workflow.
+Numeric values are stored only when explicitly reported or transparently marked as derived with a documented derivation. Experimental and calculated spectra remain different measurement grains. Curves are never fabricated from peak values. Figure-only spectra are not converted into fake numerical traces; digitization, if later performed, must be a separate provenance-labelled workflow.
 
 ## Evidence contract
 
@@ -65,27 +66,34 @@ Every curated measurement or mechanism assignment requires a private evidence ob
 
 ## Review status
 
-Each article receives an explicit review state and completeness counters. `qc_passed` means the main article/SI available to the project were read, reported material identities were mapped at the finest defensible grain, measurements were normalized with units/conditions, and unresolved items were retained rather than inferred. Public photophysics additionally requires Pass A and Pass B to be complete with explicit two-pass agreement.
+Each article receives an explicit review state and completeness counters.
 
-The canonical health function is fail-closed for orphaned entities, duplicate measurement/band keys, missing measurement evidence, eligible values without evidence, inconsistent conflict flags, unresolved conflict records without an adjudication basis, invalid intrinsic-scope claims, invalid structure-exact mappings, unknown property keys, pending row-level QC and completed reviews that do not satisfy the two-pass gate. Its mechanism extension additionally fails on mechanism sample/measurement/evidence orphans, band-to-measurement mismatches, evidence-to-claim mismatches, inactive mechanism codes, pending mechanism QC, and analysis-eligible mechanism rows whose mapping/evidence/QC state is unresolved.
+`pass_a_curated` means the primary-evidence Pass A curation gate is complete for the article's exposed claim set. Every exposed measurement/value/band/mechanism must still satisfy its own QC/evidence gate, and an unresolved or conflicted measurement remains withheld even when other measurements from that article are visible. Pass A curated does **not** claim an independent second review.
+
+`two_pass_verified` / article `qc_passed` means an independent Pass B has re-read the retained public claim set, Pass A and Pass B agree after any controlled corrections, and all retained public claims meet the release-grade evidence/QC contract. Pass B may discover omissions, duplicates, source conflicts or transcription errors; those are corrected explicitly before promotion rather than being hidden by the verification label. External human independence is a separate field and is not implied by AI expert-surrogate Pass B.
+
+Quantitative-analysis eligibility is independent of both publication stages. A claim can be viewable but remain analysis-ineligible because its mapping, condition specificity, approximation, processed-state status or conflict context is not appropriate for quantitative structure-property analysis.
+
+The canonical health function is fail-closed for orphaned entities, duplicate measurement/band keys, missing measurement evidence, eligible values without evidence, inconsistent conflict flags, unresolved conflict records without an adjudication basis, invalid intrinsic-scope claims, invalid structure-exact mappings, unknown property keys, pending row-level QC and completed reviews that do not satisfy their declared verification state. Its mechanism extension additionally fails on mechanism sample/measurement/evidence orphans, band-to-measurement mismatches, evidence-to-claim mismatches, inactive mechanism codes, pending mechanism QC, and analysis-eligible mechanism rows whose mapping/evidence/QC state is unresolved.
 
 ## Website target and active projection
 
-The prepublication review interface now has a deliberately narrow Photophysics/Spectra projection for the verified subset. It is not a signal that the entire 383-article queue is complete. Active capabilities are designed to support:
+The prepublication review interface has a deliberately narrow Photophysics/Spectra projection. It is not a signal that the entire 383-article queue has completed Pass B. Active capabilities are designed to support:
 
-- material-level property cards on article pages only after the two-pass gate;
+- material-level property cards on article pages after the Pass A curation gate, with the verification stage displayed explicitly;
+- a distinct `Two-pass verified` state only after independent Pass B agreement;
 - structure pages showing properties only for exact structure/phase/sample mappings, otherwise retaining the material/article-level boundary;
 - deterministic queries for emission wavelength, PLQY, lifetime, optical gap, scintillation performance and mechanism with sample-state labels;
 - mechanism output that distinguishes positive assignments, source-supported exclusions, unresolved claims and claim basis/confidence rather than flattening all interpretations into one label;
 - structure–property comparison only where `analysis_eligible=true`, while still allowing verified non-intrinsic/process/device values to be viewed with their state labels;
-- material-specific Smart RAG queries using the same two-pass public contract instead of legacy article-level hint propagation;
-- explicit `reported`, `derived`, `unresolved`, `not applicable`, and quantitative-analysis-eligibility states.
+- material-specific Smart RAG queries using the same staged public contract instead of legacy article-level hint propagation;
+- explicit `reported`, `derived`, `unresolved`, `not applicable`, publication-stage, and quantitative-analysis-eligibility states.
 
 Bulk download of the normalized photophysics corpus remains disabled.
 
 ## Publication gate
 
-Public exposure is not enabled merely because the private schema exists. A row enters the public projection only after:
+Public exposure is not enabled merely because the private schema exists. For a Pass A curated claim to enter the public projection, the applicable gates include:
 
 1. row-level scientific QC;
 2. material-to-article/structure referential checks;
@@ -93,8 +101,10 @@ Public exposure is not enabled merely because the private schema exists. A row e
 4. private evidence-locator coverage checks;
 5. mechanism-claim provenance and contradiction checks;
 6. privacy/copyright checks;
-7. independent Pass A / Pass B completion and agreement;
+7. Pass A completion at article/claim grain;
 8. browser and API regression tests;
 9. RAG unsupported-claim tests.
+
+Independent Pass B is an additional promotion gate for the `two_pass_verified` state; it is not retrospectively implied for Pass A curated records. Measurement-level conflicts remain fail-closed at both stages.
 
 The current prepublication noindex and no-bulk-export governance remains unchanged. The public projection can grow article-by-article without weakening any of these gates.
