@@ -27,6 +27,6 @@ test('standalone enrichment is restricted to successful record pages',async()=>{
   assert.match(wrapper,/const enrich=res\.statusCode===200&&\(overlay\?\.record_result\?\.state==='ok'\|\|overlay\?\.record_result==null\)/);
   assert.match(wrapper,/if\(enrich\)\{out=injectOrganicComponents\(out,overlay\);out=injectPhotophysics\(out,overlay\.photophysics\);out=injectOrganicClient\(out,overlay\)\}/);
   assert.match(wrapper,/allowSelf:enrich&&overlay\.kind==='structure'/);
-  assert.ok(wrapper.includes("'\"':'&quot;'"),'double quotes must use a complete HTML entity');
-  assert.ok(!wrapper.includes("'\"':'&quot',\"'\""),'malformed quote escaping must not be reintroduced');
+  assert.ok(wrapper.includes(`'"':'&quot;'`),'double quotes must use a complete HTML entity');
+  assert.ok(!wrapper.includes(`'"':'&quot'`),'malformed quote escaping must not be reintroduced');
 });
