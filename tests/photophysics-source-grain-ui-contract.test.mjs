@@ -99,7 +99,8 @@ test('photophysics migration regressions are mandatory and runtime declarations 
   const visible=read('tests/visible-photophysics-ui.spec.js');
   const runtime=read('public/ui-photophysics-v1.js');
   assert.ok(visible.includes('assertPhotophysicsHealth'));
-  assert.ok(visible.includes('state.expected.publishable_measurements'));
+  assert.ok(visible.includes('const{state}=await liveHealth(request),expected=state.expected'));
+  assert.ok(visible.includes('expected.publishable_measurements'));
   assert.ok(runtime.includes("const PHOTO_ALLOWED=new Set(['1.3.2','1.3.3'])"));
   assert.ok(runtime.includes('id="photoContractVersion"'));
   assert.ok(runtime.includes("contract.textContent=String(h.version||'unavailable')"));
