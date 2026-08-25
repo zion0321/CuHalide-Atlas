@@ -58,7 +58,9 @@ test('production readiness workflow is locked to the same governance and metadat
   const workflow=read('.github/workflows/production-browser-qa.yml');
   assert.match(workflow,/x\.publication_state!=='prepublication-review'/);
   assert.match(workflow,/x\.meta_version!=='50\.5'\|\|x\.gateway_meta_version!=='50\.5'/);
-  assert.match(workflow,/Photophysics 1\.3\.1 baseline PASS/);
+  assert.match(workflow,/Photophysics 1\.3\.1 invariant baseline PASS/);
+  assert.match(workflow,/verification-stage accounting does not sum to article queue/);
+  assert.doesNotMatch(workflow,/expected 85 two-pass \/ 244 Pass-A curated/);
   assert.match(workflow,/contract migration window/i);
   assert.doesNotMatch(workflow,/Meta must remain exactly 50\.4/);
 });
