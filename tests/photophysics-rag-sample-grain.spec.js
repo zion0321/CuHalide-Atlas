@@ -57,9 +57,11 @@ test('two-pass Record 46 PLQY preserves article grain without false structure ma
   const x=await askAgent(request,'What is the PLQY for Record 46? Keep the verification stage explicit.');
   expect(x.mode).toBe('deterministic-scientific-data');
   expect(x.photophysics_contract).toBe('1.3.1');
-  expect(x.answer).toContain('PLQY 41.5 %');
-  expect(x.answer).toContain('two-pass verified');
-  expect(x.answer).not.toContain('Pass A curated');
+  const recordLine=String(x.answer||'').split('\n').find(line=>line.includes('[A:46]'));
+  expect(recordLine).toBeTruthy();
+  expect(recordLine).toContain('PLQY 41.5 %');
+  expect(recordLine).toContain('two-pass verified');
+  expect(recordLine).not.toContain('Pass A curated');
   expect(Array.isArray(x.sources)).toBe(true);
   expect(x.sources.length).toBeGreaterThan(0);
   const source=x.sources.find(s=>s.record_id===46);
