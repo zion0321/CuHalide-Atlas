@@ -142,7 +142,7 @@ test('Research Assistant returns Record 313 PLQY and lifetime at article grain w
   test.setTimeout(180_000);
   for(const [question,expected] of [
     ['What is the PLQY for Record 313? Keep the verification stage and sample grain explicit.','15.17 %'],
-    ['What is the average lifetime for Record 313? Keep the verification stage and sample grain explicit.','84.63 us']
+    ['What is the average lifetime for Record 313? Keep the verification stage and sample grain explicit.','84.63 μs']
   ]){
     const x=await ask(request,question);
     expect(x.mode).toBe('deterministic-scientific-data');
