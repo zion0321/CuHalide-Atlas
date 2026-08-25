@@ -118,6 +118,6 @@ test('public record renderer reaches staged photophysics only through the whitel
   assert.match(record, /Pass B verification has not yet been completed/);
   assert.doesNotMatch(record, /evidence_locator|source_file|source_sha256|atlas_internal/i);
   assert.match(proxy, /PUBLIC_DATA_VERSION='2\.16\.0'/);
-  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.3\.1'/);
+  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.3\.2'/);
   assert.match(proxy, /cuhalide-atlas-public-data-v3/);
 });
