@@ -59,3 +59,26 @@ test('sample-grain UI hardening does not add private evidence fields',()=>{
   const sources=[read('api/ui-assistant-current.js'),read('public/ui-structure-photophysics-v1.js')].join('\n');
   for(const forbidden of ['source_file','source_sha256','evidence_locator','page_locator','internal_sample_id','evidence_excerpt','raw_payload','private_path'])assert.ok(!sources.includes(forbidden),`private field leaked into public photophysics UI code: ${forbidden}`);
 });
+
+test('Pass A QA follows the live verification stage instead of pinning a mutable article',()=>{
+  const helper=read('tests/helpers/live-photophysics-stage.js');
+  const apiQa=read('tests/site-quality-v50-1.spec.js');
+  const uiQa=read('tests/visible-photophysics-ui.spec.js');
+  const qa=`${apiQa}\n${uiQa}`;
+  for(const token of [
+    'findLivePassARecord',
+    'photophysics-health',
+    'action=articles',
+    "public_state==='pass_a_curated'",
+    "verification_stage==='pass_a_curated'",
+    'two_pass_verified===false',
+    'pass_a_curated_articles===0',
+    'terminal staged-verification state must account for the full article queue'
+  ])assert.ok(`${helper}\n${qa}`.includes(token),`stage-invariant Pass A QA contract missing ${token}`);
+  assert.ok(apiQa.includes('findLivePassARecord(request,BASE)'));
+  assert.ok(uiQa.includes('findLivePassARecord(request,BASE)'));
+  assert.doesNotMatch(helper,/release_status=/,'Pass A discovery must inspect the full reviewed article queue, not only canonical rows');
+  assert.doesNotMatch(qa,/photophysics&id=8/,'QA must not pin Record 8 as a mutable Pass A fixture');
+  assert.doesNotMatch(qa,/record_id:\s*\d+\s*,\s*public_state:'pass_a_curated'/,'QA must not pin any record ID to the mutable Pass A stage');
+  assert.doesNotMatch(uiQa,/openArticleRoute\(page,\s*\d+\)/,'visible QA must resolve the live Pass A article dynamically');
+});
