@@ -12,10 +12,10 @@ test('canonical public runtime exposes one rev.7 contract',()=>{
   for(const stale of ["CURRENT_REVISION='4'","EXPECTED_STRUCTURES=864","EXPECTED_URLS=1225","PUBLIC_DATA_VERSION='2.11.0'","PUBLIC_DATA_VERSION='2.10.0'","EVIDENCE_VERSION='9.16.0'","ASSISTANT_VERSION='10.1.0'"])assert.ok(!text.includes(stale),`stale token ${stale}`);
 });
 
-test('README is locked to the same rev.7 living scientific state',()=>{
+test('README is locked to the same rev.7 living scientific state and corrected photophysics baseline',()=>{
   const readme=read('README.md');
-  for(const token of ['Prepublication release status','Current Curated rev.7','2026-08-19','Article audit records | 383','Canonical verified articles | 369','Structure / phase rows | 946','Core-Included structure rows | 886','Resolved space-group rows | 710','Verified one-to-one SG rows | 684','Strict-polar rows | 87','RAG documents / embeddings | 1,329 / 1,329','628','318','Metadata gateway: **50.5**','Public Data: **2.16.0**','Structured Photophysics contract: **1.3.1**','Smart RAG: **9.19.0**','Research Assistant: **10.4.1**','Publication/governance state: **prepublication-review**','Pass A curated','two-pass verified'])assert.ok(readme.includes(token),`README missing current token ${token}`);
-  for(const stale of ['Current Curated rev.5 — living default','Curated through **2026-08-17**','Structure / phase rows | 938','Core-Included structure rows | 878','581','357','Public Data: **2.12.0**','Smart RAG: **9.17.0**','Research Assistant: **10.2.0**'])assert.ok(!readme.includes(stale),`README stale token ${stale}`);
+  for(const token of ['Prepublication release status','Current Curated rev.7','2026-08-19','Article audit records | 383','Canonical verified articles | 369','Structure / phase rows | 946','Core-Included structure rows | 886','Resolved space-group rows | 710','Verified one-to-one SG rows | 684','Strict-polar rows | 87','RAG documents / embeddings | 1,329 / 1,329','628','318','Metadata gateway: **50.5**','Public Data: **2.16.0**','Structured Photophysics contract: **1.3.2**','Smart RAG: **9.19.0**','Research Assistant: **10.4.1**','Publication/governance state: **prepublication-review**','940 publishable sample states','2,262 measurements','2,985 normalized values','281 quantitative-analysis-eligible values','477 mechanism claims','Pass A curated','two-pass verified'])assert.ok(readme.includes(token),`README missing current token ${token}`);
+  for(const stale of ['Current Curated rev.5 — living default','Curated through **2026-08-17**','Structure / phase rows | 938','Core-Included structure rows | 878','581','357','Public Data: **2.12.0**','Smart RAG: **9.17.0**','Research Assistant: **10.2.0**','Structured Photophysics contract: **1.3.1**'])assert.ok(!readme.includes(stale),`README stale token ${stale}`);
 });
 
 test('prepublication repository metadata cannot claim formal public release',()=>{
@@ -46,6 +46,13 @@ test('preview QA has one PR trigger while Vercel deployment status remains indep
   assert.match(workflow,/ref: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/);
   assert.match(gate,/REQUIRED_VERCEL_STATUS = 'Vercel'/);
   assert.match(gate,/has no trusted successful Vercel preview status/);
+});
+
+test('production readiness is locked to the final 1.3.2 content baseline while stage counts remain dynamic',()=>{
+  const workflow=read('.github/workflows/production-browser-qa.yml');
+  for(const token of ["p?.version!=='1.3.2'",'p?.publishable_samples!==940','p?.publishable_measurements!==2262','p?.publishable_values!==2985','p?.analysis_eligible_values!==281','p?.publishable_mechanism_claims!==477','verification-stage accounting does not sum to article queue','Photophysics 1.3.2 corrected baseline PASS'])assert.ok(workflow.includes(token),`production readiness missing ${token}`);
+  for(const stale of ['stagedBaseline','correctedBaseline','private-staging baseline','contract migration window','publishable_measurements===2259','publishable_values===2979','publishable_mechanism_claims===476'])assert.ok(!workflow.includes(stale),`temporary migration residue remains: ${stale}`);
+  assert.doesNotMatch(workflow,/pass_a_curated_articles[^\n]*(?:===|!==)239|two_pass_verified_articles[^\n]*(?:===|!==)90/,'mutable stage split must not be hardcoded');
 });
 
 test('canonical routes terminate at rev.7 evidence wrappers, not historical renderer provenance',()=>{

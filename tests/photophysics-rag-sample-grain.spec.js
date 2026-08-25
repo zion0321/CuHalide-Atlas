@@ -16,7 +16,7 @@ function expectNoPrivatePayload(value){
   for(const key of forbidden)expect(raw).not.toContain(`\"${key}\"`);
 }
 
-test('Research Assistant health is aligned to staged photophysics 1.3.2',async({request},testInfo)=>{
+test('Research Assistant health is aligned to corrected photophysics 1.3.2 baseline',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Read-only RAG contract is viewport invariant.');
   const response=await request.get(`${BASE}/api/agent`,{timeout:30_000});
   expect(response.status()).toBe(200);
@@ -33,10 +33,10 @@ test('Research Assistant health is aligned to staged photophysics 1.3.2',async({
     pass_a_pending_articles:0,
     verified_no_data_articles:54,
     publishable_samples:940,
-    publishable_measurements:2259,
-    publishable_values:2979,
+    publishable_measurements:2262,
+    publishable_values:2985,
     analysis_eligible_values:281,
-    publishable_mechanism_claims:476,
+    publishable_mechanism_claims:477,
     staged_publication:true,
     two_pass_status_preserved:true,
     conflicts_fail_closed:true,

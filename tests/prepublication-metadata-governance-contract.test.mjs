@@ -54,14 +54,18 @@ test('metadata gateway 50.5 carries explicit governance state without changing s
   assert.match(readme,/Publication\/governance state: \*\*prepublication-review\*\*/);
 });
 
-test('production readiness workflow is locked to the same governance and metadata baseline',()=>{
+test('production readiness workflow is locked to the same governance metadata and corrected photophysics baseline',()=>{
   const workflow=read('.github/workflows/production-browser-qa.yml');
   assert.match(workflow,/x\.publication_state!=='prepublication-review'/);
   assert.match(workflow,/x\.meta_version!=='50\.5'\|\|x\.gateway_meta_version!=='50\.5'/);
-  assert.match(workflow,/Photophysics 1\.3\.2 invariant baseline PASS/);
+  assert.match(workflow,/Photophysics 1\.3\.2 corrected baseline PASS/);
   assert.match(workflow,/verification-stage accounting does not sum to article queue/);
+  assert.match(workflow,/publishable_measurements!==2262/);
+  assert.match(workflow,/publishable_values!==2985/);
+  assert.match(workflow,/publishable_mechanism_claims!==477/);
   assert.doesNotMatch(workflow,/expected 85 two-pass \/ 244 Pass-A curated/);
-  assert.match(workflow,/contract migration window/i);
+  assert.doesNotMatch(workflow,/contract migration window/i);
+  assert.doesNotMatch(workflow,/stagedBaseline|correctedBaseline|private-staging baseline/);
   assert.doesNotMatch(workflow,/Meta must remain exactly 50\.4/);
 });
 
