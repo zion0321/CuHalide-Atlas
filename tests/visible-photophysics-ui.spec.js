@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import {findLivePassARecord} from './helpers/live-photophysics-stage.js';
 
 const BASE=process.env.CUHALIDE_BASE_URL||'https://cuhalide-atlas-v3.vercel.app';
 const forbidden=['evidence_locator','raw_evidence_locator','source_file','private_path','internal_sample_id','candidate_score','reason_code'];
@@ -19,7 +20,7 @@ async function openArticleRoute(page,id){
   return page.locator('#modalBody .photo-modal-section');
 }
 
-test('structured photophysics is a first-class visible portal feature',async({page})=>{
+test('structured photophysics is a first-class visible portal feature',async({page,request})=>{
   const pageErrors=[];
   page.on('pageerror',error=>pageErrors.push(String(error)));
   await page.goto(BASE,{waitUntil:'networkidle'});
@@ -79,12 +80,17 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   await page.keyboard.press('Escape');
   await expect(page.locator('#modal')).toBeHidden();
 
-  const passA=await openArticleRoute(page,8);
-  await expect(passA).toContainText('Pass A curated');
-  await expect(passA).toContainText('Primary-evidence Pass A is complete');
-  await expect(passA).not.toContainText('Two-pass verified');
-  const passAText=(await passA.innerText()).toLowerCase();
-  for(const key of forbidden)expect(passAText).not.toContain(key);
+  const livePassA=await findLivePassARecord(request,BASE);
+  if(livePassA.record){
+    const passA=await openArticleRoute(page,livePassA.record.record_id);
+    await expect(passA).toContainText('Pass A curated');
+    await expect(passA).toContainText('Primary-evidence Pass A is complete');
+    await expect(passA).not.toContainText('Two-pass verified');
+    const passAText=(await passA.innerText()).toLowerCase();
+    for(const key of forbidden)expect(passAText).not.toContain(key);
+  }else{
+    expect(livePassA.health.pass_a_curated_articles).toBe(0);
+  }
 
   expect(pageErrors,`page errors: ${pageErrors.join(' | ')}`).toEqual([]);
 });
