@@ -12,6 +12,13 @@ async function openArticle(page,id){
   return page.locator('#modalBody .photo-modal-section');
 }
 
+async function openArticleRoute(page,id){
+  await page.goto(`${BASE}/#article/${id}`,{waitUntil:'networkidle'});
+  await expect(page.locator('#modal')).toBeVisible({timeout:12000});
+  await expect(page.locator('#modalBody .photo-modal-section')).toBeVisible({timeout:15000});
+  return page.locator('#modalBody .photo-modal-section');
+}
+
 test('structured photophysics is a first-class visible portal feature',async({page})=>{
   const pageErrors=[];
   page.on('pageerror',error=>pageErrors.push(String(error)));
@@ -35,6 +42,7 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   const view=page.locator('.view[data-view="photophysics"]');
   await expect(view).toHaveClass(/active/);
   await expect(view).toBeVisible();
+  await expect(view).toContainText('Structured photophysics · contract 1.3.1');
   await expect(view).toContainText('Photophysics at the correct experimental grain');
   await expect(page.locator('#photoStatusGrid')).toContainText('Pass A complete');
   await expect(page.locator('#photoStatusGrid')).toContainText('383');
@@ -46,6 +54,8 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   await expect(view).toContainText('Sample state');
   await expect(view).toContainText('Measurement');
   await expect(view).toContainText('Value / band / mechanism');
+  await expect(view.locator('button[data-article="46"]')).toHaveText('Open article-level PLQY example · Record 46');
+  await expect(view.locator('button[data-article="46"]')).not.toContainText('Pass A');
 
   const verified=await openArticle(page,381);
   await expect(verified).toContainText('Sample-resolved measurements');
@@ -58,7 +68,18 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   await page.keyboard.press('Escape');
   await expect(page.locator('#modal')).toBeHidden();
 
-  const passA=await openArticle(page,8);
+  const promoted=await openArticle(page,46);
+  await expect(promoted).toContainText('Two-pass verified');
+  await expect(promoted).toContainText('Independent Pass A and Pass B agree');
+  await expect(promoted).toContainText('41.5 %');
+  await expect(promoted).not.toContainText('Primary-evidence Pass A is complete; independent Pass B has not yet been completed.');
+  const promotedText=(await promoted.innerText()).toLowerCase();
+  for(const key of forbidden)expect(promotedText).not.toContain(key);
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#modal')).toBeHidden();
+
+  const passA=await openArticleRoute(page,8);
   await expect(passA).toContainText('Pass A curated');
   await expect(passA).toContainText('Primary-evidence Pass A is complete');
   await expect(passA).not.toContainText('Two-pass verified');
