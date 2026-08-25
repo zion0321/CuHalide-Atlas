@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {findLivePassARecord} from './helpers/live-photophysics-stage.js';
+import {assertPhotophysicsHealth} from '../lib/photophysics-contract.js';
 
 const BASE=process.env.CUHALIDE_BASE_URL||'https://cuhalide-atlas-v3.vercel.app';
 const forbidden=['evidence_locator','raw_evidence_locator','source_file','private_path','internal_sample_id','candidate_score','reason_code'];
@@ -20,7 +21,10 @@ async function openArticleRoute(page,id){
   return page.locator('#modalBody .photo-modal-section');
 }
 
+async function liveHealth(request){const r=await request.get(`${BASE}/api/public-data?action=photophysics-health`);expect(r.status()).toBe(200);const x=await r.json();const state=assertPhotophysicsHealth(x);expect(r.headers()['x-cuhalide-photophysics-contract']).toBe(state.version);return{x,state}}
+
 test('structured photophysics is a first-class visible portal feature',async({page,request})=>{
+  const{state}=await liveHealth(request),expected=state.expected;
   const pageErrors=[];
   page.on('pageerror',error=>pageErrors.push(String(error)));
   await page.goto(BASE,{waitUntil:'networkidle'});
@@ -30,8 +34,8 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   await expect(page.locator('.photo-home-panel')).toBeVisible();
   await expect(page.locator('.photo-home-panel')).toContainText('Photophysics is now sample- and measurement-resolved.');
   await expect(page.locator('#photoHomeMetrics')).toContainText('383');
-  await expect(page.locator('#photoHomeMetrics')).toContainText('2262');
-  await expect(page.locator('#photoHomeMetrics')).toContainText('2985');
+  await expect(page.locator('#photoHomeMetrics')).toContainText(String(expected.publishable_measurements));
+  await expect(page.locator('#photoHomeMetrics')).toContainText(String(expected.publishable_values));
 
   if(!(await nav.isVisible())){
     const menu=page.locator('#menu');
@@ -43,12 +47,13 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   const view=page.locator('.view[data-view="photophysics"]');
   await expect(view).toHaveClass(/active/);
   await expect(view).toBeVisible();
-  await expect(view).toContainText('Structured photophysics · contract 1.3.2');
+  await expect(view).toContainText(`Structured photophysics · contract ${state.version}`);
+  await expect(view).not.toContainText('contract resolving…');
   await expect(view).toContainText('Photophysics at the correct experimental grain');
   await expect(page.locator('#photoStatusGrid')).toContainText('Pass A complete');
   await expect(page.locator('#photoStatusGrid')).toContainText('383');
-  await expect(page.locator('#photoStatusGrid')).toContainText('2262');
-  await expect(page.locator('#photoStatusGrid')).toContainText('2985');
+  await expect(page.locator('#photoStatusGrid')).toContainText(String(expected.publishable_measurements));
+  await expect(page.locator('#photoStatusGrid')).toContainText(String(expected.publishable_values));
   await expect(view).toContainText('Pass A curated');
   await expect(view).toContainText('Two-pass verified');
   await expect(view).toContainText('Article');
@@ -61,6 +66,7 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   const verified=await openArticle(page,381);
   await expect(verified).toContainText('Sample-resolved measurements');
   await expect(verified).toContainText('Two-pass verified');
+  await expect(verified).toContainText(`Structured photophysics · ${state.version}`);
   await expect(verified.locator('.photo-sample').first()).toBeVisible();
   await expect(verified).toContainText(/PLQY|Lifetime|Emission peak/);
   const verifiedText=(await verified.innerText()).toLowerCase();
