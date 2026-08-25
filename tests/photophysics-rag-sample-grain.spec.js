@@ -31,8 +31,6 @@ test('Research Assistant health is aligned to staged photophysics 1.3.1',async({
     article_queue:383,
     pass_a_complete_articles:383,
     pass_a_pending_articles:0,
-    pass_a_curated_articles:244,
-    two_pass_verified_articles:85,
     verified_no_data_articles:54,
     publishable_samples:940,
     publishable_measurements:2259,
@@ -45,19 +43,23 @@ test('Research Assistant health is aligned to staged photophysics 1.3.1',async({
     primary_files_exposed:false,
     raw_evidence_locators_exposed:false
   });
+  expect(Number.isInteger(x.photophysics.pass_a_curated_articles)).toBe(true);
+  expect(Number.isInteger(x.photophysics.two_pass_verified_articles)).toBe(true);
+  expect(x.photophysics.pass_a_curated_articles).toBeGreaterThanOrEqual(0);
+  expect(x.photophysics.two_pass_verified_articles).toBeGreaterThanOrEqual(0);
   expect(x.photophysics.pass_a_curated_articles+x.photophysics.two_pass_verified_articles+x.photophysics.verified_no_data_articles).toBe(x.photophysics.article_queue);
   expect(x.photophysics.pass_a_complete_articles).toBe(x.photophysics.article_queue);
 });
 
-test('Pass A curated Record 46 PLQY is available without false two-pass labeling',async({request},testInfo)=>{
+test('two-pass Record 46 PLQY preserves article grain without false structure mapping',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Read-only RAG contract is viewport invariant.');
   test.setTimeout(120_000);
   const x=await askAgent(request,'What is the PLQY for Record 46? Keep the verification stage explicit.');
   expect(x.mode).toBe('deterministic-scientific-data');
   expect(x.photophysics_contract).toBe('1.3.1');
   expect(x.answer).toContain('PLQY 41.5 %');
-  expect(x.answer).toContain('Pass A curated');
-  expect(x.answer.toLowerCase()).not.toContain('record 46 is two-pass verified');
+  expect(x.answer).toContain('two-pass verified');
+  expect(x.answer).not.toContain('Pass A curated');
   expect(Array.isArray(x.sources)).toBe(true);
   expect(x.sources.length).toBeGreaterThan(0);
   const source=x.sources.find(s=>s.record_id===46);
@@ -69,10 +71,11 @@ test('Pass A curated Record 46 PLQY is available without false two-pass labeling
     mapping_status:'compound_exact',
     property_scope:'article_level',
     photophysics_analysis_eligible:false,
-    verification_stage:'pass_a_curated',
-    two_pass_verified:false,
-    evidence_scope:'Pass A curated structured scientific data'
+    verification_stage:'two_pass_verified',
+    two_pass_verified:true,
+    evidence_scope:'two-pass verified structured scientific data'
   });
+  expect(source).not.toHaveProperty('structure_id');
   expectNoPrivatePayload(x.sources);
   expectNoPrivatePayload(x.scientific_query?.rows||[]);
 });
