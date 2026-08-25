@@ -46,16 +46,22 @@ jobs:
           node --input-type=module <<'NODE'
           const base=process.env.CUHALIDE_BASE_URL;
           const fail=(m)=>{throw new Error(m)};
+          const baselines={
+            '1.3.2':{publishable_samples:940,publishable_measurements:2262,publishable_values:2985,analysis_eligible_values:281,publishable_mechanism_claims:477},
+            '1.3.3':{publishable_samples:940,publishable_measurements:2267,publishable_values:2988,analysis_eligible_values:281,publishable_mechanism_claims:477}
+          };
           const validatePhotophysics=(p,label)=>{
             if(p?.ok!==true) fail(`${label}: photophysics health is not OK`);
-            if(p?.version!=='1.3.2') fail(`${label}: expected Photophysics 1.3.2, got ${p?.version}`);
+            const expected=baselines[String(p?.version||'')];
+            if(!expected) fail(`${label}: unsupported Photophysics contract ${p?.version}`);
             if(p?.publication_policy!=='pass_a_curated_or_two_pass_verified') fail(`${label}: staged publication policy changed`);
             if(p?.article_queue!==383||p?.pass_a_complete_articles!==383||p?.pass_a_pending_articles!==0) fail(`${label}: Pass A article queue invariant changed`);
             if(p?.verified_no_data_articles!==54) fail(`${label}: verified-no-data denominator changed`);
             if(!Number.isInteger(p?.two_pass_verified_articles)||p.two_pass_verified_articles<0||!Number.isInteger(p?.pass_a_curated_articles)||p.pass_a_curated_articles<0) fail(`${label}: mutable verification-stage counts are invalid`);
             if(p.pass_a_curated_articles+p.two_pass_verified_articles+p.verified_no_data_articles!==p.article_queue) fail(`${label}: verification-stage accounting does not sum to article queue`);
-            if(p?.publishable_samples!==940||p?.publishable_measurements!==2262||p?.publishable_values!==2985||p?.analysis_eligible_values!==281||p?.publishable_mechanism_claims!==477) fail(`${label}: Structured Photophysics 1.3.2 corrected content baseline changed`);
+            for(const [key,value] of Object.entries(expected)) if(p?.[key]!==value) fail(`${label}: ${key} expected ${value} for Photophysics ${p.version}, got ${p?.[key]}`);
             if(p?.checks?.conflicts_fail_closed!==true||p?.checks?.two_pass_status_preserved!==true||p?.checks?.raw_primary_files_exposed!==false||p?.checks?.raw_evidence_locators_exposed!==false||p?.checks?.ineligible_measurement_projection_leaks!==0) fail(`${label}: photophysics privacy/QC guard changed`);
+            return p.version;
           };
 
           const r=await fetch(`${base}/health.json`,{headers:{accept:'application/json'}});
@@ -68,10 +74,11 @@ jobs:
           for(const [k,v] of Object.entries({structure_phase_rows:946,core_included_structure_rows:886,resolved_space_group_rows:710,verified_space_group_rows:684,strict_polar_rows:87,strict_polar_articles:54,rag_documents:1329,rag_embedded:1329})) if(c[k]!==v) fail(`production ${k}: expected ${v}, got ${c[k]}`);
           if(x.meta_version!=='50.5'||x.gateway_meta_version!=='50.5') fail(`pre-merge production Meta must remain exactly 50.5, got ${x.meta_version}/${x.gateway_meta_version}`);
           if(x.public_data?.version!=='2.16.0'||x.public_data_version!=='2.16.0') fail(`pre-merge production Public Data must remain 2.16.0, got ${x.public_data?.version}/${x.public_data_version}`);
-          validatePhotophysics(x.photophysics,'production health');
+          const photoVersion=validatePhotophysics(x.photophysics,'production health');
+          if(x.photophysics_contract_version!==photoVersion) fail(`production metadata/photo contract mismatch ${x.photophysics_contract_version} != ${photoVersion}`);
           if(x.checks?.photophysics_contract!==true||x.checks?.photophysics_staged_publication!==true||x.checks?.photophysics_private_evidence_guard!==true) fail('pre-merge production photophysics health gates are not intact');
           if(x.smart_rag?.version!=='9.19.0'||x.research_assistant?.version!=='10.4.1') fail('pre-merge production RAG/Research Assistant baseline changed unexpectedly');
-          console.log('Pre-merge production rev.7 / prepublication-review / Meta 50.5 / Public Data 2.16.0 / Photophysics 1.3.2 corrected baseline PASS');
+          console.log(`Pre-merge production rev.7 / prepublication-review / Meta 50.5 / Public Data 2.16.0 / Photophysics ${photoVersion} exact activation-window baseline PASS`);
           NODE
       - name: Run full post-merge production browser QA
         if: github.event_name != 'pull_request'
