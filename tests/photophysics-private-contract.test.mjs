@@ -110,12 +110,12 @@ test('public record renderer reaches staged photophysics only through the whitel
   const record = read('api/record-current.js');
   const proxy = read('api/public-data.js');
   assert.match(record, /cuhalide-atlas-public-data-v3/);
-  assert.match(record, /PHOTOPHYSICS_CONTRACT='1\.3\.0'/);
+  assert.match(record, /PHOTOPHYSICS_CONTRACT='1\.3\.1'/);
   assert.match(record, /Pass A curated/);
   assert.match(record, /Two-pass verified/);
   assert.match(record, /Pass B verification has not yet been completed/);
   assert.doesNotMatch(record, /evidence_locator|source_file|source_sha256|atlas_internal/i);
   assert.match(proxy, /PUBLIC_DATA_VERSION='2\.16\.0'/);
-  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.3\.0'/);
+  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.3\.1'/);
   assert.match(proxy, /cuhalide-atlas-public-data-v3/);
 });
