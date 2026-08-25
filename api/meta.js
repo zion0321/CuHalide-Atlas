@@ -5,7 +5,7 @@ const CONTRACT='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-a
 const PHOTOPHYSICS_HEALTH='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3?action=photophysics-health';
 const ORGANIC_COMPONENTS_HEALTH='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3?action=organic-components-health';
 const PUBLIC='https://cuhalide-atlas-v3.vercel.app';
-const RELEASE='3.0.2',META_VERSION='50.5',PUBLIC_DATA_VERSION='2.16.0',PHOTOPHYSICS_VERSION='1.3.0',ORGANIC_COMPONENTS_VERSION='1.1.0',CURRENT_REVISION='7',PUBLICATION_STATE='prepublication-review';
+const RELEASE='3.0.2',META_VERSION='50.5',PUBLIC_DATA_VERSION='2.16.0',PHOTOPHYSICS_VERSION='1.3.1',ORGANIC_COMPONENTS_VERSION='1.1.0',CURRENT_REVISION='7',PUBLICATION_STATE='prepublication-review';
 const RETRIES=3,ATTEMPT_TIMEOUT_MS=7000,RETRY_DELAY_MS=180;
 const CITATION_PATH=path.join(process.cwd(),'CITATION.cff');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -38,7 +38,7 @@ function normalizeHealth(x,ph,org){
   x.photophysics_contract_version=PHOTOPHYSICS_VERSION;
   x.organic_components_contract_version=ORGANIC_COMPONENTS_VERSION;
   x.photophysics_publication_policy='pass-a-curated-or-two-pass-verified';
-  x.site_probe_mode='frontend v50 active; backend Current Curated rev.7 deterministic contract; Structured Photophysics 1.3.0 staged publication; Organic Components 1.1.0 structure-grain fail-closed depiction contract';
+  x.site_probe_mode='frontend v50 active; backend Current Curated rev.7 deterministic contract; Structured Photophysics 1.3.1 staged publication; Organic Components 1.1.0 structure-grain fail-closed depiction contract';
   x.public_data={...(x.public_data||{}),version:PUBLIC_DATA_VERSION};
   x.photophysics=ph;
   x.organic_components=org;
@@ -60,7 +60,7 @@ async function health(){
   const u=new URL(CONTRACT);u.searchParams.set('action','health');
   const [runtime,photo,organic]=await Promise.all([
     fetchJsonWithRetry(u,'CuHalide-Atlas-Meta/50.5'),
-    fetchJsonWithRetry(PHOTOPHYSICS_HEALTH,'CuHalide-Atlas-Meta-Photophysics/1.3.0'),
+    fetchJsonWithRetry(PHOTOPHYSICS_HEALTH,'CuHalide-Atlas-Meta-Photophysics/1.3.1'),
     fetchJsonWithRetry(ORGANIC_COMPONENTS_HEALTH,'CuHalide-Atlas-Meta-Organic-Components/1.1.0')
   ]);
   const runtimeOk=runtime?.r?.ok&&runtime?.x?.ok===true,photoOk=photo?.r?.ok&&photo?.x?.ok===true&&photo?.x?.version===PHOTOPHYSICS_VERSION,organicOk=organic?.r?.ok&&organic?.x?.ok===true&&organic?.x?.contract_version===ORGANIC_COMPONENTS_VERSION;
