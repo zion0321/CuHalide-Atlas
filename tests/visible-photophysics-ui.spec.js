@@ -58,9 +58,10 @@ test('structured photophysics is a first-class visible portal feature',async({pa
   await page.keyboard.press('Escape');
   await expect(page.locator('#modal')).toBeHidden();
 
-  const passA=await openArticle(page,46);
+  const passA=await openArticle(page,8);
   await expect(passA).toContainText('Pass A curated');
   await expect(passA).toContainText('Primary-evidence Pass A is complete');
+  await expect(passA).not.toContainText('Two-pass verified');
   const passAText=(await passA.innerText()).toLowerCase();
   for(const key of forbidden)expect(passAText).not.toContain(key);
 
