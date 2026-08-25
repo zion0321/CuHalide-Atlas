@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import recordHandler from './record.js';
+import {normalizePhotophysicsVersion} from '../lib/photophysics-contract.js';
 
 const CURRENT_REVISION='7';
 const CURATED_DATE='2026-08-19';
@@ -7,7 +8,6 @@ const PAGE_DATE='2026-08-24';
 const LAST_MODIFIED=new Date(`${PAGE_DATE}T00:00:00Z`).toUTCString();
 const ROBOTS_META='<meta name="robots" content="noindex,nofollow,noarchive">';
 const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3';
-const PHOTOPHYSICS_CONTRACT='1.3.2';
 const ORGANIC_COMPONENTS_CONTRACT='1.1.0';
 
 const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -40,7 +40,7 @@ async function fetchRecordOverlay(req){
   if(!['article','structure'].includes(kind)||!id)return base;
   try{
     const u=new URL(PUBLIC_DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);
-    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Overlay/1.2.0'},signal:AbortSignal.timeout(6500)}),raw=await r.text();
+    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Overlay/1.3.0'},signal:AbortSignal.timeout(6500)}),raw=await r.text();
     let x;try{x=raw?JSON.parse(raw):null}catch{x=null}
     if(r.status===404)return{...base,record_result:{state:'not-found',status:404}};
     if(!r.ok||!x?.item)return{...base,record_result:r.status<500&&r.status!==429?{state:'error',status:r.status}:null};
@@ -156,16 +156,16 @@ function injectOrganicClient(html,overlay){if(overlay?.kind!=='structure'||html.
 export default async function handler(req,res){
   res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');
   res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);
-  res.setHeader('X-CuHalide-Photophysics-Contract',PHOTOPHYSICS_CONTRACT);
+  res.removeHeader?.('X-CuHalide-Photophysics-Contract');
   res.setHeader('X-CuHalide-Organic-Components-Contract',ORGANIC_COMPONENTS_CONTRACT);
   res.setHeader('Last-Modified',LAST_MODIFIED);
   const overlayPromise=fetchRecordOverlay(req);
   req.__cuhalideRecordSnapshotPromise=overlayPromise;
   const bridge={
-    setHeader:(name,value)=>{const k=String(name).toLowerCase();if(k==='x-robots-tag')return res.setHeader(name,'noindex, nofollow, noarchive');if(k==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(k==='x-cuhalide-organic-components-contract')return res.setHeader(name,ORGANIC_COMPONENTS_CONTRACT);if(k==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
+    setHeader:(name,value)=>{const k=String(name).toLowerCase();if(k==='x-robots-tag')return res.setHeader(name,'noindex, nofollow, noarchive');if(k==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);if(k==='x-cuhalide-photophysics-contract')return;if(k==='x-cuhalide-organic-components-contract')return res.setHeader(name,ORGANIC_COMPONENTS_CONTRACT);if(k==='last-modified')return res.setHeader(name,LAST_MODIFIED);return res.setHeader(name,value)},
     getHeader:name=>res.getHeader?.(name),
     removeHeader:name=>res.removeHeader?.(name),
-    end:async body=>{const overlay=await overlayPromise;let out=normalize(body);if(typeof out==='string'&&out.includes('</html>')){const enrich=res.statusCode===200&&(overlay?.record_result?.state==='ok'||overlay?.record_result==null);if(enrich){out=injectOrganicComponents(out,overlay);out=injectPhotophysics(out,overlay.photophysics);out=injectOrganicClient(out,overlay)}if(!out.includes(ROBOTS_META))throw new Error('prepublication record page missing noindex meta');syncCsp(out,res,{allowSelf:enrich&&overlay.kind==='structure'})}res.removeHeader?.('Content-Length');return res.end(out)}
+    end:async body=>{const overlay=await overlayPromise,hasPhoto=overlay?.photophysics&&typeof overlay.photophysics==='object',photoVersion=normalizePhotophysicsVersion(overlay?.photophysics?.version);if(hasPhoto&&!photoVersion)throw new Error(`unsupported attached photophysics contract: ${String(overlay?.photophysics?.version??'missing')}`);if(photoVersion)res.setHeader('X-CuHalide-Photophysics-Contract',photoVersion);else res.removeHeader?.('X-CuHalide-Photophysics-Contract');let out=normalize(body);if(typeof out==='string'&&out.includes('</html>')){const enrich=res.statusCode===200&&(overlay?.record_result?.state==='ok'||overlay?.record_result==null);if(enrich){out=injectOrganicComponents(out,overlay);out=injectPhotophysics(out,overlay.photophysics);out=injectOrganicClient(out,overlay)}if(!out.includes(ROBOTS_META))throw new Error('prepublication record page missing noindex meta');syncCsp(out,res,{allowSelf:enrich&&overlay.kind==='structure'})}res.removeHeader?.('Content-Length');return res.end(out)}
   };
   Object.defineProperty(bridge,'statusCode',{get:()=>res.statusCode,set:value=>{res.statusCode=value}});
   return recordHandler(req,bridge);
