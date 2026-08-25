@@ -89,6 +89,9 @@ test('corrected 1.3.2 scientific regressions are mandatory in both candidate and
   assert.ok(String(pkg.scripts?.['qa:site-quality']||'').includes(regression),'candidate site-quality gate must run the 1.3.2 scientific regression');
   assert.ok(String(pkg.scripts?.['qa:browser']||'').includes(regression),'post-merge production browser gate must run the 1.3.2 scientific regression');
   const visible=read('tests/visible-photophysics-ui.spec.js');
+  const runtime=read('public/ui-photophysics-v1.js');
   for(const token of ['2262','2985','Structured photophysics · contract 1.3.2'])assert.ok(visible.includes(token),`visible 1.3.2 QA missing ${token}`);
+  for(const token of ['Structured photophysics · contract 1.3.2',"ph.version||'1.3.2'"])assert.ok(runtime.includes(token),`visible Photophysics runtime missing ${token}`);
   for(const stale of ['2259','2979','Structured photophysics · contract 1.3.1'])assert.ok(!visible.includes(stale),`visible QA still contains superseded 1.3.1 baseline token ${stale}`);
+  assert.ok(!runtime.includes('1.3.1'),'visible Photophysics runtime must not retain a 1.3.1 fallback or label');
 });
