@@ -108,16 +108,20 @@ test('runtime API does not expose the private photophysics staging schema', () =
   assert.deepEqual(exposed, [], `private photophysics schema referenced by public runtime: ${exposed.join(', ')}`);
 });
 
-test('public record renderer reaches staged photophysics only through the whitelisted public contract', () => {
+test('public record renderer reaches staged photophysics only through the whitelisted live-derived contract', () => {
   const record = read('api/record-current.js');
   const proxy = read('api/public-data.js');
   assert.match(record, /cuhalide-atlas-public-data-v3/);
-  assert.match(record, /PHOTOPHYSICS_CONTRACT='1\.3\.2'/);
+  assert.match(record, /normalizePhotophysicsVersion/);
+  assert.match(record, /overlay\.photophysics\.version/);
   assert.match(record, /Pass A curated/);
   assert.match(record, /Two-pass verified/);
   assert.match(record, /Pass B verification has not yet been completed/);
   assert.doesNotMatch(record, /evidence_locator|source_file|source_sha256|atlas_internal/i);
   assert.match(proxy, /PUBLIC_DATA_VERSION='2\.16\.0'/);
-  assert.match(proxy, /PHOTOPHYSICS_CONTRACT='1\.3\.2'/);
+  assert.match(proxy, /snapshotPhotophysicsVersion/);
+  assert.match(proxy, /normalizePhotophysicsVersion/);
+  assert.match(proxy, /bodyVersion&&headerVersion&&bodyVersion!==headerVersion/);
   assert.match(proxy, /cuhalide-atlas-public-data-v3/);
+  assert.doesNotMatch(`${record}\n${proxy}`,/PHOTOPHYSICS_CONTRACT='1\.3\.[123]'/);
 });
