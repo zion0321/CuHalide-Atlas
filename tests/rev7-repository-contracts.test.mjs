@@ -83,7 +83,7 @@ test('rev.7 wrappers normalize living UI and staged photophysics provenance with
   assert.match(assistant,/Current Curated rev\.7/);
   assert.match(record,/Current Curated rev\.7 · primary-evidence reviewed through 19 Aug 2026/);
   assert.match(record,/content=\"7\"/);
-  assert.match(record,/PHOTOPHYSICS_CONTRACT='1\.3\.1'/);
+  assert.match(record,/PHOTOPHYSICS_CONTRACT='1\.3\.2'/);
   assert.match(record,/Pass A curated/);
   assert.match(record,/Two-pass verified/);
   assert.match(record,/Pass B verification has not yet been completed/);
