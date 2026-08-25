@@ -39,12 +39,13 @@ test('canonical HTML renderers use explicit prepublication response and page met
   assert.doesNotMatch(motifs,/meta name="robots" content="index,follow,max-image-preview:large"/);
 });
 
-test('metadata gateway 50.5 carries explicit governance state without changing scientific contracts',()=>{
+test('metadata gateway 50.5 carries explicit governance state and validates the live photophysics contract',()=>{
   const meta=read('api/meta.js'),readme=read('README.md'),cff=read('CITATION.cff');
-  for(const token of ["META_VERSION='50.5'","PUBLICATION_STATE='prepublication-review'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_VERSION='1.3.2'","ORGANIC_COMPONENTS_VERSION='1.1.0'","CURRENT_REVISION='7'",'publication_state=PUBLICATION_STATE',"publication_state:PUBLICATION_STATE","governance_state:PUBLICATION_STATE","release_state:'prepublication'","indexing:'disabled-prepublication'"])assert.ok(meta.includes(token),`metadata governance contract missing ${token}`);
+  for(const token of ["META_VERSION='50.5'","PUBLICATION_STATE='prepublication-review'","PUBLIC_DATA_VERSION='2.16.0'","ORGANIC_COMPONENTS_VERSION='1.1.0'","CURRENT_REVISION='7'",'assertPhotophysicsHealth','validatePhoto','photophysics_contract_version=photoVersion','publication_state=PUBLICATION_STATE',"publication_state:PUBLICATION_STATE","governance_state:PUBLICATION_STATE","release_state:'prepublication'","indexing:'disabled-prepublication'"])assert.ok(meta.includes(token),`metadata governance contract missing ${token}`);
   assert.match(meta,/X-CuHalide-Publication-State/);
   assert.match(meta,/CuHalide-Atlas-Meta\/50\.5/);
   assert.match(meta,/fs\.readFileSync\(CITATION_PATH,'utf8'\)/);
+  assert.doesNotMatch(meta,/PHOTOPHYSICS_VERSION='1\.3\.[123]'/);
   assert.doesNotMatch(meta,/Prepublication review interface/);
   assert.match(cff,/prepublication review resource/i);
   assert.match(cff,/not a formally deposited public dataset/i);
@@ -54,18 +55,17 @@ test('metadata gateway 50.5 carries explicit governance state without changing s
   assert.match(readme,/Publication\/governance state: \*\*prepublication-review\*\*/);
 });
 
-test('production readiness workflow is locked to the same governance metadata and corrected photophysics baseline',()=>{
+test('production readiness workflow accepts only the two exact photophysics activation baselines',()=>{
   const workflow=read('.github/workflows/production-browser-qa.yml');
   assert.match(workflow,/x\.publication_state!=='prepublication-review'/);
   assert.match(workflow,/x\.meta_version!=='50\.5'\|\|x\.gateway_meta_version!=='50\.5'/);
-  assert.match(workflow,/Photophysics 1\.3\.2 corrected baseline PASS/);
+  assert.match(workflow,/'1\.3\.2':\{publishable_samples:940,publishable_measurements:2262,publishable_values:2985,analysis_eligible_values:281,publishable_mechanism_claims:477\}/);
+  assert.match(workflow,/'1\.3\.3':\{publishable_samples:940,publishable_measurements:2267,publishable_values:2988,analysis_eligible_values:281,publishable_mechanism_claims:477\}/);
+  assert.match(workflow,/unsupported Photophysics contract/);
   assert.match(workflow,/verification-stage accounting does not sum to article queue/);
-  assert.match(workflow,/publishable_measurements!==2262/);
-  assert.match(workflow,/publishable_values!==2985/);
-  assert.match(workflow,/publishable_mechanism_claims!==477/);
+  assert.match(workflow,/metadata\/photo contract mismatch/);
+  assert.match(workflow,/exact activation-window baseline PASS/);
   assert.doesNotMatch(workflow,/expected 85 two-pass \/ 244 Pass-A curated/);
-  assert.doesNotMatch(workflow,/contract migration window/i);
-  assert.doesNotMatch(workflow,/stagedBaseline|correctedBaseline|private-staging baseline/);
   assert.doesNotMatch(workflow,/Meta must remain exactly 50\.4/);
 });
 
