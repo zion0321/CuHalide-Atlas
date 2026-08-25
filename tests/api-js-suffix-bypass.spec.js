@@ -50,14 +50,16 @@ test('stale record function suffixes terminate at the evidence-grain wrapper',as
   }
 });
 
-test('legacy record suffix preserves current article provenance and staged photophysics',async({request},testInfo)=>{
+test('legacy record suffix preserves current article provenance and promoted two-pass photophysics',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Suffix routing is viewport invariant; run once on desktop.');
   const r=await request.get(`${BASE}/api/record.js?kind=article&id=46`);
   expect(r.status()).toBe(200);
   expect(header(r,'x-cuhalide-middleware')).toBe(CURRENT_MIDDLEWARE);
   const html=await r.text();
   expect(html).toContain('Current Curated rev.7 context · core article record inherited from immutable Frozen Release 3.0.2 baseline');
-  expect(html).toContain('Pass A curated');
+  expect(html).toContain('Two-pass verified');
+  expect(html).toContain('Independent Pass A and Pass B review agree');
+  expect(html).not.toContain('Pass A curated');
   expect(html).toContain('PLQY: 41.5 %');
   expect(html).toContain('"@type":"WebPage"');
   expect(html).toContain('"@type":"ScholarlyArticle"');
