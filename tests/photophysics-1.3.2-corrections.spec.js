@@ -13,20 +13,13 @@ function valueBy(m,key){const items=(m?.values||[]).filter(v=>v.property_key===k
 function bandBy(m,domain){const items=(m?.bands||[]).filter(b=>b.domain===domain);expect(items,`expected exactly one ${domain} band`).toHaveLength(1);return items[0]}
 async function ask(request,content){const r=await request.post(`${BASE}/api/agent`,{data:{messages:[{role:'user',content}]},timeout:90_000});expect(r.status()).toBe(200);const x=await r.json();noPrivate(x);return x}
 
-test('1.3.2 corrected science remains exact under the controlled 1.3.3 migration while verification-stage split stays dynamic',async({request},testInfo)=>{
+test('1.3.2 correction history remains exact inside the locked activated 1.3.3 baseline',async({request},testInfo)=>{
   desktopOnly(testInfo);
   const r=await request.get(`${BASE}/api/public-data?action=photophysics-health`);
   expect(r.status()).toBe(200);
   expect(r.headers()['x-cuhalide-photophysics-contract']).toBe('1.3.3');
   const x=await r.json();
-  expect(x).toMatchObject({ok:true,version:'1.3.3',article_queue:383,pass_a_complete_articles:383,pass_a_pending_articles:0,verified_no_data_articles:54,publishable_samples:940,analysis_eligible_values:281,publishable_mechanism_claims:477,publication_policy:'pass_a_curated_or_two_pass_verified'});
-  const staged=x.publishable_measurements===2262&&x.publishable_values===2985;
-  const activated=x.publishable_measurements===2267&&x.publishable_values===2988;
-  expect(staged||activated).toBe(true);
-  expect(Number.isInteger(x.pass_a_curated_articles)).toBe(true);
-  expect(Number.isInteger(x.two_pass_verified_articles)).toBe(true);
-  expect(x.pass_a_curated_articles).toBeGreaterThanOrEqual(0);
-  expect(x.two_pass_verified_articles).toBeGreaterThanOrEqual(0);
+  expect(x).toMatchObject({ok:true,version:'1.3.3',article_queue:383,pass_a_complete_articles:383,pass_a_pending_articles:0,verified_no_data_articles:54,pass_a_curated_articles:237,two_pass_verified_articles:92,publishable_samples:940,publishable_measurements:2267,publishable_values:2988,analysis_eligible_values:281,publishable_mechanism_claims:477,publication_policy:'pass_a_curated_or_two_pass_verified'});
   expect(x.pass_a_curated_articles+x.two_pass_verified_articles+x.verified_no_data_articles).toBe(x.article_queue);
   expect(x.checks).toMatchObject({invalid_published_pass_a_gate:0,ineligible_measurement_projection_leaks:0,raw_primary_files_exposed:false,raw_evidence_locators_exposed:false,two_pass_status_preserved:true,conflicts_fail_closed:true});
   noPrivate(x);

@@ -56,7 +56,7 @@ test('structure modal photophysics stays fail-closed at structure grain',()=>{
 });
 
 test('sample-grain UI hardening does not add private evidence fields',()=>{
-  const sources=[read('api/ui-assistant-current.js'),read('public/ui-structure-photophysics-v1.js')].join('\n');
+  const sources=[read('api/ui-assistant-current.js'),read('public/ui-structure-photophysics-v1.js'),read('public/ui-photophysics-v1.js')].join('\n');
   for(const forbidden of ['source_file','source_sha256','evidence_locator','page_locator','internal_sample_id','evidence_excerpt','raw_payload','private_path'])assert.ok(!sources.includes(forbidden),`private field leaked into public photophysics UI code: ${forbidden}`);
 });
 
@@ -83,7 +83,7 @@ test('Pass A QA follows the live verification stage instead of pinning a mutable
   assert.doesNotMatch(uiQa,/openArticleRoute\(page,\s*\d+\)/,'visible QA must resolve the live Pass A article dynamically');
 });
 
-test('1.3.2 correction and 1.3.3 release scientific regressions are mandatory in candidate and post-merge browser gates',()=>{
+test('1.3.2 correction history and locked 1.3.3 release regressions are mandatory in candidate and post-merge gates',()=>{
   const pkg=JSON.parse(read('package.json'));
   for(const regression of ['tests/photophysics-1.3.2-corrections.spec.js','tests/photophysics-1.3.3-release.spec.js']){
     assert.ok(String(pkg.scripts?.['qa:site-quality']||'').includes(regression),`candidate site-quality gate must run ${regression}`);
@@ -91,8 +91,7 @@ test('1.3.2 correction and 1.3.3 release scientific regressions are mandatory in
   }
   const visible=read('tests/visible-photophysics-ui.spec.js');
   const runtime=read('public/ui-photophysics-v1.js');
-  for(const token of ['2262','2985','Structured photophysics · contract 1.3.2'])assert.ok(visible.includes(token),`visible migration-window 1.3.2 QA missing ${token}`);
-  for(const token of ['Structured photophysics · contract 1.3.2',"ph.version||'1.3.2'"])assert.ok(runtime.includes(token),`visible Photophysics migration-window runtime missing ${token}`);
-  for(const stale of ['2259','2979','Structured photophysics · contract 1.3.1'])assert.ok(!visible.includes(stale),`visible QA still contains superseded 1.3.1 baseline token ${stale}`);
-  assert.ok(!runtime.includes('1.3.1'),'visible Photophysics runtime must not retain a 1.3.1 fallback or label');
+  for(const token of ['2267','2988','237','92','Structured photophysics · contract 1.3.3'])assert.ok(visible.includes(token),`visible activated 1.3.3 QA missing ${token}`);
+  for(const token of ["PHOTOPHYSICS_CONTRACT='1.3.3'",'Structured photophysics · contract ${PHOTOPHYSICS_CONTRACT}',"ph.version||PHOTOPHYSICS_CONTRACT"])assert.ok(runtime.includes(token),`visible Photophysics 1.3.3 runtime missing ${token}`);
+  for(const stale of ['2259','2979','Structured photophysics · contract 1.3.1','Structured photophysics · contract 1.3.2',"ph.version||'1.3.2'"])assert.ok(!visible.includes(stale)&&!runtime.includes(stale),`visible photophysics retains superseded token ${stale}`);
 });

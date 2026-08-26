@@ -1,6 +1,7 @@
 import recordCurrent from './record-current.js';
 import {applyRecordPrepublicationGovernance,PUBLICATION_STATE} from '../lib/prepublication-governance.js';
 
+const PHOTOPHYSICS_CONTRACT='1.3.3';
 const ZERO_SAMPLE_CARD=/<section class="card"><p class="eyebrow">Photophysics<\/p><span class="status">(Two-pass verified|Pass A curated)<\/span><p class="fine">[\s\S]*?0 curated sample states · 0 measurements · 0 normalized values\. Crystal-intrinsic, processed, composite, and device states remain separate; quantitative-analysis eligibility is independently gated\.<\/p><\/section>/g;
 const ARTICLE_JSONLD=/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
 const ARCHIVED_PROVENANCE='Part of archived scientific snapshot 3.0.2 · retained in the current corpus';
@@ -26,6 +27,13 @@ function requestKind(req){
 function hardenArticleProvenance(body,kind){
   if(kind!=='article'||typeof body!=='string')return body;
   return body.includes(ARCHIVED_PROVENANCE)?body.split(ARCHIVED_PROVENANCE).join(LIVING_INHERITED_PROVENANCE):body;
+}
+
+function lockPhotophysicsContract(body){
+  if(typeof body!=='string')return body;
+  return body
+    .split('Structured Photophysics 1.3.2').join(`Structured Photophysics ${PHOTOPHYSICS_CONTRACT}`)
+    .split('Photophysics 1.3.2').join(`Photophysics ${PHOTOPHYSICS_CONTRACT}`);
 }
 
 function doiUrl(value){
@@ -92,13 +100,19 @@ export default async function handler(req,res){
   const kind=requestKind(req);
   res.setHeader('X-CuHalide-Publication-State',PUBLICATION_STATE);
   const bridge={
-    setHeader:(name,value)=>String(name).toLowerCase()==='x-cuhalide-publication-state'?res.setHeader(name,PUBLICATION_STATE):res.setHeader(name,value),
+    setHeader:(name,value)=>{
+      const key=String(name).toLowerCase();
+      if(key==='x-cuhalide-publication-state')return res.setHeader(name,PUBLICATION_STATE);
+      if(key==='x-cuhalide-photophysics-contract')return res.setHeader(name,PHOTOPHYSICS_CONTRACT);
+      return res.setHeader(name,value);
+    },
     getHeader:name=>res.getHeader?.(name),
     removeHeader:name=>res.removeHeader?.(name),
     end:body=>{
       let out=hardenArticleProvenance(body,kind);
       out=separateArticleStructuredData(out,kind);
       out=hardenStructurePhotophysics(out,kind);
+      out=lockPhotophysicsContract(out);
       out=applyRecordPrepublicationGovernance(out);
       res.removeHeader?.('Content-Length');
       return res.end(out);
