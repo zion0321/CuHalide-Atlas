@@ -5,7 +5,7 @@ const CONTRACT='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-a
 const PHOTOPHYSICS_HEALTH='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3?action=photophysics-health';
 const ORGANIC_COMPONENTS_HEALTH='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3?action=organic-components-health';
 const PUBLIC='https://cuhalide-atlas-v3.vercel.app';
-const RELEASE='3.0.2',META_VERSION='50.5',PUBLIC_DATA_VERSION='2.16.0',PHOTOPHYSICS_VERSION='1.3.3',ORGANIC_COMPONENTS_VERSION='1.1.0',CURRENT_REVISION='7',PUBLICATION_STATE='prepublication-review';
+const RELEASE='3.0.2',META_VERSION='50.5',PUBLIC_DATA_VERSION='2.16.0',PHOTOPHYSICS_VERSION='1.3.3',ORGANIC_COMPONENTS_VERSION='1.1.0',CURRENT_REVISION='8',PUBLICATION_STATE='prepublication-review';
 const RETRIES=3,ATTEMPT_TIMEOUT_MS=7000,RETRY_DELAY_MS=180;
 const CITATION_PATH=path.join(process.cwd(),'CITATION.cff');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -38,7 +38,7 @@ function normalizeHealth(x,ph,org){
   x.photophysics_contract_version=PHOTOPHYSICS_VERSION;
   x.organic_components_contract_version=ORGANIC_COMPONENTS_VERSION;
   x.photophysics_publication_policy='pass-a-curated-or-two-pass-verified';
-  x.site_probe_mode='frontend v50 active; backend Current Curated rev.7 deterministic contract; Structured Photophysics 1.3.3 staged publication; Organic Components 1.1.0 structure-grain fail-closed depiction contract';
+  x.site_probe_mode='frontend v50 active; backend Current Curated rev.8 deterministic contract; Structured Photophysics 1.3.3 staged publication; Organic Components 1.1.0 structure-grain fail-closed depiction contract';
   x.public_data={...(x.public_data||{}),version:PUBLIC_DATA_VERSION};
   x.photophysics=ph;
   x.organic_components=org;
@@ -77,12 +77,12 @@ function manifest(){
     public_origin:PUBLIC,
     publication_state:PUBLICATION_STATE,
     frozen_release:FROZEN,
-    current_curated:{revision:7,architecture:'full-current-atomic-structure-snapshot',...CURRENT},
+    current_curated:{revision:8,architecture:'full-current-atomic-structure-snapshot',...CURRENT},
     runtime:{site_version:'50',ui_version:'50.2',meta_version:META_VERSION,public_data_version:PUBLIC_DATA_VERSION,photophysics_contract_version:PHOTOPHYSICS_VERSION,organic_components_contract_version:ORGANIC_COMPONENTS_VERSION,smart_rag_version:'9.19.0',research_assistant_version:'10.4.1',motif_atlas_version:'1.2'},
     photophysics:{public_projection:'pass-a-curated-or-two-pass-verified',verification_stage_explicit:true,two_pass_identity_preserved:true,measurement_conflicts_fail_closed:true,raw_primary_files:false,raw_evidence_locators:false,internal_sample_ids:false,analysis_eligibility_explicit:true,processed_state_structure_guard:true},
     organic_components:{contract_version:ORGANIC_COMPONENTS_VERSION,structure_grain:true,mapping_rows:495,mapped_structures:453,distinct_raw_component_keys:260,all_rows_explicitly_classified:true,verified_connectivity_only_for_deterministic_depiction:true,unresolved_identity_fail_closed:true,stereochemistry_not_inferred:true,renderer:'RDKit 2025.09.4 coordinate layout + browser SVG',generative_imagery:false,raw_primary_files:false,raw_evidence_locators:false,private_evidence_fields:false},
     public_access:{mode:'query-and-view',release_state:'prepublication',governance_state:PUBLICATION_STATE,indexing:'disabled-prepublication',bulk_export:false,primary_pdf_si_cif:false,exact_stored_abstracts:false,internal_evidence_locators:false,candidate_scores_reason_codes:false,structured_photophysics:true,structured_organic_components:true},
-    provenance_note:'Frozen Release 3.0.2 is immutable. Current Curated rev.7 is the living full-current article and atomic/context structure snapshot reviewed through 2026-08-19. Structured photophysics may be exposed after the Pass A primary-evidence curation gate; records that also complete independent Pass B agreement remain explicitly identified as two-pass verified. Organic Components 1.1.0 classifies every QC-passed structure-grain component mapping and renders only independently verified molecular connectivity using deterministic RDKit-derived browser SVG; ambiguous identities remain unresolved rather than inferred. Measurement-level QC, source-conflict and organic-component identity gates remain fail-closed. Raw source files and internal evidence locators remain private. Reported composition, local Cu-X motif and global connectivity dimensionality are represented separately; unsupported compound-level crystallographic mappings are withheld. Search-engine indexing remains disabled during the prepublication governance phase.'
+    provenance_note:'Frozen Release 3.0.2 is immutable. Current Curated rev.8 is the living full-current article and atomic/context structure snapshot reviewed through 2026-08-19. Structured photophysics may be exposed after the Pass A primary-evidence curation gate; records that also complete independent Pass B agreement remain explicitly identified as two-pass verified. Organic Components 1.1.0 classifies every QC-passed structure-grain component mapping and renders only independently verified molecular connectivity using deterministic RDKit-derived browser SVG; ambiguous identities remain unresolved rather than inferred. Measurement-level QC, source-conflict and organic-component identity gates remain fail-closed. Raw source files and internal evidence locators remain private. Reported composition, local Cu-X motif and global connectivity dimensionality are represented separately; unsupported compound-level crystallographic mappings are withheld. Search-engine indexing remains disabled during the prepublication governance phase.'
   },null,2);
 }
 
