@@ -24,7 +24,7 @@ function skipRepeatedApiViewport(testInfo, reason) {
   test.skip(testInfo.project.name !== API_ONLY_PROJECT, reason);
 }
 
-test('pre-merge production backend rev.7 is ready', async ({ request }) => {
+test('production backend rev.7 and activated Photophysics 1.3.3 are ready', async ({ request }) => {
   const r = await request.get(`${BASE}/health.json`);
   expect(r.status()).toBe(200);
   const x = await r.json();
@@ -44,7 +44,18 @@ test('pre-merge production backend rev.7 is ready', async ({ request }) => {
   });
   expect(x.photophysics).toMatchObject({
     ok: true,
-    version: '1.3.2',
+    version: '1.3.3',
+    article_queue: 383,
+    pass_a_complete_articles: 383,
+    pass_a_pending_articles: 0,
+    verified_no_data_articles: 54,
+    pass_a_curated_articles: 237,
+    two_pass_verified_articles: 92,
+    publishable_samples: 940,
+    publishable_measurements: 2267,
+    publishable_values: 2988,
+    analysis_eligible_values: 281,
+    publishable_mechanism_claims: 477,
     publication_policy: 'pass_a_curated_or_two_pass_verified',
     checks: {
       invalid_published_pass_a_gate: 0,
@@ -55,6 +66,10 @@ test('pre-merge production backend rev.7 is ready', async ({ request }) => {
       conflicts_fail_closed: true,
     },
   });
+  expect(x.photophysics.pass_a_curated_articles + x.photophysics.two_pass_verified_articles + x.photophysics.verified_no_data_articles).toBe(383);
+  expect(x.photophysics_contract_version).toBe('1.3.3');
+  expect(x.smart_rag?.photophysics_contract).toBe('1.3.3');
+  expect(x.research_assistant?.photophysics_contract).toBe('1.3.3');
 });
 
 test('v50 living portal exposes Current Curated rev.7', async ({ page, request }) => {
@@ -174,6 +189,7 @@ test('Research Assistant reports 10.4 / 9.19 and complete rev.7 RAG', async ({ r
   const x = await r.json();
   expect(x.assistant_version).toBe('10.4.1');
   expect(x.version).toBe('9.19.0');
+  expect(x.photophysics_contract).toBe('1.3.3');
   expect(x.current_curated).toMatchObject({
     layer: 'current-curated-r7',
     live_revision: 7,
