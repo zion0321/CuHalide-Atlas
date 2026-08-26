@@ -4,6 +4,7 @@
   'use strict';
 
   const DATA='/api/public-data';
+  const PHOTOPHYSICS_CONTRACT='1.3.3';
   const $=id=>document.getElementById(id);
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let healthPromise=null;
@@ -37,7 +38,7 @@
   function stageClass(ph){return ph?.two_pass_verified===true?'verified':'passa'}
 
   async function getHealth(){
-    if(!healthPromise)healthPromise=fetch(`${DATA}?action=photophysics-health`,{cache:'no-store',headers:{accept:'application/json'}}).then(async r=>{const x=await r.json();if(!r.ok||x.ok!==true)throw new Error(x.error||`HTTP ${r.status}`);return x});
+    if(!healthPromise)healthPromise=fetch(`${DATA}?action=photophysics-health`,{cache:'no-store',headers:{accept:'application/json'}}).then(async r=>{const x=await r.json();if(!r.ok||x.ok!==true)throw new Error(x.error||`HTTP ${r.status}`);if(x.version!==PHOTOPHYSICS_CONTRACT)throw new Error(`Expected Photophysics ${PHOTOPHYSICS_CONTRACT}, got ${x.version||'unknown'}`);return x});
     return healthPromise;
   }
 
@@ -66,7 +67,7 @@
     if(document.querySelector('.view[data-view="photophysics"]'))return;
     const target=document.querySelector('.view[data-view="polar"]')||document.querySelector('.view[data-view="rag"]');if(!target)return;
     target.insertAdjacentHTML('beforebegin',`<section class="view photo-view" data-view="photophysics">
-      <div class="shell page-head"><p class="eyebrow">Structured photophysics · contract 1.3.2</p><h1>Photophysics at the correct experimental grain</h1><p>Browse the new curated layer without conflating a crystal, powder, composite, film or device. Pass A and independent two-pass verification are shown separately, and unresolved source conflicts remain fail-closed.</p></div>
+      <div class="shell page-head"><p class="eyebrow">Structured photophysics · contract ${PHOTOPHYSICS_CONTRACT}</p><h1>Photophysics at the correct experimental grain</h1><p>Browse the new curated layer without conflating a crystal, powder, composite, film or device. Pass A and independent two-pass verification are shown separately, and unresolved source conflicts remain fail-closed.</p></div>
       <div class="shell photo-status-grid" id="photoStatusGrid" aria-live="polite"><div class="panel loading">Loading structured photophysics status…</div></div>
       <div class="shell photo-feature-grid">
         <article class="panel"><p class="eyebrow">Verification ladder</p><h2>Pass A is not mislabeled as double verification</h2><div class="photo-stage-row"><span class="photo-stage passa">Pass A curated</span><p>Primary-evidence extraction and article-level curation complete. Measurement-level QC and conflict gates still apply.</p></div><div class="photo-stage-row"><span class="photo-stage verified">Two-pass verified</span><p>Independent Pass B is also complete and agrees with the Pass A article state.</p></div></article>
@@ -121,7 +122,7 @@
     const counts=ph.counts||{},samples=Array.isArray(ph.samples)?ph.samples:[];
     if(ph.public_state==='verified_no_reported_data')return `<section class="photo-modal-section"><div class="photo-modal-title"><div><p class="eyebrow">Structured photophysics</p><h2>No reportable photophysics measurement</h2></div><span class="photo-stage passa">Primary-evidence reviewed</span></div><p class="fine">The reviewed source set does not expose a reportable measurement at the curated sample grain.</p></section>`;
     const conflicts=Array.isArray(ph.conflicts)?ph.conflicts:[];
-    return `<section class="photo-modal-section"><div class="photo-modal-title"><div><p class="eyebrow">Structured photophysics · ${esc(ph.version||'1.3.2')}</p><h2>Sample-resolved measurements</h2></div><span class="photo-stage ${stageClass(ph)}">${esc(stageLabel(ph))}</span></div><p class="fine photo-stage-note">${ph.two_pass_verified===true?'Independent Pass A and Pass B agree for this exposed article state.':'Primary-evidence Pass A is complete; independent Pass B has not yet been completed.'} Source-conflicted or otherwise ineligible measurements remain fail-closed.</p><div class="photo-inline-stats"><span><strong>${esc(counts.samples??samples.length)}</strong> samples</span><span><strong>${esc(counts.measurements??0)}</strong> measurements</span><span><strong>${esc(counts.values??0)}</strong> values</span><span><strong>${esc(counts.conflicts??conflicts.length)}</strong> conflicts</span></div><div class="photo-samples">${samples.slice(0,8).map(sampleCard).join('')}</div>${samples.length>8?`<p class="fine">${esc(samples.length-8)} additional curated sample states are available through the public query interface.</p>`:''}${conflicts.length?`<div class="photo-conflict"><strong>Curated source discrepancy</strong>${conflicts.slice(0,4).map(c=>`<p>${esc(labelKey(c.property_key))}: ${esc(c.adjudication_status||'unresolved')} · ${esc(c.warning||'Conflicting source values are retained explicitly.')}</p>`).join('')}</div>`:''}<p class="fine photo-privacy">Public projection only: primary source files, raw evidence locators, internal sample IDs and unpublished adjudication notes are not exposed.</p></section>`;
+    return `<section class="photo-modal-section"><div class="photo-modal-title"><div><p class="eyebrow">Structured photophysics · ${esc(ph.version||PHOTOPHYSICS_CONTRACT)}</p><h2>Sample-resolved measurements</h2></div><span class="photo-stage ${stageClass(ph)}">${esc(stageLabel(ph))}</span></div><p class="fine photo-stage-note">${ph.two_pass_verified===true?'Independent Pass A and Pass B agree for this exposed article state.':'Primary-evidence Pass A is complete; independent Pass B has not yet been completed.'} Source-conflicted or otherwise ineligible measurements remain fail-closed.</p><div class="photo-inline-stats"><span><strong>${esc(counts.samples??samples.length)}</strong> samples</span><span><strong>${esc(counts.measurements??0)}</strong> measurements</span><span><strong>${esc(counts.values??0)}</strong> values</span><span><strong>${esc(counts.conflicts??conflicts.length)}</strong> conflicts</span></div><div class="photo-samples">${samples.slice(0,8).map(sampleCard).join('')}</div>${samples.length>8?`<p class="fine">${esc(samples.length-8)} additional curated sample states are available through the public query interface.</p>`:''}${conflicts.length?`<div class="photo-conflict"><strong>Curated source discrepancy</strong>${conflicts.slice(0,4).map(c=>`<p>${esc(labelKey(c.property_key))}: ${esc(c.adjudication_status||'unresolved')} · ${esc(c.warning||'Conflicting source values are retained explicitly.')}</p>`).join('')}</div>`:''}<p class="fine photo-privacy">Public projection only: primary source files, raw evidence locators, internal sample IDs and unpublished adjudication notes are not exposed.</p></section>`;
   }
 
   async function enhanceArticleModal(){
