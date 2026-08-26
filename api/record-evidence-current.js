@@ -1,6 +1,7 @@
 import recordCurrent from './record-current.js';
 import {applyRecordPrepublicationGovernance,PUBLICATION_STATE} from '../lib/prepublication-governance.js';
 
+const CURRENT_REVISION='8';
 const PHOTOPHYSICS_CONTRACT='1.3.3';
 const ZERO_SAMPLE_CARD=/<section class="card"><p class="eyebrow">Photophysics<\/p><span class="status">(Two-pass verified|Pass A curated)<\/span><p class="fine">[\s\S]*?0 curated sample states · 0 measurements · 0 normalized values\. Crystal-intrinsic, processed, composite, and device states remain separate; quantitative-analysis eligibility is independently gated\.<\/p><\/section>/g;
 const ARTICLE_JSONLD=/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
@@ -29,10 +30,27 @@ function hardenArticleProvenance(body,kind){
   return body.includes(ARCHIVED_PROVENANCE)?body.split(ARCHIVED_PROVENANCE).join(LIVING_INHERITED_PROVENANCE):body;
 }
 
+function lockCurrentRevision(body){
+  if(typeof body!=='string')return body;
+  return body
+    .split('<meta name="cuhalide-current-curated-revision" content="6">').join('<meta name="cuhalide-current-curated-revision" content="8">')
+    .split('<meta name="cuhalide-current-curated-revision" content="7">').join('<meta name="cuhalide-current-curated-revision" content="8">')
+    .split('Current Curated rev.6').join('Current Curated rev.8')
+    .split('Current Curated rev.7').join('Current Curated rev.8')
+    .split('current-curated-r6').join('current-curated-r8')
+    .split('current-curated-r7').join('current-curated-r8')
+    .split('current-r6').join('current-r8')
+    .split('current-r7').join('current-r8')
+    .split('cc.live_revision||6').join('cc.live_revision||8')
+    .split('cc.live_revision||7').join('cc.live_revision||8');
+}
+
 function lockPhotophysicsContract(body){
   if(typeof body!=='string')return body;
   return body
+    .split('Structured Photophysics 1.3.1').join(`Structured Photophysics ${PHOTOPHYSICS_CONTRACT}`)
     .split('Structured Photophysics 1.3.2').join(`Structured Photophysics ${PHOTOPHYSICS_CONTRACT}`)
+    .split('Photophysics 1.3.1').join(`Photophysics ${PHOTOPHYSICS_CONTRACT}`)
     .split('Photophysics 1.3.2').join(`Photophysics ${PHOTOPHYSICS_CONTRACT}`);
 }
 
@@ -98,10 +116,13 @@ function hardenStructurePhotophysics(body,kind){
 
 export default async function handler(req,res){
   const kind=requestKind(req);
+  res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);
   res.setHeader('X-CuHalide-Publication-State',PUBLICATION_STATE);
+  res.setHeader('X-CuHalide-Photophysics-Contract',PHOTOPHYSICS_CONTRACT);
   const bridge={
     setHeader:(name,value)=>{
       const key=String(name).toLowerCase();
+      if(key==='x-cuhalide-current-curated-revision')return res.setHeader(name,CURRENT_REVISION);
       if(key==='x-cuhalide-publication-state')return res.setHeader(name,PUBLICATION_STATE);
       if(key==='x-cuhalide-photophysics-contract')return res.setHeader(name,PHOTOPHYSICS_CONTRACT);
       return res.setHeader(name,value);
@@ -113,6 +134,7 @@ export default async function handler(req,res){
       out=separateArticleStructuredData(out,kind);
       out=hardenStructurePhotophysics(out,kind);
       out=lockPhotophysicsContract(out);
+      out=lockCurrentRevision(out);
       out=applyRecordPrepublicationGovernance(out);
       res.removeHeader?.('Content-Length');
       return res.end(out);
