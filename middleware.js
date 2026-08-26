@@ -12,8 +12,8 @@ export default async function middleware(request){
   if(isRecord||isAssistantCompat)target.search=incoming.search;
   const response=await fetch(target,{method:request.method,headers:request.headers,redirect:'follow'});
   const headers=new Headers(response.headers);
-  headers.set('x-cuhalide-middleware','release-3.0.2-ui-v50.2-current-r7');
-  headers.set('x-cuhalide-current-curated-revision','7');
+  headers.set('x-cuhalide-middleware','release-3.0.2-ui-v50.2-current-r8');
+  headers.set('x-cuhalide-current-curated-revision','8');
   headers.set('x-cuhalide-publication-state','prepublication-review');
   headers.set('x-cuhalide-ui-version','50.2');
   headers.set('x-cuhalide-site-version','50');
