@@ -4,7 +4,7 @@ import { projectOrganic, organicComponentHealth } from './organic-components-ext
 const BASE=Deno.env.get('SUPABASE_URL'), KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'), REST=`${BASE}/rest/v1`;
 const UP=`${BASE}/functions/v1/cuhalide-atlas-public-data-v302-public`;
 const RELEASE='3.0.2', VERSION='2.16.0', REV='7', PUBLIC='https://cuhalide-atlas-v3.vercel.app', PUBLICATION_STATE='prepublication-review';
-const PHOTOPHYSICS_CONTRACT='1.3.1', ORGANIC_COMPONENTS_CONTRACT='1.1.0';
+const PHOTOPHYSICS_CONTRACT='1.3.3', ORGANIC_COMPONENTS_CONTRACT='1.1.0';
 const ALLOWED=new Set([PUBLIC,'http://localhost:8765','http://127.0.0.1:8765']);
 const PUBLIC_ACTIONS=new Set(['health','bootstrap','articles','structures','polar','article','structure','article-structures','search','current-curated','candidates','status','errata','motifs','photophysics-health','photophysics','organic-components-health','organic-components']);
 const AUTH={apikey:KEY,authorization:`Bearer ${KEY}`,accept:'application/json','content-type':'application/json'};
