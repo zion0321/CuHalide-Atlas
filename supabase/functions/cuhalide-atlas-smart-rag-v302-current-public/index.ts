@@ -2,7 +2,7 @@ declare const Deno:any;
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 const ROOT='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1';
 const CURRENT=`${ROOT}/cuhalide-atlas-current-rag-r7-unified-internal`,FROZEN=`${ROOT}/cuhalide-atlas-smart-rag-v302-public`,PUBLIC_DATA=`${ROOT}/cuhalide-atlas-public-data-v3`;
-const SERVICE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,RELEASE='3.0.2',VERSION='9.19.0',CURRENT_RELEASE='current-curated-r7',REV=7,DOCS=1329,PHOTOPHYSICS_CONTRACT='1.3.1';
+const SERVICE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,RELEASE='3.0.2',VERSION='9.19.0',CURRENT_RELEASE='current-curated-r7',REV=7,DOCS=1329,PHOTOPHYSICS_CONTRACT='1.3.3';
 const FROZEN_INTENT=/(?:Frozen(?:\s+Release)?|release\s*3\.0\.2|3\.0\.2\s*(?:release|snapshot)|archived\s+(?:scientific\s+)?snapshot|historical\s+(?:snapshot|release)|冻结(?:发布|快照)?|历史快照|归档快照)/i;
 const LATEST=/(?:latest|newest|recent|new papers?|new literature|just published|literature watch|candidate|最新|最近|新文献|新论文|刚发表|候选)/i;
 function internal(req:Request){return req.headers.get('authorization')===`Bearer ${SERVICE}`&&req.headers.get('apikey')===SERVICE}
