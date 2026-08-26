@@ -12,6 +12,7 @@ test('active rev7 RAG and Public Data sources have one locked photophysics contr
   assert.match(exactSource,/VERSION='current-rag-r7\.0\.8'/);
   assert.match(scienceSource,/VERSION='current-rag-r7-science-exact-1\.1\.1'/);
   assert.match(unifiedSource,/VERSION='current-rag-r7\.2\.5'/);
+  assert.doesNotMatch(unifiedSource,/VERSION='current-rag-r7\.2\.1'/,'repository source must not regress to the pre-production unified RAG mirror');
   assert.match(smartSource,/VERSION='9\.19\.0'/);
   assert.match(publicDataSource,/VERSION='2\.16\.0'/);
   for(const source of [exactSource,scienceSource,unifiedSource,smartSource,publicDataSource]){
