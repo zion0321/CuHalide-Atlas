@@ -16,7 +16,7 @@ function expectNoPrivatePayload(value){
   for(const key of forbidden)expect(raw).not.toContain(`\"${key}\"`);
 }
 
-test('Research Assistant health is aligned to corrected photophysics 1.3.2 baseline',async({request},testInfo)=>{
+test('Research Assistant health is aligned to staged photophysics 1.3.3 baseline',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Read-only RAG contract is viewport invariant.');
   const response=await request.get(`${BASE}/api/agent`,{timeout:30_000});
   expect(response.status()).toBe(200);
@@ -26,7 +26,7 @@ test('Research Assistant health is aligned to corrected photophysics 1.3.2 basel
   expect(x.assistant_version).toBe('10.4.1');
   expect(x.photophysics).toMatchObject({
     ok:true,
-    version:'1.3.2',
+    version:'1.3.3',
     publication_policy:'pass_a_curated_or_two_pass_verified',
     article_queue:383,
     pass_a_complete_articles:383,
@@ -56,7 +56,7 @@ test('two-pass Record 46 PLQY preserves article grain without false structure ma
   test.setTimeout(120_000);
   const x=await askAgent(request,'What is the PLQY for Record 46? Keep the verification stage explicit.');
   expect(x.mode).toBe('deterministic-scientific-data');
-  expect(x.photophysics_contract).toBe('1.3.2');
+  expect(x.photophysics_contract).toBe('1.3.3');
   const recordLine=String(x.answer||'').split('\n').find(line=>line.includes('[A:46]'));
   expect(recordLine).toBeTruthy();
   expect(recordLine).toContain('PLQY 41.5 %');
@@ -87,7 +87,7 @@ test('two-pass Record 381 PLQY preserves two-pass identity and structure grain',
   test.setTimeout(120_000);
   const x=await askAgent(request,'What are the PLQY values for Record 381? Keep verification stage and structure mapping explicit.');
   expect(x.mode).toBe('deterministic-scientific-data');
-  expect(x.photophysics_contract).toBe('1.3.2');
+  expect(x.photophysics_contract).toBe('1.3.3');
   expect(x.answer).toContain('89.84 %');
   expect(x.answer).toContain('91.09 %');
   expect(x.answer).toContain('two-pass verified');
