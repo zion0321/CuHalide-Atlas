@@ -39,9 +39,9 @@ test('canonical HTML renderers use explicit prepublication response and page met
   assert.doesNotMatch(motifs,/meta name="robots" content="index,follow,max-image-preview:large"/);
 });
 
-test('metadata gateway 50.5 carries explicit governance state without changing scientific contracts',()=>{
+test('metadata gateway 50.5 carries explicit governance state while entering photophysics 1.3.3',()=>{
   const meta=read('api/meta.js'),readme=read('README.md'),cff=read('CITATION.cff');
-  for(const token of ["META_VERSION='50.5'","PUBLICATION_STATE='prepublication-review'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_VERSION='1.3.2'","ORGANIC_COMPONENTS_VERSION='1.1.0'","CURRENT_REVISION='7'",'publication_state=PUBLICATION_STATE',"publication_state:PUBLICATION_STATE","governance_state:PUBLICATION_STATE","release_state:'prepublication'","indexing:'disabled-prepublication'"])assert.ok(meta.includes(token),`metadata governance contract missing ${token}`);
+  for(const token of ["META_VERSION='50.5'","PUBLICATION_STATE='prepublication-review'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_VERSION='1.3.3'","ORGANIC_COMPONENTS_VERSION='1.1.0'","CURRENT_REVISION='7'",'publication_state=PUBLICATION_STATE',"publication_state:PUBLICATION_STATE","governance_state:PUBLICATION_STATE","release_state:'prepublication'","indexing:'disabled-prepublication'"])assert.ok(meta.includes(token),`metadata governance contract missing ${token}`);
   assert.match(meta,/X-CuHalide-Publication-State/);
   assert.match(meta,/CuHalide-Atlas-Meta\/50\.5/);
   assert.match(meta,/fs\.readFileSync\(CITATION_PATH,'utf8'\)/);
@@ -52,20 +52,25 @@ test('metadata gateway 50.5 carries explicit governance state without changing s
   assert.doesNotMatch(cff,/\bdoi:\s*\S+/im);
   assert.match(readme,/Metadata gateway: \*\*50\.5\*\*/);
   assert.match(readme,/Publication\/governance state: \*\*prepublication-review\*\*/);
+  assert.match(readme,/Structured Photophysics contract: \*\*1\.3\.2\*\*/,'README remains the locked pre-migration release document until the final lock PR');
 });
 
-test('production readiness workflow is locked to the same governance metadata and corrected photophysics baseline',()=>{
+test('production readiness workflow permits only the explicit 1.3.2 -> 1.3.3 governance-safe states',()=>{
   const workflow=read('.github/workflows/production-browser-qa.yml');
   assert.match(workflow,/x\.publication_state!=='prepublication-review'/);
   assert.match(workflow,/x\.meta_version!=='50\.5'\|\|x\.gateway_meta_version!=='50\.5'/);
-  assert.match(workflow,/Photophysics 1\.3\.2 corrected baseline PASS/);
+  assert.match(workflow,/stable132/);
+  assert.match(workflow,/staged133/);
+  assert.match(workflow,/activated133/);
+  assert.match(workflow,/controlled 1\.3\.2 -> 1\.3\.3 migration states/);
   assert.match(workflow,/verification-stage accounting does not sum to article queue/);
-  assert.match(workflow,/publishable_measurements!==2262/);
-  assert.match(workflow,/publishable_values!==2985/);
-  assert.match(workflow,/publishable_mechanism_claims!==477/);
+  assert.match(workflow,/p\.publishable_measurements===2262/);
+  assert.match(workflow,/p\.publishable_measurements===2267/);
+  assert.match(workflow,/p\.publishable_values===2985/);
+  assert.match(workflow,/p\.publishable_values===2988/);
+  assert.match(workflow,/p\.publishable_mechanism_claims===477/);
   assert.doesNotMatch(workflow,/expected 85 two-pass \/ 244 Pass-A curated/);
-  assert.doesNotMatch(workflow,/contract migration window/i);
-  assert.doesNotMatch(workflow,/stagedBaseline|correctedBaseline|private-staging baseline/);
+  assert.doesNotMatch(workflow,/publishable_measurements===2259|publishable_values===2979/);
   assert.doesNotMatch(workflow,/Meta must remain exactly 50\.4/);
 });
 
@@ -78,6 +83,7 @@ test('platform compatibility and public-data gateways fail closed on prepublicat
   assert.match(publicData,/PUBLICATION_STATE='prepublication-review'/);
   assert.match(publicData,/X-CuHalide-Publication-State/);
   assert.match(publicData,/PUBLIC_DATA_VERSION='2\.16\.0'/);
+  assert.match(publicData,/PHOTOPHYSICS_CONTRACT='1\.3\.3'/);
 });
 
 test('assistant export and sitemap handlers independently expose governance state',()=>{

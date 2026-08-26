@@ -144,7 +144,7 @@ test('manifest health data gateway citation assistant export and sitemap expose 
   const manifest=await manifestResponse.json();
   expect(manifest.publication_state).toBe(STATE);
   expect(manifest.public_access).toMatchObject({mode:'query-and-view',release_state:'prepublication',governance_state:STATE,indexing:'disabled-prepublication',bulk_export:false});
-  expect(manifest.runtime).toMatchObject({site_version:'50',ui_version:'50.2',meta_version:'50.5',public_data_version:'2.16.0',photophysics_contract_version:'1.3.2',organic_components_contract_version:'1.1.0'});
+  expect(manifest.runtime).toMatchObject({site_version:'50',ui_version:'50.2',meta_version:'50.5',public_data_version:'2.16.0',photophysics_contract_version:'1.3.3',organic_components_contract_version:'1.1.0'});
   expect(manifest.current_curated).toMatchObject({revision:7,article_audit_records:383,canonical_verified_articles:369,structure_phase_rows:946,core_included_structure_rows:886,verified_space_group_rows:684,strict_polar_rows:87,strict_polar_articles:54,rag_documents:1329,rag_embedded:1329});
 
   const healthResponse=await request.get(`${BASE}/health.json`);
@@ -152,14 +152,14 @@ test('manifest health data gateway citation assistant export and sitemap expose 
   expect(header(healthResponse,'x-cuhalide-publication-state')).toBe(STATE);
   expect(header(healthResponse,'x-cuhalide-meta-version')).toBe('50.5');
   const health=await healthResponse.json();
-  expect(health).toMatchObject({ok:true,status:'PASS',site_readiness:'PASS',meta_version:'50.5',gateway_meta_version:'50.5',publication_state:STATE,public_data_version:'2.16.0',photophysics_contract_version:'1.3.2',organic_components_contract_version:'1.1.0'});
+  expect(health).toMatchObject({ok:true,status:'PASS',site_readiness:'PASS',meta_version:'50.5',gateway_meta_version:'50.5',publication_state:STATE,public_data_version:'2.16.0',photophysics_contract_version:'1.3.3',organic_components_contract_version:'1.1.0'});
 
   const dataResponse=await request.get(`${BASE}/api/public-data?action=article&id=46`);
   expect(dataResponse.status()).toBe(200);
   expect(header(dataResponse,'x-cuhalide-publication-state')).toBe(STATE);
   const data=await dataResponse.json();
   expect(data.data_scope).toBe('frozen_release');
-  expect(data.record_context).toMatchObject({serving_context:'current_curated',serving_revision:7,core_record_origin:'frozen_release',core_record_origin_release:'3.0.2',attached_photophysics_context:'current_curated',attached_photophysics_contract:'1.3.2'});
+  expect(data.record_context).toMatchObject({serving_context:'current_curated',serving_revision:7,core_record_origin:'frozen_release',core_record_origin_release:'3.0.2',attached_photophysics_context:'current_curated',attached_photophysics_contract:'1.3.3'});
 
   const assistantResponse=await request.get(`${BASE}/api/agent`);
   expect(assistantResponse.status()).toBe(200);

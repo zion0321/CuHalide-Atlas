@@ -8,13 +8,13 @@ const read=p=>fs.readFileSync(url(p),'utf8');
 test('canonical public runtime exposes one rev.7 contract',()=>{
   const files=['api/ui-site.js','api/ui-assistant-current.js','api/meta.js','api/data.js','api/public-data.js','api/sitemap.js','api/agent.js','api/motifs.js','api/record-current.js','api/record-evidence-current.js','middleware.js','vercel.json'];
   const text=files.map(read).join('\n');
-  for(const token of ["CURRENT_REVISION='7'","2026-08-19","946","886","684","87","1329","META_VERSION='50.5'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_CONTRACT='1.3.2'","prepublication-review"])assert.ok(text.includes(token),`missing ${token}`);
+  for(const token of ["CURRENT_REVISION='7'","2026-08-19","946","886","684","87","1329","META_VERSION='50.5'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_CONTRACT='1.3.3'","prepublication-review"])assert.ok(text.includes(token),`missing ${token}`);
   for(const stale of ["CURRENT_REVISION='4'","EXPECTED_STRUCTURES=864","EXPECTED_URLS=1225","PUBLIC_DATA_VERSION='2.11.0'","PUBLIC_DATA_VERSION='2.10.0'","EVIDENCE_VERSION='9.16.0'","ASSISTANT_VERSION='10.1.0'"])assert.ok(!text.includes(stale),`stale token ${stale}`);
 });
 
-test('README is locked to the same rev.7 living scientific state and corrected photophysics baseline',()=>{
+test('README remains the locked 1.3.2 release document during the controlled 1.3.3 migration window',()=>{
   const readme=read('README.md');
-  for(const token of ['Prepublication release status','Current Curated rev.7','2026-08-19','Article audit records | 383','Canonical verified articles | 369','Structure / phase rows | 946','Core-Included structure rows | 886','Resolved space-group rows | 710','Verified one-to-one SG rows | 684','Strict-polar rows | 87','RAG documents / embeddings | 1,329 / 1,329','628','318','Metadata gateway: **50.5**','Public Data: **2.16.0**','Structured Photophysics contract: **1.3.2**','Smart RAG: **9.19.0**','Research Assistant: **10.4.1**','Publication/governance state: **prepublication-review**','940 publishable sample states','2,262 measurements','2,985 normalized values','281 quantitative-analysis-eligible values','477 mechanism claims','Pass A curated','two-pass verified'])assert.ok(readme.includes(token),`README missing current token ${token}`);
+  for(const token of ['Prepublication release status','Current Curated rev.7','2026-08-19','Article audit records | 383','Canonical verified articles | 369','Structure / phase rows | 946','Core-Included structure rows | 886','Resolved space-group rows | 710','Verified one-to-one SG rows | 684','Strict-polar rows | 87','RAG documents / embeddings | 1,329 / 1,329','628','318','Metadata gateway: **50.5**','Public Data: **2.16.0**','Structured Photophysics contract: **1.3.2**','Smart RAG: **9.19.0**','Research Assistant: **10.4.1**','Publication/governance state: **prepublication-review**','940 publishable sample states','2,262 measurements','2,985 normalized values','281 quantitative-analysis-eligible values','477 mechanism claims','Pass A curated','two-pass verified'])assert.ok(readme.includes(token),`README missing locked 1.3.2 token ${token}`);
   for(const stale of ['Current Curated rev.5 — living default','Curated through **2026-08-17**','Structure / phase rows | 938','Core-Included structure rows | 878','581','357','Public Data: **2.12.0**','Smart RAG: **9.17.0**','Research Assistant: **10.2.0**','Structured Photophysics contract: **1.3.1**'])assert.ok(!readme.includes(stale),`README stale token ${stale}`);
 });
 
@@ -48,11 +48,12 @@ test('preview QA has one PR trigger while Vercel deployment status remains indep
   assert.match(gate,/has no trusted successful Vercel preview status/);
 });
 
-test('production readiness is locked to the final 1.3.2 content baseline while stage counts remain dynamic',()=>{
+test('production readiness permits only the explicit 1.3.2 -> 1.3.3 migration states',()=>{
   const workflow=read('.github/workflows/production-browser-qa.yml');
-  for(const token of ["p?.version!=='1.3.2'",'p?.publishable_samples!==940','p?.publishable_measurements!==2262','p?.publishable_values!==2985','p?.analysis_eligible_values!==281','p?.publishable_mechanism_claims!==477','verification-stage accounting does not sum to article queue','Photophysics 1.3.2 corrected baseline PASS'])assert.ok(workflow.includes(token),`production readiness missing ${token}`);
-  for(const stale of ['stagedBaseline','correctedBaseline','private-staging baseline','contract migration window','publishable_measurements===2259','publishable_values===2979','publishable_mechanism_claims===476'])assert.ok(!workflow.includes(stale),`temporary migration residue remains: ${stale}`);
+  for(const token of ["['1.3.2','1.3.3']",'stable132','staged133','activated133','p.publishable_measurements===2262','p.publishable_measurements===2267','p.publishable_values===2985','p.publishable_values===2988','p.analysis_eligible_values===281','p.publishable_mechanism_claims===477','verification-stage accounting does not sum to article queue','controlled contract migration window PASS'])assert.ok(workflow.includes(token),`production migration readiness missing ${token}`);
   assert.doesNotMatch(workflow,/pass_a_curated_articles[^\n]*(?:===|!==)239|two_pass_verified_articles[^\n]*(?:===|!==)90/,'mutable stage split must not be hardcoded');
+  assert.ok(!workflow.includes('publishable_measurements===2259'),'superseded 1.3.1 baseline must not return');
+  assert.ok(!workflow.includes('publishable_values===2979'),'superseded 1.3.1 value baseline must not return');
 });
 
 test('canonical routes terminate at rev.7 evidence wrappers, not historical renderer provenance',()=>{
@@ -84,7 +85,7 @@ test('Vercel Pro serverless surface stays bounded while base renderer stays inte
   assert.match(read('api/ui-site.js'),/\.\.\/lib\/site-renderer\.js/);
 });
 
-test('rev.7 wrappers normalize living UI and staged photophysics provenance without rewriting validated base renderers',()=>{
+test('rev.7 wrappers preserve the currently deployed visible 1.3.2 record label during migration',()=>{
   const ui=read('api/ui-site.js'),assistant=read('api/ui-assistant-current.js'),record=read('api/record-current.js'),boundary=read('api/record-evidence-current.js');
   for(const token of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R7','Current Curated rev.7','19 Aug 2026','Smart RAG 9.19.0','cc.verified_space_group_rows||684','cc.strict_polar_rows||87','cc.strict_polar_articles||54'])assert.ok(ui.includes(token),`UI promotion missing ${token}`);
   assert.match(assistant,/Current Curated rev\.7/);
@@ -103,10 +104,10 @@ test('rev.7 wrappers normalize living UI and staged photophysics provenance with
   assert.match(boundary,/applyRecordPrepublicationGovernance/);
 });
 
-test('metadata health and manifest carry exact rev.7 denominators staged verification and governance policy',()=>{
+test('metadata health and manifest carry the 1.3.3 migration contract without changing rev.7 governance',()=>{
   const meta=read('api/meta.js');
-  for(const token of ["META_VERSION='50.5'","PUBLICATION_STATE='prepublication-review'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_VERSION='1.3.2'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:628','motif_unresolved_rows:318','photophysics_contract_version:PHOTOPHYSICS_VERSION',"smart_rag_version:'9.19.0'","research_assistant_version:'10.4.1'", "release_state:'prepublication'", "governance_state:PUBLICATION_STATE", "indexing:'disabled-prepublication'","structured_photophysics:true","photophysics_publication_policy='pass-a-curated-or-two-pass-verified'","public_projection:'pass-a-curated-or-two-pass-verified'","two_pass_identity_preserved:true","measurement_conflicts_fail_closed:true"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
-  assert.match(meta,/frontend v50 active; backend Current Curated rev\.7 deterministic contract; Structured Photophysics 1\.3\.2 staged publication/);
+  for(const token of ["META_VERSION='50.5'","PUBLICATION_STATE='prepublication-review'","PUBLIC_DATA_VERSION='2.16.0'","PHOTOPHYSICS_VERSION='1.3.3'","CURRENT_REVISION='7'","curated_through:'2026-08-19'",'resolved_space_group_rows:710','verified_space_group_rows:684','verified_polar_rows:97','strict_polar_rows:87','strict_polar_articles:54','motif_resolved_rows:628','motif_unresolved_rows:318','photophysics_contract_version:PHOTOPHYSICS_VERSION',"smart_rag_version:'9.19.0'","research_assistant_version:'10.4.1'", "release_state:'prepublication'", "governance_state:PUBLICATION_STATE", "indexing:'disabled-prepublication'","structured_photophysics:true","photophysics_publication_policy='pass-a-curated-or-two-pass-verified'","public_projection:'pass-a-curated-or-two-pass-verified'","two_pass_identity_preserved:true","measurement_conflicts_fail_closed:true"])assert.ok(meta.includes(token),`metadata contract missing ${token}`);
+  assert.match(meta,/frontend v50 active; backend Current Curated rev\.7 deterministic contract; Structured Photophysics 1\.3\.3 staged publication/);
   assert.doesNotMatch(meta,/staged photophysics verification preview/);
 });
 
@@ -138,7 +139,7 @@ test('legacy data route remains compatibility-only and delegates to the current 
   const data=read('api/data.js'),publicData=read('api/public-data.js');
   for(const token of ["import publicDataHandler from './public-data.js'",'prefer /api/public-data','return publicDataHandler(req,res)'])assert.ok(data.includes(token),`legacy data contract missing ${token}`);
   assert.doesNotMatch(data,/supabase\.co\/functions\/v1/);
-  for(const token of ["PUBLIC_DATA_VERSION='2.16.0'","CURRENT_REVISION='7'","PHOTOPHYSICS_CONTRACT='1.3.2'","PUBLICATION_STATE='prepublication-review'",'cuhalide-atlas-public-data-v3'])assert.ok(publicData.includes(token),`canonical public-data missing ${token}`);
+  for(const token of ["PUBLIC_DATA_VERSION='2.16.0'","CURRENT_REVISION='7'","PHOTOPHYSICS_CONTRACT='1.3.3'","PUBLICATION_STATE='prepublication-review'",'cuhalide-atlas-public-data-v3'])assert.ok(publicData.includes(token),`canonical public-data missing ${token}`);
   assert.match(publicData,/response\.status===429/);
 });
 

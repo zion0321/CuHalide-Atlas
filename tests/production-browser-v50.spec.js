@@ -137,7 +137,7 @@ test('manifest sitemap and Motif Atlas agree with final rev.7', async ({ request
   expect(j.runtime).toMatchObject({
     meta_version: '50.5',
     public_data_version: '2.16.0',
-    photophysics_contract_version: '1.3.2',
+    photophysics_contract_version: '1.3.3',
     smart_rag_version: '9.19.0',
     research_assistant_version: '10.4.1',
   });
