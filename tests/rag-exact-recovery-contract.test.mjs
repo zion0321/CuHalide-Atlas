@@ -10,11 +10,11 @@ const smartSource=fs.readFileSync(new URL('../supabase/functions/cuhalide-atlas-
 test('active rev7 RAG chain has versioned recovery sources with one photophysics contract',()=>{
   assert.match(exactSource,/VERSION='current-rag-r7\.0\.8'/);
   assert.match(scienceSource,/VERSION='current-rag-r7-science-exact-1\.1\.1'/);
-  assert.match(unifiedSource,/VERSION='current-rag-r7\.2\.1'/);
+  assert.match(unifiedSource,/VERSION='current-rag-r7\.2\.5'/);
   assert.match(smartSource,/VERSION='9\.19\.0'/);
   for(const source of [exactSource,scienceSource,unifiedSource,smartSource]){
-    assert.match(source,/PHOTOPHYSICS_CONTRACT='1\.3\.1'/);
-    assert.doesNotMatch(source,/PHOTOPHYSICS_CONTRACT='1\.3\.0'/);
+    assert.match(source,/PHOTOPHYSICS_CONTRACT='1\.3\.3'/);
+    assert.doesNotMatch(source,/PHOTOPHYSICS_CONTRACT='1\.3\.[012]'/);
     assert.match(source,/noindex, nofollow, noarchive/);
   }
   assert.match(exactSource,/x-cuhalide-publication-state':'prepublication-review'/);
