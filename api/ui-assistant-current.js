@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import assistantHandler from './ui-assistant.js';
 import {applyRootPrepublicationGovernance,PUBLICATION_STATE} from '../lib/prepublication-governance.js';
 
-const CURRENT_REVISION='7';
+const CURRENT_REVISION='8';
 const CONTENT_DATE='2026-08-19';
 const LAST_MODIFIED=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
 const SAMPLE_GRAIN_MARKER='CUHALIDE_PHOTOPHYSICS_SAMPLE_GRAIN_UI_V1';
@@ -49,7 +49,7 @@ function injectVisiblePhotophysicsAssets(body){
 function injectPortalUxShell(body){
   if(body.includes(PORTAL_UX_SHELL_MARKER))return body;
   let out=body;
-  const oldHero='<h1>Evidence-grounded Cu(I) halide literature and structures.</h1><p class="hero-copy">Search primary-evidence-reviewed literature, 946 atomic/context structure records and structure-resolved relationships. Current Curated rev.7 explicitly separates reported composition, local Cu–X motif and global connectivity dimensionality; unresolved values remain unresolved rather than inferred.</p>';
+  const oldHero='<h1>Evidence-grounded Cu(I) halide literature and structures.</h1><p class="hero-copy">Search primary-evidence-reviewed literature, 946 atomic/context structure records and structure-resolved relationships. Current Curated rev.8 explicitly separates reported composition, local Cu–X motif and global connectivity dimensionality; unresolved values remain unresolved rather than inferred.</p>';
   const newHero='<h1>Evidence-grounded Cu(I) halide knowledge, from structure to photophysics.</h1><p class="hero-copy">Search curated literature, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or ask the Research Assistant for evidence-linked scientific synthesis.</p>';
   if(out.includes(oldHero))out=out.replace(oldHero,newHero);
   else if(!out.includes('from structure to photophysics.'))throw new Error('portal UX shell: hero copy anchor missing');
@@ -93,17 +93,19 @@ function injectPortalUxAssets(body){
 
 function normalize(body){
   if(typeof body!=='string')return body;
-  let out=body
-    .split('CUHALIDE_UI_V50_2_CURRENT_R6').join('CUHALIDE_UI_V50_2_CURRENT_R7')
-    .split('CUHALIDE_SITE_V50_CURRENT_CURATED_R6').join('CUHALIDE_SITE_V50_CURRENT_CURATED_R7')
-    .split('Current Curated rev.6').join('Current Curated rev.7')
-    .split('current-curated-r6').join('current-curated-r7')
-    .split('current-r6').join('current-r7')
-    .split('18 Aug 2026').join('19 Aug 2026')
+  let out=body;
+  for(const from of ['CUHALIDE_UI_V50_2_CURRENT_R6','CUHALIDE_UI_V50_2_CURRENT_R7'])out=out.split(from).join('CUHALIDE_UI_V50_2_CURRENT_R8');
+  for(const from of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R6','CUHALIDE_SITE_V50_CURRENT_CURATED_R7'])out=out.split(from).join('CUHALIDE_SITE_V50_CURRENT_CURATED_R8');
+  for(const from of ['Current Curated rev.6','Current Curated rev.7'])out=out.split(from).join('Current Curated rev.8');
+  for(const from of ['current-curated-r6','current-curated-r7'])out=out.split(from).join('current-curated-r8');
+  for(const from of ['current-r6','current-r7'])out=out.split(from).join('current-r8');
+  out=out.split('18 Aug 2026').join('19 Aug 2026')
     .split('18 August 2026').join('19 August 2026')
     .split('2026-08-18').join('2026-08-19')
-    .split('cc.live_revision||6').join('cc.live_revision||7')
-    .split('This revision adds four primary-evidence-reviewed articles and eight SCXRD structure determinations while preserving the immutable archived scientific snapshot 3.0.2.').join('Rev.7 completes a full structure-truth re-audit across the 946-row Current Curated snapshot while preserving the immutable archived scientific snapshot 3.0.2.');
+    .split('cc.live_revision||6').join('cc.live_revision||8')
+    .split('cc.live_revision||7').join('cc.live_revision||8')
+    .split('This revision adds four primary-evidence-reviewed articles and eight SCXRD structure determinations while preserving the immutable archived scientific snapshot 3.0.2.').join('Rev.8 incorporates primary-source-reverified structure corrections while preserving the immutable archived scientific snapshot 3.0.2.')
+    .split('Rev.7 completes a full structure-truth re-audit across the 946-row Current Curated snapshot while preserving the immutable archived scientific snapshot 3.0.2.').join('Rev.8 incorporates primary-source-reverified structure corrections while preserving the immutable archived scientific snapshot 3.0.2.');
   out=hardenSourceCards(out);
   out=extendPhotophysicsRoute(out);
   out=injectVisiblePhotophysicsAssets(out);
