@@ -16,14 +16,16 @@ function expectNoPrivatePayload(value){
   for(const key of forbidden)expect(raw).not.toContain(`\"${key}\"`);
 }
 
-test('Research Assistant health is aligned to staged photophysics 1.3.3 baseline',async({request},testInfo)=>{
+test('Research Assistant health is aligned to the locked activated photophysics 1.3.3 baseline',async({request},testInfo)=>{
   test.skip(testInfo.project.name!=='desktop-chromium','Read-only RAG contract is viewport invariant.');
   const response=await request.get(`${BASE}/api/agent`,{timeout:30_000});
   expect(response.status()).toBe(200);
+  expect(response.headers()['x-cuhalide-photophysics-contract']).toBe('1.3.3');
   const x=await response.json();
   expect(x.ok).toBe(true);
   expect(x.version).toBe('9.19.0');
   expect(x.assistant_version).toBe('10.4.1');
+  expect(x.photophysics_contract).toBe('1.3.3');
   expect(x.photophysics).toMatchObject({
     ok:true,
     version:'1.3.3',
@@ -32,9 +34,11 @@ test('Research Assistant health is aligned to staged photophysics 1.3.3 baseline
     pass_a_complete_articles:383,
     pass_a_pending_articles:0,
     verified_no_data_articles:54,
+    pass_a_curated_articles:237,
+    two_pass_verified_articles:92,
     publishable_samples:940,
-    publishable_measurements:2262,
-    publishable_values:2985,
+    publishable_measurements:2267,
+    publishable_values:2988,
     analysis_eligible_values:281,
     publishable_mechanism_claims:477,
     staged_publication:true,
@@ -43,10 +47,6 @@ test('Research Assistant health is aligned to staged photophysics 1.3.3 baseline
     primary_files_exposed:false,
     raw_evidence_locators_exposed:false
   });
-  expect(Number.isInteger(x.photophysics.pass_a_curated_articles)).toBe(true);
-  expect(Number.isInteger(x.photophysics.two_pass_verified_articles)).toBe(true);
-  expect(x.photophysics.pass_a_curated_articles).toBeGreaterThanOrEqual(0);
-  expect(x.photophysics.two_pass_verified_articles).toBeGreaterThanOrEqual(0);
   expect(x.photophysics.pass_a_curated_articles+x.photophysics.two_pass_verified_articles+x.photophysics.verified_no_data_articles).toBe(x.photophysics.article_queue);
   expect(x.photophysics.pass_a_complete_articles).toBe(x.photophysics.article_queue);
 });
