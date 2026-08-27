@@ -29,9 +29,9 @@ test('rev.9 production adapters expose the validated scientific/runtime contract
   for(const token of ["REV='9'","VERSION='2.17.1'","PH='1.4.0'","OC='1.2.0'"])assert.ok(data.includes(token),`missing public-data token: ${token}`);
 
   const record=read('api/record-r9.js');
-  assert.ok(record.includes("REV='9',PH='1.4.0',OC='1.2.0'"));
+  for(const token of ["REV='9'","SITE='51'","UI='51.0'","PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'"])assert.ok(record.includes(token),`missing record token: ${token}`);
   const motifs=read('api/motifs-r9.js');
-  assert.ok(motifs.includes("REV='9'"));
+  for(const token of ["REV='9'","SITE='51'","UI='51.0'",'stale current-curated revision in Motif Atlas'])assert.ok(motifs.includes(token),`missing motif token: ${token}`);
 });
 
 test('rev.9 adapter preserves prepublication and privacy boundaries',()=>{
