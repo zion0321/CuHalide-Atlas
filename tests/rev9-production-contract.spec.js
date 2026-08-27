@@ -35,6 +35,11 @@ test('manifest and Motif Atlas agree with rev.9',async({request,page})=>{
   expect(j.current_curated).toMatchObject({revision:9,structure_phase_rows:947,core_included_structure_rows:887,resolved_space_group_rows:744,verified_space_group_rows:717,verified_polar_rows:101,strict_polar_rows:91,strict_polar_articles:57,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947,motif_resolved_rows:640,motif_unresolved_rows:307});
   expect(j.runtime).toMatchObject({site_version:'51',ui_version:'51.0',meta_version:'51.0',public_data_version:'2.17.1',photophysics_contract_version:'1.4.0',organic_components_contract_version:'1.2.0',smart_rag_version:'9.20.0',research_assistant_version:'10.5.0'});
   expect(j.frozen_release).toMatchObject({version:'3.0.2',immutable:true,structure_phase_rows:878});
+  const raw=await request.get(`${BASE}/motifs`);expect(raw.status()).toBe(200);const motifHtml=await raw.text();
+  expect(motifHtml).toContain('Current Curated rev.9');
+  expect(motifHtml).toContain('Curated through 19 Aug 2026 · rev.9');
+  expect(motifHtml).not.toContain('· rev.8');
+  expect(raw.headers()['x-cuhalide-current-curated-revision']).toBe('9');
   const mr=await page.goto(`${BASE}/motifs`,{waitUntil:'domcontentloaded'});expect(mr?.status()).toBe(200);await expect(page.locator('body')).toContainText('Current Curated rev.9');await expect(page.locator('body')).toContainText('640');await expect(page.locator('body')).toContainText('307');
 });
 
