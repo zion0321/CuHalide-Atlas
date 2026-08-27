@@ -1,19 +1,25 @@
-export const config={matcher:['/','/index.html','/api/site','/api/ui-site','/api/ui-site.js','/api/ui-assistant','/api/ui-assistant.js','/api/ui-assistant-current','/api/ui-assistant-current.js','/api/public-data','/api/public-data.js','/api/record','/api/record.js','/api/record-current','/api/record-current.js','/api/record-evidence-current','/api/record-evidence-current.js']};
+export const config={matcher:['/','/index.html','/api/site','/api/ui-site','/api/ui-site.js','/api/ui-assistant','/api/ui-assistant.js','/api/ui-assistant-current','/api/ui-assistant-current.js','/api/public-data','/api/public-data.js','/api/data','/api/data.js','/api/motifs','/api/motifs.js','/api/meta','/api/meta.js','/api/record','/api/record.js','/api/record-current','/api/record-current.js','/api/record-evidence-current','/api/record-evidence-current.js']};
 const LAST_MODIFIED=new Date('2026-08-19T00:00:00Z').toUTCString();
 const REV='9',UI='51.0',SITE='51',PUBLIC_DATA='2.17.1',PH='1.4.0',OC='1.2.0',STATE='prepublication-review';
 export default async function middleware(request){
   const incoming=new URL(request.url);
   const recordPaths=new Set(['/api/record','/api/record.js','/api/record-current','/api/record-current.js','/api/record-evidence-current','/api/record-evidence-current.js']);
-  const publicDataPaths=new Set(['/api/public-data','/api/public-data.js']);
+  const publicDataPaths=new Set(['/api/public-data','/api/public-data.js','/api/data','/api/data.js']);
+  const motifPaths=new Set(['/api/motifs','/api/motifs.js']);
+  const metaPaths=new Set(['/api/meta','/api/meta.js']);
   const assistantCompatPaths=new Set(['/api/ui-assistant','/api/ui-assistant.js','/api/ui-assistant-current','/api/ui-assistant-current.js','/api/site','/api/ui-site','/api/ui-site.js']);
   const isRecord=recordPaths.has(incoming.pathname);
   const isPublicData=publicDataPaths.has(incoming.pathname);
+  const isMotif=motifPaths.has(incoming.pathname);
+  const isMeta=metaPaths.has(incoming.pathname);
   const isAssistantCompat=assistantCompatPaths.has(incoming.pathname);
   const assistantTarget=new URL('/api/ui-r9',request.url);
   const publicDataTarget=new URL('/api/public-data-r9',request.url);
+  const motifTarget=new URL('/api/motifs-r9',request.url);
+  const metaTarget=new URL('/api/meta-r9',request.url);
   const recordTarget=new URL('/api/record-r9',request.url);
-  const target=isRecord?recordTarget:isPublicData?publicDataTarget:assistantTarget;
-  if(isRecord||isPublicData||isAssistantCompat)target.search=incoming.search;
+  const target=isRecord?recordTarget:isPublicData?publicDataTarget:isMotif?motifTarget:isMeta?metaTarget:assistantTarget;
+  if(isRecord||isPublicData||isMotif||isMeta||isAssistantCompat)target.search=incoming.search;
   const response=await fetch(target,{method:request.method,headers:request.headers,redirect:'follow'});
   const headers=new Headers(response.headers);
   headers.set('x-cuhalide-middleware','release-3.0.2-ui-v51.0-current-r9');
@@ -24,6 +30,7 @@ export default async function middleware(request){
   headers.set('x-cuhalide-site-version',SITE);
   headers.set('x-cuhalide-photophysics-contract',PH);
   headers.set('x-cuhalide-organic-components-contract',OC);
+  if(incoming.pathname==='/api/data'||incoming.pathname==='/api/data.js')headers.set('warning','299 - Legacy /api/data route exposes only the minimized public query contract; prefer /api/public-data.');
   headers.set('last-modified',LAST_MODIFIED);
   return new Response(request.method==='HEAD'?null:response.body,{status:response.status,statusText:response.statusText,headers});
 }
