@@ -18,9 +18,9 @@ function patch(body,kind){
   if(kind==='structure'&&!x.includes('Record not found')){
     x=all(x,'Motif confidence','Motif adjudication confidence');
     x=all(x,'Normalized reported identity','Machine-normalized identity key');
-    const oc='<script src="/organic-components-v1.js?v=1.2.0"></script>';
-    const graphs='<script src="/organic-components-graphs-11.js?v=1.2.0"></script>';
-    if(x.includes(oc)&&!x.includes('/organic-components-graphs-11.js?v=1.2.0'))x=x.replace(oc,`${graphs}${oc}`);
+    const graphs='<script src="/organic-components-graphs-11.js?v=1.2.0" defer></script>';
+    const ocRe=/<script\b(?=[^>]*\bsrc=["']\/organic-components-v1\.js\?v=1\.2\.0["'])[^>]*><\/script>/i;
+    if(!x.includes('/organic-components-graphs-11.js?v=1.2.0')&&ocRe.test(x))x=x.replace(ocRe,m=>`${graphs}${m}`);
   }
   if(kind==='article'&&!x.includes('Record not found')){
     x=all(x,'<dt>Dimensionality</dt><dd>','<dt>Article index class</dt><dd>');
