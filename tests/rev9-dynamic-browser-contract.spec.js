@@ -51,10 +51,10 @@ test('Organic Components 1.2 renders verified connectivity and the complete rev.
   const r=await page.goto(`${BASE}/structure/CUH-013-S01`,{waitUntil:'domcontentloaded'});expect(r?.status()).toBe(200);
   const host=page.locator('[data-oc-standalone="CUH-013-S01"]');
   await expect(host.locator('.oc-contract')).toHaveText('Contract 1.2.0',{timeout:15000});
-  await expect(host.locator('svg.oc-svg')).toHaveCount(1,{timeout:15000});
   const registry=await page.evaluate(()=>Object.keys(window.__CuHalideOrganicGraphs||{}));
   const missing=VERIFIED_GRAPH_KEYS.filter(key=>!registry.includes(key));
   expect(missing,'all rev.9 verified-connectivity keys require a deterministic browser graph').toEqual([]);
+  await expect(host.locator('svg.oc-svg')).toHaveCount(1,{timeout:15000});
   await page.waitForTimeout(100);
   expect(errors.pageErrors).toEqual([]);
   expect(errors.consoleErrors).toEqual([]);
