@@ -14,7 +14,7 @@ test('rev.9 production adapters expose the validated scientific/runtime contract
   assert.equal(rewrites.get('/health.json'),'/api/meta-r9?asset=health');
 
   const middleware=read('middleware.js');
-  for(const token of ["assistantTarget=new URL('/api/ui-r9'","recordTarget=new URL('/api/record-r9'","REV='9'","UI='51.0'","SITE='51'","PH='1.4.0'","OC='1.2.0'",'release-3.0.2-ui-v51.0-current-r9'])assert.ok(middleware.includes(token),`missing middleware token: ${token}`);
+  for(const token of ["assistantTarget=new URL('/api/ui-r9'","publicDataTarget=new URL('/api/public-data-r9'","recordTarget=new URL('/api/record-r9'","REV='9'","UI='51.0'","SITE='51'","PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'",'release-3.0.2-ui-v51.0-current-r9',"'/api/public-data'","'/api/public-data.js'"])assert.ok(middleware.includes(token),`missing middleware token: ${token}`);
   assert.doesNotMatch(middleware,/ui-v50\.2-current-r8/);
   assert.doesNotMatch(middleware,/new URL\('\/api\/ui-assistant-current'/);
   assert.doesNotMatch(middleware,/new URL\('\/api\/record-evidence-current'/);
