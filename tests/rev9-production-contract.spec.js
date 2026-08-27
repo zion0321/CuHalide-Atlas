@@ -64,6 +64,14 @@ test('public data and organic-component resolution are rev.9 fail-closed',async(
   expect(hh['x-cuhalide-organic-components-contract']).toBe('1.2.0');
 });
 
+test('machine-readable article grain is explicit and current record context is rev.9',async({request})=>{
+  const r=await request.get(`${BASE}/api/public-data?action=article&id=91`);expect(r.status()).toBe(200);const x=await r.json();
+  expect(x.item).toMatchObject({record_id:91,dimensionality_class:'0D',article_index_class:'0D',dimensionality_field_semantics:'article_index_class_not_structure_grain',structure_dimensionality_source:'structure_phase_records'});
+  expect(x.record_context).toMatchObject({serving_context:'current_curated',serving_revision:9,attached_photophysics_context:'current_curated',attached_photophysics_contract:'1.4.0'});
+  expect(x.photophysics.version).toBe('1.4.0');
+  expect(x.current_curated_revision).toBe(9);
+});
+
 test('article index class and structure dimensionality remain separated at record grain',async({request})=>{
   const r=await request.get(`${BASE}/structure/CUH-091-S02`);expect(r.status()).toBe(200);const structureHtml=await r.text();
   expect(structureHtml).toContain('Current Curated rev.9');
