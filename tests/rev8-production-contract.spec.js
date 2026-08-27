@@ -72,7 +72,9 @@ test('rev.8 targeted primary-source corrections are exposed at structure and art
   const a=await getStructure(request,'CUH-294-S01');expect(a.dimensionality).toBe('0D');expect(a.motif_details?.formula).toBe('Cu4I6');
   const b=await getStructure(request,'CUH-294-S02');expect(b.dimensionality).toBe('0D');expect(b.motif_details?.formula).toBe('Cu4I8');
   const c=await getStructure(request,'CUH-294-S03');expect(c.dimensionality).toBe('1D');expect(c.motif_details?.formula).toBe('Cu5I7');
-  const article=await getArticle(request,294);expect(article.dimensionality_class).toBe('0D/1D');expect(String(article.structure_summary||'')).toMatch(/Cu4I6/i);expect(String(article.structure_summary||'')).toMatch(/Cu4I8/i);expect(String(article.structure_summary||'')).toMatch(/Cu5I7/i);
+  const article=await getArticle(request,294);const summary=String(article.structure_summary||'');
+  expect(article.dimensionality_class).toBe('Mixed / series-level');
+  expect(summary).toMatch(/Cu4I6/i);expect(summary).toMatch(/Cu4I8/i);expect(summary).toMatch(/Cu5I7/i);expect(summary).toMatch(/0D/i);expect(summary).toMatch(/1D/i);
 });
 
 test('Rev.7 hostile-audit corrections inherited by rev.8 remain stable',async({request},testInfo)=>{
