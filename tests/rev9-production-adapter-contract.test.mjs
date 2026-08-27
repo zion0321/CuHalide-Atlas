@@ -42,8 +42,7 @@ test('rev.9 production adapters expose the validated scientific/runtime contract
 test('UI 51 dynamic browser assets and citation provenance are synchronized to rev.9',()=>{
   for(const p of ['public/ui-v51-core.js','public/ui-v51-core.css','public/ui-assistant-v51.css'])assert.ok(fs.existsSync(p),`missing current UI asset: ${p}`);
   const ui=read('api/ui-r9.js');
-  for(const token of ['/ui-v51-core.css?v=51.0','/ui-v51-core.js?v=51.0','/ui-assistant-v51.css?v=51.0','/ui-photophysics-v1.js?v=1.4.0','/ui-ux-v1.js?v=51.0'])assert.ok(ui.includes(token),`missing current active asset rewrite: ${token}`);
-  for(const stale of ['/ui-v48-2.','ui-assistant-v48-5','v=50.2','CUHALIDE_UI_V48_5'])assert.ok(!ui.split('for(const stale of')[0].includes(stale),`legacy asset remains active in UI patch body: ${stale}`);
+  for(const token of ["x=all(x,'/ui-v48-2.css?v=50.2','/ui-v51-core.css?v=51.0')","x=all(x,'/ui-v48-2.js?v=50.2','/ui-v51-core.js?v=51.0')","x=all(x,'/ui-assistant-v48-5.css?v=20260818','/ui-assistant-v51.css?v=51.0')","x=all(x,'/ui-photophysics-v1.js?v=1.0.0','/ui-photophysics-v1.js?v=1.4.0')","x=all(x,'/ui-ux-v1.js?v=1.0.0','/ui-ux-v1.js?v=51.0')",'stale rev.9 display/browser token'])assert.ok(ui.includes(token),`missing active-asset migration/guard token: ${token}`);
 
   const ph=read('public/ui-photophysics-v1.js');
   for(const token of ["PHOTOPHYSICS_CONTRACT='1.4.0'","CURRENT_REVISION=9","PUBLICATION_POLICY='two_pass_verified_or_verified_no_reported_data'",'Pass A-only articles must not be published','Two-pass verified','Verified no reported data','Structured data withheld'])assert.ok(ph.includes(token),`missing Photophysics 1.4 browser token: ${token}`);
