@@ -13,6 +13,12 @@ test('rev.9 production adapters expose the validated scientific/runtime contract
   assert.match(rewrites.get('/article/:id'),/record-r9/);
   assert.equal(rewrites.get('/health.json'),'/api/meta-r9?asset=health');
 
+  const middleware=read('middleware.js');
+  for(const token of ["assistantTarget=new URL('/api/ui-r9'","recordTarget=new URL('/api/record-r9'","REV='9'","UI='51.0'","SITE='51'","PH='1.4.0'","OC='1.2.0'",'release-3.0.2-ui-v51.0-current-r9'])assert.ok(middleware.includes(token),`missing middleware token: ${token}`);
+  assert.doesNotMatch(middleware,/ui-v50\.2-current-r8/);
+  assert.doesNotMatch(middleware,/new URL\('\/api\/ui-assistant-current'/);
+  assert.doesNotMatch(middleware,/new URL\('\/api\/record-evidence-current'/);
+
   const ui=read('api/ui-r9.js');
   for(const token of ["REV='9'","UI='51.0'","SITE='51'",'Current Curated rev.9','947 atomic/context structure records','Core-Included · n=887','Smart RAG 9.20.0','Structured Photophysics 1.4.0','Organic Components 1.2.0'])assert.ok(ui.includes(token),`missing UI token: ${token}`);
 
