@@ -12,18 +12,30 @@ function patch(input){
   for(const a of ['current-r8','current-r7','current-r6'])x=all(x,a,'current-r9');
   for(const a of ['CUHALIDE_UI_V50_2_CURRENT_R8','CUHALIDE_UI_V50_2_CURRENT_R7','CUHALIDE_UI_V50_2_CURRENT_R6'])x=all(x,a,'CUHALIDE_UI_V51_0_CURRENT_R9');
   for(const a of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R8','CUHALIDE_SITE_V50_CURRENT_CURATED_R7','CUHALIDE_SITE_V50_CURRENT_CURATED_R6'])x=all(x,a,'CUHALIDE_SITE_V51_CURRENT_CURATED_R9');
+  x=all(x,'<meta name="cuhalide-site-version" content="50">','<meta name="cuhalide-site-version" content="51">');
   x=all(x,'946 atomic/context structure records','947 atomic/context structure records');
+  x=all(x,'946 structure/phase rows','947 structure/phase rows');
+  x=all(x,'946 structure rows','947 structure rows');
   x=all(x,'946-row Current Curated snapshot','947-row Current Curated snapshot');
   x=all(x,'946-row taxonomy','947-row taxonomy');
   x=all(x,'All structure / phase rows · n=946','All structure / phase rows · n=947');
+  x=all(x,'All structure / phase rows · n = 946','All structure / phase rows · n = 947');
   x=all(x,'Core-Included · n=886','Core-Included · n=887');
+  x=all(x,'Core-Included structure rows · n = 886','Core-Included structure rows · n = 887');
   x=all(x,'Resolved structure rows · n = 710','Resolved structure rows · n = 744');
+  x=all(x,'cc.core_included_structure_rows||886','cc.core_included_structure_rows||887');
+  x=all(x,'cc.structure_phase_rows||946','cc.structure_phase_rows||947');
+  x=all(x,"'Audit view: all 946 structure/phase rows.'","'Audit view: all 947 structure/phase rows.'");
   x=all(x,'<div class="polar-num"><strong>87</strong><small>strict-polar rows · 54 articles</small></div>','<div class="polar-num"><strong>91</strong><small>strict-polar rows · 57 articles</small></div>');
   x=all(x,'<strong id="pcount">87 rows</strong>','<strong id="pcount">91 rows</strong>');
   x=all(x,'cc.verified_space_group_rows||684','cc.verified_space_group_rows||717');
   x=all(x,'cc.strict_polar_rows||87','cc.strict_polar_rows||91');
   x=all(x,'cc.strict_polar_articles||54','cc.strict_polar_articles||57');
   for(const n of ['6','7','8'])x=all(x,`cc.live_revision||${n}`,'cc.live_revision||9');
+  x=all(x,'1,329-document Current Curated rev.9','1,330-document Current Curated rev.9');
+  x=all(x,'1,329 BGE-M3','1,330 BGE-M3');
+  x=all(x,'1329-document','1330-document');
+  x=all(x,'1329 documents','1330 documents');
   x=all(x,'Smart RAG 9.19.0','Smart RAG 9.20.0');
   x=all(x,'Structured Photophysics 1.3.3','Structured Photophysics 1.4.0');
   x=all(x,'Photophysics 1.3.3','Photophysics 1.4.0');
@@ -33,6 +45,7 @@ function patch(input){
   x=all(x,'backend rev.8 deterministic contract','backend rev.9 deterministic contract');
   x=all(x,'Rev.8 incorporates primary-source-reverified structure corrections while preserving the immutable archived scientific snapshot 3.0.2.','Rev.9 closes structure/member identity and terminal evidence boundaries while preserving the immutable archived scientific snapshot 3.0.2.');
   if(!x.includes('CUHALIDE_UI_V51_0_CURRENT_R9')||!x.includes('Current Curated rev.9'))throw new Error('rev.9 UI adapter contract missing');
+  for(const stale of ['Core-Included structure rows · n = 886','cc.core_included_structure_rows||886','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">'])if(x.includes(stale))throw new Error(`stale rev.9 display token: ${stale}`);
   return x;
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
