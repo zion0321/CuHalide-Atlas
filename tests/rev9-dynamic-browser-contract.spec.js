@@ -24,6 +24,7 @@ test('production shell activates only UI 51 browser assets with correct MIME and
   for(const token of currentAssets)expect(html).toContain(token);
   for(const stale of ['/ui-v48-2.','ui-assistant-v48-5','v=50.2','CUHALIDE_UI_V48_5','/ui-photophysics-v1.js?v=1.0.0'])expect(html).not.toContain(stale);
   for(const asset of currentAssets){const r=await request.get(`${BASE}${asset}`);expect(r.status(),asset).toBe(200);const ct=String(r.headers()['content-type']||'');if(asset.includes('.css'))expect(ct,asset).toMatch(/^text\/css\b/i);else expect(ct,asset).toMatch(/^(text|application)\/javascript\b/i)}
+  const renderer=await request.get(`${BASE}/organic-components-graphs-11.js?v=1.2.0`);expect(renderer.status()).toBe(200);expect(String(renderer.headers()['content-type']||'')).toMatch(/^(text|application)\/javascript\b/i);
   const c=await request.get(`${BASE}/citation.cff`);expect(c.status()).toBe(200);const citation=await c.text();
   expect(citation).toContain('Current Curated rev.9 (prepublication review)');
   expect(citation).toContain('Structured Photophysics 1.4.0');
@@ -50,6 +51,11 @@ test('Photophysics 1.4 dynamic view loads the current publication state without 
 test('Organic Components 1.2 renders every renderer-safe rev.9 verified connectivity key',async({page})=>{
   const errors=captureBrowserErrors(page);
   const r=await page.goto(`${BASE}/structure/CUH-013-S01`,{waitUntil:'domcontentloaded'});expect(r?.status()).toBe(200);
+  const main=page.locator('main');
+  await expect(main).toContainText('Motif adjudication confidence');
+  await expect(main).toContainText('Machine-normalized identity key');
+  await expect(main).not.toContainText('Motif confidence');
+  await expect(main).not.toContainText('Normalized reported identity');
   const host=page.locator('[data-oc-standalone="CUH-013-S01"]');
   await expect(host.locator('.oc-contract')).toHaveText('Contract 1.2.0',{timeout:15000});
   const registry=await page.evaluate(()=>Object.keys(window.__CuHalideOrganicGraphs||{}));
