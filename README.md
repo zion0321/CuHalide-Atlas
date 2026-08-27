@@ -58,6 +58,7 @@ The 2026-06-30 date is a boundary of the archived snapshot, **not** a cutoff for
 
 - One article-audit row per normalized DOI.
 - Article, chemical identity, organic component and crystallographic determination are different entity grains.
+- Article-level dimensionality classes are **retrieval/index metadata only**. They do not assert that every structure reported in an article has that dimensionality; physical connectivity dimensionality is assigned at the structure/phase-determination grain.
 - **Reported composition, normalized local Cu–X motif and global connectivity dimensionality are distinct fields.** A local Cu2I2, Cu2I4 or Cu4I4 unit does not by itself establish a globally 0D material.
 - Formula, title wording, nuclearity and space group are not used as proxies for structural dimensionality.
 - Multiple polymorphs, temperatures, CIF blocks or independent refinements remain separate structure rows when primary evidence supports separate determinations.
