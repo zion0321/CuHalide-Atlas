@@ -16,6 +16,8 @@ function patch(body,kind){
   x=all(x,'Contract 1.1.0','Contract 1.2.0');
   x=all(x,'src="/organic-components-v1.js"','src="/organic-components-v1.js?v=1.2.0"');
   if(kind==='structure'&&!x.includes('Record not found')){
+    x=all(x,'Motif confidence','Motif adjudication confidence');
+    x=all(x,'Normalized reported identity','Machine-normalized identity key');
     const oc='<script src="/organic-components-v1.js?v=1.2.0"></script>';
     const graphs='<script src="/organic-components-graphs-11.js?v=1.2.0"></script>';
     if(x.includes(oc)&&!x.includes('/organic-components-graphs-11.js?v=1.2.0'))x=x.replace(oc,`${graphs}${oc}`);
@@ -32,6 +34,8 @@ function patch(body,kind){
     if(!x.includes('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic Components 1.2.0 asset missing');
     if(!x.includes('/organic-components-graphs-11.js?v=1.2.0'))throw new Error('structure record rev.9 Organic renderer layer missing');
     if(x.indexOf('/organic-components-graphs-11.js?v=1.2.0')>x.indexOf('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic renderer must load before Organic Components runtime');
+    if(x.includes('Motif confidence')||x.includes('Normalized reported identity'))throw new Error('ambiguous standalone structure terminology remains');
+    if(!x.includes('Motif adjudication confidence')||!x.includes('Machine-normalized identity key'))throw new Error('standalone structure semantic labels missing');
   }
   return x
 }
