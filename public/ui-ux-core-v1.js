@@ -1,4 +1,4 @@
-/* CuHalide Atlas portal UX layer v1.0
+/* CuHalide Atlas portal UX layer for UI 51.
    Uses only existing public query-and-view endpoints. */
 (() => {
   'use strict';
@@ -23,7 +23,8 @@
 
   function addSearchTrigger(){
     const head=document.querySelector('.head'),menu=$('menu');if(!head||!menu||$('uxSearchTrigger'))return;
-    const b=document.createElement('button');b.id='uxSearchTrigger';b.type='button';b.className='ux-search-trigger';b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-controls','uxSearchDialog');b.setAttribute('aria-label','Search CuHalide Atlas');b.innerHTML='<span>Search Atlas</span><kbd aria-hidden="true">⌘K</kbd>';
+    const platform=String(navigator.userAgentData?.platform||navigator.platform||'');const shortcut=/Mac|iPhone|iPad|iPod/i.test(platform)?'⌘ K':'Ctrl K';
+    const b=document.createElement('button');b.id='uxSearchTrigger';b.type='button';b.className='ux-search-trigger';b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-controls','uxSearchDialog');b.setAttribute('aria-label','Search CuHalide Atlas');b.innerHTML=`<span>Search Atlas</span><kbd aria-hidden="true">${shortcut}</kbd>`;
     head.insertBefore(b,menu);
   }
 
