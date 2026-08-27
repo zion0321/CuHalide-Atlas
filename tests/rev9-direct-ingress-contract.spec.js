@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
+const CANONICAL='https://cuhalide-atlas-v3.vercel.app';
 const currentHeaders=h=>{
   expect(h['x-cuhalide-current-curated-revision']).toBe('9');
   expect(h['x-cuhalide-site-version']).toBe('51');
@@ -23,9 +24,9 @@ test('legacy data ingress is minimized rev.9 public data with deprecation warnin
   expect(x).toMatchObject({ok:true,contract_version:'1.2.0',current_curated_revision:9,representation_rows:965,verified_connectivity_rows:61,unresolved_rows:894,not_applicable_rows:10});const h=r.headers();currentHeaders(h);expect(h['x-cuhalide-public-data-version']).toBe('2.17.1');expect(h['x-cuhalide-photophysics-contract']).toBe('1.4.0');expect(h['x-cuhalide-organic-components-contract']).toBe('1.2.0');expect(h.warning||'').toContain('Legacy /api/data route');
 });
 
-test('direct sitemap is rev.9 and remains non-enumerating',async({request})=>{
+test('direct sitemap is rev.9, canonical, and remains non-enumerating',async({request})=>{
   const r=await request.get(`${BASE}/api/sitemap.js`);expect(r.status()).toBe(200);const xml=await r.text();
-  expect(xml).toContain(`${BASE}/`);expect(xml).toContain(`${BASE}/motifs`);expect(xml).not.toContain('/article/');expect(xml).not.toContain('/structure/');expect((xml.match(/<url>/g)||[]).length).toBe(2);currentHeaders(r.headers());expect(r.headers()['x-cuhalide-sitemap-scope']).toBe('prepublication-non-enumerating');
+  expect(xml).toContain(`<loc>${CANONICAL}/</loc>`);expect(xml).toContain(`<loc>${CANONICAL}/motifs</loc>`);expect(xml).not.toContain(`http://127.0.0.1:4173`);expect(xml).not.toContain('/article/');expect(xml).not.toContain('/structure/');expect((xml.match(/<url>/g)||[]).length).toBe(2);currentHeaders(r.headers());expect(r.headers()['x-cuhalide-sitemap-scope']).toBe('prepublication-non-enumerating');
 });
 
 test('direct public-data and record compatibility paths stay on current contracts',async({request})=>{
