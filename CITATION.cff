@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "CuHalide Atlas is currently a prepublication review resource, not a formally deposited public dataset. For living-atlas results shared during review, report the access date and Current Curated revision. Archived scientific snapshot 3.0.2 remains the immutable historical baseline for exact reproduction."
 title: "CuHalide Atlas"
-version: "Current Curated rev.8 (prepublication review)"
+version: "Current Curated rev.9 (prepublication review)"
 type: dataset
 authors:
   - name: "CuHalide Atlas Project"
@@ -10,17 +10,20 @@ repository-code: "https://github.com/zion0321/CuHalide-Atlas"
 abstract: >-
   Prepublication review resource for an evidence-grounded, structure-resolved
   knowledge base covering organic-containing Cu(I) chlorides, bromides and
-  iodides. Current Curated rev.8 is reviewed through 2026-08-19, retains the
-  complete rev.7 hostile structure-truth audit, and adds a narrow
-  primary-source-reverified correction set for structure-grain motif,
-  dimensionality and chemical-identity mapping. Reported composition, local
-  Cu-X motif and global connectivity dimensionality remain separated at the
-  appropriate evidence grain. Archived scientific snapshot 3.0.2 is retained
-  as an immutable historical baseline. Direct-link review access is
-  query-and-view; search-engine indexing, bulk normalized exports, exact stored
-  publisher abstracts, primary PDF/SI/CIF files and internal curation/audit
-  artifacts remain outside the public release boundary. No permanent DOI,
-  blanket license or formal public-release date is asserted until owner approval.
+  iodides. Current Curated rev.9 is reviewed through 2026-08-19 and closes the
+  current structure/member identity, space-group, dimensionality and terminal
+  evidence boundaries without rewriting the immutable archived scientific
+  snapshot 3.0.2. Reported composition, local Cu-X motif, global connectivity
+  dimensionality, article-level retrieval classes, organic-component
+  connectivity and photophysical measurements remain separated at their
+  appropriate evidence grain. Structured Photophysics 1.4.0 publishes
+  data-bearing article states only after independent two-pass verification;
+  Organic Components 1.2.0 remains fail-closed when molecular connectivity is
+  not uniquely verified. Direct-link review access is query-and-view;
+  search-engine indexing, bulk normalized exports, exact stored publisher
+  abstracts, primary PDF/SI/CIF files and internal curation/audit artifacts
+  remain outside the public release boundary. No permanent DOI, blanket license
+  or formal public-release date is asserted until owner approval.
 keywords:
   - copper(I) halide
   - Cu(I)-I
