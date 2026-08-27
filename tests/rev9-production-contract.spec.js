@@ -39,7 +39,10 @@ test('manifest and Motif Atlas agree with rev.9',async({request,page})=>{
   expect(motifHtml).toContain('Current Curated rev.9');
   expect(motifHtml).toContain('Curated through 19 Aug 2026 · rev.9');
   expect(motifHtml).not.toContain('· rev.8');
-  expect(raw.headers()['x-cuhalide-current-curated-revision']).toBe('9');
+  const mh=raw.headers();
+  expect(mh['x-cuhalide-current-curated-revision']).toBe('9');
+  expect(mh['x-cuhalide-site-version']).toBe('51');
+  expect(mh['x-cuhalide-ui-version']).toBe('51.0');
   const mr=await page.goto(`${BASE}/motifs`,{waitUntil:'domcontentloaded'});expect(mr?.status()).toBe(200);await expect(page.locator('body')).toContainText('Current Curated rev.9');await expect(page.locator('body')).toContainText('640');await expect(page.locator('body')).toContainText('307');
 });
 
@@ -49,6 +52,8 @@ test('public data and organic-component resolution are rev.9 fail-closed',async(
   expect(x.checks).toMatchObject({database_organic_structure_state_closed:true,database_component_connectivity_state_closed:true,database_component_orphans_clear:true,raw_primary_files_exposed:false,raw_evidence_locators_exposed:false,private_evidence_fields_exposed:false});
   const hh=h.headers();
   expect(hh['x-cuhalide-current-curated-revision']).toBe('9');
+  expect(hh['x-cuhalide-site-version']).toBe('51');
+  expect(hh['x-cuhalide-ui-version']).toBe('51.0');
   expect(hh['x-cuhalide-public-data-version']).toBe('2.17.1');
   expect(hh['x-cuhalide-photophysics-contract']).toBe('1.4.0');
   expect(hh['x-cuhalide-organic-components-contract']).toBe('1.2.0');
@@ -58,9 +63,20 @@ test('record pages carry rev.9 contracts',async({request})=>{
   const r=await request.get(`${BASE}/structure/CUH-091-S02`);expect(r.status()).toBe(200);const html=await r.text();
   expect(html).toContain('Current Curated rev.9');
   expect(html).toContain('P21/n');
-  expect(r.headers()['x-cuhalide-current-curated-revision']).toBe('9');
-  expect(r.headers()['x-cuhalide-photophysics-contract']).toBe('1.4.0');
-  expect(r.headers()['x-cuhalide-organic-components-contract']).toBe('1.2.0');
+  const rh=r.headers();
+  expect(rh['x-cuhalide-current-curated-revision']).toBe('9');
+  expect(rh['x-cuhalide-site-version']).toBe('51');
+  expect(rh['x-cuhalide-ui-version']).toBe('51.0');
+  expect(rh['x-cuhalide-public-data-version']).toBe('2.17.1');
+  expect(rh['x-cuhalide-photophysics-contract']).toBe('1.4.0');
+  expect(rh['x-cuhalide-organic-components-contract']).toBe('1.2.0');
+  const a=await request.get(`${BASE}/article/91`);expect(a.status()).toBe(200);const ah=a.headers();
+  expect(ah['x-cuhalide-current-curated-revision']).toBe('9');
+  expect(ah['x-cuhalide-site-version']).toBe('51');
+  expect(ah['x-cuhalide-ui-version']).toBe('51.0');
+  expect(ah['x-cuhalide-public-data-version']).toBe('2.17.1');
+  expect(ah['x-cuhalide-photophysics-contract']).toBe('1.4.0');
+  expect(ah['x-cuhalide-organic-components-contract']).toBe('1.2.0');
 });
 
 test('prepublication privacy and Frozen 3.0.2 boundary remain intact',async({request})=>{
