@@ -15,6 +15,11 @@ function patch(body,kind){
   x=all(x,'Organic Components 1.1','Organic Components 1.2');
   x=all(x,'Contract 1.1.0','Contract 1.2.0');
   x=all(x,'src="/organic-components-v1.js"','src="/organic-components-v1.js?v=1.2.0"');
+  if(kind==='structure'&&!x.includes('Record not found')){
+    const oc='<script src="/organic-components-v1.js?v=1.2.0"></script>';
+    const graphs='<script src="/organic-components-graphs-11.js?v=1.2.0"></script>';
+    if(x.includes(oc)&&!x.includes('/organic-components-graphs-11.js?v=1.2.0'))x=x.replace(oc,`${graphs}${oc}`);
+  }
   if(kind==='article'&&!x.includes('Record not found')){
     x=all(x,'<dt>Dimensionality</dt><dd>','<dt>Article index class</dt><dd>');
     const marker='</dl><p>';
@@ -23,7 +28,11 @@ function patch(body,kind){
     if(!x.includes('Article index class')||!x.includes('literature-retrieval label'))throw new Error('article dimension grain guard missing');
   }
   for(const stale of ['Contract 1.1.0','Organic Components 1.1','Photophysics 1.3.','src="/organic-components-v1.js"'])if(x.includes(stale))throw new Error(`stale record browser contract: ${stale}`);
-  if(kind==='structure'&&!x.includes('Record not found')&&!x.includes('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic Components 1.2.0 asset missing');
+  if(kind==='structure'&&!x.includes('Record not found')){
+    if(!x.includes('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic Components 1.2.0 asset missing');
+    if(!x.includes('/organic-components-graphs-11.js?v=1.2.0'))throw new Error('structure record rev.9 Organic renderer layer missing');
+    if(x.indexOf('/organic-components-graphs-11.js?v=1.2.0')>x.indexOf('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic renderer must load before Organic Components runtime');
+  }
   return x
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
