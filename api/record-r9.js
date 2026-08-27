@@ -10,11 +10,11 @@ function patch(body,kind){
   for(const a of ['current-curated-r8','current-curated-r7','current-curated-r6'])x=all(x,a,'current-curated-r9');
   for(const a of ['current-r8','current-r7','current-r6'])x=all(x,a,'current-r9');
   x=all(x,'content="8"','content="9"');
-  x=all(x,'Structured Photophysics 1.3.3','Structured Photophysics 1.4.0');
-  x=all(x,'Photophysics 1.3.3','Photophysics 1.4.0');
+  for(const v of ['1.3.0','1.3.1','1.3.2','1.3.3']){x=all(x,`Structured Photophysics ${v}`,'Structured Photophysics 1.4.0');x=all(x,`Photophysics ${v}`,'Photophysics 1.4.0')}
   x=all(x,'Organic Components 1.1.0','Organic Components 1.2.0');
   x=all(x,'Organic Components 1.1','Organic Components 1.2');
   x=all(x,'Contract 1.1.0','Contract 1.2.0');
+  x=all(x,'src="/organic-components-v1.js"','src="/organic-components-v1.js?v=1.2.0"');
   if(kind==='article'&&!x.includes('Record not found')){
     x=all(x,'<dt>Dimensionality</dt><dd>','<dt>Article index class</dt><dd>');
     const marker='</dl><p>';
@@ -22,6 +22,8 @@ function patch(body,kind){
     if(x.includes('<dt>Dimensionality</dt>'))throw new Error('article page exposes article index class as structure dimensionality');
     if(!x.includes('Article index class')||!x.includes('literature-retrieval label'))throw new Error('article dimension grain guard missing');
   }
+  for(const stale of ['Contract 1.1.0','Organic Components 1.1','Photophysics 1.3.','src="/organic-components-v1.js"'])if(x.includes(stale))throw new Error(`stale record browser contract: ${stale}`);
+  if(kind==='structure'&&!x.includes('Record not found')&&!x.includes('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic Components 1.2.0 asset missing');
   return x
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
