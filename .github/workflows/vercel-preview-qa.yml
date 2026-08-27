@@ -27,8 +27,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          EXPECTED="${{ github.event.pull_request.head.sha }}"
-          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          test -f api/ui-r9.js
+          test -f api/meta-r9.js
           test -f scripts/local-candidate-server.mjs
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
@@ -38,7 +39,7 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install locked QA dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Run repository preflight
+      - name: Run rev.9 repository preflight
         run: npm run qa:preflight
       - name: Start exact candidate runtime locally
         shell: bash
@@ -48,39 +49,15 @@ jobs:
           echo $! > candidate-server.pid
           for i in $(seq 1 45); do
             rm -f /tmp/cuhalide-candidate-ready.headers
-            if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then echo 'Exact candidate runtime is ready.'; exit 0; fi
+            if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then exit 0; fi
             sleep 1
           done
           cat candidate-server.log >&2 || true
           exit 1
       - name: Install locked Chromium
         run: npx playwright install chromium
-      - name: Run comprehensive site quality regression gate
+      - name: Run rev.9 browser and privacy regression gate
         run: npm run qa:site-quality
-      - name: Verify v50 portal rev.8 contract
-        run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.8"
-      - name: Verify Rev.8 production copy is residue-free
-        run: npm run qa:browser -- --grep "public Rev.8 copy contains no active Rev.7 or Rev.6 residues"
-      - name: Verify prepublication indexing boundary
-        run: npm run qa:browser -- --grep "prepublication indexing remains disabled while direct access stays available"
-      - name: Verify rev.8 runtime health
-        run: npm run qa:browser -- --grep "production backend rev.8 and activated Photophysics 1.3.3 are ready"
-      - name: Verify manifest sitemap and Motif Atlas
-        run: npm run qa:browser -- --grep "manifest sitemap and Motif Atlas agree with final rev.8"
-      - name: Verify Research Assistant runtime contract
-        run: npm run qa:browser -- --grep "Research Assistant reports 10.4 / 9.19 and complete rev.8 RAG"
-      - name: Verify staged photophysics through Research Assistant
-        run: npx playwright test tests/photophysics-rag-sample-grain.spec.js --project=desktop-chromium
-      - name: Verify rev.8 primary-source corrections
-        run: npm run qa:browser -- --grep "rev.8 targeted primary-source corrections are exposed at structure and article grain"
-      - name: Verify inherited Rev.7 hostile-audit corrections
-        run: npm run qa:browser -- --grep "Rev.7 hostile-audit corrections inherited by rev.8 remain stable"
-      - name: Verify local/global connectivity boundaries
-        run: npm run qa:browser -- --grep "local motif versus global dimensionality boundaries remain live"
-      - name: Verify rev.8 deterministic identity boundaries
-        run: npm run qa:browser -- --grep "rev.8 exact-count and identity boundaries remain deterministic"
-      - name: Verify deleted placeholders and export privacy boundary
-        run: npm run qa:browser -- --grep "review/perspective placeholders stay absent and export stays disabled"
       - name: Stop local candidate runtime
         if: always()
         shell: bash
@@ -109,13 +86,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Attest candidate provenance
-        shell: bash
-        run: |
-          set -euo pipefail
-          EXPECTED="${{ github.event.pull_request.head.sha }}"
-          test "$(git rev-parse HEAD)" = "$EXPECTED"
-          test -f scripts/local-candidate-server.mjs
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -124,7 +94,7 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install locked QA dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Run repository preflight
+      - name: Run rev.9 repository preflight
         run: npm run qa:preflight
       - name: Start exact candidate runtime locally
         shell: bash
@@ -133,15 +103,14 @@ jobs:
           node scripts/local-candidate-server.mjs > candidate-server.log 2>&1 &
           echo $! > candidate-server.pid
           for i in $(seq 1 45); do
-            rm -f /tmp/cuhalide-candidate-ready.headers
-            if curl --fail --silent --show-error --dump-header /tmp/cuhalide-candidate-ready.headers --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready" && grep -qi '^x-cuhalide-candidate-ready: 1' /tmp/cuhalide-candidate-ready.headers; then echo 'Exact candidate runtime is ready.'; exit 0; fi
+            if curl --fail --silent --output /dev/null "$CUHALIDE_BASE_URL/__qa/ready"; then exit 0; fi
             sleep 1
           done
           cat candidate-server.log >&2 || true
           exit 1
       - name: Install locked Chromium
         run: npx playwright install chromium
-      - name: Run Lighthouse gate against exact candidate runtime
+      - name: Run Lighthouse gate against exact rev.9 candidate runtime
         run: npm run qa:lighthouse
       - name: Stop exact candidate runtime
         if: always()

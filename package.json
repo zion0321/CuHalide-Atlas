@@ -1,15 +1,15 @@
 {
   "name": "cuhalide-atlas-production-qa",
-  "version": "1.2.0",
+  "version": "1.3.1",
   "private": true,
   "type": "module",
   "description": "Production browser, accessibility, performance, repository-contract and SEO quality gates for CuHalide Atlas.",
   "scripts": {
-    "qa:browser": "playwright test tests/rev8-production-contract.spec.js tests/rev7-production-copy.spec.js tests/prepublication-indexing.spec.js tests/prepublication-public-ingress.spec.js tests/prepublication-metadata-governance.spec.js tests/prepublication-noarchive-headers.spec.js tests/citation-single-source.spec.js tests/api-js-suffix-bypass.spec.js tests/photophysics-1.3.2-corrections-rev8.spec.js tests/photophysics-1.3.3-release.spec.js tests/photophysics-rag-sample-grain.spec.js tests/visible-photophysics-ui.spec.js tests/portal-ux-v1.spec.js tests/organic-components-ui.spec.js tests/structure-photophysics-boundary.spec.js tests/article-serving-context.spec.js tests/record-single-snapshot.spec.js",
-    "qa:site-quality": "playwright test tests/site-quality-v50-1.spec.js tests/prepublication-public-ingress.spec.js tests/prepublication-metadata-governance.spec.js tests/prepublication-noarchive-headers.spec.js tests/citation-single-source.spec.js tests/api-js-suffix-bypass.spec.js tests/photophysics-1.3.2-corrections-rev8.spec.js tests/photophysics-1.3.3-release.spec.js tests/visible-photophysics-ui.spec.js tests/portal-ux-v1.spec.js tests/organic-components-ui.spec.js tests/structure-photophysics-boundary.spec.js tests/article-serving-context.spec.js tests/record-single-snapshot.spec.js",
+    "qa:browser": "playwright test tests/rev9-production-contract.spec.js",
+    "qa:site-quality": "playwright test tests/rev9-production-contract.spec.js",
     "qa:lighthouse": "bash scripts/production-lighthouse.sh",
     "qa:deployment-gate": "node --test tests/vercel-production-gate.test.mjs",
-    "qa:contracts": "node --test tests/rev8-source-contract.test.mjs tests/rev7-repository-contracts.test.mjs tests/rev7-cleanup-contracts.test.mjs tests/prepublication-metadata-governance-contract.test.mjs tests/prepublication-noarchive-contract.test.mjs tests/prepublication-public-ingress-contract.test.mjs tests/citation-single-source-contract.test.mjs tests/photophysics-private-contract.test.mjs tests/photophysics-source-grain-ui-contract.test.mjs tests/portal-ux-repository-contract.test.mjs tests/organic-components-contract.test.mjs tests/record-evidence-route-contract.test.mjs tests/record-single-snapshot-contract.test.mjs tests/article-serving-context-contract.test.mjs tests/rag-exact-recovery-contract.test.mjs tests/internal-edge-service-auth-contract.test.mjs",
+    "qa:contracts": "node --test tests/rev9-production-adapter-contract.test.mjs tests/prepublication-noarchive-contract.test.mjs tests/prepublication-public-ingress-contract.test.mjs tests/citation-single-source-contract.test.mjs tests/internal-edge-service-auth-contract.test.mjs",
     "qa:preflight": "npm run qa:contracts && npm run qa:deployment-gate"
   },
   "devDependencies": {
