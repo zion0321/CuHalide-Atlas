@@ -4,9 +4,11 @@ import {readFile} from 'node:fs/promises';
 
 const ACTIVE=[
   ['conversation','supabase/functions/cuhalide-atlas-conversation-v1-internal/index.ts','1.0.2'],
-  ['r8 unified','supabase/functions/cuhalide-atlas-current-rag-r8-unified-internal/index.ts','current-rag-r8.0.0'],
-  ['r8 science exact','supabase/functions/cuhalide-atlas-current-rag-r8-science-exact-internal/index.ts','current-rag-r8-science-exact-1.0.0'],
-  ['r8 exact','supabase/functions/cuhalide-atlas-current-rag-r8-exact-internal/index.ts','current-rag-r8-exact-1.0.0'],
+  ['r9 unified','supabase/functions/cuhalide-atlas-current-rag-r9-unified-internal/index.ts','current-rag-r9.0.1'],
+  ['r9 science exact','supabase/functions/cuhalide-atlas-current-rag-r9-science-exact-internal/index.ts','current-rag-r9-science-exact-1.0.1'],
+  ['r8 unified recovery','supabase/functions/cuhalide-atlas-current-rag-r8-unified-internal/index.ts','current-rag-r8.0.0'],
+  ['r8 science exact recovery','supabase/functions/cuhalide-atlas-current-rag-r8-science-exact-internal/index.ts','current-rag-r8-science-exact-1.0.0'],
+  ['r8 exact recovery','supabase/functions/cuhalide-atlas-current-rag-r8-exact-internal/index.ts','current-rag-r8-exact-1.0.0'],
   ['r7 unified recovery','supabase/functions/cuhalide-atlas-current-rag-r7-unified-internal/index.ts','current-rag-r7.2.5'],
   ['r7 science exact recovery','supabase/functions/cuhalide-atlas-current-rag-r7-science-exact-internal/index.ts','current-rag-r7-science-exact-1.1.1'],
   ['r7 exact recovery','supabase/functions/cuhalide-atlas-current-rag-r7-exact-internal/index.ts','current-rag-r7.0.8'],
@@ -54,7 +56,9 @@ for(const[name,path,expectedVersion]of RETIRED){
   });
 }
 
-test('production internal RAG chain is explicit as rev.8 active with rev.7 recovery',async()=>{
+test('production internal RAG chain is explicit as rev.9 active with rev.8/rev.7 recovery',async()=>{
+  const r9u=await readFile('supabase/functions/cuhalide-atlas-current-rag-r9-unified-internal/index.ts','utf8');
+  const r9s=await readFile('supabase/functions/cuhalide-atlas-current-rag-r9-science-exact-internal/index.ts','utf8');
   const r8u=await readFile('supabase/functions/cuhalide-atlas-current-rag-r8-unified-internal/index.ts','utf8');
   const r8s=await readFile('supabase/functions/cuhalide-atlas-current-rag-r8-science-exact-internal/index.ts','utf8');
   const r8e=await readFile('supabase/functions/cuhalide-atlas-current-rag-r8-exact-internal/index.ts','utf8');
@@ -65,13 +69,17 @@ test('production internal RAG chain is explicit as rev.8 active with rev.7 recov
   const r1=await readFile('supabase/functions/cuhalide-atlas-current-rag-r1-internal/index.ts','utf8');
   const smart=await readFile('supabase/functions/cuhalide-atlas-smart-rag-v302-current-public/index.ts','utf8');
 
-  assert.match(smart,/cuhalide-atlas-current-rag-r8-unified-internal/,'public current Smart RAG must terminate at active rev.8 unified RAG');
-  assert.match(smart,/CURRENT_RELEASE='current-curated-r8'/);
-  assert.match(smart,/REV=8/);
+  assert.match(smart,/cuhalide-atlas-current-rag-r9-unified-internal/,'current Smart RAG must terminate at active rev.9 unified RAG');
+  assert.match(smart,/CURRENT_RELEASE='current-curated-r9'/);
+  assert.match(smart,/REV=9/);
+  assert.match(r9u,/cuhalide-atlas-current-rag-r9-science-exact-internal/);
+  assert.match(r9u,/CURRENT='current-curated-r9'/);
+  assert.match(r9u,/DOCS=1330/);
+  assert.match(r9s,/cuhalide-atlas-current-rag-r8-science-exact-internal/,'rev.9 science wrapper may use the locked rev.8 structured implementation as recovery logic while patching rev.9 metadata');
+  assert.match(r9s,/CURRENT='current-curated-r9'/);
   assert.match(r8u,/cuhalide-atlas-current-rag-r8-science-exact-internal/);
-  assert.match(r8u,/CURRENT='current-curated-r8'/);
-  assert.match(r8s,/cuhalide-atlas-current-rag-r7-science-exact-internal/,'rev.8 science wrapper may use the locked rev.7 deterministic implementation as recovery logic while patching rev.8 metadata');
-  assert.match(r8e,/cuhalide-atlas-current-rag-r7-exact-internal/,'rev.8 exact wrapper must preserve the locked rev.7 deterministic fallback');
+  assert.match(r8s,/cuhalide-atlas-current-rag-r7-science-exact-internal/,'rev.8 science wrapper may use locked rev.7 recovery logic');
+  assert.match(r8e,/cuhalide-atlas-current-rag-r7-exact-internal/,'rev.8 exact wrapper preserves locked rev.7 deterministic fallback');
   assert.match(r7u,/cuhalide-atlas-current-rag-r7-science-exact-internal/);
   assert.match(r7s,/cuhalide-atlas-current-rag-r7-exact-internal/);
   assert.match(r7e,/cuhalide-atlas-current-rag-r6-exact-internal/);
