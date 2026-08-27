@@ -42,6 +42,11 @@ test('public data and organic-component resolution are rev.9 fail-closed',async(
   const h=await request.get(`${BASE}/api/public-data?action=organic-components-health`);expect(h.status()).toBe(200);const x=await h.json();
   expect(x).toMatchObject({ok:true,contract_version:'1.2.0',representation_rows:965,represented_structures:908,verified_connectivity_rows:61,unresolved_rows:894,not_applicable_rows:10,current_curated_revision:9});
   expect(x.checks).toMatchObject({database_organic_structure_state_closed:true,database_component_connectivity_state_closed:true,database_component_orphans_clear:true,raw_primary_files_exposed:false,raw_evidence_locators_exposed:false,private_evidence_fields_exposed:false});
+  const hh=h.headers();
+  expect(hh['x-cuhalide-current-curated-revision']).toBe('9');
+  expect(hh['x-cuhalide-public-data-version']).toBe('2.17.1');
+  expect(hh['x-cuhalide-photophysics-contract']).toBe('1.4.0');
+  expect(hh['x-cuhalide-organic-components-contract']).toBe('1.2.0');
 });
 
 test('record pages carry rev.9 contracts',async({request})=>{
