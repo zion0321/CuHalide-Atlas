@@ -35,7 +35,7 @@ test('Photophysics 1.4 dynamic view loads the current publication state without 
   await expect(view).toContainText('contract 1.4.0');
   const status=page.locator('#photoStatusGrid');
   await expect(status).toContainText('Two-pass verified',{timeout:15000});
-  for(const token of ['329','Verified no reported data','54','2,275','3,002','280','478','66'])await expect(status).toContainText(token);
+  for(const token of ['329','Verified no reported data','54','2275','3002','280','478','66'])await expect(status).toContainText(token);
   await expect(status).not.toContainText('temporarily unavailable');
   await expect(view).not.toContainText('Pass A curated');
   await expect(view).not.toContainText('published at first-pass stage');
@@ -51,7 +51,8 @@ test('Organic Components 1.2 renders verified connectivity and the complete rev.
   await expect(host.locator('.oc-contract')).toHaveText('Contract 1.2.0',{timeout:15000});
   await expect(host.locator('svg.oc-svg')).toHaveCount(1,{timeout:15000});
   const registry=await page.evaluate(()=>Object.keys(window.__CuHalideOrganicGraphs||{}));
-  for(const key of VERIFIED_GRAPH_KEYS)expect(registry,`missing deterministic graph for ${key}`).toContain(key);
+  const missing=VERIFIED_GRAPH_KEYS.filter(key=>!registry.includes(key));
+  expect(missing,'all rev.9 verified-connectivity keys require a deterministic browser graph').toEqual([]);
   await page.waitForTimeout(100);
   expect(errors.pageErrors).toEqual([]);
   expect(errors.consoleErrors).toEqual([]);
