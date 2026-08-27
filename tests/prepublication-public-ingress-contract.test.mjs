@@ -29,13 +29,14 @@ test('public repository blocks and contains no private or bulk artifact file typ
 test('prepublication sitemap is deliberately non-enumerating',()=>{
   const sitemap=read('api/sitemap.js');
   assert.match(sitemap,/const URLS=\[\{loc:`\$\{PUBLIC_ORIGIN\}\/`,priority:'1\.0'\},\{loc:`\$\{PUBLIC_ORIGIN\}\/motifs`,priority:'0\.9'\}\]/);
+  assert.match(sitemap,/CURRENT_REVISION='8'/);
   assert.match(sitemap,/prepublication-non-enumerating/);
   assert.match(sitemap,/Cache-Control','no-store, max-age=0'/);
-  assert.ok(!sitemap.includes('/article/${'), 'sitemap must not enumerate article records');
-  assert.ok(!sitemap.includes('/structure/${'), 'sitemap must not enumerate structure records');
-  assert.ok(!sitemap.includes('fetchIndex'), 'sitemap must not fetch a bulk record index during prepublication review');
-
+  assert.ok(!sitemap.includes('/article/${'),'sitemap must not enumerate article records');
+  assert.ok(!sitemap.includes('/structure/${'),'sitemap must not enumerate structure records');
+  assert.ok(!sitemap.includes('fetchIndex'),'sitemap must not fetch a bulk record index during prepublication review');
   const runtime=read('supabase/functions/cuhalide-atlas-runtime-contract-v1-public/index.ts');
+  assert.match(runtime,/CURRENT_REVISION=8/);
   assert.match(runtime,/enumeration:false/);
   assert.match(runtime,/record_urls_exposed:false/);
   assert.match(runtime,/route_count:2/);
@@ -49,6 +50,7 @@ test('canonical public data is allowlisted and clamps browse-sized motif results
     assert.match(source,/PUBLIC_ACTIONS=new Set\(/,`${path} must define an explicit public action allowlist`);
     assert.match(source,/unknown public action/);
     assert.match(source,/Math\.min\(24,/,'Motif Atlas public result window must be capped at 24');
+    assert.match(source,/CURRENT_REVISION='8'|CURRENT_REVISION=8/,`${path} must expose active rev.8`);
   }
   const edge=read('supabase/functions/cuhalide-atlas-public-data-v3/index.ts');
   assert.match(edge,/noindex, nofollow, noarchive/);
@@ -86,6 +88,7 @@ test('public record renderers use canonical Public Data v3 rather than protected
 test('Motif Atlas uses canonical Public Data v3 and Public Data v2 is retired after RAG migration',()=>{
   const motifs=read('api/motifs.js');
   assert.match(motifs,/cuhalide-atlas-public-data-v3/);
+  assert.match(motifs,/REV='8'/);
   assert.doesNotMatch(motifs,/cuhalide-atlas-public-data-v2/);
   assert.match(motifs,/u\.searchParams\.set\('limit','24'\)/);
   const source=read('supabase/functions/cuhalide-atlas-public-data-v2/index.ts');
@@ -134,6 +137,7 @@ test('obsolete anonymous Supabase compatibility gateways are static 410 retireme
 test('Research Assistant strips caller-controlled top-level parameters at both public ingress layers',()=>{
   const vercel=read('api/agent.js');
   assert.match(vercel,/JSON\.stringify\(\{messages\}\)/);
+  assert.match(vercel,/CURRENT_REVISION='8'/);
   assert.ok(!vercel.includes('requestBody(req)'),'Vercel must not forward the raw request object to the assistant');
   const edge=read('supabase/functions/cuhalide-atlas-research-assistant-v1-public/index.ts');
   assert.match(edge,/function normalizeBody\(b:any,mode:string\)\{return JSON\.stringify\(\{messages:messages\(b\),mode,depth:'standard'\}\)\}/);
@@ -142,14 +146,16 @@ test('Research Assistant strips caller-controlled top-level parameters at both p
   assert.match(edge,/PUBLICATION_STATE='prepublication-review'/);
 });
 
-test('versioned Supabase recovery source is synchronized to the rev.7 runtime contract',()=>{
+test('versioned runtime source is synchronized to active rev.8 and locked Photophysics 1.3.3',()=>{
   const runtime=read('supabase/functions/cuhalide-atlas-runtime-contract-v1-public/index.ts');
   assert.match(runtime,/PUBLIC_DATA_VERSION='2\.16\.0'/);
   assert.match(runtime,/EVIDENCE_VERSION='9\.19\.0'/);
   assert.match(runtime,/ASSISTANT_VERSION='10\.4\.1'/);
-  assert.match(runtime,/PHOTOPHYSICS_VERSION='1\.3\.1'/);
-  assert.match(runtime,/CURRENT_REVISION=7/);
+  assert.match(runtime,/PHOTOPHYSICS_VERSION='1\.3\.3'/);
+  assert.match(runtime,/CURRENT_REVISION=8/);
   assert.match(runtime,/SITE_VERSION='50'/);
   assert.match(runtime,/META_VERSION='50\.5'/);
   assert.match(runtime,/rag:1329/);
+  assert.match(runtime,/layer:'current-curated-r8'/);
+  assert.doesNotMatch(runtime,/PHOTOPHYSICS_VERSION='1\.3\.[012]'/);
 });
