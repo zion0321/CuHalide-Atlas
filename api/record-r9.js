@@ -10,17 +10,32 @@ function patch(body,kind){
   for(const a of ['current-curated-r8','current-curated-r7','current-curated-r6'])x=all(x,a,'current-curated-r9');
   for(const a of ['current-r8','current-r7','current-r6'])x=all(x,a,'current-r9');
   x=all(x,'content="8"','content="9"');
-  x=all(x,'Structured Photophysics 1.3.3','Structured Photophysics 1.4.0');
-  x=all(x,'Photophysics 1.3.3','Photophysics 1.4.0');
+  for(const v of ['1.3.0','1.3.1','1.3.2','1.3.3']){x=all(x,`Structured Photophysics ${v}`,'Structured Photophysics 1.4.0');x=all(x,`Photophysics ${v}`,'Photophysics 1.4.0')}
   x=all(x,'Organic Components 1.1.0','Organic Components 1.2.0');
   x=all(x,'Organic Components 1.1','Organic Components 1.2');
   x=all(x,'Contract 1.1.0','Contract 1.2.0');
+  x=all(x,'src="/organic-components-v1.js"','src="/organic-components-v1.js?v=1.2.0"');
+  if(kind==='structure'&&!x.includes('Record not found')){
+    x=all(x,'Motif confidence','Motif adjudication confidence');
+    x=all(x,'Normalized reported identity','Machine-normalized identity key');
+    const graphs='<script src="/organic-components-graphs-11.js?v=1.2.0" defer></script>';
+    const ocRe=/<script\b(?=[^>]*\bsrc=["']\/organic-components-v1\.js\?v=1\.2\.0["'])[^>]*><\/script>/i;
+    if(!x.includes('/organic-components-graphs-11.js?v=1.2.0')&&ocRe.test(x))x=x.replace(ocRe,m=>`${graphs}${m}`);
+  }
   if(kind==='article'&&!x.includes('Record not found')){
     x=all(x,'<dt>Dimensionality</dt><dd>','<dt>Article index class</dt><dd>');
     const marker='</dl><p>';
     if(x.includes(marker))x=x.replace(marker,'</dl><p class="fine"><strong>Grain note:</strong> Article index class is a literature-retrieval label, not a structure-grain connectivity assignment. A single article may contain determinations with different dimensionalities; use linked structure records for physical dimensionality.</p><p>');
     if(x.includes('<dt>Dimensionality</dt>'))throw new Error('article page exposes article index class as structure dimensionality');
     if(!x.includes('Article index class')||!x.includes('literature-retrieval label'))throw new Error('article dimension grain guard missing');
+  }
+  for(const stale of ['Contract 1.1.0','Organic Components 1.1','Photophysics 1.3.','src="/organic-components-v1.js"'])if(x.includes(stale))throw new Error(`stale record browser contract: ${stale}`);
+  if(kind==='structure'&&!x.includes('Record not found')){
+    if(!x.includes('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic Components 1.2.0 asset missing');
+    if(!x.includes('/organic-components-graphs-11.js?v=1.2.0'))throw new Error('structure record rev.9 Organic renderer layer missing');
+    if(x.indexOf('/organic-components-graphs-11.js?v=1.2.0')>x.indexOf('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic renderer must load before Organic Components runtime');
+    if(x.includes('Motif confidence')||x.includes('Normalized reported identity'))throw new Error('ambiguous standalone structure terminology remains');
+    if(!x.includes('Motif adjudication confidence')||!x.includes('Machine-normalized identity key'))throw new Error('standalone structure semantic labels missing');
   }
   return x
 }

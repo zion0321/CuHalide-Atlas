@@ -29,7 +29,7 @@ test('rev.9 production adapters expose the validated scientific/runtime contract
   for(const token of ["REV='9'","VERSION='2.17.1'","PH='1.4.0'","OC='1.2.0'","ARTICLE_DIMENSION_SEMANTICS='article_index_class_not_structure_grain'",'o.article_index_class=o.dimensionality_class','o.dimensionality_field_semantics=ARTICLE_DIMENSION_SEMANTICS',"o.structure_dimensionality_source='structure_phase_records'","o.serving_context==='current_curated'","o.attached_photophysics_context==='current_curated'"])assert.ok(data.includes(token),`missing public-data token: ${token}`);
 
   const record=read('api/record-r9.js');
-  for(const token of ["REV='9'","SITE='51'","UI='51.0'","PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'",'requestKind(req)','Article index class','literature-retrieval label','article dimension grain guard missing'])assert.ok(record.includes(token),`missing record token: ${token}`);
+  for(const token of ["REV='9'","SITE='51'","UI='51.0'","PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'",'requestKind(req)','Article index class','literature-retrieval label','article dimension grain guard missing','/organic-components-v1.js?v=1.2.0'])assert.ok(record.includes(token),`missing record token: ${token}`);
   assert.match(record,/if\(kind==='article'/);
   const motifs=read('api/motifs-r9.js');
   for(const token of ["REV='9'","SITE='51'","UI='51.0'",'stale current-curated revision in Motif Atlas'])assert.ok(motifs.includes(token),`missing motif token: ${token}`);
@@ -37,6 +37,36 @@ test('rev.9 production adapters expose the validated scientific/runtime contract
   const agent=read('api/agent.js');
   for(const token of ["SITE_VERSION='51'","UI_VERSION='51.0'","PUBLIC_DATA_VERSION='2.17.1'","ASSISTANT_VERSION='10.5.0'","EVIDENCE_VERSION='9.20.0'","PHOTOPHYSICS_CONTRACT='1.4.0'","ORGANIC_COMPONENTS_CONTRACT='1.2.0'","CURRENT_REVISION='9'",'cuhalide-v51-evidence-v10.5.0','cuhalide-v51-conversation-v10.5.0',"res.setHeader('X-CuHalide-Photophysics-Contract',PHOTOPHYSICS_CONTRACT)","res.setHeader('X-CuHalide-Organic-Components-Contract',ORGANIC_COMPONENTS_CONTRACT)",'x.photophysics_contract=PHOTOPHYSICS_CONTRACT','x.organic_components_contract=ORGANIC_COMPONENTS_CONTRACT'])assert.ok(agent.includes(token),`missing agent token: ${token}`);
   for(const stale of ["ASSISTANT_VERSION='10.4.1'","EVIDENCE_VERSION='9.19.0'","PHOTOPHYSICS_CONTRACT='1.3.3'","CURRENT_REVISION='8'",'cuhalide-v50-evidence-v10.4.1','cuhalide-v50-conversation-v10.4.1'])assert.ok(!agent.includes(stale),`stale agent token: ${stale}`);
+});
+
+test('UI 51 dynamic browser assets and citation provenance are synchronized to rev.9',()=>{
+  for(const p of ['public/ui-v51-core.js','public/ui-v51-core.css','public/ui-assistant-v51.css'])assert.ok(fs.existsSync(p),`missing current UI asset: ${p}`);
+  const ui=read('api/ui-r9.js');
+  for(const token of ["x=all(x,'/ui-v48-2.css?v=50.2','/ui-v51-core.css?v=51.0')","x=all(x,'/ui-v48-2.js?v=50.2','/ui-v51-core.js?v=51.0')","x=all(x,'/ui-assistant-v48-5.css?v=20260818','/ui-assistant-v51.css?v=51.0')","x=all(x,'/ui-photophysics-v1.js?v=1.0.0','/ui-photophysics-v1.js?v=1.4.0')","x=all(x,'/ui-ux-v1.js?v=1.0.0','/ui-ux-v1.js?v=51.0')",'stale rev.9 display/browser token'])assert.ok(ui.includes(token),`missing active-asset migration/guard token: ${token}`);
+
+  const ph=read('public/ui-photophysics-v1.js');
+  for(const token of ["PHOTOPHYSICS_CONTRACT='1.4.0'","CURRENT_REVISION=9","PUBLICATION_POLICY='two_pass_verified_or_verified_no_reported_data'",'Pass A-only articles must not be published','Two-pass verified','Verified no reported data','Structured data withheld'])assert.ok(ph.includes(token),`missing Photophysics 1.4 browser token: ${token}`);
+  for(const stale of ["PHOTOPHYSICS_CONTRACT='1.3.3'",'published at first-pass stage','Primary-evidence Pass A is complete; independent Pass B has not yet been completed.'])assert.ok(!ph.includes(stale),`stale Photophysics browser token: ${stale}`);
+
+  const oc=read('public/organic-components-v1.js');
+  for(const token of ["CONTRACT='1.2.0'","CURRENT_REVISION=9",'Expected Organic Components','Contract ${CONTRACT}','deterministic 2D renderer asset is unavailable'])assert.ok(oc.includes(token),`missing Organic Components 1.2 browser token: ${token}`);
+  for(const stale of ['Contract 1.1.0','Organic Components 1.1 projection',"dataset.organicComponents='1.1.0'"])assert.ok(!oc.includes(stale),`stale Organic Components browser token: ${stale}`);
+
+  const sph=read('public/ui-structure-photophysics-v1.js');
+  for(const token of ["CONTRACT='1.4.0'","CURRENT_REVISION=9",'Withheld pending independent verification','does not satisfy the Photophysics 1.4.0 public-state gate'])assert.ok(sph.includes(token),`missing structure-photophysics 1.4 token: ${token}`);
+  assert.ok(!sph.includes("ph.version||'1.3.0'"),'stale structure-photophysics 1.3 fallback');
+
+  const bootstrap=read('public/ui-ux-v1.js');
+  for(const token of ['/ui-ux-core-v1.js?v=51.0','/organic-components-v1.js?v=1.2.0','/ui-structure-photophysics-v1.js?v=1.4.0'])assert.ok(bootstrap.includes(token),`missing UI bootstrap token: ${token}`);
+  const ux=read('public/ui-ux-core-v1.js');
+  assert.ok(ux.includes("?'⌘ K':'Ctrl K'"),'platform-aware search shortcut missing');
+
+  const citation=read('CITATION.cff');
+  for(const token of ['Current Curated rev.9 (prepublication review)','Current Curated rev.9 is reviewed through 2026-08-19','Structured Photophysics 1.4.0','Organic Components 1.2.0'])assert.ok(citation.includes(token),`missing citation rev.9 token: ${token}`);
+  assert.ok(!citation.includes('Current Curated rev.8'),'stale rev.8 citation metadata');
+  const codemeta=read('codemeta.json');
+  for(const token of ['prepublication-current-r9','Current Curated rev.9','Structured Photophysics 1.4.0','Organic Components 1.2.0'])assert.ok(codemeta.includes(token),`missing CodeMeta rev.9 token: ${token}`);
+  assert.ok(!codemeta.includes('current-r8'),'stale rev.8 CodeMeta metadata');
 });
 
 test('rev.9 adapter preserves prepublication and privacy boundaries',()=>{

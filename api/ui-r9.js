@@ -12,7 +12,18 @@ function patch(input){
   for(const a of ['current-r8','current-r7','current-r6'])x=all(x,a,'current-r9');
   for(const a of ['CUHALIDE_UI_V50_2_CURRENT_R8','CUHALIDE_UI_V50_2_CURRENT_R7','CUHALIDE_UI_V50_2_CURRENT_R6'])x=all(x,a,'CUHALIDE_UI_V51_0_CURRENT_R9');
   for(const a of ['CUHALIDE_SITE_V50_CURRENT_CURATED_R8','CUHALIDE_SITE_V50_CURRENT_CURATED_R7','CUHALIDE_SITE_V50_CURRENT_CURATED_R6'])x=all(x,a,'CUHALIDE_SITE_V51_CURRENT_CURATED_R9');
+  x=all(x,'CUHALIDE_UI_V48_5','CUHALIDE_UI_V51_0');
   x=all(x,'<meta name="cuhalide-site-version" content="50">','<meta name="cuhalide-site-version" content="51">');
+
+  /* UI 51 is the only active browser-asset generation. Historical v48 files remain audit-only. */
+  x=all(x,'/ui-v48-2.css?v=50.2','/ui-v51-core.css?v=51.0');
+  x=all(x,'/ui-v48-2.js?v=50.2','/ui-v51-core.js?v=51.0');
+  x=all(x,'/ui-assistant-v48-5.css?v=20260818','/ui-assistant-v51.css?v=51.0');
+  x=all(x,'/ui-photophysics-v1.css?v=1.0.0','/ui-photophysics-v1.css?v=1.4.0');
+  x=all(x,'/ui-photophysics-v1.js?v=1.0.0','/ui-photophysics-v1.js?v=1.4.0');
+  x=all(x,'/ui-ux-v1.css?v=1.0.0','/ui-ux-v1.css?v=51.0');
+  x=all(x,'/ui-ux-v1.js?v=1.0.0','/ui-ux-v1.js?v=51.0');
+
   x=all(x,'946 atomic/context structure records','947 atomic/context structure records');
   x=all(x,'946 structure/phase rows','947 structure/phase rows');
   x=all(x,'946 structure rows','947 structure rows');
@@ -37,8 +48,9 @@ function patch(input){
   x=all(x,'1329-document','1330-document');
   x=all(x,'1329 documents','1330 documents');
   x=all(x,'Smart RAG 9.19.0','Smart RAG 9.20.0');
-  x=all(x,'Structured Photophysics 1.3.3','Structured Photophysics 1.4.0');
-  x=all(x,'Photophysics 1.3.3','Photophysics 1.4.0');
+  x=all(x,'Research Assistant 10.4.1','Research Assistant 10.5.0');
+  x=all(x,'Public Data 2.16.0','Public Data 2.17.1');
+  for(const v of ['1.3.0','1.3.1','1.3.2','1.3.3']){x=all(x,`Structured Photophysics ${v}`,'Structured Photophysics 1.4.0');x=all(x,`Photophysics ${v}`,'Photophysics 1.4.0')}
   x=all(x,'Organic Components 1.1.0','Organic Components 1.2.0');
   x=all(x,'Organic Components 1.1','Organic Components 1.2');
   x=all(x,'Contract 1.1.0','Contract 1.2.0');
@@ -49,9 +61,10 @@ function patch(input){
   x=all(x,'<dt>Dimension</dt><dd>${esc(x.dimensionality_class)}</dd>','<dt>Article index class</dt><dd>${esc(x.dimensionality_class)}</dd>');
   x=all(x,'<p class="fine" id="articleHalogenNote">Single-halogen filters include mixed records containing that halogen; mixed labels are exact curated categories.</p>','<p class="fine" id="articleHalogenNote">Single-halogen filters include mixed records containing that halogen; mixed labels are exact curated categories.</p><p class="fine" id="articleDimensionNote"><strong>Grain note:</strong> Article index classes are retrieval aids only. Physical connectivity dimensionality belongs to structure/phase determinations and may vary within one article; use the Structure register for structure-grain dimensionality.</p>');
   x=all(x,'<article class="card method"><span class="no">06</span><h2>Evidence grain</h2><p>Article-level photophysics is not assigned to an individual structure/phase unless a structure-grain evidence mapping establishes that link.</p></article>','<article class="card method"><span class="no">06</span><h2>Evidence grain</h2><p>Article index classes are retrieval metadata, not structure-grain dimensionality. Article-level photophysics is likewise not assigned to an individual structure/phase unless a structure-grain evidence mapping establishes that link.</p></article>');
+
   if(!x.includes('CUHALIDE_UI_V51_0_CURRENT_R9')||!x.includes('Current Curated rev.9'))throw new Error('rev.9 UI adapter contract missing');
-  for(const stale of ['Core-Included structure rows · n = 886','cc.core_included_structure_rows||886','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">'])if(x.includes(stale))throw new Error(`stale rev.9 display token: ${stale}`);
-  for(const required of ['Article index class','Article index · ${esc(a.dimensionality_class)}','Article index classes are retrieval aids only','Article index classes are retrieval metadata, not structure-grain dimensionality'])if(!x.includes(required))throw new Error(`article dimension grain UI guard missing: ${required}`);
+  for(const stale of ['Core-Included structure rows · n = 886','cc.core_included_structure_rows||886','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">','/ui-v48-2.','ui-assistant-v48-5','v=50.2','CUHALIDE_UI_V48_5','/ui-photophysics-v1.js?v=1.0.0','/ui-ux-v1.js?v=1.0.0'])if(x.includes(stale))throw new Error(`stale rev.9 display/browser token: ${stale}`);
+  for(const required of ['Article index class','Article index · ${esc(a.dimensionality_class)}','Article index classes are retrieval aids only','Article index classes are retrieval metadata, not structure-grain dimensionality','/ui-v51-core.css?v=51.0','/ui-v51-core.js?v=51.0','/ui-assistant-v51.css?v=51.0','/ui-photophysics-v1.js?v=1.4.0','/ui-ux-v1.js?v=51.0'])if(!x.includes(required))throw new Error(`UI 51 contract guard missing: ${required}`);
   return x;
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
