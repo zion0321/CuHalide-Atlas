@@ -39,7 +39,7 @@ jobs:
         run: npm run qa:preflight
       - name: Install locked Chromium
         run: npx playwright install chromium
-      - name: Run pre-merge production rev.7 backend readiness
+      - name: Run pre-merge production rev.8 backend readiness
         if: github.event_name == 'pull_request'
         shell: bash
         run: |
@@ -57,21 +57,20 @@ jobs:
             if(p?.publishable_samples!==940||p?.publishable_measurements!==2267||p?.publishable_values!==2988||p?.analysis_eligible_values!==281||p?.publishable_mechanism_claims!==477) fail(`${label}: activated 1.3.3 public denominators changed`);
             if(p?.checks?.conflicts_fail_closed!==true||p?.checks?.two_pass_status_preserved!==true||p?.checks?.raw_primary_files_exposed!==false||p?.checks?.raw_evidence_locators_exposed!==false||p?.checks?.ineligible_measurement_projection_leaks!==0) fail(`${label}: photophysics privacy/QC guard changed`);
           };
-
           const r=await fetch(`${base}/health.json`,{headers:{accept:'application/json'}});
           if(!r.ok) fail(`production health returned ${r.status}`);
           const x=await r.json();
           if(x.ok!==true) fail('production health is not OK');
           if(x.publication_state!=='prepublication-review') fail(`expected production prepublication-review state, got ${x.publication_state}`);
-          if(x.current_curated?.live_revision!==7) fail(`expected production rev.7, got ${x.current_curated?.live_revision}`);
+          if(x.current_curated?.live_revision!==8) fail(`expected production rev.8, got ${x.current_curated?.live_revision}`);
           const c=x.current_curated?.counts||{};
-          for(const [k,v] of Object.entries({structure_phase_rows:946,core_included_structure_rows:886,resolved_space_group_rows:710,verified_space_group_rows:684,strict_polar_rows:87,strict_polar_articles:54,rag_documents:1329,rag_embedded:1329})) if(c[k]!==v) fail(`production ${k}: expected ${v}, got ${c[k]}`);
+          for(const [k,v] of Object.entries({structure_phase_rows:946,core_included_structure_rows:886,resolved_space_group_rows:710,verified_space_group_rows:684,verified_polar_rows:97,strict_polar_rows:87,strict_polar_articles:54,rag_documents:1329,rag_embedded:1329})) if(c[k]!==v) fail(`production ${k}: expected ${v}, got ${c[k]}`);
           if(x.meta_version!=='50.5'||x.gateway_meta_version!=='50.5') fail(`pre-merge production Meta must remain exactly 50.5, got ${x.meta_version}/${x.gateway_meta_version}`);
           if(x.public_data?.version!=='2.16.0'||x.public_data_version!=='2.16.0') fail(`pre-merge production Public Data must remain 2.16.0, got ${x.public_data?.version}/${x.public_data_version}`);
           validatePhotophysics(x.photophysics,'production health');
           if(x.photophysics_contract_version!=='1.3.3'||x.checks?.photophysics_contract!==true||x.checks?.photophysics_staged_publication!==true||x.checks?.photophysics_private_evidence_guard!==true) fail('pre-merge production photophysics health gates are not intact');
           if(x.smart_rag?.version!=='9.19.0'||x.smart_rag?.photophysics_contract!=='1.3.3'||x.research_assistant?.version!=='10.4.1'||x.research_assistant?.photophysics_contract!=='1.3.3') fail('pre-merge production RAG/Research Assistant contract changed unexpectedly');
-          console.log('Pre-merge production rev.7 / prepublication-review / activated Photophysics 1.3.3 PASS');
+          console.log('Pre-merge production rev.8 / prepublication-review / activated Photophysics 1.3.3 PASS');
           NODE
       - name: Run full post-merge production browser QA
         if: github.event_name != 'pull_request'

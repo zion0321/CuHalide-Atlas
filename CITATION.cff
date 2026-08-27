@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "CuHalide Atlas is currently a prepublication review resource, not a formally deposited public dataset. For living-atlas results shared during review, report the access date and Current Curated revision. Archived scientific snapshot 3.0.2 remains the immutable historical baseline for exact reproduction."
 title: "CuHalide Atlas"
-version: "Current Curated rev.7 (prepublication review)"
+version: "Current Curated rev.8 (prepublication review)"
 type: dataset
 authors:
   - name: "CuHalide Atlas Project"
@@ -10,10 +10,13 @@ repository-code: "https://github.com/zion0321/CuHalide-Atlas"
 abstract: >-
   Prepublication review resource for an evidence-grounded, structure-resolved
   knowledge base covering organic-containing Cu(I) chlorides, bromides and
-  iodides. Current Curated rev.7 is reviewed through 2026-08-19 and separates
-  reported composition, local Cu-X motif and global connectivity dimensionality
-  at the appropriate evidence grain. Archived scientific snapshot 3.0.2 is
-  retained as an immutable historical baseline. Direct-link review access is
+  iodides. Current Curated rev.8 is reviewed through 2026-08-19, retains the
+  complete rev.7 hostile structure-truth audit, and adds a narrow
+  primary-source-reverified correction set for structure-grain motif,
+  dimensionality and chemical-identity mapping. Reported composition, local
+  Cu-X motif and global connectivity dimensionality remain separated at the
+  appropriate evidence grain. Archived scientific snapshot 3.0.2 is retained
+  as an immutable historical baseline. Direct-link review access is
   query-and-view; search-engine indexing, bulk normalized exports, exact stored
   publisher abstracts, primary PDF/SI/CIF files and internal curation/audit
   artifacts remain outside the public release boundary. No permanent DOI,

@@ -1,4 +1,4 @@
-const PUBLIC_ORIGIN='https://cuhalide-atlas-v3.vercel.app',CONTENT_DATE='2026-08-19',RELEASE='3.0.2',CURRENT_REVISION='7',PUBLICATION_STATE='prepublication-review';
+const PUBLIC_ORIGIN='https://cuhalide-atlas-v3.vercel.app',CONTENT_DATE='2026-08-19',RELEASE='3.0.2',CURRENT_REVISION='8',PUBLICATION_STATE='prepublication-review';
 const URLS=[{loc:`${PUBLIC_ORIGIN}/`,priority:'1.0'},{loc:`${PUBLIC_ORIGIN}/motifs`,priority:'0.9'}];
 const xml=v=>String(v).replace(/[<>&'\"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]));
 function commonHeaders(res){res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');res.setHeader('X-CuHalide-Release',RELEASE);res.setHeader('X-CuHalide-Current-Curated-Revision',CURRENT_REVISION);res.setHeader('X-CuHalide-Publication-State',PUBLICATION_STATE);res.setHeader('X-CuHalide-Sitemap-Scope','prepublication-non-enumerating')}

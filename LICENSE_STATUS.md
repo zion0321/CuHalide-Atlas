@@ -1,6 +1,6 @@
 # License status
 
-No top-level open-source or open-data license has been approved for CuHalide Atlas through **Frozen Release 3.0.2** and **Current Curated rev.7**. The repository and review portal are currently in a **prepublication review state** and do not assign a new license on behalf of the rights holder.
+No top-level open-source or open-data license has been approved for CuHalide Atlas through **Frozen Release 3.0.2** and **Current Curated rev.8**. The repository and review portal are currently in a **prepublication review state** and do not assign a new license on behalf of the rights holder.
 
 Before permanent DOI deposition, formal public release, or any blanket reuse statement, the repository owner must review and approve licenses appropriate to:
 

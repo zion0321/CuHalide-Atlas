@@ -7,24 +7,7 @@ const read=p=>fs.readFileSync(url(p),'utf8');
 
 test('photophysics evidence cards expose sample grain instead of implying intrinsic structure scope',()=>{
   const ui=read('api/ui-assistant-current.js');
-  for(const token of [
-    'CUHALIDE_PHOTOPHYSICS_SAMPLE_GRAIN_UI_V1',
-    'function sourceKind(s,fallback)',
-    'function sourceScopeLine(s,fallback)',
-    'sample_form',
-    'mapping_status',
-    'property_scope',
-    'photophysics_analysis_eligible',
-    'Crystal photophysics sample',
-    'Powder photophysics sample',
-    'Pellet photophysics sample',
-    'Composite photophysics sample',
-    'Device photophysics sample',
-    "sourceKind(s,'Structure')",
-    "sourceKind(s,'Article')",
-    'quantitative-correlation eligible',
-    'not quantitative-correlation eligible'
-  ])assert.ok(ui.includes(token),`sample-grain UI contract missing ${token}`);
+  for(const token of ['CUHALIDE_PHOTOPHYSICS_SAMPLE_GRAIN_UI_V1','function sourceKind(s,fallback)','function sourceScopeLine(s,fallback)','sample_form','mapping_status','property_scope','photophysics_analysis_eligible','Crystal photophysics sample','Powder photophysics sample','Pellet photophysics sample','Composite photophysics sample','Device photophysics sample',"sourceKind(s,'Structure')","sourceKind(s,'Article')",'quantitative-correlation eligible','not quantitative-correlation eligible'])assert.ok(ui.includes(token),`sample-grain UI contract missing ${token}`);
   assert.match(ui,/if\(!isPhoto\)return fallback/);
   assert.match(ui,/if\(!isPhoto\)return scopeLine\(s,fallback\)/);
   assert.match(ui,/mapping='\+s\.mapping_status/);
@@ -42,15 +25,7 @@ test('structure modal photophysics stays fail-closed at structure grain',()=>{
   const bootstrap=read('public/ui-ux-v1.js');
   const modal=read('public/ui-structure-photophysics-v1.js');
   assert.ok(bootstrap.includes("load('/ui-structure-photophysics-v1.js','structure-photophysics-v1')"));
-  for(const token of [
-    "action=structure&id=",
-    "ph.structure_mapping_state==='mapped_samples_present'",
-    'No structure-mapped data',
-    'Parent article ·',
-    'Only samples explicitly mapped to this crystallographic structure are shown here',
-    'does not assign article-level or other sample-grain measurements to this crystallographic structure',
-    'function exactMappedSamples(ph,id)'
-  ])assert.ok(modal.includes(token),`structure-modal grain contract missing ${token}`);
+  for(const token of ["action=structure&id=","ph.structure_mapping_state==='mapped_samples_present'",'No structure-mapped data','Parent article ·','Only samples explicitly mapped to this crystallographic structure are shown here','does not assign article-level or other sample-grain measurements to this crystallographic structure','function exactMappedSamples(ph,id)'])assert.ok(modal.includes(token),`structure-modal grain contract missing ${token}`);
   assert.match(modal,/String\(s\.structure_id\|\|''\)===id&&String\(s\.mapping_status\|\|''\)\.startsWith\('structure_'\)/);
   assert.match(modal,/structure_mapping_state==='mapped_samples_present'&&mapped\.length>0/);
 });
@@ -65,16 +40,7 @@ test('Pass A QA follows the live verification stage instead of pinning a mutable
   const apiQa=read('tests/site-quality-v50-1.spec.js');
   const uiQa=read('tests/visible-photophysics-ui.spec.js');
   const qa=`${apiQa}\n${uiQa}`;
-  for(const token of [
-    'findLivePassARecord',
-    'photophysics-health',
-    'action=articles',
-    "public_state==='pass_a_curated'",
-    "verification_stage==='pass_a_curated'",
-    'two_pass_verified===false',
-    'pass_a_curated_articles===0',
-    'terminal staged-verification state must account for the full article queue'
-  ])assert.ok(`${helper}\n${qa}`.includes(token),`stage-invariant Pass A QA contract missing ${token}`);
+  for(const token of ['findLivePassARecord','photophysics-health','action=articles',"public_state==='pass_a_curated'","verification_stage==='pass_a_curated'",'two_pass_verified===false','pass_a_curated_articles===0','terminal staged-verification state must account for the full article queue'])assert.ok(`${helper}\n${qa}`.includes(token),`stage-invariant Pass A QA contract missing ${token}`);
   assert.ok(apiQa.includes('findLivePassARecord(request,BASE)'));
   assert.ok(uiQa.includes('findLivePassARecord(request,BASE)'));
   assert.doesNotMatch(helper,/release_status=/,'Pass A discovery must inspect the full reviewed article queue, not only canonical rows');
@@ -83,9 +49,9 @@ test('Pass A QA follows the live verification stage instead of pinning a mutable
   assert.doesNotMatch(uiQa,/openArticleRoute\(page,\s*\d+\)/,'visible QA must resolve the live Pass A article dynamically');
 });
 
-test('1.3.2 correction history and locked 1.3.3 release regressions are mandatory in candidate and post-merge gates',()=>{
+test('1.3.2 correction history and locked 1.3.3 release regressions are mandatory in rev.8 candidate and post-merge gates',()=>{
   const pkg=JSON.parse(read('package.json'));
-  for(const regression of ['tests/photophysics-1.3.2-corrections.spec.js','tests/photophysics-1.3.3-release.spec.js']){
+  for(const regression of ['tests/photophysics-1.3.2-corrections-rev8.spec.js','tests/photophysics-1.3.3-release.spec.js']){
     assert.ok(String(pkg.scripts?.['qa:site-quality']||'').includes(regression),`candidate site-quality gate must run ${regression}`);
     assert.ok(String(pkg.scripts?.['qa:browser']||'').includes(regression),`post-merge production browser gate must run ${regression}`);
   }

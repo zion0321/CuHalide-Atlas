@@ -2,11 +2,11 @@
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
   "name": "CuHalide Atlas",
-  "version": "prepublication-current-r7",
+  "version": "prepublication-current-r8",
   "codeRepository": "https://github.com/zion0321/CuHalide-Atlas",
   "url": "https://cuhalide-atlas-v3.vercel.app/",
   "applicationCategory": "Scientific database and evidence-grounded retrieval system",
-  "description": "Prepublication review implementation for an evidence-grounded, structure-resolved Cu(I) chloride, bromide and iodide knowledge portal. Current Curated rev.7 is reviewed through 2026-08-19; archived scientific snapshot 3.0.2 remains immutable. Direct-link access is query-and-view, search-engine indexing is disabled, and no permanent DOI, blanket license or formal public-release date is asserted until owner approval.",
+  "description": "Prepublication review implementation for an evidence-grounded, structure-resolved Cu(I) chloride, bromide and iodide knowledge portal. Current Curated rev.8 is reviewed through 2026-08-19; archived scientific snapshot 3.0.2 remains immutable. Direct-link access is query-and-view, search-engine indexing is disabled, and no permanent DOI, blanket license or formal public-release date is asserted until owner approval.",
   "programmingLanguage": [
     "TypeScript",
     "JavaScript",
@@ -17,7 +17,7 @@
   "isPartOf": {
     "@type": "Dataset",
     "name": "CuHalide Atlas prepublication review corpus",
-    "version": "Current Curated rev.7"
+    "version": "Current Curated rev.8"
   },
   "license": "NOASSERTION",
   "keywords": [
