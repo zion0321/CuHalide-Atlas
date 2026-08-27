@@ -1,0 +1,56 @@
+import {test,expect} from '@playwright/test';
+const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
+test.describe.configure({mode:'serial'});
+
+test('rev.9 deterministic health is ready',async({request})=>{
+  const r=await request.get(`${BASE}/health.json`);expect(r.status()).toBe(200);const x=await r.json();
+  expect(x).toMatchObject({ok:true,status:'PASS',site_readiness:'PASS',publication_state:'prepublication-review',current_curated_revision:9,site_version:'51',ui_version:'51.0',meta_version:'51.0',public_data_version:'2.17.1',photophysics_contract_version:'1.4.0',organic_components_contract_version:'1.2.0',smart_rag_version:'9.20.0',research_assistant_version:'10.5.0'});
+  expect(x.current_curated.live_revision).toBe(9);
+  expect(x.current_curated.counts).toMatchObject({article_audit_records:383,chemically_included_articles:372,canonical_verified_articles:369,structure_phase_rows:947,core_included_structure_rows:887,resolved_space_group_rows:744,verified_space_group_rows:717,verified_polar_rows:101,strict_polar_rows:91,strict_polar_articles:57,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947});
+  expect(x.photophysics).toMatchObject({ok:true,version:'1.4.0',article_queue:383,pass_a_complete_articles:383,pass_a_pending_articles:0,pass_a_curated_articles:0,two_pass_verified_articles:329,verified_no_data_articles:54,publishable_samples:940,publishable_measurements:2275,publishable_values:3002,analysis_eligible_values:280,publishable_mechanism_claims:478,publication_policy:'two_pass_verified_or_verified_no_reported_data'});
+  expect(x.organic_components).toMatchObject({ok:true,version:'1.2.0',database_authority:true});
+  expect(x.checks).toMatchObject({frozen_release_contract:true,current_curated_contract:true,motif_taxonomy_contract:true,photophysics_contract:true,photophysics_all_data_bearing_two_pass:true,photophysics_conflicts_fail_closed:true,rag_embeddings_complete:true,organic_structure_state_closed:true,organic_component_connectivity_state_closed:true,mapping_terminal_boundaries_closed:true,space_group_terminal_boundaries_closed:true,dimensionality_terminal_boundaries_closed:true});
+});
+
+test('v51 portal exposes rev.9 and no active rev.8 production copy',async({page,request})=>{
+  const r=await request.get(`${BASE}/api/site`);expect(r.status()).toBe(200);const html=await r.text();
+  expect(html).toContain('CUHALIDE_SITE_V51_CURRENT_CURATED_R9');
+  expect(html).toContain('CUHALIDE_UI_V51_0_CURRENT_R9');
+  expect(html).toContain('Current Curated rev.9');
+  expect(html).toContain('Core-Included · n=887');
+  expect(html).toContain('All structure / phase rows · n=947');
+  expect(html).not.toContain('CUHALIDE_UI_V50_2_CURRENT_R8');
+  const nav=await page.goto(BASE,{waitUntil:'domcontentloaded'});expect(nav?.status()).toBe(200);
+  await expect(page.locator('body')).toContainText('Current Curated rev.9');
+});
+
+test('manifest and Motif Atlas agree with rev.9',async({request,page})=>{
+  const m=await request.get(`${BASE}/release-manifest.json`);expect(m.status()).toBe(200);const j=await m.json();
+  expect(j.current_curated).toMatchObject({revision:9,structure_phase_rows:947,core_included_structure_rows:887,resolved_space_group_rows:744,verified_space_group_rows:717,verified_polar_rows:101,strict_polar_rows:91,strict_polar_articles:57,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947,motif_resolved_rows:640,motif_unresolved_rows:307});
+  expect(j.runtime).toMatchObject({site_version:'51',ui_version:'51.0',meta_version:'51.0',public_data_version:'2.17.1',photophysics_contract_version:'1.4.0',organic_components_contract_version:'1.2.0',smart_rag_version:'9.20.0',research_assistant_version:'10.5.0'});
+  expect(j.frozen_release).toMatchObject({version:'3.0.2',immutable:true,structure_phase_rows:878});
+  const mr=await page.goto(`${BASE}/motifs`,{waitUntil:'domcontentloaded'});expect(mr?.status()).toBe(200);await expect(page.locator('body')).toContainText('Current Curated rev.9');await expect(page.locator('body')).toContainText('640');await expect(page.locator('body')).toContainText('307');
+});
+
+test('public data and organic-component resolution are rev.9 fail-closed',async({request})=>{
+  const h=await request.get(`${BASE}/api/public-data?action=organic-components-health`);expect(h.status()).toBe(200);const x=await h.json();
+  expect(x).toMatchObject({ok:true,contract_version:'1.2.0',representation_rows:965,represented_structures:908,verified_connectivity_rows:61,unresolved_rows:894,not_applicable_rows:10,current_curated_revision:9});
+  expect(x.checks).toMatchObject({database_organic_structure_state_closed:true,database_component_connectivity_state_closed:true,database_component_orphans_clear:true,raw_primary_files_exposed:false,raw_evidence_locators_exposed:false,private_evidence_fields_exposed:false});
+});
+
+test('record pages carry rev.9 contracts',async({request})=>{
+  const r=await request.get(`${BASE}/structure/CUH-091-S02`);expect(r.status()).toBe(200);const html=await r.text();
+  expect(html).toContain('Current Curated rev.9');
+  expect(html).toContain('P21/n');
+  expect(r.headers()['x-cuhalide-current-curated-revision']).toBe('9');
+  expect(r.headers()['x-cuhalide-photophysics-contract']).toBe('1.4.0');
+  expect(r.headers()['x-cuhalide-organic-components-contract']).toBe('1.2.0');
+});
+
+test('prepublication privacy and Frozen 3.0.2 boundary remain intact',async({request})=>{
+  const root=await request.get(BASE);expect(root.headers()['x-robots-tag']).toContain('noindex');
+  const manifest=await (await request.get(`${BASE}/release-manifest.json`)).json();
+  expect(manifest.public_access).toMatchObject({bulk_export:false,primary_pdf_si_cif:false,raw_evidence_locators:false});
+  expect(manifest.frozen_release).toMatchObject({version:'3.0.2',immutable:true});
+  const ex=await request.get(`${BASE}/api/export`);expect([404,405]).toContain(ex.status());
+});
