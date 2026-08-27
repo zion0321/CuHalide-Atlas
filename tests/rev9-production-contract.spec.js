@@ -52,5 +52,5 @@ test('prepublication privacy and Frozen 3.0.2 boundary remain intact',async({req
   const manifest=await (await request.get(`${BASE}/release-manifest.json`)).json();
   expect(manifest.public_access).toMatchObject({bulk_export:false,primary_pdf_si_cif:false,raw_evidence_locators:false});
   expect(manifest.frozen_release).toMatchObject({version:'3.0.2',immutable:true});
-  const ex=await request.get(`${BASE}/api/export`);expect([404,405]).toContain(ex.status());
+  const ex=await request.get(`${BASE}/api/export`);expect([404,405,410]).toContain(ex.status());
 });
