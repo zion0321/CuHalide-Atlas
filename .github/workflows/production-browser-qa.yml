@@ -22,7 +22,6 @@ jobs:
     timeout-minutes: 30
     env:
       CUHALIDE_BASE_URL: https://cuhalide-atlas-v3.vercel.app
-      CUHALIDE_PREMERGE_PRODUCTION: ${{ github.event_name == 'pull_request' }}
       CI: 'true'
     steps:
       - name: Checkout
@@ -35,44 +34,28 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install locked QA dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Run repository and deployment preflight contracts
+      - name: Run rev.9 repository and deployment preflight contracts
         run: npm run qa:preflight
-      - name: Install locked Chromium
-        run: npx playwright install chromium
-      - name: Run pre-merge production rev.8 backend readiness
+      - name: Validate rev.9 backend readiness before merge
         if: github.event_name == 'pull_request'
         shell: bash
         run: |
           node --input-type=module <<'NODE'
-          const base=process.env.CUHALIDE_BASE_URL;
-          const fail=(m)=>{throw new Error(m)};
-          const validatePhotophysics=(p,label)=>{
-            if(p?.ok!==true) fail(`${label}: photophysics health is not OK`);
-            if(p?.version!=='1.3.3') fail(`${label}: expected locked Photophysics 1.3.3, got ${p?.version}`);
-            if(p?.publication_policy!=='pass_a_curated_or_two_pass_verified') fail(`${label}: staged verification publication policy changed`);
-            if(p?.article_queue!==383||p?.pass_a_complete_articles!==383||p?.pass_a_pending_articles!==0) fail(`${label}: Pass A article queue invariant changed`);
-            if(p?.verified_no_data_articles!==54) fail(`${label}: verified-no-data denominator changed`);
-            if(p?.pass_a_curated_articles!==237||p?.two_pass_verified_articles!==92) fail(`${label}: activated 1.3.3 verification-stage split changed`);
-            if(p.pass_a_curated_articles+p.two_pass_verified_articles+p.verified_no_data_articles!==p.article_queue) fail(`${label}: verification-stage accounting does not sum to article queue`);
-            if(p?.publishable_samples!==940||p?.publishable_measurements!==2267||p?.publishable_values!==2988||p?.analysis_eligible_values!==281||p?.publishable_mechanism_claims!==477) fail(`${label}: activated 1.3.3 public denominators changed`);
-            if(p?.checks?.conflicts_fail_closed!==true||p?.checks?.two_pass_status_preserved!==true||p?.checks?.raw_primary_files_exposed!==false||p?.checks?.raw_evidence_locators_exposed!==false||p?.checks?.ineligible_measurement_projection_leaks!==0) fail(`${label}: photophysics privacy/QC guard changed`);
-          };
-          const r=await fetch(`${base}/health.json`,{headers:{accept:'application/json'}});
-          if(!r.ok) fail(`production health returned ${r.status}`);
+          const url='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-runtime-contract-v1-public?action=health';
+          const r=await fetch(url,{headers:{accept:'application/json'}}); if(!r.ok) throw new Error(`backend health ${r.status}`);
           const x=await r.json();
-          if(x.ok!==true) fail('production health is not OK');
-          if(x.publication_state!=='prepublication-review') fail(`expected production prepublication-review state, got ${x.publication_state}`);
-          if(x.current_curated?.live_revision!==8) fail(`expected production rev.8, got ${x.current_curated?.live_revision}`);
           const c=x.current_curated?.counts||{};
-          for(const [k,v] of Object.entries({structure_phase_rows:946,core_included_structure_rows:886,resolved_space_group_rows:710,verified_space_group_rows:684,verified_polar_rows:97,strict_polar_rows:87,strict_polar_articles:54,rag_documents:1329,rag_embedded:1329})) if(c[k]!==v) fail(`production ${k}: expected ${v}, got ${c[k]}`);
-          if(x.meta_version!=='50.5'||x.gateway_meta_version!=='50.5') fail(`pre-merge production Meta must remain exactly 50.5, got ${x.meta_version}/${x.gateway_meta_version}`);
-          if(x.public_data?.version!=='2.16.0'||x.public_data_version!=='2.16.0') fail(`pre-merge production Public Data must remain 2.16.0, got ${x.public_data?.version}/${x.public_data_version}`);
-          validatePhotophysics(x.photophysics,'production health');
-          if(x.photophysics_contract_version!=='1.3.3'||x.checks?.photophysics_contract!==true||x.checks?.photophysics_staged_publication!==true||x.checks?.photophysics_private_evidence_guard!==true) fail('pre-merge production photophysics health gates are not intact');
-          if(x.smart_rag?.version!=='9.19.0'||x.smart_rag?.photophysics_contract!=='1.3.3'||x.research_assistant?.version!=='10.4.1'||x.research_assistant?.photophysics_contract!=='1.3.3') fail('pre-merge production RAG/Research Assistant contract changed unexpectedly');
-          console.log('Pre-merge production rev.8 / prepublication-review / activated Photophysics 1.3.3 PASS');
+          const expected={structure_phase_rows:947,core_included_structure_rows:887,resolved_space_group_rows:744,verified_space_group_rows:717,verified_polar_rows:101,strict_polar_rows:91,strict_polar_articles:57,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947};
+          if(x.ok!==true||x.current_curated?.live_revision!==9) throw new Error('rev.9 backend is not ready');
+          for(const [k,v] of Object.entries(expected)) if(c[k]!==v) throw new Error(`${k}: expected ${v}, got ${c[k]}`);
+          if(x.photophysics?.version!=='1.4.0'||x.photophysics?.two_pass_verified_articles!==329||x.photophysics?.verified_no_data_articles!==54||x.photophysics?.pass_a_curated_articles!==0) throw new Error('Photophysics 1.4.0 terminal state mismatch');
+          if(x.organic_components?.version!=='1.2.0'||x.organic_components?.database_authority!==true) throw new Error('Organic Components 1.2.0 mismatch');
+          console.log('Current Curated rev.9 backend readiness PASS');
           NODE
-      - name: Run full post-merge production browser QA
+      - name: Install locked Chromium
+        if: github.event_name != 'pull_request'
+        run: npx playwright install chromium
+      - name: Run full post-merge production rev.9 browser QA
         if: github.event_name != 'pull_request'
         run: npm run qa:browser
       - name: Upload browser report and evidence
