@@ -72,10 +72,13 @@ test('rev.9 renderer additions preserve authoritative formula and formal charge 
   }
 });
 
-test('browser bootstrap and candidate runtime explicitly include the rev.9 renderer layer',()=>{
+test('interactive shell, standalone record and candidate runtime all include the rev.9 renderer layer',()=>{
   const bootstrap=fs.readFileSync('public/ui-ux-v1.js','utf8');
   assert.match(bootstrap,/organic-components-graphs-11\.js\?v=1\.2\.0/);
   assert.match(bootstrap,/then\(\(\)=>load\('\/organic-components-v1\.js\?v=1\.2\.0'/);
+  const record=fs.readFileSync('api/record-r9.js','utf8');
+  assert.match(record,/organic-components-graphs-11\.js\?v=1\.2\.0/);
+  assert.match(record,/Organic renderer must load before Organic Components runtime/);
   const server=fs.readFileSync('scripts/local-candidate-server.mjs','utf8');
   assert.match(server,/Array\.from\(\{length:11\}/);
 });
