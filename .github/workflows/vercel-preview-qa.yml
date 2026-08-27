@@ -57,26 +57,28 @@ jobs:
         run: npx playwright install chromium
       - name: Run comprehensive site quality regression gate
         run: npm run qa:site-quality
-      - name: Verify v50 portal rev.7 contract
-        run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.7"
-      - name: Verify rev.7 production copy is residue-free
-        run: npm run qa:browser -- --grep "public rev.7 copy contains no rev.6 release-language residues"
+      - name: Verify v50 portal rev.8 contract
+        run: npm run qa:browser -- --grep "v50 living portal exposes Current Curated rev.8"
+      - name: Verify Rev.8 production copy is residue-free
+        run: npm run qa:browser -- --grep "public Rev.8 copy contains no active Rev.7 or Rev.6 residues"
       - name: Verify prepublication indexing boundary
         run: npm run qa:browser -- --grep "prepublication indexing remains disabled while direct access stays available"
-      - name: Verify rev.7 runtime health
-        run: npm run qa:browser -- --grep "runtime health is exact final rev.7 contract"
+      - name: Verify rev.8 runtime health
+        run: npm run qa:browser -- --grep "production backend rev.8 and activated Photophysics 1.3.3 are ready"
       - name: Verify manifest sitemap and Motif Atlas
-        run: npm run qa:browser -- --grep "manifest sitemap and Motif Atlas agree with final rev.7"
+        run: npm run qa:browser -- --grep "manifest sitemap and Motif Atlas agree with final rev.8"
       - name: Verify Research Assistant runtime contract
-        run: npm run qa:browser -- --grep "Research Assistant reports 10.4 / 9.19 and complete rev.7 RAG"
+        run: npm run qa:browser -- --grep "Research Assistant reports 10.4 / 9.19 and complete rev.8 RAG"
       - name: Verify staged photophysics through Research Assistant
         run: npx playwright test tests/photophysics-rag-sample-grain.spec.js --project=desktop-chromium
-      - name: Verify rev.7 structure-truth corrections
-        run: npm run qa:browser -- --grep "final rev.7 structure-truth corrections are exposed at structure grain"
+      - name: Verify rev.8 primary-source corrections
+        run: npm run qa:browser -- --grep "rev.8 targeted primary-source corrections are exposed at structure and article grain"
+      - name: Verify inherited Rev.7 hostile-audit corrections
+        run: npm run qa:browser -- --grep "Rev.7 hostile-audit corrections inherited by rev.8 remain stable"
       - name: Verify local/global connectivity boundaries
         run: npm run qa:browser -- --grep "local motif versus global dimensionality boundaries remain live"
-      - name: Verify rev.7 deterministic identity boundaries
-        run: npm run qa:browser -- --grep "rev.7 exact-count and identity boundaries remain deterministic"
+      - name: Verify rev.8 deterministic identity boundaries
+        run: npm run qa:browser -- --grep "rev.8 exact-count and identity boundaries remain deterministic"
       - name: Verify deleted placeholders and export privacy boundary
         run: npm run qa:browser -- --grep "review/perspective placeholders stay absent and export stays disabled"
       - name: Stop local candidate runtime
