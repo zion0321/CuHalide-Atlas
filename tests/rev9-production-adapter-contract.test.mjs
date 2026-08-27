@@ -56,3 +56,21 @@ test('historical rev.8 implementation remains available for audit but is not a p
   const destinations=vercel.rewrites.filter(x=>['/','/index.html','/api/public-data','/motifs','/health.json'].includes(x.source)).map(x=>x.destination);
   assert.ok(destinations.every(x=>!x.includes('ui-assistant-current')&&!x.includes('record-evidence-current')&&!x.includes('meta?asset=health')));
 });
+
+test('Supabase public-safe mirror is synchronized to rev.9 and final DB hardening is versioned',()=>{
+  const runtime=read('supabase/README.md');
+  for(const token of ['Current Curated: **rev.9**','Site / UI: **51 / 51.0**','Metadata gateway: **51.0**','Public Data: **2.17.1**','Structured Photophysics: **1.4.0**','Organic Components: **1.2.0**','Research Assistant: **10.5.0**','Smart RAG evidence engine: **9.20.0**','**1,330 / 1,330** documents/embeddings','structure/phase: **947**','Core-Included: **887**','verified one-to-one space-group mappings: **717**'])assert.ok(runtime.includes(token),`stale Supabase runtime mirror; missing ${token}`);
+  for(const stale of ['Current Curated: **rev.7**','Site / UI: **50 / 50.2**','Public Data: **2.16.0**','Structured Photophysics: **1.3.1**','Organic Components: **1.1.0**','**1,329 / 1,329** documents/embeddings'])assert.ok(!runtime.includes(stale),`stale current Supabase README token: ${stale}`);
+
+  const acl=read('supabase/migrations/20260827152633_harden_cuhalide_function_execute_privileges.sql');
+  for(const token of ['cuhalide_photophysics_public_conflict_warning_v1','cuhalide_photophysics_release_regression_v3','cuhalide_atlas_current_structure_search_safe_v1','from public, anon, authenticated','to service_role'])assert.ok(acl.includes(token),`missing ACL migration token: ${token}`);
+
+  const keys=read('supabase/migrations/20260827152743_harden_rev9_current_keys_and_photophysics_fk_index.sql');
+  for(const token of ['cuhalide_public_structures_current_r9_candidate_v1_pkey','primary key (structure_id)','idx_photo_mechanism_sample','cuhalide_photophysics_mechanism_v1(sample_id)'])assert.ok(keys.includes(token),`missing key/index migration token: ${token}`);
+
+  const ledger=read('supabase/contracts/REMOTE_MIGRATION_INVENTORY_2026-08-27.md');
+  for(const token of ['production migration-history entries: **323**','20260827093021','promote_cuhalide_current_curated_rev9','20260827152633','20260827152743'])assert.ok(ledger.includes(token),`missing remote-ledger token: ${token}`);
+
+  const closeout=read('docs/CURRENT_CURATED_R9_PRODUCTION_CLOSEOUT_2026-08-27.md');
+  for(const token of ['Current Curated rev.9 production closeout','prepublication-review','1,330 / 1,330','/api/export','HTTP 410 Gone','20260827152633_harden_cuhalide_function_execute_privileges.sql','20260827152743_harden_rev9_current_keys_and_photophysics_fk_index.sql'])assert.ok(closeout.includes(token),`missing rev.9 closeout token: ${token}`);
+});
