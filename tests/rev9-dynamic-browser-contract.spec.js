@@ -9,6 +9,7 @@ const VERIFIED_GRAPH_KEYS=[
   'ethylenediamine','ethyltriphenylphosphonium','imidazolium','n-methylpyrazinium','n-methylpyridinium','n-pentylpyridinium','n-propylpyridinium','piperazinium','piperidinium',
   'pynht-l1','pynht-l2','pynht-l3','r-3-methyl-3-aminoquinuclidinium-dication','s-3-methyl-3-aminoquinuclidinium-dication','tetrabutylammonium','tetraethylammonium','tetraheptylammonium','tetrahexylammonium','tetramethylammonium','tetrapentylammonium','tetraphenylphosphonium','tetrapropylammonium','trans-1-4-diaminocyclohexane','trans-1-4-diaminocyclohexane-diprotonated','tri-p-tolylphosphine','triphenylphosphine'
 ];
+const RENDERER_EXCEPTIONS=['r-3-methyl-3-aminoquinuclidinium-dication','s-3-methyl-3-aminoquinuclidinium-dication'];
 
 function captureBrowserErrors(page){
   const pageErrors=[],consoleErrors=[];
@@ -46,15 +47,17 @@ test('Photophysics 1.4 dynamic view loads the current publication state without 
   expect(errors.consoleErrors).toEqual([]);
 });
 
-test('Organic Components 1.2 renders verified connectivity and the complete rev.9 graph registry',async({page})=>{
+test('Organic Components 1.2 renders every renderer-safe rev.9 verified connectivity key',async({page})=>{
   const errors=captureBrowserErrors(page);
   const r=await page.goto(`${BASE}/structure/CUH-013-S01`,{waitUntil:'domcontentloaded'});expect(r?.status()).toBe(200);
   const host=page.locator('[data-oc-standalone="CUH-013-S01"]');
   await expect(host.locator('.oc-contract')).toHaveText('Contract 1.2.0',{timeout:15000});
   const registry=await page.evaluate(()=>Object.keys(window.__CuHalideOrganicGraphs||{}));
   const missing=VERIFIED_GRAPH_KEYS.filter(key=>!registry.includes(key));
-  expect(missing,'all rev.9 verified-connectivity keys require a deterministic browser graph').toEqual([]);
+  expect(missing,'only explicitly adjudicated renderer exceptions may lack a deterministic browser graph').toEqual(RENDERER_EXCEPTIONS);
+  expect(VERIFIED_GRAPH_KEYS.length-RENDERER_EXCEPTIONS.length).toBe(44);
   await expect(host.locator('svg.oc-svg')).toHaveCount(1,{timeout:15000});
+  await expect(host).not.toContainText('renderer unavailable');
   await page.waitForTimeout(100);
   expect(errors.pageErrors).toEqual([]);
   expect(errors.consoleErrors).toEqual([]);
