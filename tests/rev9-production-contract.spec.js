@@ -12,14 +12,20 @@ test('rev.9 deterministic health is ready',async({request})=>{
   expect(x.checks).toMatchObject({frozen_release_contract:true,current_curated_contract:true,motif_taxonomy_contract:true,photophysics_contract:true,photophysics_all_data_bearing_two_pass:true,photophysics_conflicts_fail_closed:true,rag_embeddings_complete:true,organic_structure_state_closed:true,organic_component_connectivity_state_closed:true,mapping_terminal_boundaries_closed:true,space_group_terminal_boundaries_closed:true,dimensionality_terminal_boundaries_closed:true});
 });
 
-test('v51 portal exposes rev.9 and no active rev.8 production copy',async({page,request})=>{
+test('v51 portal exposes rev.9 and no stale current-state denominators',async({page,request})=>{
   const r=await request.get(`${BASE}/api/site`);expect(r.status()).toBe(200);const html=await r.text();
   expect(html).toContain('CUHALIDE_SITE_V51_CURRENT_CURATED_R9');
   expect(html).toContain('CUHALIDE_UI_V51_0_CURRENT_R9');
   expect(html).toContain('Current Curated rev.9');
+  expect(html).toContain('<meta name="cuhalide-site-version" content="51">');
   expect(html).toContain('Core-Included · n=887');
+  expect(html).toContain('Core-Included structure rows · n = 887');
   expect(html).toContain('All structure / phase rows · n=947');
-  expect(html).not.toContain('CUHALIDE_UI_V50_2_CURRENT_R8');
+  expect(html).toContain('1,330-document Current Curated rev.9');
+  for(const stale of ['CUHALIDE_UI_V50_2_CURRENT_R8','Core-Included structure rows · n = 886','cc.core_included_structure_rows||886','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">'])expect(html).not.toContain(stale);
+  expect(r.headers()['x-cuhalide-current-curated-revision']).toBe('9');
+  expect(r.headers()['x-cuhalide-site-version']).toBe('51');
+  expect(r.headers()['x-cuhalide-ui-version']).toBe('51.0');
   const nav=await page.goto(BASE,{waitUntil:'domcontentloaded'});expect(nav?.status()).toBe(200);
   await expect(page.locator('body')).toContainText('Current Curated rev.9');
 });
