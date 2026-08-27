@@ -17,10 +17,12 @@ function captureBrowserErrors(page){
   return {pageErrors,consoleErrors};
 }
 
-test('production shell activates only UI 51 browser assets and citation body is rev.9',async({request})=>{
+test('production shell activates only UI 51 browser assets with correct MIME and citation body is rev.9',async({request})=>{
   const root=await request.get(`${BASE}/api/site`);expect(root.status()).toBe(200);const html=await root.text();
-  for(const token of ['/ui-v51-core.css?v=51.0','/ui-v51-core.js?v=51.0','/ui-assistant-v51.css?v=51.0','/ui-photophysics-v1.js?v=1.4.0','/ui-ux-v1.js?v=51.0'])expect(html).toContain(token);
+  const currentAssets=['/ui-v51-core.css?v=51.0','/ui-v51-core.js?v=51.0','/ui-assistant-v51.css?v=51.0','/ui-photophysics-v1.js?v=1.4.0','/ui-ux-v1.js?v=51.0'];
+  for(const token of currentAssets)expect(html).toContain(token);
   for(const stale of ['/ui-v48-2.','ui-assistant-v48-5','v=50.2','CUHALIDE_UI_V48_5','/ui-photophysics-v1.js?v=1.0.0'])expect(html).not.toContain(stale);
+  for(const asset of currentAssets){const r=await request.get(`${BASE}${asset}`);expect(r.status(),asset).toBe(200);const ct=String(r.headers()['content-type']||'');if(asset.includes('.css'))expect(ct,asset).toMatch(/^text\/css\b/i);else expect(ct,asset).toMatch(/^(text|application)\/javascript\b/i)}
   const c=await request.get(`${BASE}/citation.cff`);expect(c.status()).toBe(200);const citation=await c.text();
   expect(citation).toContain('Current Curated rev.9 (prepublication review)');
   expect(citation).toContain('Structured Photophysics 1.4.0');
