@@ -18,10 +18,13 @@ The result was a split-brain presentation state: server/API metadata reported Cu
    - The old copy also exposed obsolete Pass A-only publication language.
    - The browser layer is now contract 1.4.0, requires Current Curated rev.9 and the `two_pass_verified_or_verified_no_reported_data` publication policy, and fails closed if a Pass A-only data-bearing state is encountered.
 
-2. **Organic Components browser metadata drift**
+2. **Organic Components browser metadata and renderer drift**
    - Interactive/augmented records could display Contract 1.1.0 while the authoritative backend and server-rendered record were 1.2.0.
+   - The old deterministic graph registry covered only 11 of the 46 canonical graph keys represented by the 61 current rev.9 verified-connectivity rows.
    - The browser layer now requires contract 1.2.0 and rev.9 on every organic-component API response.
-   - Verified connectivity without a deterministic browser graph no longer silently looks unresolved; it reports a renderer-asset boundary while never inferring a substitute molecular graph.
+   - Thirty-three rev.9 renderer additions were generated with RDKit 2025.09.4 and admitted only after molecular formula and formal charge matched the rev.9 authority exactly. Together with the 11 existing keys, 44/46 renderer-safe canonical keys are covered.
+   - The two remaining canonical keys are the R/S Me3-3-AQ chiral quinuclidinium entries. They remain explicit renderer exceptions because the available renderer-level representation has not yet been adjudicated sufficiently to encode topology/protonation/stereochemistry without assumption. The authoritative connectivity status is not downgraded; the browser reports that deterministic 2D rendering is unavailable and does not infer a substitute graph.
+   - Verified connectivity without a deterministic browser graph therefore no longer silently looks unresolved; it reports a renderer-asset boundary while never inferring a substitute molecular graph.
 
 3. **Structure-modal photophysics stale fallback**
    - The structure augmentation layer retained 1.3.0 fallback copy and Pass A-era states.
@@ -46,13 +49,16 @@ The result was a split-brain presentation state: server/API metadata reported Cu
 `tests/rev9-dynamic-browser-contract.spec.js` is part of both `qa:browser` and `qa:site-quality` and covers runtime behavior that the earlier static/server contracts did not:
 
 - production shell activates only UI 51 browser assets;
+- current CSS/JavaScript assets return browser-correct MIME types;
 - citation response body is rev.9;
 - `#photophysics` renders the 1.4.0 current publication state (329 two-pass verified data-bearing articles, 54 verified-no-data articles, 2,275 measurements, 3,002 normalized values, 280 analysis-eligible values and 478 mechanism claims) without a client-side unavailable state;
 - Pass A-only public-data language is absent;
 - browser `pageerror` and console-error channels remain clean on the exercised views;
 - a representative verified Organic Components 1.2.0 record renders deterministic SVG connectivity;
 - a representative terminal-unresolved record remains diagram-free/fail-closed;
-- the browser graph registry contains all 46 canonical graph keys required by the 61 current rev.9 verified-connectivity rows.
+- all 44 renderer-safe verified canonical keys are present, while only the two explicitly adjudicated Me3-3-AQ renderer exceptions may lack a browser graph.
+
+`tests/rev9-organic-renderer-contract.test.mjs` independently executes all eleven graph chunks in an isolated JavaScript context and checks registry coverage. It also validates the molecular-formula and formal-charge metadata embedded in all 33 new rev.9 renderer additions.
 
 The static rev.9 repository contract additionally locks the current browser asset versions and provenance files so a future server-only release cannot silently leave the browser augmentation layer behind.
 
