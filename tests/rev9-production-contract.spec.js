@@ -12,7 +12,7 @@ test('rev.9 deterministic health is ready',async({request})=>{
   expect(x.checks).toMatchObject({frozen_release_contract:true,current_curated_contract:true,motif_taxonomy_contract:true,photophysics_contract:true,photophysics_all_data_bearing_two_pass:true,photophysics_conflicts_fail_closed:true,rag_embeddings_complete:true,organic_structure_state_closed:true,organic_component_connectivity_state_closed:true,mapping_terminal_boundaries_closed:true,space_group_terminal_boundaries_closed:true,dimensionality_terminal_boundaries_closed:true});
 });
 
-test('v51 portal exposes rev.9 and no stale current-state denominators',async({page,request})=>{
+test('v51 portal exposes rev.9 and article index classes are not presented as structure dimensionality',async({page,request})=>{
   const r=await request.get(`${BASE}/api/site`);expect(r.status()).toBe(200);const html=await r.text();
   expect(html).toContain('CUHALIDE_SITE_V51_CURRENT_CURATED_R9');
   expect(html).toContain('CUHALIDE_UI_V51_0_CURRENT_R9');
@@ -22,6 +22,11 @@ test('v51 portal exposes rev.9 and no stale current-state denominators',async({p
   expect(html).toContain('Core-Included structure rows · n = 887');
   expect(html).toContain('All structure / phase rows · n=947');
   expect(html).toContain('1,330-document Current Curated rev.9');
+  expect(html).toContain('<span>Article index class</span><select id="adim">');
+  expect(html).toContain('Article index classes are retrieval aids only');
+  expect(html).toContain('Article index · ${esc(a.dimensionality_class)}');
+  expect(html).toContain('Article index classes are retrieval metadata, not structure-grain dimensionality');
+  expect(html).not.toContain('<span>Dimensionality</span><select id="adim">');
   for(const stale of ['CUHALIDE_UI_V50_2_CURRENT_R8','Core-Included structure rows · n = 886','cc.core_included_structure_rows||886','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">'])expect(html).not.toContain(stale);
   expect(r.headers()['x-cuhalide-current-curated-revision']).toBe('9');
   expect(r.headers()['x-cuhalide-site-version']).toBe('51');
@@ -59,10 +64,12 @@ test('public data and organic-component resolution are rev.9 fail-closed',async(
   expect(hh['x-cuhalide-organic-components-contract']).toBe('1.2.0');
 });
 
-test('record pages carry rev.9 contracts',async({request})=>{
-  const r=await request.get(`${BASE}/structure/CUH-091-S02`);expect(r.status()).toBe(200);const html=await r.text();
-  expect(html).toContain('Current Curated rev.9');
-  expect(html).toContain('P21/n');
+test('article index class and structure dimensionality remain separated at record grain',async({request})=>{
+  const r=await request.get(`${BASE}/structure/CUH-091-S02`);expect(r.status()).toBe(200);const structureHtml=await r.text();
+  expect(structureHtml).toContain('Current Curated rev.9');
+  expect(structureHtml).toContain('P21/n');
+  expect(structureHtml).toContain('<dt>Dimensionality</dt><dd>1D</dd>');
+  expect(structureHtml).not.toContain('<dt>Article index class</dt>');
   const rh=r.headers();
   expect(rh['x-cuhalide-current-curated-revision']).toBe('9');
   expect(rh['x-cuhalide-site-version']).toBe('51');
@@ -70,7 +77,13 @@ test('record pages carry rev.9 contracts',async({request})=>{
   expect(rh['x-cuhalide-public-data-version']).toBe('2.17.1');
   expect(rh['x-cuhalide-photophysics-contract']).toBe('1.4.0');
   expect(rh['x-cuhalide-organic-components-contract']).toBe('1.2.0');
-  const a=await request.get(`${BASE}/article/91`);expect(a.status()).toBe(200);const ah=a.headers();
+
+  const a=await request.get(`${BASE}/article/91`);expect(a.status()).toBe(200);const articleHtml=await a.text();
+  expect(articleHtml).toContain('<dt>Article index class</dt><dd>0D</dd>');
+  expect(articleHtml).toContain('Article index class is a literature-retrieval label, not a structure-grain connectivity assignment.');
+  expect(articleHtml).toContain('A single article may contain determinations with different dimensionalities');
+  expect(articleHtml).not.toContain('<dt>Dimensionality</dt><dd>0D</dd>');
+  const ah=a.headers();
   expect(ah['x-cuhalide-current-curated-revision']).toBe('9');
   expect(ah['x-cuhalide-site-version']).toBe('51');
   expect(ah['x-cuhalide-ui-version']).toBe('51.0');
