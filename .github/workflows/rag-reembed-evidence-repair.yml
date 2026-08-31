@@ -1,0 +1,31 @@
+name: One-time RAG evidence repair
+
+on:
+  push:
+    branches:
+      - fix/public-ui-simplify-and-resolve
+    paths:
+      - .github/workflows/rag-reembed-evidence-repair.yml
+
+permissions:
+  contents: read
+
+jobs:
+  reembed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Run deterministic 42-document re-embedding
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail-with-body --silent --show-error --max-time 300 \
+            'https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-r9-reembed-evidence-repair-ephemeral')"
+          printf '%s\n' "$response"
+          RESPONSE="$response" python3 - <<'PY'
+          import json, os
+          data=json.loads(os.environ['RESPONSE'])
+          assert data.get('ok') is True, data
+          assert data.get('remaining') == 0, data
+          assert data.get('updated') in (0, 42), data
+          PY
