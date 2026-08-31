@@ -11,8 +11,8 @@ function simplifyPublicUi(input){
   // Overview: prioritize research content instead of release-engineering state.
   x=all(x,'<span class="ver">Latest curated state</span>','<span class="ver">Updated collection</span>');
   x=x.replace(/<p class="release-note">Current Curated rev\.9[\s\S]*?<\/p>/,'<p class="release-note">Search the latest curated literature, structures and measurements. Detailed provenance remains available under About data.</p>');
-  x=all(x,"$('releaseDl').innerHTML=[['Curated through','19 Aug 2026'],['Canonical articles',cc.canonical_verified_articles||369],['Core structures',cc.core_included_structure_rows||887],['Verified SG mappings',cc.verified_space_group_rows||717],['Strict polar',cc.strict_polar_rows||91]].map","$('releaseDl').innerHTML=[['Updated','19 Aug 2026'],['Publications',cc.canonical_verified_articles||369],['Structures',cc.core_included_structure_rows||887]].map");
-  x=all(x,"$('kpis').innerHTML=[['Article audit',cc.article_audit_records||383,'reviewed DOI records'],['Canonical articles',cc.canonical_verified_articles||369,'in-scope verified'],['Structures / phases',cc.structure_phase_rows||947,'atomic/context structure rows'],['Verified mappings',cc.verified_space_group_rows||717,'one-to-one SG mappings'],['Strict polar',cc.strict_polar_rows||91,`${cc.strict_polar_articles||57} articles`]].map","$('kpis').innerHTML=[['Publications',cc.canonical_verified_articles||369,'curated articles'],['Structures',cc.core_included_structure_rows||887,'curated determinations'],['Resolved space groups',cc.resolved_space_group_rows||744,'structure records'],['Polar structures',cc.strict_polar_rows||91,`${cc.strict_polar_articles||57} articles`]].map");
+  x=all(x,"$('releaseDl').innerHTML=[['Curated through','19 Aug 2026'],['Canonical articles',cc.canonical_verified_articles||370],['Core structures',cc.core_included_structure_rows||890],['Verified SG mappings',cc.verified_space_group_rows||720],['Strict polar',cc.strict_polar_rows||91]].map","$('releaseDl').innerHTML=[['Updated','19 Aug 2026'],['Publications',cc.canonical_verified_articles||370],['Structures',cc.core_included_structure_rows||890]].map");
+  x=all(x,"$('kpis').innerHTML=[['Article audit',cc.article_audit_records||383,'reviewed DOI records'],['Canonical articles',cc.canonical_verified_articles||370,'in-scope verified'],['Structures / phases',cc.structure_phase_rows||947,'atomic/context structure rows'],['Verified mappings',cc.verified_space_group_rows||720,'one-to-one SG mappings'],['Strict polar',cc.strict_polar_rows||91,`${cc.strict_polar_articles||57} articles`]].map","$('kpis').innerHTML=[['Publications',cc.canonical_verified_articles||370,'curated articles'],['Structures',cc.core_included_structure_rows||890,'curated determinations'],['Resolved space groups',cc.resolved_space_group_rows||747,'structure records'],['Polar structures',cc.strict_polar_rows||91,`${cc.strict_polar_articles||57} articles`]].map");
   x=all(x,'.kpis{display:grid;grid-template-columns:repeat(5,1fr);','.kpis{display:grid;grid-template-columns:repeat(4,1fr);');
   x=all(x,'@media(max-width:1120px){.nav','@media(max-width:1120px){.nav');
   x=all(x,'.kpis{grid-template-columns:repeat(3,1fr)}.dashboard','.kpis{grid-template-columns:repeat(2,1fr)}.dashboard');
@@ -94,15 +94,22 @@ function patch(input){
   x=all(x,'946-row taxonomy','947-row taxonomy');
   x=all(x,'All structure / phase rows · n=946','All structure / phase rows · n=947');
   x=all(x,'All structure / phase rows · n = 946','All structure / phase rows · n = 947');
-  x=all(x,'Core-Included · n=886','Core-Included · n=887');
-  x=all(x,'Core-Included structure rows · n = 886','Core-Included structure rows · n = 887');
-  x=all(x,'Resolved structure rows · n = 710','Resolved structure rows · n = 744');
-  x=all(x,'cc.core_included_structure_rows||886','cc.core_included_structure_rows||887');
+  x=all(x,'Core-Included · n=886','Core-Included · n=890');
+  x=all(x,'Core-Included · n=887','Core-Included · n=890');
+  x=all(x,'Core-Included structure rows · n = 886','Core-Included structure rows · n = 890');
+  x=all(x,'Core-Included structure rows · n = 887','Core-Included structure rows · n = 890');
+  x=all(x,'Resolved structure rows · n = 710','Resolved structure rows · n = 747');
+  x=all(x,'Resolved structure rows · n = 744','Resolved structure rows · n = 747');
+  x=all(x,'cc.core_included_structure_rows||886','cc.core_included_structure_rows||890');
+  x=all(x,'cc.core_included_structure_rows||887','cc.core_included_structure_rows||890');
   x=all(x,'cc.structure_phase_rows||946','cc.structure_phase_rows||947');
+  x=all(x,'cc.canonical_verified_articles||369','cc.canonical_verified_articles||370');
+  x=all(x,'cc.verified_space_group_rows||684','cc.verified_space_group_rows||720');
+  x=all(x,'cc.verified_space_group_rows||717','cc.verified_space_group_rows||720');
+  x=all(x,'cc.resolved_space_group_rows||744','cc.resolved_space_group_rows||747');
   x=all(x,"'Audit view: all 946 structure/phase rows.'","'Audit view: all 947 structure/phase rows.'");
   x=all(x,'<div class="polar-num"><strong>87</strong><small>strict-polar rows · 54 articles</small></div>','<div class="polar-num"><strong>91</strong><small>strict-polar rows · 57 articles</small></div>');
   x=all(x,'<strong id="pcount">87 rows</strong>','<strong id="pcount">91 rows</strong>');
-  x=all(x,'cc.verified_space_group_rows||684','cc.verified_space_group_rows||717');
   x=all(x,'cc.strict_polar_rows||87','cc.strict_polar_rows||91');
   x=all(x,'cc.strict_polar_articles||54','cc.strict_polar_articles||57');
   for(const n of ['6','7','8'])x=all(x,`cc.live_revision||${n}`,'cc.live_revision||9');
@@ -128,7 +135,7 @@ function patch(input){
   x=simplifyPublicUi(x);
 
   if(!x.includes('CUHALIDE_UI_V51_0_CURRENT_R9')||!x.includes('Current Curated rev.9'))throw new Error('rev.9 UI adapter contract missing');
-  for(const stale of ['Core-Included structure rows · n = 886','cc.core_included_structure_rows||886','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">','/ui-v48-2.','ui-assistant-v48-5','v=50.2','CUHALIDE_UI_V48_5','/ui-photophysics-v1.js?v=1.0.0','/ui-ux-v1.js?v=1.0.0'])if(x.includes(stale))throw new Error(`stale rev.9 display/browser token: ${stale}`);
+  for(const stale of ['Core-Included structure rows · n = 886','Core-Included structure rows · n = 887','cc.core_included_structure_rows||886','cc.core_included_structure_rows||887','cc.canonical_verified_articles||369','cc.resolved_space_group_rows||744','cc.verified_space_group_rows||717','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">','/ui-v48-2.','ui-assistant-v48-5','v=50.2','CUHALIDE_UI_V48_5','/ui-photophysics-v1.js?v=1.0.0','/ui-ux-v1.js?v=1.0.0'])if(x.includes(stale))throw new Error(`stale rev.9 display/browser token: ${stale}`);
   for(const required of ['<input type="hidden" id="arel" value="Current canonical">','<input type="hidden" id="selig" value="Core - Included">','/ui-v51-core.css?v=51.0','/ui-v51-core.js?v=51.0','/ui-assistant-v51.css?v=51.0','/ui-photophysics-v1.js?v=1.4.0','/ui-ux-v1.js?v=51.0'])if(!x.includes(required))throw new Error(`UI 51 public contract guard missing: ${required}`);
   return x;
 }
