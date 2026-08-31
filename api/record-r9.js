@@ -18,24 +18,26 @@ function patch(body,kind){
   if(kind==='structure'&&!x.includes('Record not found')){
     x=all(x,'Motif confidence','Motif adjudication confidence');
     x=all(x,'Normalized reported identity','Machine-normalized identity key');
+    x=x.replace(/<dt>Motif adjudication confidence<\/dt><dd>[\s\S]*?<\/dd>/i,'');
+    x=x.replace(/<dt>Machine-normalized identity key<\/dt><dd>[\s\S]*?<\/dd>/i,'');
+    x=x.replace(/<dt>SG \/ mapping confidence<\/dt><dd>[\s\S]*?<\/dd>/i,'');
+    x=all(x,'<dd>Unresolved</dd>','<dd>Not established from available evidence</dd>');
+    x=all(x,'<p class="fine">Contract 1.2.0 · field-whitelisted structure-grain projection. Deterministic 2D connectivity is loaded only for independently verified identities; unresolved identities remain fail-closed.</p>','<p class="fine">2D connectivity is shown only when it is uniquely established from source evidence.</p>');
     const graphs='<script src="/organic-components-graphs-11.js?v=1.2.0" defer></script>';
     const ocRe=/<script\b(?=[^>]*\bsrc=["']\/organic-components-v1\.js\?v=1\.2\.0["'])[^>]*><\/script>/i;
     if(!x.includes('/organic-components-graphs-11.js?v=1.2.0')&&ocRe.test(x))x=x.replace(ocRe,m=>`${graphs}${m}`);
   }
   if(kind==='article'&&!x.includes('Record not found')){
-    x=all(x,'<dt>Dimensionality</dt><dd>','<dt>Article index class</dt><dd>');
-    const marker='</dl><p>';
-    if(x.includes(marker))x=x.replace(marker,'</dl><p class="fine"><strong>Grain note:</strong> Article index class is a literature-retrieval label, not a structure-grain connectivity assignment. A single article may contain determinations with different dimensionalities; use linked structure records for physical dimensionality.</p><p>');
-    if(x.includes('<dt>Dimensionality</dt>'))throw new Error('article page exposes article index class as structure dimensionality');
-    if(!x.includes('Article index class')||!x.includes('literature-retrieval label'))throw new Error('article dimension grain guard missing');
+    x=x.replace(/<dt>Dimensionality<\/dt><dd>[\s\S]*?<\/dd>/i,'');
+    x=x.replace(/<dt>Article index class<\/dt><dd>[\s\S]*?<\/dd>/i,'');
+    x=x.replace(/<p class="fine"><strong>Grain note:<\/strong>[\s\S]*?<\/p>/i,'');
   }
   for(const stale of ['Contract 1.1.0','Organic Components 1.1','Photophysics 1.3.','src="/organic-components-v1.js"'])if(x.includes(stale))throw new Error(`stale record browser contract: ${stale}`);
   if(kind==='structure'&&!x.includes('Record not found')){
     if(!x.includes('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic Components 1.2.0 asset missing');
     if(!x.includes('/organic-components-graphs-11.js?v=1.2.0'))throw new Error('structure record rev.9 Organic renderer layer missing');
     if(x.indexOf('/organic-components-graphs-11.js?v=1.2.0')>x.indexOf('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic renderer must load before Organic Components runtime');
-    if(x.includes('Motif confidence')||x.includes('Normalized reported identity'))throw new Error('ambiguous standalone structure terminology remains');
-    if(!x.includes('Motif adjudication confidence')||!x.includes('Machine-normalized identity key'))throw new Error('standalone structure semantic labels missing');
+    for(const hidden of ['Motif adjudication confidence','Machine-normalized identity key','SG / mapping confidence'])if(x.includes(hidden))throw new Error(`internal standalone structure field remains visible: ${hidden}`);
   }
   return x
 }

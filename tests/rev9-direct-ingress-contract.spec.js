@@ -11,7 +11,7 @@ const currentHeaders=h=>{
 
 test('direct Motif compatibility ingress cannot bypass rev.9 adapter',async({request})=>{
   const r=await request.get(`${BASE}/api/motifs.js`);expect(r.status()).toBe(200);const body=await r.text();
-  expect(body).toContain('Current Curated rev.9');expect(body).toContain('947-row taxonomy');expect(body).not.toContain('Current Curated rev.8');expect(body).not.toContain('· rev.8');currentHeaders(r.headers());
+  expect(body).toContain('<meta name="cuhalide-current-curated-revision" content="9">');expect(body).toContain('Source-resolved motifs');expect(body).toContain('>947<');expect(body).toContain('>663<');expect(body).not.toContain('Unresolved legacy mapping');expect(body).not.toContain('Current Curated rev.8');expect(body).not.toContain('· rev.8');currentHeaders(r.headers());
 });
 
 test('direct metadata compatibility ingress is rev.9 PASS rather than stale gateway',async({request})=>{

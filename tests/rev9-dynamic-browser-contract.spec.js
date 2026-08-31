@@ -32,32 +32,35 @@ test('production shell activates only UI 51 browser assets with correct MIME and
   expect(citation).not.toContain('Current Curated rev.8');
 });
 
-test('Photophysics 1.4 dynamic view loads the current publication state without client errors',async({page})=>{
+test('Photophysics loads user-facing sample-resolved measurements while internal publication stages stay hidden',async({page})=>{
   const errors=captureBrowserErrors(page);
   const r=await page.goto(`${BASE}/#photophysics`,{waitUntil:'domcontentloaded'});expect(r?.status()).toBe(200);
   const view=page.locator('.view[data-view="photophysics"]');await expect(view).toHaveClass(/active/,{timeout:15000});
-  await expect(view).toContainText('contract 1.4.0');
+  await expect(view).toContainText('Sample-resolved measurements');
   const status=page.locator('#photoStatusGrid');
-  await expect(status).toContainText('Two-pass verified',{timeout:15000});
-  for(const token of ['329','Verified no reported data','54','2275','3002','280','478','66'])await expect(status).toContainText(token);
+  for(const token of ['Sample states','940','Measurements','2275','Values','3002','Quantitative values','280','Mechanism assignments','478'])await expect(status).toContainText(token,{timeout:15000});
   await expect(status).not.toContainText('temporarily unavailable');
-  await expect(view).not.toContainText('Pass A curated');
-  await expect(view).not.toContainText('published at first-pass stage');
+  await expect(view).not.toContainText('contract 1.4.0');
+  await expect(view).not.toContainText('Two-pass verified');
+  await expect(view).not.toContainText('Pass A');
+  await expect(view).not.toContainText('329');
+  await expect(view).not.toContainText('Verified no reported data');
   await page.waitForTimeout(150);
   expect(errors.pageErrors).toEqual([]);
   expect(errors.consoleErrors).toEqual([]);
 });
 
-test('Organic Components 1.2 renders every renderer-safe rev.9 verified connectivity key',async({page})=>{
+test('Organic Components renders verified connectivity without exposing internal confidence fields',async({page})=>{
   const errors=captureBrowserErrors(page);
   const r=await page.goto(`${BASE}/structure/CUH-013-S01`,{waitUntil:'domcontentloaded'});expect(r?.status()).toBe(200);
   const main=page.locator('main');
-  await expect(main).toContainText('Motif adjudication confidence');
-  await expect(main).toContainText('Machine-normalized identity key');
-  await expect(main).not.toContainText('Motif confidence');
-  await expect(main).not.toContainText('Normalized reported identity');
+  await expect(main).not.toContainText('Motif adjudication confidence');
+  await expect(main).not.toContainText('Machine-normalized identity key');
+  await expect(main).not.toContainText('SG / mapping confidence');
+  await expect(main).not.toContainText('Contract 1.2.0');
   const host=page.locator('[data-oc-standalone="CUH-013-S01"]');
-  await expect(host.locator('.oc-contract')).toHaveText('Contract 1.2.0',{timeout:15000});
+  await expect(host).toContainText('Organic components',{timeout:15000});
+  await expect(host).toContainText('2D structures are shown only when molecular connectivity is uniquely established from source evidence.');
   const registry=await page.evaluate(()=>Object.keys(window.__CuHalideOrganicGraphs||{}));
   const missing=VERIFIED_GRAPH_KEYS.filter(key=>!registry.includes(key));
   expect(missing,'only explicitly adjudicated renderer exceptions may lack a deterministic browser graph').toEqual(RENDERER_EXCEPTIONS);
@@ -69,14 +72,15 @@ test('Organic Components 1.2 renders every renderer-safe rev.9 verified connecti
   expect(errors.consoleErrors).toEqual([]);
 });
 
-test('Organic Components 1.2 preserves terminal unresolved connectivity without an inferred diagram',async({page})=>{
+test('Organic Components preserves a genuine connectivity boundary without an inferred diagram or unresolved badge',async({page})=>{
   const errors=captureBrowserErrors(page);
   const r=await page.goto(`${BASE}/structure/CUH-001-S01`,{waitUntil:'domcontentloaded'});expect(r?.status()).toBe(200);
   const host=page.locator('[data-oc-standalone="CUH-001-S01"]');
-  await expect(host.locator('.oc-contract')).toHaveText('Contract 1.2.0',{timeout:15000});
-  await expect(host.locator('.oc-unresolved')).toContainText('2D unresolved',{timeout:15000});
+  await expect(host).toContainText('Organic components',{timeout:15000});
   await expect(host.locator('svg.oc-svg')).toHaveCount(0);
-  await expect(host).toContainText('not uniquely');
+  await expect(host).not.toContainText('2D unresolved');
+  await expect(host).not.toContainText('Contract 1.2.0');
+  await expect(host).toContainText('2D connectivity is not shown because it is not uniquely established for this record.');
   await page.waitForTimeout(100);
   expect(errors.pageErrors).toEqual([]);
   expect(errors.consoleErrors).toEqual([]);

@@ -45,9 +45,10 @@ jobs:
           const r=await fetch(url,{headers:{accept:'application/json'}}); if(!r.ok) throw new Error(`backend health ${r.status}`);
           const x=await r.json();
           const c=x.current_curated?.counts||{};
-          const expected={structure_phase_rows:947,core_included_structure_rows:887,resolved_space_group_rows:744,verified_space_group_rows:717,verified_polar_rows:101,strict_polar_rows:91,strict_polar_articles:57,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947};
+          const expected={article_audit_records:383,chemically_included_articles:372,canonical_verified_articles:370,structure_phase_rows:947,core_included_structure_rows:890,resolved_space_group_rows:747,verified_space_group_rows:720,verified_polar_rows:101,strict_polar_rows:91,strict_polar_articles:57,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947};
           if(x.ok!==true||x.current_curated?.live_revision!==9) throw new Error('rev.9 backend is not ready');
           for(const [k,v] of Object.entries(expected)) if(c[k]!==v) throw new Error(`${k}: expected ${v}, got ${c[k]}`);
+          if(x.motif_atlas?.resolved!==663||x.motif_atlas?.unresolved!==284||x.motif_atlas?.geometry_resolved!==217) throw new Error('Motif Atlas final state mismatch');
           if(x.photophysics?.version!=='1.4.0'||x.photophysics?.two_pass_verified_articles!==329||x.photophysics?.verified_no_data_articles!==54||x.photophysics?.pass_a_curated_articles!==0) throw new Error('Photophysics 1.4.0 terminal state mismatch');
           if(x.organic_components?.version!=='1.2.0'||x.organic_components?.database_authority!==true) throw new Error('Organic Components 1.2.0 mismatch');
           console.log('Current Curated rev.9 backend readiness PASS');
