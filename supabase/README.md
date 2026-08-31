@@ -32,8 +32,9 @@ Expected Current Curated counts:
 - strict-polar rows: **91**
 - strict-polar articles: **57**
 - taxonomy rows: **947**
-- resolved local Cu–X motifs: **640**
-- explicitly unresolved local motifs: **307**
+- resolved local Cu–X motifs: **655**
+- explicitly unresolved local motifs: **292**
+- structure rows with resolved motif geometry: **206**
 - unresolved legacy material-category mappings: **35**
 - RAG documents / embedded: **1,330 / 1,330**
 
@@ -65,11 +66,14 @@ Conflicts fail closed at measurement grain. Article-grain photophysics is never 
 Current structure-grain taxonomy:
 
 - taxonomy rows: **947**
-- resolved local Cu–X motifs: **640**
-- unresolved local motifs: **307**
+- source-resolved local Cu–X motifs: **655**
+- unresolved local motifs: **292**
+- resolved motif-geometry rows: **206**
 - unresolved legacy material-category mappings: **35**
 
-Local Cu–X motif and global connectivity dimensionality are independent fields. Fractional or mixed-occupancy stoichiometry is not rounded or truncated into an integer motif without independent structure-grain evidence.
+The 31 August 2026 evidence repair resolved only states that were explicitly named by primary-source titles, abstracts, member identities or already verified structure-specific notes. Production migrations **20260831060611** and **20260831061829** record those changes. No local motif, geometry, dimensionality or space group is completed from empirical stoichiometry or analogy alone.
+
+Local Cu–X motif and global connectivity dimensionality remain independent fields. Fractional or mixed-occupancy stoichiometry is not rounded or truncated into an integer motif without independent structure-grain evidence.
 
 ## Organic Components 1.2.0
 
