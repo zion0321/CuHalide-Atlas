@@ -19,3 +19,17 @@ html{scroll-padding-top:88px}body{font-size:15.25px}.shell{width:min(var(--shell
 @media(max-width:480px){.brand small{display:none}.actions{gap:8px}.hero .btn{flex:1 1 auto}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi{min-height:108px}.kpi strong{font-size:26px}.sg-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.composer-row{align-items:stretch}.composer-row .btn{width:100%}.status-list div{grid-template-columns:125px minmax(0,1fr)}}
 @media(max-width:350px){.kpis,.sg-grid{grid-template-columns:minmax(0,1fr)}.kpi:last-child:nth-child(odd){grid-column:auto}.view[data-view="structures"] td,.view[data-view="polar"] td{grid-template-columns:86px minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){.panel,.card,.kpi,.release,.modal-card,.ui-backtop,.mobile-filter-toggle .ui-chevron{transition:none}}
+
+
+/* UI51_PUBLIC_SIMPLIFICATION_A11Y */
+.kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+th{color:#fff!important}
+.polar-num,.polar-num strong,.polar-num small{color:#fff!important}
+.footer-links a{display:inline-flex;align-items:center;min-height:32px;padding:4px 2px}
+@media(max-width:1120px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:780px){
+  .footer-links{row-gap:8px}
+  .footer-links a{min-height:36px;padding:8px 4px}
+  .view[data-view="structures"] tbody td:nth-child(7)::before{content:"Source"!important}
+  .view[data-view="structures"] tbody td:nth-child(8)::before{content:""!important}
+}

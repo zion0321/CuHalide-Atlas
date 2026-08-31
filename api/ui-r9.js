@@ -80,7 +80,6 @@ function patch(input){
   x=all(x,'/ui-v48-2.css?v=50.2','/ui-v51-core.css?v=51.0');
   x=all(x,'/ui-v48-2.js?v=50.2','/ui-v51-core.js?v=51.0');
   x=all(x,'/ui-assistant-v48-5.css?v=20260818','/ui-assistant-v51.css?v=51.0');
-  if(!x.includes('/ui-v51-public-fixes.css?v=51.0'))x=x.replace('</head>','<link rel="stylesheet" href="/ui-v51-public-fixes.css?v=51.0"></head>');
   x=all(x,'/ui-photophysics-v1.css?v=1.0.0','/ui-photophysics-v1.css?v=1.4.0');
   x=all(x,'/ui-photophysics-v1.js?v=1.0.0','/ui-photophysics-v1.js?v=1.4.0');
   x=all(x,'/ui-ux-v1.css?v=1.0.0','/ui-ux-v1.css?v=51.0');

@@ -1,7 +1,0 @@
-/* CuHalide Atlas UI 51 public-facing accessibility and simplified-layout corrections. */
-.kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important}
-th{color:#fff!important}
-.polar-num,.polar-num strong,.polar-num small{color:#fff!important}
-.footer-links a{display:inline-flex;align-items:center;min-height:32px;padding:4px 2px}
-@media(max-width:1120px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:780px){.footer-links{row-gap:8px}.footer-links a{min-height:36px;padding:8px 4px}}
