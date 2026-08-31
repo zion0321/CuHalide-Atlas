@@ -102,6 +102,7 @@ function patch(input){
   x=all(x,'cc.core_included_structure_rows||887','cc.core_included_structure_rows||890');
   x=all(x,'cc.structure_phase_rows||946','cc.structure_phase_rows||947');
   x=all(x,'cc.canonical_verified_articles||369','cc.canonical_verified_articles||370');
+  x=all(x,'Curated literature · n = 369','Curated literature · n = 370');
   x=all(x,'cc.verified_space_group_rows||684','cc.verified_space_group_rows||720');
   x=all(x,'cc.verified_space_group_rows||717','cc.verified_space_group_rows||720');
   x=all(x,'cc.resolved_space_group_rows||744','cc.resolved_space_group_rows||747');
@@ -133,8 +134,8 @@ function patch(input){
   x=simplifyPublicUi(x);
 
   if(!x.includes('CUHALIDE_UI_V51_0_CURRENT_R9')||!x.includes('Current Curated rev.9'))throw new Error('rev.9 UI adapter contract missing');
-  for(const stale of ['Core-Included structure rows · n = 886','Core-Included structure rows · n = 887','cc.core_included_structure_rows||886','cc.core_included_structure_rows||887','cc.canonical_verified_articles||369','cc.resolved_space_group_rows||744','cc.verified_space_group_rows||717','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">','/ui-v48-2.','ui-assistant-v48-5','v=50.2','CUHALIDE_UI_V48_5','/ui-photophysics-v1.js?v=1.0.0','/ui-ux-v1.js?v=1.0.0'])if(x.includes(stale))throw new Error(`stale rev.9 display/browser token: ${stale}`);
-  for(const required of ['<input type="hidden" id="arel" value="Current canonical">','<input type="hidden" id="selig" value="Core - Included">','/ui-v51-core.css?v=51.0','/ui-v51-core.js?v=51.0','/ui-assistant-v51.css?v=51.0','/ui-photophysics-v1.js?v=1.4.0','/ui-ux-v1.js?v=51.0'])if(!x.includes(required))throw new Error(`UI 51 public contract guard missing: ${required}`);
+  for(const stale of ['Curated literature · n = 369','Core-Included structure rows · n = 886','Core-Included structure rows · n = 887','cc.core_included_structure_rows||886','cc.core_included_structure_rows||887','cc.canonical_verified_articles||369','cc.resolved_space_group_rows||744','cc.verified_space_group_rows||717','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">','/ui-v48-2.','ui-assistant-v48-5','v=50.2','CUHALIDE_UI_V48_5','/ui-photophysics-v1.js?v=1.0.0','/ui-ux-v1.js?v=1.0.0'])if(x.includes(stale))throw new Error(`stale rev.9 display/browser token: ${stale}`);
+  for(const required of ['Curated literature · n = 370','<input type="hidden" id="arel" value="Current canonical">','<input type="hidden" id="selig" value="Core - Included">','/ui-v51-core.css?v=51.0','/ui-v51-core.js?v=51.0','/ui-assistant-v51.css?v=51.0','/ui-photophysics-v1.js?v=1.4.0','/ui-ux-v1.js?v=51.0'])if(!x.includes(required))throw new Error(`UI 51 public contract guard missing: ${required}`);
   return x;
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
