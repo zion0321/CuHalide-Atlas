@@ -20,11 +20,12 @@ function patch(body){
   x=x.replace(/<div class="notice"><strong>Conservative motif rule:<\/strong>[\s\S]*?<\/div>/,'<div class="notice"><strong>How to read motifs:</strong> a local Cu–X motif and the dimensionality of the extended inorganic structure are different properties. A motif is shown only when it is established from structure-level evidence.</div>');
   x=x.replace(/<article class="card"><strong>Unresolved legacy mapping<\/strong><p class="fine">[\s\S]*?<\/p><\/article>/g,'');
   x=x.replace(/<tr><td>[^<]*<\/td><td>Unresolved<\/td><td>[^<]*<\/td><td>[^<]*<\/td><td>[^<]*<\/td><\/tr>/g,'');
+  x=all(x,'<td>Unresolved legacy mapping</td>','<td>—</td>');
   x=all(x,'Resolved and unresolved Cu–X motif families by material class','Source-resolved Cu–X motif families by material class');
   x=x.replace(/<article class="card"><strong><a href="\/structure\/[^\"]+">[\s\S]*?<\/a><\/strong><p class="fine">[^<]* · [^<]* · Unresolved · [^<]*<\/p><\/article>/g,'');
   x=x.replace(/<div class="provenance"><strong>Evidence boundary\.<\/strong>[\s\S]*?<\/div>/,'<div class="provenance">Motifs are shown only when supported at the structure level. Open an individual structure record for crystallographic context and source links.</div>');
   if(/\brev\.[678]\b/i.test(x))throw new Error('stale current-curated revision in Motif Atlas');
-  if(x.includes('<td>Unresolved</td>')||x.includes('Legacy category unresolved')||x.includes('Motif unresolved'))throw new Error('unresolved QA state remains promoted as a Motif Atlas category');
+  if(x.includes('<td>Unresolved</td>')||x.includes('Unresolved legacy mapping')||x.includes('Legacy category unresolved')||x.includes('Motif unresolved'))throw new Error('unresolved QA state remains promoted as a Motif Atlas category');
   return x
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
