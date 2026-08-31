@@ -20,19 +20,19 @@ test('rev.9 production adapters expose the validated scientific/runtime contract
   assert.doesNotMatch(middleware,/new URL\('\/api\/record-evidence-current'/);
 
   const ui=read('api/ui-r9.js');
-  for(const token of ["REV='9'","UI='51.0'","SITE='51'",'Current Curated rev.9','947 atomic/context structure records','Core-Included · n=887','Smart RAG 9.20.0','Structured Photophysics 1.4.0','Organic Components 1.2.0','Article index class','Article index · ${esc(a.dimensionality_class)}','Article index classes are retrieval aids only','Article index classes are retrieval metadata, not structure-grain dimensionality'])assert.ok(ui.includes(token),`missing UI token: ${token}`);
+  for(const token of ["REV='9'","UI='51.0'","SITE='51'",'Current Curated rev.9','947 atomic/context structure records','Core-Included · n=887','Smart RAG 9.20.0','Structured Photophysics 1.4.0','Organic Components 1.2.0','simplifyPublicUi','<input type="hidden" id="arel" value="Current canonical">','<input type="hidden" id="selig" value="Core - Included">',"const shown=v=>!v||/^unresolved$/i.test(String(v).trim())?'—':v"] )assert.ok(ui.includes(token),`missing UI token: ${token}`);
 
   const meta=read('api/meta-r9.js');
-  for(const token of ["PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'","RAG='9.20.0'","ASSISTANT='10.5.0'","REV='9'",'structure_phase_rows:947','core_included_structure_rows:887','resolved_space_group_rows:744','verified_space_group_rows:717','verified_polar_rows:101','strict_polar_rows:91','strict_polar_articles:57','rag_documents:1330','taxonomy_rows:947','motif_resolved_rows:640','motif_unresolved_rows:307'])assert.ok(meta.includes(token),`missing meta token: ${token}`);
+  for(const token of ["PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'","RAG='9.20.0'","ASSISTANT='10.5.0'","REV='9'",'structure_phase_rows:947','core_included_structure_rows:887','resolved_space_group_rows:744','verified_space_group_rows:717','verified_polar_rows:101','strict_polar_rows:91','strict_polar_articles:57','rag_documents:1330','taxonomy_rows:947','motif_resolved_rows:655','motif_unresolved_rows:292','motif_geometry_resolved_rows:206'])assert.ok(meta.includes(token),`missing meta token: ${token}`);
 
   const data=read('api/public-data-r9.js');
   for(const token of ["REV='9'","VERSION='2.17.1'","PH='1.4.0'","OC='1.2.0'","ARTICLE_DIMENSION_SEMANTICS='article_index_class_not_structure_grain'",'o.article_index_class=o.dimensionality_class','o.dimensionality_field_semantics=ARTICLE_DIMENSION_SEMANTICS',"o.structure_dimensionality_source='structure_phase_records'","o.serving_context==='current_curated'","o.attached_photophysics_context==='current_curated'"])assert.ok(data.includes(token),`missing public-data token: ${token}`);
 
   const record=read('api/record-r9.js');
-  for(const token of ["REV='9'","SITE='51'","UI='51.0'","PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'",'requestKind(req)','Article index class','literature-retrieval label','article dimension grain guard missing','/organic-components-v1.js?v=1.2.0'])assert.ok(record.includes(token),`missing record token: ${token}`);
+  for(const token of ["REV='9'","SITE='51'","UI='51.0'","PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'",'requestKind(req)','/organic-components-v1.js?v=1.2.0','internal standalone structure field remains visible','Not established from available evidence'])assert.ok(record.includes(token),`missing record token: ${token}`);
   assert.match(record,/if\(kind==='article'/);
   const motifs=read('api/motifs-r9.js');
-  for(const token of ["REV='9'","SITE='51'","UI='51.0'",'stale current-curated revision in Motif Atlas'])assert.ok(motifs.includes(token),`missing motif token: ${token}`);
+  for(const token of ["REV='9'","SITE='51'","UI='51.0'",'Source-resolved motifs','unresolved QA state remains promoted as a Motif Atlas category'])assert.ok(motifs.includes(token),`missing motif token: ${token}`);
 
   const agent=read('api/agent.js');
   for(const token of ["SITE_VERSION='51'","UI_VERSION='51.0'","PUBLIC_DATA_VERSION='2.17.1'","ASSISTANT_VERSION='10.5.0'","EVIDENCE_VERSION='9.20.0'","PHOTOPHYSICS_CONTRACT='1.4.0'","ORGANIC_COMPONENTS_CONTRACT='1.2.0'","CURRENT_REVISION='9'",'cuhalide-v51-evidence-v10.5.0','cuhalide-v51-conversation-v10.5.0',"res.setHeader('X-CuHalide-Photophysics-Contract',PHOTOPHYSICS_CONTRACT)","res.setHeader('X-CuHalide-Organic-Components-Contract',ORGANIC_COMPONENTS_CONTRACT)",'x.photophysics_contract=PHOTOPHYSICS_CONTRACT','x.organic_components_contract=ORGANIC_COMPONENTS_CONTRACT'])assert.ok(agent.includes(token),`missing agent token: ${token}`);
@@ -45,12 +45,12 @@ test('UI 51 dynamic browser assets and citation provenance are synchronized to r
   for(const token of ["x=all(x,'/ui-v48-2.css?v=50.2','/ui-v51-core.css?v=51.0')","x=all(x,'/ui-v48-2.js?v=50.2','/ui-v51-core.js?v=51.0')","x=all(x,'/ui-assistant-v48-5.css?v=20260818','/ui-assistant-v51.css?v=51.0')","x=all(x,'/ui-photophysics-v1.js?v=1.0.0','/ui-photophysics-v1.js?v=1.4.0')","x=all(x,'/ui-ux-v1.js?v=1.0.0','/ui-ux-v1.js?v=51.0')",'stale rev.9 display/browser token'])assert.ok(ui.includes(token),`missing active-asset migration/guard token: ${token}`);
 
   const ph=read('public/ui-photophysics-v1.js');
-  for(const token of ["PHOTOPHYSICS_CONTRACT='1.4.0'","CURRENT_REVISION=9","PUBLICATION_POLICY='two_pass_verified_or_verified_no_reported_data'",'Pass A-only articles must not be published','Two-pass verified','Verified no reported data','Structured data withheld'])assert.ok(ph.includes(token),`missing Photophysics 1.4 browser token: ${token}`);
-  for(const stale of ["PHOTOPHYSICS_CONTRACT='1.3.3'",'published at first-pass stage','Primary-evidence Pass A is complete; independent Pass B has not yet been completed.'])assert.ok(!ph.includes(stale),`stale Photophysics browser token: ${stale}`);
+  for(const token of ["PHOTOPHYSICS_CONTRACT='1.4.0'","CURRENT_REVISION=9","PUBLICATION_POLICY='two_pass_verified_or_verified_no_reported_data'",'Pass A-only articles must not be published','Sample-resolved photophysics','Reviewed · no reported data','Data not available','Source discrepancy'])assert.ok(ph.includes(token),`missing Photophysics 1.4 browser/internal token: ${token}`);
+  for(const stale of ["PHOTOPHYSICS_CONTRACT='1.3.3'",'published at first-pass stage','Primary-evidence Pass A is complete; independent Pass B has not yet been completed.','<span class="photo-stage verified">Two-pass verified</span>'])assert.ok(!ph.includes(stale),`stale/public-internal Photophysics browser token: ${stale}`);
 
   const oc=read('public/organic-components-v1.js');
-  for(const token of ["CONTRACT='1.2.0'","CURRENT_REVISION=9",'Expected Organic Components','Contract ${CONTRACT}','deterministic 2D renderer asset is unavailable'])assert.ok(oc.includes(token),`missing Organic Components 1.2 browser token: ${token}`);
-  for(const stale of ['Contract 1.1.0','Organic Components 1.1 projection',"dataset.organicComponents='1.1.0'"])assert.ok(!oc.includes(stale),`stale Organic Components browser token: ${stale}`);
+  for(const token of ["CONTRACT='1.2.0'","CURRENT_REVISION=9",'Expected Organic Components','2D connectivity is shown only when molecular connectivity is uniquely established from source evidence.',"if(!first)return ''"])assert.ok(oc.includes(token),`missing Organic Components 1.2 browser token: ${token}`);
+  for(const stale of ['Contract 1.1.0','Organic Components 1.1 projection',"dataset.organicComponents='1.1.0'",'normalization_confidence','deterministic 2D renderer asset is unavailable'])assert.ok(!oc.includes(stale),`stale/internal Organic Components browser token: ${stale}`);
 
   const sph=read('public/ui-structure-photophysics-v1.js');
   for(const token of ["CONTRACT='1.4.0'","CURRENT_REVISION=9",'Withheld pending independent verification','does not satisfy the Photophysics 1.4.0 public-state gate'])assert.ok(sph.includes(token),`missing structure-photophysics 1.4 token: ${token}`);
@@ -67,6 +67,18 @@ test('UI 51 dynamic browser assets and citation provenance are synchronized to r
   const codemeta=read('codemeta.json');
   for(const token of ['prepublication-current-r9','Current Curated rev.9','Structured Photophysics 1.4.0','Organic Components 1.2.0'])assert.ok(codemeta.includes(token),`missing CodeMeta rev.9 token: ${token}`);
   assert.ok(!codemeta.includes('current-r8'),'stale rev.8 CodeMeta metadata');
+});
+
+test('public browsing contract hides internal curation controls while preserving fixed scientific scope',()=>{
+  const ui=read('api/ui-r9.js'),record=read('api/record-r9.js'),motifs=read('api/motifs-r9.js'),ph=read('public/ui-photophysics-v1.js'),oc=read('public/organic-components-v1.js');
+  for(const token of ['<input type="hidden" id="arel" value="Current canonical">','<input type="hidden" id="selig" value="Core - Included">','Curated literature.','Curated structure records.','Browse and cite the Atlas'])assert.ok(ui.includes(token),`public minimality guard missing: ${token}`);
+  for(const token of ['Machine-normalized identity key','Motif adjudication confidence','SG / mapping confidence'])assert.ok(record.includes(`x=x.replace`)||record.includes(token),`standalone removal implementation missing for ${token}`);
+  for(const token of ['Machine-normalized identity key','Motif adjudication confidence','SG / mapping confidence'])assert.ok(record.includes(`internal standalone structure field remains visible`),`standalone hidden-field guard missing: ${token}`);
+  assert.ok(motifs.includes("x.includes('<td>Unresolved</td>')"),'Motif Atlas unresolved-family guard missing');
+  assert.ok(ph.includes('PUBLICATION_POLICY'),'Photophysics publication gate must remain internal');
+  assert.ok(!ph.includes('<p class="eyebrow">Structured photophysics · contract'),'Photophysics contract leaked into public heading');
+  assert.ok(!ph.includes('<span class="photo-stage verified">Two-pass verified</span>'),'two-pass engineering label leaked into public UI');
+  assert.ok(!oc.includes('normalization_confidence'),'Organic normalization confidence leaked into public UI renderer');
 });
 
 test('rev.9 adapter preserves prepublication and privacy boundaries',()=>{
@@ -87,7 +99,7 @@ test('historical rev.8 implementation remains available for audit but is not a p
   assert.ok(destinations.every(x=>!x.includes('ui-assistant-current')&&!x.includes('record-evidence-current')&&!x.includes('meta?asset=health')));
 });
 
-test('Supabase public-safe mirror is synchronized to rev.9 and final DB hardening is versioned',()=>{
+test('Supabase public-safe mirror is synchronized to rev.9 and current evidence repairs are versioned',()=>{
   const runtime=read('supabase/README.md');
   for(const token of ['Current Curated: **rev.9**','Site / UI: **51 / 51.0**','Metadata gateway: **51.0**','Public Data: **2.17.1**','Structured Photophysics: **1.4.0**','Organic Components: **1.2.0**','Research Assistant: **10.5.0**','Smart RAG evidence engine: **9.20.0**','**1,330 / 1,330** documents/embeddings','structure/phase: **947**','Core-Included: **887**','verified one-to-one space-group mappings: **717**'])assert.ok(runtime.includes(token),`stale Supabase runtime mirror; missing ${token}`);
   for(const stale of ['Current Curated: **rev.7**','Site / UI: **50 / 50.2**','Public Data: **2.16.0**','Structured Photophysics: **1.3.1**','Organic Components: **1.1.0**','**1,329 / 1,329** documents/embeddings'])assert.ok(!runtime.includes(stale),`stale current Supabase README token: ${stale}`);
@@ -98,8 +110,13 @@ test('Supabase public-safe mirror is synchronized to rev.9 and final DB hardenin
   const keys=read('supabase/migrations/20260827152743_harden_rev9_current_keys_and_photophysics_fk_index.sql');
   for(const token of ['cuhalide_public_structures_current_r9_candidate_v1_pkey','primary key (structure_id)','idx_photo_mechanism_sample','cuhalide_photophysics_mechanism_v1(sample_id)'])assert.ok(keys.includes(token),`missing key/index migration token: ${token}`);
 
+  const motif=read('supabase/migrations/20260831060611_resolve_explicit_rev9_motif_evidence_v2.sql');
+  for(const token of ['CUH-227-S01','CUH-068-S02','CUH-215-S01','CUH-307-S01','CUH-181-S01','CUH-337-S03','CUH-184-S02','PRIMARY_SOURCE_EXPLICIT'])assert.ok(motif.includes(token),`missing explicit motif repair token: ${token}`);
+  const geometry=read('supabase/migrations/20260831061829_resolve_explicit_rev9_motif_geometry_v2.sql');
+  for(const token of ['CUH-321-S01','bipyramidal Cu4I4 cluster','CUH-052-S01','cubane Cu4I4 molecular cluster','CUH-160-S01','edge-shared tetrahedra','CUH-323-S01'])assert.ok(geometry.includes(token),`missing explicit geometry repair token: ${token}`);
+
   const ledger=read('supabase/contracts/REMOTE_MIGRATION_INVENTORY_2026-08-27.md');
-  for(const token of ['production migration-history entries: **323**','20260827093021','promote_cuhalide_current_curated_rev9','20260827152633','20260827152743'])assert.ok(ledger.includes(token),`missing remote-ledger token: ${token}`);
+  for(const token of ['production migration-history entries: **323**','20260827093021','promote_cuhalide_current_curated_rev9','20260827152633','20260827152743'])assert.ok(ledger.includes(token),`missing dated remote-ledger token: ${token}`);
 
   const closeout=read('docs/CURRENT_CURATED_R9_PRODUCTION_CLOSEOUT_2026-08-27.md');
   for(const token of ['Current Curated rev.9 production closeout','prepublication-review','1,330 / 1,330','/api/export','HTTP 410 Gone','20260827152633_harden_cuhalide_function_execute_privileges.sql','20260827152743_harden_rev9_current_keys_and_photophysics_fk_index.sql'])assert.ok(closeout.includes(token),`missing rev.9 closeout token: ${token}`);
