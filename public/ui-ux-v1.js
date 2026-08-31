@@ -3,7 +3,7 @@
   'use strict';
   const load=(src,key)=>new Promise((resolve,reject)=>{const existing=document.querySelector(`script[data-cuhalide-layer="${key}"]`);if(existing){if(existing.dataset.loaded==='1')resolve();else existing.addEventListener('load',resolve,{once:true});return}const s=document.createElement('script');s.src=src;s.async=false;s.dataset.cuhalideLayer=key;s.onload=()=>{s.dataset.loaded='1';resolve()};s.onerror=reject;document.head.appendChild(s)});
   const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn,{once:true}):queueMicrotask(fn);
-  const text=(node,value)=>{if(node)node.textContent=value};
+  const text=(node,value)=>{if(node&&node.textContent!==value)node.textContent=value};
   const pageCopy=(view,value)=>text(document.querySelector(`.view[data-view="${view}"] .page-head p:not(.eyebrow)`),value);
 
   function polishStartGrid(){
@@ -27,20 +27,19 @@
     if(growth)text(growth.querySelector('h2'),'Curated publications by year');
     const dim=document.querySelector('.view[data-view="home"] #dimDist')?.closest('.panel');
     if(dim)text(dim.querySelector('.denom'),'Curated structure records · n = 890');
-    const searchFooter=document.querySelector('.ux-search-footer');
-    text(searchFooter,'Search covers curated literature and structures; source publications remain linked by DOI.');
+    text(document.querySelector('.ux-search-footer'),'Search covers curated literature and structures; source publications remain linked by DOI.');
 
     pageCopy('articles','Search curated articles by title, DOI, year, halogen or category, then open a record for related structures and reported measurements.');
     pageCopy('structures','Browse curated structure and phase determinations. Search by formula, phase, dimensionality or space group; local motifs are available in Motifs, and photophysics is linked only where the evidence supports it.');
     pageCopy('rag','Ask naturally about Cu(I) halide materials, structures, literature or photophysics. When a question depends on Atlas data, the assistant retrieves source-linked evidence automatically.');
     pageCopy('methods','See how the Atlas separates article, structure, motif and measurement evidence, and how unresolved or conflicting source information is handled.');
 
-    const ragHead=document.querySelector('.view[data-view="rag"] .page-head .eyebrow');
-    text(ragHead,'Evidence-linked scientific assistant');
-    const reset=document.getElementById('sreset');text(reset,'Reset filters');
+    text(document.querySelector('.view[data-view="rag"] .page-head .eyebrow'),'Evidence-linked scientific assistant');
+    text(document.getElementById('sreset'),'Reset filters');
 
     const polar=document.querySelector('.view[data-view="polar"] .polar-intro p:not(.eyebrow)');
-    if(polar)polar.innerHTML='This subset includes curated structures in polar point groups whose space group and one-to-one structure mapping are both supported at the highest evidence level. <strong>Polar does not mean ferroelectric.</strong>';
+    const polarCopy='This subset includes curated structures in polar point groups whose space group and one-to-one structure mapping are both supported at the highest evidence level. <strong>Polar does not mean ferroelectric.</strong>';
+    if(polar&&polar.innerHTML!==polarCopy)polar.innerHTML=polarCopy;
 
     const method=[...document.querySelectorAll('.view[data-view="methods"] .method')].find(x=>x.querySelector('.no')?.textContent.trim()==='06');
     if(method){text(method.querySelector('h2'),'Keep evidence at the right level');text(method.querySelector('p'),'Article-level labels support literature retrieval and are not substitutes for structure-level dimensionality. Photophysics is linked to a specific structure only when the source evidence establishes that connection.');}
