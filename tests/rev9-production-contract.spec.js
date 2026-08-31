@@ -23,7 +23,7 @@ test('v51 portal keeps final rev.9 scope while hiding internal curation controls
   expect(html).toContain('cc.canonical_verified_articles||370');
   expect(html).toContain('cc.core_included_structure_rows||890');
   expect(html).toContain('cc.resolved_space_group_rows||747');
-  expect(html).toContain('cc.verified_space_group_rows||720');
+  expect(html).toContain('cc.strict_polar_rows||91');
   expect(html).toContain('1,330-document Current Curated rev.9');
   expect(html).not.toContain('<span>Article index class</span><select id="adim">');
   expect(html).not.toContain('Article index · ${esc(a.dimensionality_class)}');
