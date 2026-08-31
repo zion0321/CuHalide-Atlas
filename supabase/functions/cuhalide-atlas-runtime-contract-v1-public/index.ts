@@ -3,7 +3,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 const BASE=Deno.env.get('SUPABASE_URL')!,KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,REST=`${BASE}/rest/v1`;
 const RELEASE='3.0.2',PUBLIC_DATA_VERSION='2.17.1',EVIDENCE_VERSION='9.20.0',ASSISTANT_VERSION='10.5.0',PHOTOPHYSICS_VERSION='1.4.0',ORGANIC_COMPONENTS_VERSION='1.2.0',CURRENT_REVISION=9;
 const SITE_VERSION='51',UI_VERSION='51.0',META_VERSION='51.0',PUBLIC='https://cuhalide-atlas-v3.vercel.app',PUBLICATION_STATE='prepublication-review';
-const EXPECT={articles:383,included:372,canonical:369,structures:947,core:887,resolved:744,verified:717,polar:101,strict:91,strictArticles:57,rag:1330,taxonomy:947,motifResolved:655,motifUnresolved:292,motifGeometry:206,motifLegacy:35,phTwoPass:329,phNoData:54,phSamples:940,phMeasurements:2275,phValues:3002,phAnalysisValues:280,phMechanisms:478,phConflicts:66};
+const EXPECT={articles:383,included:372,canonical:370,structures:947,core:890,resolved:747,verified:720,polar:101,strict:91,strictArticles:57,rag:1330,taxonomy:947,motifResolved:663,motifUnresolved:284,motifGeometry:217,motifLegacy:35,phTwoPass:329,phNoData:54,phSamples:940,phMeasurements:2275,phValues:3002,phAnalysisValues:280,phMechanisms:478,phConflicts:66};
 const AUTH={apikey:KEY,authorization:`Bearer ${KEY}`,accept:'application/json','content-type':'application/json'};
 const ALLOWED=new Set([PUBLIC,'http://localhost:8765','http://127.0.0.1:8765','http://127.0.0.1:4173']);
 const CACHE_TTL_MS=15000;let contractCache:any=null;
