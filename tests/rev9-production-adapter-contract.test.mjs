@@ -9,24 +9,26 @@ const lacks=(text,tokens,label='stale token')=>{for(const token of tokens)assert
 test('rev.9 production adapters expose the validated scientific/runtime contract',()=>{
   const vercel=JSON.parse(read('vercel.json'));
   const rewrites=new Map(vercel.rewrites.map(x=>[x.source,x.destination]));
-  assert.equal(rewrites.get('/'),'/api/ui-r9');
+  assert.equal(rewrites.get('/'),'/api/ui-r9-current');
   assert.equal(rewrites.get('/api/public-data'),'/api/public-data-r9');
   assert.equal(rewrites.get('/motifs'),'/api/motifs-r9');
   assert.match(rewrites.get('/article/:id'),/record-r9/);
   assert.equal(rewrites.get('/health.json'),'/api/meta-r9?asset=health');
 
   const middleware=read('middleware.js');
-  has(middleware,["assistantTarget=new URL('/api/ui-r9'","publicDataTarget=new URL('/api/public-data-r9'","recordTarget=new URL('/api/record-r9'","REV='9'","UI='51.0'","SITE='51'","PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'",'release-3.0.2-ui-v51.0-current-r9',"'/api/public-data'","'/api/public-data.js'"],'middleware token');
+  has(middleware,["assistantTarget=new URL('/api/ui-r9-current'","publicDataTarget=new URL('/api/public-data-r9'","recordTarget=new URL('/api/record-r9'","REV='9'","UI='51.0'","SITE='51'","PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'",'release-3.0.2-ui-v51.0-current-r9',"'/api/public-data'","'/api/public-data.js'"],'middleware token');
   assert.doesNotMatch(middleware,/ui-v50\.2-current-r8/);
   assert.doesNotMatch(middleware,/new URL\('\/api\/ui-assistant-current'/);
   assert.doesNotMatch(middleware,/new URL\('\/api\/record-evidence-current'/);
 
   const ui=read('api/ui-r9.js');
-  has(ui,["REV='9'","UI='51.0'","SITE='51'",'Current Curated rev.9','947 atomic/context structure records','Core-Included · n=890','Smart RAG 9.20.0','Structured Photophysics 1.4.0','Organic Components 1.2.0','simplifyPublicUi','<input type="hidden" id="arel" value="Current canonical">','<input type="hidden" id="selig" value="Core - Included">','const shown=v=>','Not established from available evidence'],'UI token');
+  has(ui,["REV='9'","UI='51.0'","SITE='51'",'Current Curated rev.9','947 atomic/context structure records','Core-Included · n=890','Smart RAG 9.20.0','Structured Photophysics 1.4.0','Organic Components 1.2.0','simplifyPublicUi','<input type="hidden" id="arel" value="Current canonical">','<input type="hidden" id="selig" value="Core - Included">','const shown=v=>','Not established from available evidence'],'base UI token');
+  const currentUi=read('api/ui-r9-current.js');
+  has(currentUi,['cc.canonical_verified_articles||371','cc.core_included_structure_rows||901','cc.resolved_space_group_rows||760','cc.verified_space_group_rows||733','cc.strict_polar_rows||94','cc.strict_polar_articles||60','stale 2026-09-10 rev.9 UI fallback'],'current UI token');
 
   const meta=read('api/meta-r9.js');
-  has(meta,["PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'","RAG='9.20.0'","ASSISTANT='10.5.0'","REV='9'",'canonical_verified_articles:370','structure_phase_rows:947','core_included_structure_rows:890','resolved_space_group_rows:747','verified_space_group_rows:720','verified_polar_rows:101','strict_polar_rows:91','strict_polar_articles:57','rag_documents:1330','taxonomy_rows:947','motif_resolved_rows:663','motif_unresolved_rows:284','motif_geometry_resolved_rows:217'],'meta token');
-  lacks(meta,['canonical_verified_articles:369','core_included_structure_rows:887','resolved_space_group_rows:744','verified_space_group_rows:717','motif_resolved_rows:655','motif_unresolved_rows:292','motif_geometry_resolved_rows:206'],'stale meta token');
+  has(meta,["PUBLIC_DATA='2.17.1'","PH='1.4.0'","OC='1.2.0'","RAG='9.20.0'","ASSISTANT='10.5.0'","REV='9'",'canonical_verified_articles:371','structure_phase_rows:947','core_included_structure_rows:901','resolved_space_group_rows:760','verified_space_group_rows:733','verified_polar_rows:101','strict_polar_rows:94','strict_polar_articles:60','rag_documents:1330','taxonomy_rows:947','motif_resolved_rows:674','motif_unresolved_rows:273','motif_geometry_resolved_rows:264','representation_rows:976','represented_structures:919','unresolved_rows:905'],'meta token');
+  lacks(meta,['canonical_verified_articles:369','canonical_verified_articles:370','core_included_structure_rows:887','core_included_structure_rows:890','resolved_space_group_rows:744','resolved_space_group_rows:747','verified_space_group_rows:717','verified_space_group_rows:720','motif_resolved_rows:655','motif_resolved_rows:663','motif_unresolved_rows:292','motif_unresolved_rows:284','motif_geometry_resolved_rows:206','motif_geometry_resolved_rows:217'],'stale meta token');
 
   const data=read('api/public-data-r9.js');
   has(data,["REV='9'","VERSION='2.17.1'","PH='1.4.0'","OC='1.2.0'","ARTICLE_DIMENSION_SEMANTICS='article_index_class_not_structure_grain'",'o.article_index_class=o.dimensionality_class','o.dimensionality_field_semantics=ARTICLE_DIMENSION_SEMANTICS',"o.structure_dimensionality_source='structure_phase_records'","o.serving_context==='current_curated'","o.attached_photophysics_context==='current_curated'"],'public-data token');
@@ -104,7 +106,7 @@ test('historical implementations remain audit-only and never production entry po
 
 test('Supabase public-safe mirror includes current evidence repairs and hardening',()=>{
   const runtime=read('supabase/README.md');
-  has(runtime,['Current Curated: **rev.9**','Site / UI: **51 / 51.0**','Metadata gateway: **51.0**','Public Data: **2.17.1**','Structured Photophysics: **1.4.0**','Organic Components: **1.2.0**','Research Assistant: **10.5.0**','Smart RAG evidence engine: **9.20.0**','**1,330 / 1,330** documents/embeddings','canonical verified: **370**','structure/phase: **947**','Core-Included: **890**','resolved space-group rows: **747**','verified one-to-one space-group mappings: **720**','resolved local Cu–X motifs: **663**','explicitly unresolved local motifs: **284**','structure rows with resolved motif geometry: **217**','zero current structure/RAG scientific-field mismatches'],'Supabase runtime token');
+  has(runtime,['Current Curated: **rev.9**','Site / UI: **51 / 51.0**','Metadata gateway: **51.0**','Public Data: **2.17.1**','Structured Photophysics: **1.4.0**','Organic Components: **1.2.0**','Research Assistant: **10.5.0**','Smart RAG evidence engine: **9.20.0**','**1,330 / 1,330** documents/embeddings','canonical verified: **371**','structure/phase: **947**','Core-Included: **901**','resolved space-group rows: **760**','verified one-to-one space-group mappings: **733**','resolved local Cu–X motifs: **674**','explicitly unresolved local motifs: **273**','structure rows with resolved motif geometry: **264**','public representation rows: **976**','represented structures: **919**','unresolved rows: **905**','zero structure/RAG scientific-field mismatches'],'Supabase runtime token');
   lacks(runtime,['canonical verified: **369**','Core-Included: **887**','resolved space-group rows: **744**','verified one-to-one space-group mappings: **717**','resolved local Cu–X motifs: **655**','explicitly unresolved local motifs: **292**','structure rows with resolved motif geometry: **206**','Current Curated: **rev.7**','Site / UI: **50 / 50.2**','Public Data: **2.16.0**','Structured Photophysics: **1.3.1**','Organic Components: **1.1.0**','**1,329 / 1,329** documents/embeddings'],'stale Supabase runtime token');
 
   const acl=read('supabase/migrations/20260827152633_harden_cuhalide_function_execute_privileges.sql');
@@ -117,9 +119,9 @@ test('Supabase public-safe mirror includes current evidence repairs and hardenin
   const geometry=read('supabase/migrations/20260831061829_resolve_explicit_rev9_motif_geometry_v2.sql');
   has(geometry,['CUH-321-S01','bipyramidal Cu4I4 cluster','CUH-052-S01','cubane Cu4I4 molecular cluster','CUH-160-S01','edge-shared tetrahedra','CUH-323-S01'],'explicit geometry repair token');
   const finalRepair=read('supabase/migrations/20260831064506_resolve_final_source_explicit_rev9_batch_v3.sql');
-  has(finalRepair,['record_id=205','P21/c; Pnma; Pnna','r.canonical<>370','r.core<>890','r.motif_resolved<>663'],'final source-explicit repair token');
+  has(finalRepair,['record_id=205','P21/c; Pnma; Pnna','r.canonical<>370','r.core<>890','r.motif_resolved<>663'],'historical 31-Aug source-explicit repair token');
   const ragRefresh=read('supabase/migrations/20260831070622_refresh_rev9_rag_after_evidence_repairs.sql');
-  has(ragRefresh,['expected 41 stale structure RAG docs','expected exactly 42 documents queued for re-embedding'],'RAG repair token');
+  has(ragRefresh,['expected 41 stale structure RAG docs','expected exactly 42 documents queued for re-embedding'],'historical RAG repair token');
 
   const ledger=read('supabase/contracts/REMOTE_MIGRATION_INVENTORY_2026-08-27.md');
   has(ledger,['production migration-history entries: **323**','20260827093021','promote_cuhalide_current_curated_rev9','20260827152633','20260827152743'],'dated remote-ledger token');
