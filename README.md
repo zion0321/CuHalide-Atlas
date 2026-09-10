@@ -12,29 +12,31 @@ Two scientific layers are intentionally distinct.
 
 ### Current Curated rev.9 — living scientific state
 
-Curated through **2026-08-19**, with source-explicit evidence repairs verified through **2026-08-31**. Rev.9 is the current full article + atomic/context-structure snapshot. It preserves the hostile structure-truth audit and targeted primary-source corrections, then closes member-level identity and evidence-state boundaries only where primary evidence supports a unique assignment.
+Curated through **2026-08-19**, with source-explicit evidence repairs verified through **2026-09-10**. Rev.9 is the current full article + atomic/context-structure snapshot. It preserves the hostile structure-truth audit and targeted primary-source corrections, then closes member-level identity and evidence-state boundaries only where primary evidence supports a unique assignment.
 
 | Denominator | Current Curated rev.9 |
 |---|---:|
 | Article audit records | 383 |
 | Chemically included articles | 372 |
-| Canonical verified articles | 370 |
+| Canonical verified articles | 371 |
 | Structure / phase rows | 947 |
-| Core-Included structure rows | 890 |
-| Resolved space-group rows | 747 |
-| Verified one-to-one SG rows | 720 |
+| Core-Included structure rows | 901 |
+| Resolved space-group rows | 760 |
+| Verified one-to-one SG rows | 733 |
 | Verified polar rows | 101 |
-| Strict-polar rows | 91 |
-| Strict-polar articles | 57 |
+| Strict-polar rows | 94 |
+| Strict-polar articles | 60 |
 | RAG documents / embeddings | 1,330 / 1,330 |
 
-The structure taxonomy is one-to-one with the current structure register: **947 taxonomy rows**. Local Cu–X motif is source-resolved for **663** rows and explicitly unresolved for **284** rows; motif geometry is source-resolved for **217** rows. **35** unresolved rows retain an unresolved legacy material-category mapping rather than being force-classified.
+The structure taxonomy is one-to-one with the current structure register: **947 taxonomy rows**. Local Cu–X motif is source-resolved for **674** rows and explicitly unresolved for **273** rows; motif geometry is source-resolved for **264** rows and explicitly unresolved for **683** rows. **35** unresolved rows retain an unresolved legacy material-category mapping rather than being force-classified.
 
 Rev.9 makes evidence boundaries first-class data. Every Core-Included structure has an explicit organic-component structure-grain state, every reported component row has an explicit canonical-connectivity state, and unresolved space-group, dimensionality and mapping cases are represented as terminal evidence states rather than guessed values. A reported name, abbreviation or empirical formula remains searchable without being promoted to a verified molecular graph.
 
-The 31 August evidence repair also re-opened source-explicit cases that older conservative rules had left unresolved. In particular, Record 205 was promoted after direct primary-article verification established three isolated 1D iodocuprate members with space groups **P21/c, Pnma and Pnna** and explicit Cu3I4 / Cu2I3 chain descriptions. Other motif/geometry repairs were accepted only when member-specific source language or verified structure evidence was explicit; empirical stoichiometry and chemical analogy were not used to fill gaps.
+The 31 August evidence repair re-opened source-explicit cases that older conservative rules had left unresolved. In particular, Record 205 was promoted after direct primary-article verification established three isolated 1D iodocuprate members with space groups **P21/c, Pnma and Pnna** and explicit Cu3I4 / Cu2I3 chain descriptions.
 
-After those repairs, exactly 41 structure RAG documents plus the Record 205 article document were regenerated from the current authority and re-embedded. The active current corpus is again **1,330 / 1,330**, with validated content hashes and zero structure/RAG scientific-field mismatches.
+A second source-explicit evidence-recovery pass on **10 September 2026** reconciled 16 user-supplied primary-evidence assets against the current corpus. They mapped to **11 existing article records and added no duplicate article**. All 11 records now have complementary main-article plus SI/CIF evidence in the reviewed evidence bundle. Record 156 (`10.1021/acs.cgd.5b01721`) was promoted from primary-evidence-pending to verified after the main article, SI and multi-block CIF established seven member-specific SCXRD determinations; compounds without single-crystal evidence remain explicitly unresolved, and the PXRD-supported assignment for compound 9 is retained without copying an unmeasured space group. The same pass resolved or strengthened member-specific crystallography/topology for Records 110, 136, 271, 276, 299, 311 and 346 while preserving unresolved boundaries for Records 307 and 342 where the recovered SI does not provide member-specific crystallographic tables. Empirical stoichiometry and chemical analogy were not used to fill gaps.
+
+The 10 September repair regenerated and re-embedded **49 affected Current Curated RAG documents**. The active current corpus is **1,330 / 1,330**, with validated content hashes and zero missing embeddings. Frozen Release 3.0.2 was not rewritten.
 
 The crystallographic hostile QA also recomputes internally checkable cell-volume relationships. Source-level inconsistencies are retained as source-reported values with explicit erratum flags when no uniquely verified corrected CIF/value exists; source data are not silently repaired by arithmetic.
 
@@ -80,16 +82,16 @@ The 2026-06-30 date is a boundary of the archived snapshot, **not** a cutoff for
 
 Rev.9 is primarily a scientific-state hardening release rather than a broad reinterpretation of the corpus.
 
-- The current structure register is **947 rows**, with **890 Core-Included** rows.
+- The current structure register is **947 rows**, with **901 Core-Included** rows.
 - Canonical space-group derivation is internally consistent; the `P21/n` setting is represented as space-group type **No. 14**.
 - Member-level organic-component coverage is closed with explicit resolution states. Token/name recognition is deliberately separated from verified canonical molecular connectivity.
-- The public Organic Components projection contains **965 classified representation rows across 908 structures**. Only **61 rows across 59 structures** currently carry `verified_connectivity`; **894** remain explicitly unresolved and **10** are `not_applicable`. These counts describe representation/resolution rows, not a claim that 965 unique organic molecules exist.
+- The public Organic Components projection contains **976 classified representation rows across 919 structures**. Only **61 rows across 59 structures** currently carry `verified_connectivity`; **905** remain explicitly unresolved and **10** are `not_applicable`. These counts describe representation/resolution rows, not a claim that 976 unique organic molecules exist.
 - Cell-parameter/volume consistency is checked systematically. Publisher/source-level inconsistencies are flagged without fabricating corrected experimental values.
 - The full current RAG corpus contains **383 article + 947 structure = 1,330 documents**, all with 1024-dimensional BGE-M3 embeddings and validated content hashes.
 
 Rev.8 and Rev.7 remain historical recovery/audit layers. Frozen Release 3.0.2 remains the immutable archival denominator.
 
-See [`docs/CURRENT_CURATED_R9_2026-08-27.md`](docs/CURRENT_CURATED_R9_2026-08-27.md) for the Rev.9 release note; the 31 August source-explicit repair is recorded in the production migration mirror under `supabase/migrations/`.
+See [`docs/CURRENT_CURATED_R9_2026-08-27.md`](docs/CURRENT_CURATED_R9_2026-08-27.md) for the original Rev.9 closeout note. Later source-explicit evidence repairs are living-state corrections recorded by the production curation/audit layer and do not rewrite the Frozen Release 3.0.2 snapshot.
 
 ## Review runtime contract
 

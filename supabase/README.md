@@ -6,7 +6,7 @@ This directory versions the **public-safe Supabase runtime and database contract
 
 - Publication state: **prepublication review**. Direct-link review is allowed; formal public release/indexing is not.
 - Frozen scientific base: **Release 3.0.2** — immutable; snapshot coverage inclusive through **2026-06-30**.
-- Current Curated: **rev.9** — curated through **2026-08-19**, with source-explicit evidence repairs verified through **2026-08-31**.
+- Current Curated: **rev.9** — curated through **2026-08-19**, with source-explicit evidence repairs verified through **2026-09-10**.
 - Site / UI: **51 / 51.0**.
 - Metadata gateway: **51.0**.
 - Public Data: **2.17.1**.
@@ -23,18 +23,18 @@ Expected Current Curated counts:
 
 - article audit: **383**
 - chemically included: **372**
-- canonical verified: **370**
+- canonical verified: **371**
 - structure/phase: **947**
-- Core-Included: **890**
-- resolved space-group rows: **747**
-- verified one-to-one space-group mappings: **720**
+- Core-Included: **901**
+- resolved space-group rows: **760**
+- verified one-to-one space-group mappings: **733**
 - verified polar rows: **101**
-- strict-polar rows: **91**
-- strict-polar articles: **57**
+- strict-polar rows: **94**
+- strict-polar articles: **60**
 - taxonomy rows: **947**
-- resolved local Cu–X motifs: **663**
-- explicitly unresolved local motifs: **284**
-- structure rows with resolved motif geometry: **217**
+- resolved local Cu–X motifs: **674**
+- explicitly unresolved local motifs: **273**
+- structure rows with resolved motif geometry: **264**
 - unresolved legacy material-category mappings: **35**
 - RAG documents / embedded: **1,330 / 1,330**
 
@@ -66,14 +66,16 @@ Conflicts fail closed at measurement grain. Article-grain photophysics is never 
 Current structure-grain taxonomy:
 
 - taxonomy rows: **947**
-- source-resolved local Cu–X motifs: **663**
-- unresolved local motifs: **284**
-- resolved motif-geometry rows: **217**
+- source-resolved local Cu–X motifs: **674**
+- unresolved local motifs: **273**
+- resolved motif-geometry rows: **264**
 - unresolved legacy material-category mappings: **35**
 
-The 31 August 2026 evidence-repair sequence resolves only states directly supported by member-specific primary evidence. Production migrations **20260831060611**, **20260831061829** and **20260831064506** record the source-explicit motif/geometry/crystallographic repairs. Record 205 was promoted from pending only after direct primary-article verification established its three one-dimensional iodocuprate members and space groups P21/c, Pnma and Pnna. No local motif, geometry, dimensionality or space group is completed from empirical stoichiometry or analogy alone.
+The 31 August 2026 evidence-repair sequence resolved only states directly supported by member-specific primary evidence. Production migrations **20260831060611**, **20260831061829** and **20260831064506** record that source-explicit motif/geometry/crystallographic repair. Record 205 was promoted from pending only after direct primary-article verification established its three one-dimensional iodocuprate members and space groups P21/c, Pnma and Pnna.
 
-Production migration **20260831070622** then refreshed exactly the 41 structure RAG documents plus the Record 205 article document whose retrieval content had become stale after those evidence repairs. Those 42 documents were re-embedded with the existing BGE-M3 current-curated pipeline; post-repair checks require 1,330/1,330 embeddings, valid content hashes and zero structure/RAG scientific-field mismatches.
+On **10 September 2026**, a second primary-evidence recovery pass reconciled 16 supplied main-article/SI/CIF assets against 11 existing article records. It added no duplicate DOI. Record 156 was promoted from primary-evidence-pending after its main article, SI and multi-block CIF were verified; seven member-specific SCXRD determinations were established while compounds without suitable single crystals retained explicit terminal unresolved states. The same pass strengthened source-explicit crystallography or topology for Records 110, 136, 271, 276, 299, 311 and 346. Records 307 and 342 gained SI coverage without fabricating member-specific crystallography that the recovered SI did not report. No local motif, geometry, dimensionality or space group is completed from empirical stoichiometry or analogy alone.
+
+Production migration **20260831070622** historically refreshed exactly the 41 structure RAG documents plus the Record 205 article document affected by the 31 August repair. The 10 September evidence recovery later regenerated and re-embedded **49 affected Current Curated RAG documents**. Current validation requires **1,330/1,330** embeddings, valid content hashes and zero structure/RAG scientific-field mismatches.
 
 Local Cu–X motif and global connectivity dimensionality remain independent fields. Fractional or mixed-occupancy stoichiometry is not rounded or truncated into an integer motif without independent structure-grain evidence.
 
@@ -81,15 +83,15 @@ Local Cu–X motif and global connectivity dimensionality remain independent fie
 
 The database resolution tables are authoritative for canonical molecular connectivity.
 
-- public representation rows: **965**
-- represented structures: **908**
-- distinct component keys: **438**
+- public representation rows: **976**
+- represented structures: **919**
+- distinct component keys: **447**
 - verified-connectivity rows: **61**
 - structures with verified connectivity: **59**
-- unresolved rows: **894**
+- unresolved rows: **905**
 - not-applicable rows: **10**
 
-Every Core-Included structure has an explicit structure-grain organic-component state and every component representation has an explicit connectivity-resolution state. Names, abbreviations and empirical-formula tokens remain searchable without being promoted to a verified graph. Public 2D depiction is fail-closed to `verified_connectivity`.
+Every Core-Included structure has an explicit structure-grain organic-component state and every public component representation has an explicit connectivity-resolution state. The 10 September Record 156 promotion adds member-specific pypzpy ligand tokens, but those names are not converted into canonical molecular graphs without independent connectivity verification. Names, abbreviations and empirical-formula tokens remain searchable without being promoted to a verified graph. Public 2D depiction is fail-closed to `verified_connectivity`.
 
 ## Public ingress architecture
 
@@ -181,7 +183,7 @@ Temporary indexing, debugging, export, benchmark and obsolete compatibility endp
 
 An `ACTIVE` Supabase function can therefore still be a safe retirement stub; source behavior and authentication configuration are authoritative. Once the final live dependency is migrated, a compatibility slug must be retired rather than preserved indefinitely.
 
-The one-time rev.9 evidence-repair re-embedding function was retired immediately after the 42 queued documents returned to 1,330/1,330; its active slug, if retained for audit history, is an authenticated HTTP 410 stub rather than a write surface.
+One-time evidence-repair/re-embedding functions are retired immediately after their bounded work completes; retained slugs, if any, are authenticated HTTP 410 stubs rather than write surfaces.
 
 ## Operational validation
 

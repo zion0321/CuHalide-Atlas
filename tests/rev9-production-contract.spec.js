@@ -6,8 +6,8 @@ test('rev.9 deterministic health is ready',async({request})=>{
   const r=await request.get(`${BASE}/health.json`);expect(r.status()).toBe(200);const x=await r.json();
   expect(x).toMatchObject({ok:true,status:'PASS',site_readiness:'PASS',publication_state:'prepublication-review',current_curated_revision:9,site_version:'51',ui_version:'51.0',meta_version:'51.0',public_data_version:'2.17.1',photophysics_contract_version:'1.4.0',organic_components_contract_version:'1.2.0',smart_rag_version:'9.20.0',research_assistant_version:'10.5.0'});
   expect(x.current_curated.live_revision).toBe(9);
-  expect(x.current_curated.counts).toMatchObject({article_audit_records:383,chemically_included_articles:372,canonical_verified_articles:370,structure_phase_rows:947,core_included_structure_rows:890,resolved_space_group_rows:747,verified_space_group_rows:720,verified_polar_rows:101,strict_polar_rows:91,strict_polar_articles:57,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947});
-  expect(x.motif_atlas).toMatchObject({ok:true,taxonomy_rows:947,resolved:663,unresolved:284,geometry_resolved:217});
+  expect(x.current_curated.counts).toMatchObject({article_audit_records:383,chemically_included_articles:372,canonical_verified_articles:371,structure_phase_rows:947,core_included_structure_rows:901,resolved_space_group_rows:760,verified_space_group_rows:733,verified_polar_rows:101,strict_polar_rows:94,strict_polar_articles:60,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947});
+  expect(x.motif_atlas).toMatchObject({ok:true,taxonomy_rows:947,resolved:674,unresolved:273,geometry_resolved:264});
   expect(x.photophysics).toMatchObject({ok:true,version:'1.4.0',article_queue:383,pass_a_complete_articles:383,pass_a_pending_articles:0,pass_a_curated_articles:0,two_pass_verified_articles:329,verified_no_data_articles:54,publishable_samples:940,publishable_measurements:2275,publishable_values:3002,analysis_eligible_values:280,publishable_mechanism_claims:478,publication_policy:'two_pass_verified_or_verified_no_reported_data'});
   expect(x.organic_components).toMatchObject({ok:true,version:'1.2.0',database_authority:true});
   expect(x.checks).toMatchObject({frozen_release_contract:true,current_curated_contract:true,motif_taxonomy_contract:true,photophysics_contract:true,photophysics_all_data_bearing_two_pass:true,photophysics_conflicts_fail_closed:true,rag_embeddings_complete:true,organic_structure_state_closed:true,organic_component_connectivity_state_closed:true,mapping_terminal_boundaries_closed:true,space_group_terminal_boundaries_closed:true,dimensionality_terminal_boundaries_closed:true});
@@ -20,14 +20,14 @@ test('v51 portal keeps final rev.9 scope while hiding internal curation controls
   expect(html).toContain('<meta name="cuhalide-site-version" content="51">');
   expect(html).toContain('<input type="hidden" id="arel" value="Current canonical">');
   expect(html).toContain('<input type="hidden" id="selig" value="Core - Included">');
-  expect(html).toContain('cc.canonical_verified_articles||370');
-  expect(html).toContain('cc.core_included_structure_rows||890');
-  expect(html).toContain('cc.resolved_space_group_rows||747');
-  expect(html).toContain('cc.strict_polar_rows||91');
+  expect(html).toContain('cc.canonical_verified_articles||371');
+  expect(html).toContain('cc.core_included_structure_rows||901');
+  expect(html).toContain('cc.resolved_space_group_rows||760');
+  expect(html).toContain('cc.strict_polar_rows||94');
   expect(html).toContain('1,330-document Current Curated rev.9');
   expect(html).not.toContain('<span>Article index class</span><select id="adim">');
   expect(html).not.toContain('Article index · ${esc(a.dimensionality_class)}');
-  for(const stale of ['Core-Included · n=887','Core-Included structure rows · n = 887','Core-Included structure rows · n = 886','cc.canonical_verified_articles||369','cc.core_included_structure_rows||887','cc.resolved_space_group_rows||744','cc.verified_space_group_rows||717','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">'])expect(html).not.toContain(stale);
+  for(const stale of ['Core-Included · n=887','Core-Included structure rows · n = 887','Core-Included structure rows · n = 886','cc.canonical_verified_articles||369','cc.canonical_verified_articles||370','cc.core_included_structure_rows||887','cc.core_included_structure_rows||890','cc.resolved_space_group_rows||744','cc.resolved_space_group_rows||747','cc.verified_space_group_rows||717','cc.verified_space_group_rows||720','cc.strict_polar_rows||91','cc.structure_phase_rows||946','Audit view: all 946 structure/phase rows.','1,329-document Current Curated rev.9','<meta name="cuhalide-site-version" content="50">'])expect(html).not.toContain(stale);
   expect(r.headers()['x-cuhalide-current-curated-revision']).toBe('9');
   expect(r.headers()['x-cuhalide-site-version']).toBe('51');
   expect(r.headers()['x-cuhalide-ui-version']).toBe('51.0');
@@ -40,13 +40,13 @@ test('v51 portal keeps final rev.9 scope while hiding internal curation controls
 
 test('manifest and public Motif Atlas agree with final rev.9 without promoting unknowns',async({request,page})=>{
   const m=await request.get(`${BASE}/release-manifest.json`);expect(m.status()).toBe(200);const j=await m.json();
-  expect(j.current_curated).toMatchObject({revision:9,canonical_verified_articles:370,structure_phase_rows:947,core_included_structure_rows:890,resolved_space_group_rows:747,verified_space_group_rows:720,verified_polar_rows:101,strict_polar_rows:91,strict_polar_articles:57,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947,motif_resolved_rows:663,motif_unresolved_rows:284,motif_geometry_resolved_rows:217});
+  expect(j.current_curated).toMatchObject({revision:9,canonical_verified_articles:371,structure_phase_rows:947,core_included_structure_rows:901,resolved_space_group_rows:760,verified_space_group_rows:733,verified_polar_rows:101,strict_polar_rows:94,strict_polar_articles:60,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947,motif_resolved_rows:674,motif_unresolved_rows:273,motif_geometry_resolved_rows:264});
   expect(j.runtime).toMatchObject({site_version:'51',ui_version:'51.0',meta_version:'51.0',public_data_version:'2.17.1',photophysics_contract_version:'1.4.0',organic_components_contract_version:'1.2.0',smart_rag_version:'9.20.0',research_assistant_version:'10.5.0'});
   expect(j.frozen_release).toMatchObject({version:'3.0.2',immutable:true,structure_phase_rows:878});
   const raw=await request.get(`${BASE}/motifs`);expect(raw.status()).toBe(200);const motifHtml=await raw.text();
   expect(motifHtml).toContain('Source-resolved motifs');
   expect(motifHtml).toContain('>947<');
-  expect(motifHtml).toContain('>663<');
+  expect(motifHtml).toContain('>674<');
   expect(motifHtml).not.toContain('Motif unresolved');
   expect(motifHtml).not.toContain('Legacy category unresolved');
   expect(motifHtml).not.toContain('Unresolved legacy mapping');
@@ -56,14 +56,14 @@ test('manifest and public Motif Atlas agree with final rev.9 without promoting u
   expect(mh['x-cuhalide-ui-version']).toBe('51.0');
   const mr=await page.goto(`${BASE}/motifs`,{waitUntil:'domcontentloaded'});expect(mr?.status()).toBe(200);
   await expect(page.locator('body')).toContainText('Source-resolved motifs');
-  await expect(page.locator('body')).toContainText('663');
+  await expect(page.locator('body')).toContainText('674');
   await expect(page.locator('body')).not.toContainText('Motif unresolved');
   await expect(page.locator('body')).not.toContainText('Legacy category unresolved');
 });
 
 test('public data and organic-component resolution are rev.9 fail-closed',async({request})=>{
   const h=await request.get(`${BASE}/api/public-data?action=organic-components-health`);expect(h.status()).toBe(200);const x=await h.json();
-  expect(x).toMatchObject({ok:true,contract_version:'1.2.0',representation_rows:965,represented_structures:908,verified_connectivity_rows:61,unresolved_rows:894,not_applicable_rows:10,current_curated_revision:9});
+  expect(x).toMatchObject({ok:true,contract_version:'1.2.0',representation_rows:976,represented_structures:919,verified_connectivity_rows:61,unresolved_rows:905,not_applicable_rows:10,current_curated_revision:9});
   expect(x.checks).toMatchObject({database_organic_structure_state_closed:true,database_component_connectivity_state_closed:true,database_component_orphans_clear:true,raw_primary_files_exposed:false,raw_evidence_locators_exposed:false,private_evidence_fields_exposed:false});
   const hh=h.headers();
   expect(hh['x-cuhalide-current-curated-revision']).toBe('9');
