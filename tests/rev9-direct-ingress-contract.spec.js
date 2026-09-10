@@ -11,7 +11,7 @@ const currentHeaders=h=>{
 
 test('direct Motif compatibility ingress cannot bypass rev.9 adapter',async({request})=>{
   const r=await request.get(`${BASE}/api/motifs.js`);expect(r.status()).toBe(200);const body=await r.text();
-  expect(body).toContain('<meta name="cuhalide-current-curated-revision" content="9">');expect(body).toContain('Source-resolved motifs');expect(body).toContain('>947<');expect(body).toContain('>663<');expect(body).not.toContain('Unresolved legacy mapping');expect(body).not.toContain('Current Curated rev.8');expect(body).not.toContain('· rev.8');currentHeaders(r.headers());
+  expect(body).toContain('<meta name="cuhalide-current-curated-revision" content="9">');expect(body).toContain('Source-resolved motifs');expect(body).toContain('>947<');expect(body).toContain('>674<');expect(body).not.toContain('Unresolved legacy mapping');expect(body).not.toContain('Current Curated rev.8');expect(body).not.toContain('· rev.8');currentHeaders(r.headers());
 });
 
 test('direct metadata compatibility ingress is rev.9 PASS rather than stale gateway',async({request})=>{
@@ -21,7 +21,7 @@ test('direct metadata compatibility ingress is rev.9 PASS rather than stale gate
 
 test('legacy data ingress is minimized rev.9 public data with deprecation warning',async({request})=>{
   const r=await request.get(`${BASE}/api/data.js?action=organic-components-health`);expect(r.status()).toBe(200);const x=await r.json();
-  expect(x).toMatchObject({ok:true,contract_version:'1.2.0',current_curated_revision:9,representation_rows:965,verified_connectivity_rows:61,unresolved_rows:894,not_applicable_rows:10});const h=r.headers();currentHeaders(h);expect(h['x-cuhalide-public-data-version']).toBe('2.17.1');expect(h['x-cuhalide-photophysics-contract']).toBe('1.4.0');expect(h['x-cuhalide-organic-components-contract']).toBe('1.2.0');expect(h.warning||'').toContain('Legacy /api/data route');
+  expect(x).toMatchObject({ok:true,contract_version:'1.2.0',current_curated_revision:9,representation_rows:976,represented_structures:919,verified_connectivity_rows:61,unresolved_rows:905,not_applicable_rows:10});const h=r.headers();currentHeaders(h);expect(h['x-cuhalide-public-data-version']).toBe('2.17.1');expect(h['x-cuhalide-photophysics-contract']).toBe('1.4.0');expect(h['x-cuhalide-organic-components-contract']).toBe('1.2.0');expect(h.warning||'').toContain('Legacy /api/data route');
 });
 
 test('direct sitemap is rev.9, canonical, and remains non-enumerating',async({request})=>{
