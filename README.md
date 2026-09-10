@@ -85,7 +85,7 @@ Rev.9 is primarily a scientific-state hardening release rather than a broad rein
 - The current structure register is **947 rows**, with **901 Core-Included** rows.
 - Canonical space-group derivation is internally consistent; the `P21/n` setting is represented as space-group type **No. 14**.
 - Member-level organic-component coverage is closed with explicit resolution states. Token/name recognition is deliberately separated from verified canonical molecular connectivity.
-- The public Organic Components projection contains **976 classified representation rows across 919 structures**. Only **61 rows across 59 structures** currently carry `verified_connectivity`; **891** remain explicitly unresolved and **10** are `not_applicable`. These counts describe representation/resolution rows, not a claim that 976 unique organic molecules exist.
+- The public Organic Components projection contains **976 classified representation rows across 919 structures**. Only **61 rows across 59 structures** currently carry `verified_connectivity`; **905** remain explicitly unresolved and **10** are `not_applicable`. These counts describe representation/resolution rows, not a claim that 976 unique organic molecules exist.
 - Cell-parameter/volume consistency is checked systematically. Publisher/source-level inconsistencies are flagged without fabricating corrected experimental values.
 - The full current RAG corpus contains **383 article + 947 structure = 1,330 documents**, all with 1024-dimensional BGE-M3 embeddings and validated content hashes.
 
