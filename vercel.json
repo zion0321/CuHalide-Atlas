@@ -4,6 +4,7 @@
   "functions": {
     "api/ui-r10.js": { "includeFiles": "public/index.html" },
     "api/ui-r9.js": { "includeFiles": "public/index.html" },
+    "api/assets-r10.js": { "includeFiles": ["public/ui-photophysics-v1.js", "public/ui-structure-photophysics-v1.js", "public/organic-components-v1.js"] },
     "api/ui-assistant-current.js": { "includeFiles": "public/index.html" },
     "api/ui-site.js": { "includeFiles": "public/index.html" },
     "api/meta-r9.js": { "includeFiles": "CITATION.cff" },
@@ -19,6 +20,9 @@
     { "source": "/api/ui-assistant.js", "destination": "/api/ui-r10" },
     { "source": "/api/ui-assistant-current", "destination": "/api/ui-r10" },
     { "source": "/api/ui-assistant-current.js", "destination": "/api/ui-r10" },
+    { "source": "/ui-photophysics-v1.js", "destination": "/api/assets-r10?asset=photophysics" },
+    { "source": "/ui-structure-photophysics-v1.js", "destination": "/api/assets-r10?asset=structure_photophysics" },
+    { "source": "/organic-components-v1.js", "destination": "/api/assets-r10?asset=organic_components" },
     { "source": "/api/public-data", "destination": "/api/public-data-r9" },
     { "source": "/api/public-data.js", "destination": "/api/public-data-r9" },
     { "source": "/api/record", "destination": "/api/record-r9" },
