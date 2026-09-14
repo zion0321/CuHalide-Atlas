@@ -15,7 +15,7 @@ async function expectClean(errors,page){
   expect(errors.consoleErrors).toEqual([]);
 }
 
-test('home research paths describe the public experience without internal eligibility jargon',async({page})=>{
+test('home research paths describe the Site 52 public experience without internal eligibility jargon',async({page})=>{
   const errors=captureBrowserErrors(page);
   const r=await page.goto(`${BASE}/#home`,{waitUntil:'domcontentloaded'});expect(r?.status()).toBe(200);
   const start=page.locator('.ux-start');
@@ -26,7 +26,7 @@ test('home research paths describe the public experience without internal eligib
   await expect(start).toContainText('Ask across the Atlas');
   await expect(start).not.toContainText('confidence and source mapping');
   await expect(start).not.toContainText('evidence layer');
-  await expect(page.locator('#dimDist').locator('..')).toContainText('Curated structure records · n = 890');
+  await expect(page.locator('#dimDist').locator('..')).toContainText('Curated structure records · n = 901');
   await expect(page.locator('.ux-hero-search-hint')).toContainText('curated structure register');
   await expectClean(errors,page);
 });
