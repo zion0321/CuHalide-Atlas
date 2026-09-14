@@ -1,0 +1,70 @@
+name: Free-tier production health monitor
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: free-tier-production-health-monitor
+  cancel-in-progress: true
+
+jobs:
+  production-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check deterministic site health
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 2 --retry-delay 5 \
+            --max-time 45 \
+            'https://cuhalide-atlas-v3.vercel.app/health.json' \
+            -o /tmp/health.json
+          python3 - <<'PY'
+          import json
+          with open('/tmp/health.json', encoding='utf-8') as f:
+              data = json.load(f)
+          assert data.get('ok') is True, data
+          assert data.get('status') == 'PASS', data
+          assert str(data.get('current_curated_revision') or data.get('current_curated', {}).get('live_revision') or '') == '10', data
+          print('health: PASS')
+          PY
+
+      - name: Check canonical Current Curated article
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 2 --retry-delay 5 \
+            --max-time 45 \
+            'https://cuhalide-atlas-v3.vercel.app/api/public-data?action=article&id=384' \
+            -o /tmp/article384.json
+          python3 - <<'PY'
+          import json
+          with open('/tmp/article384.json', encoding='utf-8') as f:
+              data = json.load(f)
+          item = data.get('item') or {}
+          assert int(item.get('record_id', 0)) == 384, data
+          assert item.get('doi') == '10.1007/BF00608960', data
+          print('CUH-384: PASS')
+          PY
+
+      - name: Check Research Assistant contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 2 --retry-delay 5 \
+            --max-time 45 \
+            'https://cuhalide-atlas-v3.vercel.app/api/agent' \
+            -o /tmp/agent.json
+          python3 - <<'PY'
+          import json
+          with open('/tmp/agent.json', encoding='utf-8') as f:
+              data = json.load(f)
+          assert int(data.get('current_curated_revision', data.get('current_curated', {}).get('live_revision', 0))) == 10, data
+          print('assistant contract: PASS')
+          PY
