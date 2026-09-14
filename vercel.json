@@ -4,7 +4,7 @@
   "functions": {
     "api/ui-r10.js": { "includeFiles": "public/index.html" },
     "api/ui-r9.js": { "includeFiles": "public/index.html" },
-    "api/assets-r10.js": { "includeFiles": ["public/ui-photophysics-v1.js", "public/ui-structure-photophysics-v1.js", "public/organic-components-v1.js"] },
+    "api/assets-r10.js": { "includeFiles": "public/{ui-photophysics-v1.js,ui-structure-photophysics-v1.js,organic-components-v1.js}" },
     "api/ui-assistant-current.js": { "includeFiles": "public/index.html" },
     "api/ui-site.js": { "includeFiles": "public/index.html" },
     "api/meta-r9.js": { "includeFiles": "CITATION.cff" },
