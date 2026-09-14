@@ -22,7 +22,12 @@ function patch(body){
   x=all(x,'cc.resolved_space_group_rows||747','cc.resolved_space_group_rows||761');
   x=all(x,'all 947 structure/phase rows','all 939 structure/phase rows');
   x=all(x,'947 structure/phase rows','939 structure/phase rows');
-  if(/Current Curated rev\.9|current-curated-r9|current-r9|\brev\.9\b/i.test(x))throw new Error('stale rev.9 UI state after rev.10 patch');
+  x=all(x,'1,330-document Current Curated rev.10','1,322-document Current Curated rev.10');
+  x=all(x,'1,330 / 1,330','1,322 / 1,322');
+  x=all(x,'Smart RAG 9.20.0','Smart RAG 10.0.0');
+  x=all(x,'Research Assistant 10.5.0','Research Assistant 10.6.0');
+  x=all(x,'Public Data 2.17.1','Public Data 2.18.0');
+  if(/Current Curated rev\.9|current-curated-r9|current-r9|\brev\.9\b|1,330-document Current Curated|Smart RAG 9\.20\.0|Research Assistant 10\.5\.0|Public Data 2\.17\.1/i.test(x))throw new Error('stale rev.9 UI state after rev.10 patch');
   return x
 }
 function scriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
