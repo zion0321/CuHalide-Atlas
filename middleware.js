@@ -1,4 +1,4 @@
-export const config={matcher:['/','/index.html','/api/site','/api/ui-site','/api/ui-site.js','/api/ui-assistant','/api/ui-assistant.js','/api/ui-assistant-current','/api/ui-assistant-current.js','/api/public-data','/api/public-data.js','/api/data','/api/data.js','/api/motifs','/api/motifs.js','/api/meta','/api/meta.js','/api/record','/api/record.js','/api/record-current','/api/record-current.js','/api/record-evidence-current','/api/record-evidence-current.js']};
+export const config={matcher:['/','/index.html','/api/site','/api/ui-site','/api/ui-site.js','/api/ui-assistant','/api/ui-assistant.js','/api/ui-assistant-current','/api/ui-assistant-current.js','/api/public-data','/api/public-data.js','/api/data','/api/data.js','/api/motifs','/api/motifs.js','/api/meta','/api/meta.js','/api/record','/api/record.js','/api/record-current','/api/record-current.js','/api/record-evidence-current','/api/record-evidence-current.js','/ui-photophysics-v1.js','/ui-structure-photophysics-v1.js','/organic-components-v1.js']};
 const LAST_MODIFIED=new Date('2026-09-14T00:00:00Z').toUTCString();
 const REV='10',UI='52.0',SITE='52',PUBLIC_DATA='2.18.0',PH='1.4.0',OC='1.2.0',STATE='prepublication-review';
 export default async function middleware(request){
@@ -8,17 +8,21 @@ export default async function middleware(request){
   const motifPaths=new Set(['/api/motifs','/api/motifs.js']);
   const metaPaths=new Set(['/api/meta','/api/meta.js']);
   const assistantCompatPaths=new Set(['/api/ui-assistant','/api/ui-assistant.js','/api/ui-assistant-current','/api/ui-assistant-current.js','/api/site','/api/ui-site','/api/ui-site.js']);
+  const assetMap=new Map([['/ui-photophysics-v1.js','photophysics'],['/ui-structure-photophysics-v1.js','structure_photophysics'],['/organic-components-v1.js','organic_components']]);
   const isRecord=recordPaths.has(incoming.pathname);
   const isPublicData=publicDataPaths.has(incoming.pathname);
   const isMotif=motifPaths.has(incoming.pathname);
   const isMeta=metaPaths.has(incoming.pathname);
   const isAssistantCompat=assistantCompatPaths.has(incoming.pathname);
+  const asset=assetMap.get(incoming.pathname)||'';
   const assistantTarget=new URL('/api/ui-r10',request.url);
   const publicDataTarget=new URL('/api/public-data-r9',request.url);
   const motifTarget=new URL('/api/motifs-r9',request.url);
   const metaTarget=new URL('/api/meta-r9',request.url);
   const recordTarget=new URL('/api/record-r9',request.url);
-  const target=isRecord?recordTarget:isPublicData?publicDataTarget:isMotif?motifTarget:isMeta?metaTarget:assistantTarget;
+  const assetTarget=new URL('/api/assets-r10',request.url);
+  if(asset)assetTarget.searchParams.set('asset',asset);
+  const target=asset?assetTarget:isRecord?recordTarget:isPublicData?publicDataTarget:isMotif?motifTarget:isMeta?metaTarget:assistantTarget;
   if(isRecord||isPublicData||isMotif||isMeta||isAssistantCompat)target.search=incoming.search;
   const response=await fetch(target,{method:request.method,headers:request.headers,redirect:'follow'});
   const headers=new Headers(response.headers);
