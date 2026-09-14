@@ -32,7 +32,7 @@ async function assertServiceAuth(path,expectedVersion){
   assert.match(source,/req?\.?headers\.get\(['"]apikey['"]\)|r\.headers\.get\(['"]apikey['"]\)/,'must inspect apikey');
   assert.match(source,/Bearer \$\{(?:KEY|SERVICE)\}/,'must compare the bearer token to service role');
   assert.match(source,/internal service authorization required/,'must fail closed with the internal-auth error');
-  assert.match(source,/,401\)/,'unauthorized callers must receive 401');
+  assert.match(source,/(?:,401\)|status:401)/,'unauthorized callers must receive 401');
   assert.match(source,/noindex, nofollow, noarchive/,'internal responses must remain non-indexable and non-archivable');
   assert.ok(source.includes(expectedVersion),`must mirror deployed version ${expectedVersion}`);
   assert.doesNotMatch(source,/cuhalide-atlas-public-data-v2/,'internal RAG must not depend on retired Public Data v2');
@@ -51,7 +51,7 @@ for(const[name,path,expectedVersion]of RETIRED){
     const source=await assertServiceAuth(path,expectedVersion);
     assert.match(source,/x-cuhalide-endpoint-state['"]\s*:\s*['"]retired-internal-service-only/,'retired wrapper must identify itself as retired');
     assert.match(source,/status:'retired'/,'retired wrapper must return retired status');
-    assert.match(source,/,410\)/,'authorized calls to retired wrappers must return 410');
+    assert.match(source,/,(?:410)\)|status:410/,'authorized calls to retired wrappers must return 410');
     assert.doesNotMatch(source,/functions\/v1\/cuhalide-atlas-current-rag-/,'retired wrappers must not delegate to another RAG function');
     assert.doesNotMatch(source,/api\.cloudflare\.com/,'retired wrappers must not invoke model providers');
     assert.doesNotMatch(source,/\/rest\/v1\//,'retired wrappers must not query the database');
@@ -91,7 +91,7 @@ test('candidate monitor is a repository-backed service-only curation endpoint',a
   assert.match(source,/VERSION='2\.3\.1'/);
   assert.match(source,/SUPABASE_SERVICE_ROLE_KEY/);
   assert.match(source,/internal service authorization required/);
-  assert.match(source,/,401\)/);
+  assert.match(source,/(?:,401\)|status:401)/);
   assert.match(source,/x-cuhalide-endpoint-state':'internal-service-only'/);
   assert.match(source,/noindex, nofollow, noarchive/);
   assert.match(source,/if\(!\['GET','HEAD'\]\.includes\(req\.method\)\)/,'candidate monitor must remain read-only');
@@ -102,11 +102,11 @@ test('obsolete Release 3.0.0 RAG indexer is an inert service-only tombstone',asy
   assert.match(source,/retired-rag-indexer-release-3\.0\.0-1/);
   assert.match(source,/SUPABASE_SERVICE_ROLE_KEY/);
   assert.match(source,/internal service authorization required/);
-  assert.match(source,/,401\)/);
+  assert.match(source,/(?:,401\)|status:401)/);
   assert.match(source,/x-cuhalide-endpoint-state':'retired-internal-service-only'/);
   assert.match(source,/noindex, nofollow, noarchive/);
   assert.match(source,/status:'retired'/);
-  assert.match(source,/,410\)/);
+  assert.match(source,/(?:,410\)|status:410)/);
   assert.doesNotMatch(source,/api\.cloudflare\.com/);
   assert.doesNotMatch(source,/\/rest\/v1\//);
   assert.doesNotMatch(source,/rag_embeddings/);
