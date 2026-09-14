@@ -1,15 +1,16 @@
 import crypto from 'node:crypto';
 import currentRecord from './record-evidence-current.js';
-const REV='9',SITE='51',UI='51.0',PUBLIC_DATA='2.17.1',PH='1.4.0',OC='1.2.0',STATE='prepublication-review';
+const REV='10',SITE='52',UI='52.0',PUBLIC_DATA='2.18.0',PH='1.4.0',OC='1.2.0',STATE='prepublication-review';
 const all=(s,a,b)=>String(s).split(a).join(b);
 function requestKind(req){try{return String(new URL(String(req?.url||'/'),'http://local').searchParams.get('kind')||'').toLowerCase()}catch{return''}}
 function patch(body,kind){
   if(typeof body!=='string')return body;
   let x=body;
-  for(const a of ['Current Curated rev.8','Current Curated rev.7','Current Curated rev.6'])x=all(x,a,'Current Curated rev.9');
-  for(const a of ['current-curated-r8','current-curated-r7','current-curated-r6'])x=all(x,a,'current-curated-r9');
-  for(const a of ['current-r8','current-r7','current-r6'])x=all(x,a,'current-r9');
-  x=all(x,'content="8"','content="9"');
+  for(const a of ['Current Curated rev.9','Current Curated rev.8','Current Curated rev.7','Current Curated rev.6'])x=all(x,a,'Current Curated rev.10');
+  for(const a of ['current-curated-r9','current-curated-r8','current-curated-r7','current-curated-r6'])x=all(x,a,'current-curated-r10');
+  for(const a of ['current-r9','current-r8','current-r7','current-r6'])x=all(x,a,'current-r10');
+  x=all(x,'content="9"','content="10"');x=all(x,'content="8"','content="10"');
+  x=all(x,'2026-08-19','2026-09-14');x=all(x,'19 Aug 2026','14 Sep 2026');
   for(const v of ['1.3.0','1.3.1','1.3.2','1.3.3']){x=all(x,`Structured Photophysics ${v}`,'Structured Photophysics 1.4.0');x=all(x,`Photophysics ${v}`,'Photophysics 1.4.0')}
   x=all(x,'Organic Components 1.1.0','Organic Components 1.2.0');
   x=all(x,'Organic Components 1.1','Organic Components 1.2');
@@ -35,10 +36,11 @@ function patch(body,kind){
   for(const stale of ['Contract 1.1.0','Organic Components 1.1','Photophysics 1.3.','src="/organic-components-v1.js"'])if(x.includes(stale))throw new Error(`stale record browser contract: ${stale}`);
   if(kind==='structure'&&!x.includes('Record not found')){
     if(!x.includes('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic Components 1.2.0 asset missing');
-    if(!x.includes('/organic-components-graphs-11.js?v=1.2.0'))throw new Error('structure record rev.9 Organic renderer layer missing');
+    if(!x.includes('/organic-components-graphs-11.js?v=1.2.0'))throw new Error('structure record rev.10 Organic renderer layer missing');
     if(x.indexOf('/organic-components-graphs-11.js?v=1.2.0')>x.indexOf('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic renderer must load before Organic Components runtime');
     for(const hidden of ['Motif adjudication confidence','Machine-normalized identity key','SG / mapping confidence'])if(x.includes(hidden))throw new Error(`internal standalone structure field remains visible: ${hidden}`);
   }
+  if(/Current Curated rev\.9|current-curated-r9|current-r9/.test(x))throw new Error('stale rev.9 record browser state');
   return x
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 const ux=fs.readFileSync(new URL('../public/ui-ux-v1.js',import.meta.url),'utf8');
 
-test('Site 51 final polish uses researcher-facing public language',()=>{
+test('Site 52 final polish uses researcher-facing public language',()=>{
   for(const token of [
     'Start with the type of evidence you need.',
     'Inspect crystallography',
@@ -12,7 +12,7 @@ test('Site 51 final polish uses researcher-facing public language',()=>{
     'Compare measurements',
     'Ask across the Atlas',
     'Search covers curated literature and structures; source publications remain linked by DOI.',
-    'Curated structure records · n = 890',
+    'Curated structure records · n = 901',
     'Reported photophysics',
     'Local Cu–X motif',
     'Linked photophysics',
