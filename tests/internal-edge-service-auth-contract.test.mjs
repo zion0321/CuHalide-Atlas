@@ -5,7 +5,7 @@ import {readFile} from 'node:fs/promises';
 const ACTIVE=[
   ['conversation','supabase/functions/cuhalide-atlas-conversation-v1-internal/index.ts','1.0.2'],
   ['r10 unified','supabase/functions/cuhalide-atlas-current-rag-r10-unified-internal/index.ts','current-rag-r10.0.0'],
-  ['r10 science exact','supabase/functions/cuhalide-atlas-current-rag-r10-science-exact-internal/index.ts','current-rag-r10-science-exact-1.0.0'],
+  ['r10 science exact','supabase/functions/cuhalide-atlas-current-rag-r10-science-exact-internal/index.ts','current-rag-r10-science-exact-1.0.1'],
   ['r9 unified recovery','supabase/functions/cuhalide-atlas-current-rag-r9-unified-internal/index.ts','current-rag-r9.0.1'],
   ['r9 science exact recovery','supabase/functions/cuhalide-atlas-current-rag-r9-science-exact-internal/index.ts','current-rag-r9-science-exact-1.0.1'],
   ['r8 unified recovery','supabase/functions/cuhalide-atlas-current-rag-r8-unified-internal/index.ts','current-rag-r8.0.0'],
@@ -86,6 +86,19 @@ test('production internal RAG chain is explicit as rev.10 with locked recovery l
   assert.match(r1,/cuhalide-atlas-public-data-v3/,'terminal fallback must use canonical Public Data v3');
 });
 
+test('rev.10 science exact preserves explicit multi-structure identifier routing',async()=>{
+  const source=await readFile('supabase/functions/cuhalide-atlas-current-rag-r10-science-exact-internal/index.ts','utf8');
+  assert.ok(source.includes("VERSION='current-rag-r10-science-exact-1.0.1'"));
+  assert.match(source,/const ID_RE=\/CUH-/,'must recognize explicit CUH structure identifiers');
+  assert.match(source,/function idsFrom\(/,'must enumerate all explicit structure identifiers');
+  assert.match(source,/function targetBody\(/,'must isolate each identifier for deterministic exact retrieval');
+  assert.match(source,/Promise\.all\(ids\.map/,'must execute deterministic exact retrieval for every requested identifier');
+  assert.match(source,/multi_identifier:ids\.length>1/,'must expose multi-identifier response state');
+  assert.match(source,/requested_structure_ids:ids/,'must report the exact identifier set that was evaluated');
+  assert.ok(source.includes('current\\s+curated'),'must strip Current Curated temporal prefaces before identifier-specific exact routing');
+  assert.ok(source.includes("answers.join('\\n')"),'must preserve every per-identifier exact answer in the combined response');
+});
+
 test('candidate monitor is a repository-backed service-only curation endpoint',async()=>{
   const source=await readFile('supabase/functions/cuhalide-atlas-candidates-v2/index.ts','utf8');
   assert.match(source,/VERSION='2\.3\.1'/);
@@ -106,7 +119,7 @@ test('obsolete Release 3.0.0 RAG indexer is an inert service-only tombstone',asy
   assert.match(source,/x-cuhalide-endpoint-state':'retired-internal-service-only'/);
   assert.match(source,/noindex, nofollow, noarchive/);
   assert.match(source,/status:'retired'/);
-  assert.match(source,/(?:,410\)|status:410)/);
+  assert.match(source,/(?:,410\)|status:410/);
   assert.doesNotMatch(source,/api\.cloudflare\.com/);
   assert.doesNotMatch(source,/\/rest\/v1\//);
   assert.doesNotMatch(source,/rag_embeddings/);
