@@ -119,7 +119,7 @@ test('obsolete Release 3.0.0 RAG indexer is an inert service-only tombstone',asy
   assert.match(source,/x-cuhalide-endpoint-state':'retired-internal-service-only'/);
   assert.match(source,/noindex, nofollow, noarchive/);
   assert.match(source,/status:'retired'/);
-  assert.match(source,/(?:,410\)|status:410/);
+  assert.match(source,/,(?:410)\)|status:410/);
   assert.doesNotMatch(source,/api\.cloudflare\.com/);
   assert.doesNotMatch(source,/\/rest\/v1\//);
   assert.doesNotMatch(source,/rag_embeddings/);
