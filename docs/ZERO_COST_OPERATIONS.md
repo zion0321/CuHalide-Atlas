@@ -72,17 +72,19 @@ Only the CuHalide Atlas daily literature-discovery cron is retained as a normal 
 
 `cron.job_run_details` is operational history, not scientific data. It may be periodically pruned after active jobs have been checked for failures.
 
-## External health monitor
+## Free-tier health and keepalive checks
 
-`.github/workflows/free-tier-health-monitor.yml` runs approximately every six hours and checks:
+`vercel.json` registers a single daily Vercel Cron Job at `03:43 UTC` that requests `/health.json`. The schedule deliberately runs only once per day so it remains compatible with Vercel Hobby cron-frequency constraints. `/health.json` executes the deterministic backend health contract, so the request also creates legitimate external application/database activity without introducing a write endpoint.
+
+`.github/workflows/free-tier-health-monitor.yml` provides a second, independent monitor approximately every six hours and checks:
 
 - deterministic production health;
 - canonical Current Curated record CUH-384;
 - Research Assistant runtime contract.
 
-These requests also create regular legitimate application activity. They reduce the probability of an inactivity pause on a free backend, but they are not a service-level guarantee. GitHub scheduled workflows can be delayed or disabled by platform policy, and Supabase Free does not provide paid-plan uptime guarantees.
+The Vercel daily health request is the primary zero-cost keepalive because it is tied directly to the deployed application and does not depend on continuing Git repository activity. The GitHub scheduled workflow is a redundant external monitor. Neither mechanism is a paid service-level guarantee, and Supabase Free can still be paused or rate-limited under platform policy.
 
-If the monitor fails, check the Supabase project state and the latest Vercel deployment before changing scientific data.
+If either monitor fails, check the Supabase project state and the latest Vercel deployment before changing scientific data.
 
 ## Backup policy after leaving Pro
 
@@ -131,7 +133,8 @@ Before cancelling paid plans, all of the following must be true:
 - Current RAG is complete and embedded;
 - Frozen Release 3.0.2 remains intact;
 - the Vercel production deployment is healthy;
-- the GitHub free-tier health monitor passes;
+- the Vercel daily Hobby-compatible health cron is deployed;
+- the GitHub free-tier health monitor is present;
 - a final off-platform Supabase backup has been downloaded by the owner.
 
 After those checks, the owner can move the Vercel team to Hobby and the Supabase organization/project to Free. Billing-plan changes are owner-controlled dashboard actions and are intentionally not automated from the application.

@@ -1,6 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "node scripts/vercel-production-gate.mjs",
+  "crons": [
+    { "path": "/health.json", "schedule": "43 3 * * *" }
+  ],
   "functions": {
     "api/ui-r10.js": { "includeFiles": "public/index.html" },
     "api/ui-r9.js": { "includeFiles": "public/index.html" },
