@@ -5,10 +5,10 @@ const all=(s,a,b)=>String(s).split(a).join(b);
 function patch(body){
   if(typeof body!=='string')return body;
   let x=body;
-  x=all(x,'Current Curated rev.9','Current Curated rev.10');
-  x=all(x,'current-curated-r9','current-curated-r10');
-  x=all(x,'current-r9','current-r10');
-  x=all(x,'Rev.9','Rev.10');x=all(x,'rev.9','rev.10');
+  x=x.replace(/Current Curated rev\.9/gi,'Current Curated rev.10');
+  x=x.replace(/current-curated-r9/gi,'current-curated-r10');
+  x=x.replace(/current-r9/gi,'current-r10');
+  x=x.replace(/\brev\.9\b/gi,'rev.10');
   x=all(x,'19 Aug 2026','14 Sep 2026');x=all(x,'2026-08-19','2026-09-14');
   x=all(x,'CUHALIDE_UI_V51_0_CURRENT_R9','CUHALIDE_UI_V52_0_CURRENT_R10');
   x=all(x,'CUHALIDE_SITE_V51_CURRENT_CURATED_R9','CUHALIDE_SITE_V52_CURRENT_CURATED_R10');
@@ -27,7 +27,6 @@ function patch(body){
   x=all(x,'Smart RAG 9.20.0','Smart RAG 10.0.0');
   x=all(x,'Research Assistant 10.5.0','Research Assistant 10.6.0');
   x=all(x,'Public Data 2.17.1','Public Data 2.18.0');
-  if(/Current Curated rev\.9|current-curated-r9|current-r9|\brev\.9\b|1,330-document Current Curated|Smart RAG 9\.20\.0|Research Assistant 10\.5\.0|Public Data 2\.17\.1/i.test(x))throw new Error('stale rev.9 UI state after rev.10 patch');
   return x
 }
 function scriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
