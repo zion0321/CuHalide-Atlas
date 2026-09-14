@@ -34,9 +34,9 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install locked QA dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Run rev.9 repository and deployment preflight contracts
+      - name: Run rev.10 repository and deployment preflight contracts
         run: npm run qa:preflight
-      - name: Validate rev.9 backend readiness before merge
+      - name: Validate rev.10 backend readiness before merge
         if: github.event_name == 'pull_request'
         shell: bash
         run: |
@@ -45,18 +45,19 @@ jobs:
           const r=await fetch(url,{headers:{accept:'application/json'}}); if(!r.ok) throw new Error(`backend health ${r.status}`);
           const x=await r.json();
           const c=x.current_curated?.counts||{};
-          const expected={article_audit_records:383,chemically_included_articles:372,canonical_verified_articles:370,structure_phase_rows:947,core_included_structure_rows:890,resolved_space_group_rows:747,verified_space_group_rows:720,verified_polar_rows:101,strict_polar_rows:91,strict_polar_articles:57,rag_documents:1330,rag_embedded:1330,taxonomy_rows:947};
-          if(x.ok!==true||x.current_curated?.live_revision!==9) throw new Error('rev.9 backend is not ready');
+          const expected={article_audit_records:383,chemically_included_articles:372,canonical_verified_articles:372,structure_phase_rows:939,core_included_structure_rows:901,resolved_space_group_rows:761,verified_space_group_rows:734,verified_polar_rows:101,strict_polar_rows:94,strict_polar_articles:60,rag_documents:1322,rag_embedded:1322,taxonomy_rows:939};
+          if(x.ok!==true||x.current_curated?.live_revision!==10) throw new Error('rev.10 backend is not ready');
           for(const [k,v] of Object.entries(expected)) if(c[k]!==v) throw new Error(`${k}: expected ${v}, got ${c[k]}`);
-          if(x.motif_atlas?.resolved!==663||x.motif_atlas?.unresolved!==284||x.motif_atlas?.geometry_resolved!==217) throw new Error('Motif Atlas final state mismatch');
-          if(x.photophysics?.version!=='1.4.0'||x.photophysics?.two_pass_verified_articles!==329||x.photophysics?.verified_no_data_articles!==54||x.photophysics?.pass_a_curated_articles!==0) throw new Error('Photophysics 1.4.0 terminal state mismatch');
-          if(x.organic_components?.version!=='1.2.0'||x.organic_components?.database_authority!==true) throw new Error('Organic Components 1.2.0 mismatch');
-          console.log('Current Curated rev.9 backend readiness PASS');
+          if(x.photophysics?.ok!==true||x.photophysics?.version!=='1.4.0') throw new Error('Photophysics 1.4.0 health mismatch');
+          if(x.organic_components?.ok!==true||x.organic_components?.version!=='1.2.0'||x.organic_components?.database_authority!==true) throw new Error('Organic Components 1.2.0 mismatch');
+          const checks=x.checks||{};
+          for(const k of ['current_curated_contract','rag_embeddings_complete','rag_content_hashes_valid','taxonomy_one_to_one','organic_structure_state_closed','component_connectivity_state_closed','photophysics_contract']) if(checks[k]!==true) throw new Error(`${k} is not ready`);
+          console.log('Current Curated rev.10 backend readiness PASS');
           NODE
       - name: Install locked Chromium
         if: github.event_name != 'pull_request'
         run: npx playwright install chromium
-      - name: Run full post-merge production rev.9 browser QA
+      - name: Run full post-merge production rev.10 browser QA
         if: github.event_name != 'pull_request'
         run: npm run qa:browser
       - name: Upload browser report and evidence
