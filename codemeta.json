@@ -2,30 +2,18 @@
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
   "name": "CuHalide Atlas",
-  "version": "prepublication-current-r9",
+  "version": "prepublication-current-r10",
   "codeRepository": "https://github.com/zion0321/CuHalide-Atlas",
   "url": "https://cuhalide-atlas-v3.vercel.app/",
   "applicationCategory": "Scientific database and evidence-grounded retrieval system",
-  "description": "Prepublication review implementation for an evidence-grounded, structure-resolved Cu(I) chloride, bromide and iodide knowledge portal. Current Curated rev.9 is reviewed through 2026-08-19 and closes the current structure/member identity and terminal evidence boundaries; archived scientific snapshot 3.0.2 remains immutable. The active runtime includes Structured Photophysics 1.4.0, Organic Components 1.2.0 and Smart RAG 9.20.0. Direct-link access is query-and-view, search-engine indexing is disabled, and no permanent DOI, blanket license or formal public-release date is asserted until owner approval.",
-  "programmingLanguage": [
-    "TypeScript",
-    "JavaScript",
-    "SQL",
-    "Shell"
-  ],
+  "description": "Prepublication review implementation for an evidence-grounded, structure-resolved Cu(I) chloride, bromide and iodide knowledge portal. Current Curated rev.10 is reviewed through 2026-09-14 and integrates owner-approved corpus membership, primary-evidence structural repairs and recovered crystallographic attachments while archived scientific snapshot 3.0.2 remains immutable. The active runtime includes Structured Photophysics 1.4.0, Organic Components 1.2.0 and Smart RAG 10.0.0. Direct-link access is query-and-view, search-engine indexing is disabled, and no permanent DOI, blanket license or formal public-release date is asserted until owner approval.",
+  "programmingLanguage": ["TypeScript", "JavaScript", "SQL", "Shell"],
   "developmentStatus": "active",
   "isPartOf": {
     "@type": "Dataset",
     "name": "CuHalide Atlas prepublication review corpus",
-    "version": "Current Curated rev.9"
+    "version": "Current Curated rev.10"
   },
   "license": "NOASSERTION",
-  "keywords": [
-    "Cu(I) halide",
-    "copper iodide",
-    "crystallography",
-    "luminescence",
-    "self-trapped exciton",
-    "RAG"
-  ]
+  "keywords": ["Cu(I) halide", "copper iodide", "crystallography", "luminescence", "self-trapped exciton", "RAG"]
 }
