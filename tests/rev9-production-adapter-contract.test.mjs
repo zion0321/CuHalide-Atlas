@@ -24,8 +24,10 @@ test('rev.10 production adapters expose the validated runtime identity',()=>{
 
 test('UI 52 rev.10 wrapper patches all user-visible current-state denominators',()=>{
   const ui=read('api/ui-r10.js');
-  has(ui,["REV='10'","UI='52.0'","SITE='52'",'Current Curated rev.10','cc.canonical_verified_articles||372','cc.core_included_structure_rows||901','cc.verified_space_group_rows||734','cc.strict_polar_rows||94','cc.strict_polar_articles||60','cc.structure_phase_rows||939','cc.resolved_space_group_rows||761','2026-09-14','stale rev.9 UI state after rev.10 patch'],'UI rev10 token');
+  has(ui,["REV='10'","UI='52.0'","SITE='52'",'Current Curated rev.10','cc.canonical_verified_articles||372','cc.core_included_structure_rows||901','cc.verified_space_group_rows||734','cc.strict_polar_rows||94','cc.strict_polar_articles||60','cc.structure_phase_rows||939','cc.resolved_space_group_rows||761','2026-09-14'],'UI rev10 token');
+  assert.match(ui,/replace\(\/Current Curated rev\\\.9\/gi,'Current Curated rev\.10'\)/);
   assert.match(ui,/unsafe-inline forbidden/);
+  assert.ok(!ui.includes("throw new Error('stale rev.9 UI state after rev.10 patch')"),'compatibility wrapper must not turn harmless lexical remnants into a 500 response');
 });
 
 test('metadata manifest is synchronized to the rev.10 scientific counts',()=>{
