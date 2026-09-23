@@ -45,7 +45,20 @@ function patch(body,kind){
   return cuxploreRecord(x)
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
-function syncCsp(html,res){const c=String(res.getHeader?.('Content-Security-Policy')||'');if(!c)return;const hs=hashes(html);if(!hs.length)return;let next=c.replace(/\bscript-src\s+[^;]*;/i,`script-src 'self' ${hs.join(' ')};`);if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline forbidden');res.setHeader('Content-Security-Policy',next)}
+function syncCsp(html,res){
+  const c=String(res.getHeader?.('Content-Security-Policy')||'');if(!c)return;
+  const directives=new Map(c.split(';').map(v=>v.trim()).filter(Boolean).map(v=>{const [name,...values]=v.split(/\s+/);return[name.toLowerCase(),values]}));
+  directives.set('script-src',["'self'",...hashes(html)]);
+  if(html.includes('CUXPLORE_RECORD_V1')){
+    // Only same-origin browser assets and bounded API reads are added to record pages.
+    const styles=(directives.get('style-src')||[]).filter(v=>v!=="'none'");
+    directives.set('style-src',[...new Set(["'self'",...styles])]);
+    directives.set('connect-src',["'self'"]);
+  }
+  const next=[...directives].map(([name,values])=>name+' '+values.join(' ')).join('; ')+';';
+  if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline forbidden');
+  res.setHeader('Content-Security-Policy',next);
+}
 export default async function handler(req,res){
   const kind=requestKind(req);
   res.setHeader('X-CuHalide-Current-Curated-Revision',REV);res.setHeader('X-CuHalide-Site-Version',SITE);res.setHeader('X-CuHalide-UI-Version',UI);res.setHeader('X-CuHalide-Public-Data-Version',PUBLIC_DATA);res.setHeader('X-CuHalide-Photophysics-Contract',PH);res.setHeader('X-CuHalide-Organic-Components-Contract',OC);res.setHeader('X-CuHalide-Publication-State',STATE);
