@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 
 const ACTIVE=[
   ['conversation','supabase/functions/cuhalide-atlas-conversation-v1-internal/index.ts','1.0.2'],
-  ['r10 unified','supabase/functions/cuhalide-atlas-current-rag-r10-unified-internal/index.ts','current-rag-r10.0.0'],
+  ['r10 unified','supabase/functions/cuhalide-atlas-current-rag-r10-unified-internal/index.ts','current-rag-r10.2.0'],
   ['r10 science exact','supabase/functions/cuhalide-atlas-current-rag-r10-science-exact-internal/index.ts','current-rag-r10-science-exact-1.0.1'],
   ['r9 unified recovery','supabase/functions/cuhalide-atlas-current-rag-r9-unified-internal/index.ts','current-rag-r9.0.1'],
   ['r9 science exact recovery','supabase/functions/cuhalide-atlas-current-rag-r9-science-exact-internal/index.ts','current-rag-r9-science-exact-1.0.1'],

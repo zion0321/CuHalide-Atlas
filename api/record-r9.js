@@ -41,6 +41,7 @@ function patch(body,kind){
     for(const hidden of ['Motif adjudication confidence','Machine-normalized identity key','SG / mapping confidence'])if(x.includes(hidden))throw new Error(`internal standalone structure field remains visible: ${hidden}`);
   }
   if(/Current Curated rev\.9|current-curated-r9|current-r9/.test(x))throw new Error('stale rev.9 record browser state');
+  if(x.includes('</body>')&&!x.includes('Record not found'))x=x.replace('</head>','<link rel="stylesheet" href="/cuxplore-v1.css"></head>').replace('</body>','<script src="/cuxplore-v1.js" defer></script></body>');
   return x
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
