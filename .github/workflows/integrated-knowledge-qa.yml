@@ -1,16 +1,18 @@
-name: Research design companion QA
+name: Integrated knowledge QA
 on:
   pull_request:
     branches: [main]
     paths:
-      - 'public/research-design.*'
-      - 'scripts/qa-research-design.mjs'
-      - '.github/workflows/research-design-qa.yml'
-      - 'api/ui-r10.js'
+      - 'api/**'
+      - 'lib/**'
+      - 'public/**'
+      - 'tests/integrated-knowledge.test.mjs'
+      - 'scripts/qa-integrated-knowledge.mjs'
+      - '.github/workflows/integrated-knowledge-qa.yml'
 permissions:
   contents: read
 jobs:
-  research-design-companion:
+  integrated-knowledge:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -23,11 +25,17 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npx playwright install chromium
-      - run: node scripts/qa-research-design.mjs
+      - run: node --test tests/integrated-knowledge.test.mjs
+      - run: node scripts/qa-integrated-knowledge.mjs
+      - name: Preserve implementation without dependencies or secrets
+        if: always()
+        run: |
+          mkdir -p integrated-qa
+          git archive --format=zip HEAD -o integrated-qa/source.zip
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:
-          name: research-design-companion-${{ github.event.pull_request.head.sha }}
-          path: research-design-qa/
+          name: integrated-knowledge-${{ github.event.pull_request.head.sha }}
+          path: integrated-qa/
           if-no-files-found: warn
           retention-days: 30
