@@ -2,18 +2,22 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { chromium } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 const root=process.cwd(),out=path.join(root,'research-design-qa');
 await fs.mkdir(out,{recursive:true});
+for(const p of ['research-design.html','research-design.css'])await fs.copyFile(path.join(root,'public',p),path.join(out,p));
+await fs.copyFile(path.join(root,'api/ui-r10.js'),path.join(out,'ui-r10.js'));
 const allowed=new Map([['/research-design.html','text/html; charset=utf-8'],['/research-design.css','text/css; charset=utf-8'],['/favicon.svg','image/svg+xml']]);
 const server=http.createServer(async(req,res)=>{const p=new URL(req.url,'http://localhost').pathname;if(!allowed.has(p)){res.writeHead(404);return res.end('Not found');}try{const body=await fs.readFile(path.join(root,'public',p.slice(1)));res.writeHead(200,{'Content-Type':allowed.get(p),'X-Robots-Tag':'noindex, nofollow, noarchive'});res.end(body);}catch{res.writeHead(404);res.end();}});
 await new Promise(resolve=>server.listen(4178,'127.0.0.1',resolve));
 const browser=await chromium.launch({headless:true});
-const report={release:'ipa-pip-design-20260923-r2',commit:process.env.GITHUB_SHA||null,viewports:[],tests:[]};
+const report={release:'ipa-pip-design-20260923-r2',commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),viewports:[],tests:[]};
 try{
  for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]]){
-  const page=await browser.newPage({viewport:{width,height}}),requests=[],errors=[];
+  const context=await browser.newContext({viewport:{width,height}});
+  const page=await context.newPage(),requests=[],errors=[];
   page.on('request',r=>requests.push({url:r.url(),method:r.method()}));page.on('pageerror',e=>errors.push(e.message));
   const response=await page.goto('http://127.0.0.1:4178/research-design.html',{waitUntil:'networkidle'});
   assert.equal(response.status(),200);assert.match(response.headers()['x-robots-tag'],/noindex/);
@@ -32,12 +36,10 @@ try{
   await page.screenshot({path:path.join(out,`${name}-expanded.png`),fullPage:true});
   assert.deepEqual(errors,[]);assert.ok(requests.every(r=>r.method==='GET'&&r.url.startsWith('http://127.0.0.1:4178/')));
   report.viewports.push({name,width,height,size,requests,scriptErrors:errors,accessibilityViolations:a11y.violations.length});
-  await page.close();
+  await context.close();
  }
  report.tests=['HTTP 200','noindex header','release marker','four tasks','distinct corpus counts','valid internal anchors','no private data links','no model/network calls','no page script errors','desktop/mobile overflow','WCAG 2.1 AA automated check'];
  report.status='passed';
- for(const p of ['research-design.html','research-design.css'])await fs.copyFile(path.join(root,'public',p),path.join(out,p));
- await fs.copyFile(path.join(root,'api/ui-r10.js'),path.join(out,'ui-r10.js'));
  await fs.writeFile(path.join(out,'report.json'),JSON.stringify(report,null,2));
  console.log(JSON.stringify(report,null,2));
 } catch(error){report.status='failed';report.error=String(error);await fs.writeFile(path.join(out,'report.json'),JSON.stringify(report,null,2));throw error;}finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
