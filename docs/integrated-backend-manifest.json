@@ -1,0 +1,19 @@
+{
+  "updated_at": "2026-09-23",
+  "knowledge_contract": "1.1.0",
+  "scientific_release": "current-curated-r10",
+  "scientific_cutoff": "2026-09-14",
+  "immutable_snapshot": "3.0.2",
+  "schema_migrations": ["atlas_integrated_catalog_v1", "atlas_source_review_overlay_v1", "atlas_knowledge_ranking_and_review_projection_v2", "atlas_knowledge_boundary_context_projection", "atlas_knowledge_exact_doi_filter"],
+  "read_only_projection": "public.cuhalide_atlas_knowledge_v1",
+  "sql_execution_role": "service_role",
+  "functions": [
+    {"name": "cuhalide-atlas-public-data-v3", "version": 21, "sha256": "1fbe39ff270b4e5629346fce41d15949925f927ab3af86b48a4a272859be4c62"},
+    {"name": "cuhalide-atlas-current-rag-r10-unified-internal", "version": 2, "sha256": "b383d6cd220d8747d47bd167cfcd508557d8c7dee35f5cfc1448a64255dfdad9"},
+    {"name": "cuhalide-atlas-smart-rag-v302-current-public", "version": 19, "sha256": "743a0d03c2e4567d6deb0879eb51bb7ba75b307d83c0fd3d2e173d5842a8e7c1"}
+  ],
+  "catalog": {"included_current": 372, "boundary_context": 5, "historical_and_supplemental": 32, "additional_reviewed": 1, "total": 410, "source_notes": 41},
+  "unchanged_core": {"structures": 901, "semantic_documents": 1322, "embeddings": 1322},
+  "public_payload_policy": "Whitelisted metadata, authored source summaries and linked structured identities only; no primary files or private source passages.",
+  "testing_policy": "Retrieval and UI checks make no generative model calls. Functional checks are not scientific validation or model benchmarks."
+}
