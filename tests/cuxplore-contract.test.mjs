@@ -19,3 +19,17 @@ test('unpublished, inapplicable, registered and indexed source states are not co
  const js=fs.readFileSync('public/cuxplore-v1.js','utf8');
  for(const state of ['not_published','not_applicable','registered_not_parsed','external_deposition_registered','source_inventory_conflict','text_index_updated_at'])assert(js.includes(state));
 });
+
+import {fetchReadOnlyJson} from '../supabase/functions/cuhalide-atlas-runtime-contract-v1-public/readonly-fetch.mjs';
+test('read-only transport retries transient failure without changing data',async()=>{
+ let calls=0;const output=await fetchReadOnlyJson('https://example.invalid',{}, {sleep:async()=>{},fetcher:async()=> ++calls===1?new Response('unavailable',{status:503}):new Response('{"ok":true,"count":372}')});
+ assert.equal(calls,2);assert.deepEqual(output,{ok:true,count:372});
+});
+test('invalid credentials and invalid JSON fail without synthetic success',async()=>{
+ for(const response of [()=>new Response('forbidden',{status:403}),()=>new Response('not-json')]){
+  let calls=0;await assert.rejects(fetchReadOnlyJson('https://example.invalid',{}, {sleep:async()=>{},fetcher:async()=>{calls++;return response()}}));assert.equal(calls,1);
+ }
+});
+test('read-only transport has a strict retry bound and no stale fallback',async()=>{
+ let calls=0;await assert.rejects(fetchReadOnlyJson('https://example.invalid',{}, {sleep:async()=>{},fetcher:async()=>{calls++;return new Response('unavailable',{status:503})}}));assert.equal(calls,3);
+});
