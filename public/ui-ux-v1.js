@@ -21,7 +21,7 @@
 
   function polishStaticCopy(){
     const chip=document.querySelector('.ux-review-chip');if(chip)chip.title='Review version · not indexed or formally released yet.';
-    text(document.querySelector('.ux-hero-search-hint'),'Searches curated literature and the curated structure register.');
+    text(document.querySelector('.ux-hero-search-hint'),'Searches the connected literature catalog and the curated structure register.');
     polishStartGrid();
     const growth=document.querySelector('.view[data-view="home"] #yearChart')?.closest('.panel');
     if(growth)text(growth.querySelector('h2'),'Curated publications by year');
@@ -29,9 +29,9 @@
     if(dim)text(dim.querySelector('.denom'),'Curated structure records · n = 901');
     text(document.querySelector('.ux-search-footer'),'Search covers curated literature and structures; source publications remain linked by DOI.');
 
-    pageCopy('articles','Search curated articles by title, DOI, year, halogen or category, then open a record for related structures and reported measurements.');
+    pageCopy('articles','Search the connected literature catalog and inspect source-processing status. Switch to Curated collection for year, halogen and category filters, then open records for related structures and reported measurements.');
     pageCopy('structures','Browse curated structure and phase determinations. Search by formula, phase, dimensionality or space group; local motifs are available in Motifs, and photophysics is linked only where the evidence supports it.');
-    pageCopy('rag','Ask naturally about Cu(I) halide materials, structures, literature or photophysics. When a question depends on Atlas data, the assistant retrieves source-linked evidence automatically.');
+    pageCopy('rag','Inspect relevant sources before asking about Cu(I) halide materials, structures or photophysics. The assistant retrieves source-linked evidence automatically; original-text matches and curated measurements remain distinct.');
     pageCopy('methods','See how the Atlas separates article, structure, motif and measurement evidence, and how unresolved or conflicting source information is handled.');
 
     text(document.querySelector('.view[data-view="rag"] .page-head .eyebrow'),'Evidence-linked scientific assistant');

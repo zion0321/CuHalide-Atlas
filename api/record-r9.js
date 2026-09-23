@@ -1,3 +1,4 @@
+import { cuxploreRecord } from '../lib/cuxplore-ui.mjs';
 import crypto from 'node:crypto';
 import currentRecord from './record-evidence-current.js';
 const REV='10',SITE='52',UI='52.0',PUBLIC_DATA='2.18.0',PH='1.4.0',OC='1.2.0',STATE='prepublication-review';
@@ -41,10 +42,23 @@ function patch(body,kind){
     for(const hidden of ['Motif adjudication confidence','Machine-normalized identity key','SG / mapping confidence'])if(x.includes(hidden))throw new Error(`internal standalone structure field remains visible: ${hidden}`);
   }
   if(/Current Curated rev\.9|current-curated-r9|current-r9/.test(x))throw new Error('stale rev.9 record browser state');
-  return x
+  return cuxploreRecord(x)
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
-function syncCsp(html,res){const c=String(res.getHeader?.('Content-Security-Policy')||'');if(!c)return;const hs=hashes(html);if(!hs.length)return;let next=c.replace(/\bscript-src\s+[^;]*;/i,`script-src 'self' ${hs.join(' ')};`);if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline forbidden');res.setHeader('Content-Security-Policy',next)}
+function syncCsp(html,res){
+  const c=String(res.getHeader?.('Content-Security-Policy')||'');if(!c)return;
+  const directives=new Map(c.split(';').map(v=>v.trim()).filter(Boolean).map(v=>{const [name,...values]=v.split(/\s+/);return[name.toLowerCase(),values]}));
+  directives.set('script-src',["'self'",...hashes(html)]);
+  if(html.includes('CUXPLORE_RECORD_V1')){
+    // Only same-origin browser assets and bounded API reads are added to record pages.
+    const styles=(directives.get('style-src')||[]).filter(v=>v!=="'none'");
+    directives.set('style-src',[...new Set(["'self'",...styles])]);
+    directives.set('connect-src',["'self'"]);
+  }
+  const next=[...directives].map(([name,values])=>name+' '+values.join(' ')).join('; ')+';';
+  if(/script-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline forbidden');
+  res.setHeader('Content-Security-Policy',next);
+}
 export default async function handler(req,res){
   const kind=requestKind(req);
   res.setHeader('X-CuHalide-Current-Curated-Revision',REV);res.setHeader('X-CuHalide-Site-Version',SITE);res.setHeader('X-CuHalide-UI-Version',UI);res.setHeader('X-CuHalide-Public-Data-Version',PUBLIC_DATA);res.setHeader('X-CuHalide-Photophysics-Contract',PH);res.setHeader('X-CuHalide-Organic-Components-Contract',OC);res.setHeader('X-CuHalide-Publication-State',STATE);

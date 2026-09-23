@@ -1,3 +1,4 @@
+import { cuxploreIdentity } from '../lib/cuxplore-ui.mjs';
 import crypto from 'node:crypto';
 import currentMotifs from './motifs.js';
 const REV='10',SITE='52',UI='52.0',STATE='prepublication-review';
@@ -14,7 +15,6 @@ function patch(body){
   for(const a of ['946 structure rows','947 structure rows'])x=all(x,a,'939 structure rows');
   for(const a of ['946-row Current Curated snapshot','947-row Current Curated snapshot'])x=all(x,a,'939-row Current Curated snapshot');
   x=all(x,'19 Aug 2026','14 Sep 2026');x=all(x,'2026-08-19','2026-09-14');
-
   x=all(x,'grid-template-columns:repeat(4,1fr)','grid-template-columns:repeat(2,1fr)');
   x=x.replace(/<option value="Unresolved legacy mapping"[^>]*>Unresolved legacy mapping<\/option>/g,'');
   x=x.replace(/<p>Explore normalized Cu–halide building units across Current Curated rev\.10\.[\s\S]*?<\/p>/,'<p>Explore source-resolved Cu–halide building units and compare their local motif with the dimensionality of the extended structure.</p>');
@@ -29,7 +29,7 @@ function patch(body){
   x=x.replace(/<div class="provenance"><strong>Evidence boundary\.<\/strong>[\s\S]*?<\/div>/,'<div class="provenance">Motifs are shown only when supported at the structure level. Open an individual structure record for crystallographic context and source links.</div>');
   if(/\brev\.[6789]\b/i.test(x))throw new Error('stale current-curated revision in Motif Atlas');
   if(x.includes('<td>Unresolved</td>')||x.includes('Unresolved legacy mapping')||x.includes('Legacy category unresolved')||x.includes('Motif unresolved'))throw new Error('unresolved QA state remains promoted as a Motif Atlas category');
-  return x
+  return cuxploreIdentity(x)
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
 function syncCsp(html,res){const c=String(res.getHeader?.('Content-Security-Policy')||'');if(!c)return;const hs=hashes(html);if(!hs.length)return;let next=c;if(/script-src\s+[^;]*;/i.test(next))next=next.replace(/script-src\s+[^;]*;/i,`script-src ${hs.join(' ')};`);if(/style-src\s+[^;]*;/i.test(next)){const style=String(html).match(/<style>([\s\S]*?)<\/style>/i)?.[1];if(style){const h=`'sha256-${crypto.createHash('sha256').update(style).digest('base64')}'`;next=next.replace(/style-src\s+[^;]*;/i,`style-src ${h};`)}}res.setHeader('Content-Security-Policy',next)}
