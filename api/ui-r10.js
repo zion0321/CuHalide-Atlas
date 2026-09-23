@@ -27,6 +27,9 @@ function patch(body){
   x=all(x,'Smart RAG 9.20.0','Smart RAG 10.0.0');
   x=all(x,'Research Assistant 10.5.0','Research Assistant 10.6.0');
   x=all(x,'Public Data 2.17.1','Public Data 2.18.0');
+  // Case-study display only; Atlas release counters and live assistant stay unchanged.
+  const about='<a data-route="citation" href="#citation">About data</a>';
+  if(!x.includes('data-study="ipa-pip"'))x=all(x,about,'<a data-study="ipa-pip" href="/research-design.html">iPA–PIP study</a>'+about);
   return x
 }
 function scriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
