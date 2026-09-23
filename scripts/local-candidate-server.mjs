@@ -12,6 +12,8 @@ import sitemapHandler from '../api/sitemap.js';
 import knowledgeHandler from '../api/knowledge.js';
 const HOST=process.env.CUHALIDE_LOCAL_HOST||'127.0.0.1',PORT=Number(process.env.CUHALIDE_LOCAL_PORT||4173),PUBLIC_DIR=path.join(process.cwd(),'public'),MAX_LOCAL_BODY_BYTES=100000;
 const STATIC_FILES=new Map([
+['/ui-cuxplore-v1.css',{file:path.join(PUBLIC_DIR,'ui-cuxplore-v1.css'),type:'text/css; charset=utf-8'}],
+['/ui-cuxplore-v1.js',{file:path.join(PUBLIC_DIR,'ui-cuxplore-v1.js'),type:'text/javascript; charset=utf-8'}],
 ['/og-image.svg',{file:path.join(PUBLIC_DIR,'og-image.svg'),type:'image/svg+xml; charset=utf-8'}],
 ['/favicon.svg',{file:path.join(PUBLIC_DIR,'favicon.svg'),type:'image/svg+xml; charset=utf-8'}],
 ['/ui-v51-core.css',{file:path.join(PUBLIC_DIR,'ui-v51-core.css'),type:'text/css; charset=utf-8'}],

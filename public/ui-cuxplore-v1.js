@@ -1,0 +1,44 @@
+/* CuXplore: explicit source availability and processing, never inferred completeness. */
+(()=>{
+'use strict';
+const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n};
+const count=v=>Number.isFinite(Number(v))?Number(v).toLocaleString():'Not reported';
+const labels={text_indexed:'Text indexed',scan_not_text_indexed:'Scan: not text-indexed',registered_not_text_indexed:'Registered; text not indexed',not_published:'Not published',not_confirmed:'Not confirmed',file_parsed:'File parsed',registered_not_parsed:'Registered; file not parsed',external_deposition_registered:'External deposition registered',not_applicable:'Not applicable'};
+const photoLabels={reviewed_measurements:'Curated measurements available',reviewed_no_reported_data:'Reviewed: no reported measurements',not_reviewed_in_current_data_release:'Not reviewed in this data release'};
+function statusText(s){return labels[s]||'Not confirmed'}
+function stateRow(body,name,status,note){const tr=el('tr');const th=el('th','',name);th.scope='row';const td=el('td');td.append(el('strong','',statusText(status)));if(note)td.append(el('small','',note));tr.append(th,td);body.append(tr)}
+function sourceProcessing(item,open=false){
+ const p=item?.processing;if(!p)return null;
+ const root=el('div','cx-processing');
+ const chips=el('div','cx-status-chips');
+ for(const [name,key]of [['MAIN','main_source_status'],['SI','si_source_status'],['CIF','cif_source_status']]){const s=p[key]||'not_confirmed';chips.append(el('span','cx-status '+(['text_indexed','file_parsed'].includes(s)?'indexed':'other'),name+': '+statusText(s)))}
+ root.append(chips);
+ if(item.primary_match){const m=item.primary_match;const page=m.page_start==null?'page unavailable':`PDF p. ${m.page_start}${m.page_end&&m.page_end!==m.page_start?'\u2013'+m.page_end:''}`;root.append(el('p','cx-match',`Original-text match: ${m.source_role==='supporting_information'?'SI':'MAIN'} \u00b7 ${page}. A text match is not a verified compound assignment.`))}
+ const detail=el('details','cx-status-detail');detail.open=open;detail.append(el('summary','','Source and extraction status'));
+ const wrap=el('div','cx-status-table'),table=el('table');table.append(el('caption','','Original sources and independently maintained scientific records'));const body=el('tbody');
+ stateRow(body,'Main article',p.main_source_status,p.main_text_files?`${count(p.main_text_files)} native-text file(s)`:'Library registration does not establish text extraction.');
+ stateRow(body,'Supporting information',p.si_source_status,p.si_text_files?`${count(p.si_text_files)} native-text file(s)`:'Figures and scanned tables may not be captured by native text.');
+ stateRow(body,'Crystallographic files',p.cif_source_status,'CIF text is kept separate from MAIN / SI prose and verified structural assignments.');
+ table.append(body);wrap.append(table);detail.append(wrap);
+ const stats=el('dl','cx-record-stats');for(const [label,value] of [['Indexed MAIN / SI passages',count(p.prose_passages)],['Core structure determinations',count(p.structure_records)],['Structures with a recorded space group',count(p.structures_with_space_group)],['Photophysics',photoLabels[p.photophysics_status]||'Not confirmed']]){stats.append(el('dt','',label),el('dd','',value))}detail.append(stats);
+ if(p.source_inventory_conflict)detail.append(el('p','cx-caution','The library declaration and available files differ. The file-based indexing state is shown; the availability discrepancy remains recorded.'));
+ detail.append(el('p','fine','Text indexing, authored source review and verified measurements are separate steps. No missing molecular structure or optical value is inferred from a file being present.'));
+ if(p.source_inventory_date)detail.append(el('p','fine',`Library declarations: ${p.source_inventory_date}. Native-text index: ${p.text_index_updated_at?String(p.text_index_updated_at).slice(0,10):'no indexed text for this record'}.`));
+ root.append(detail);return root;
+}
+function renderCoverage(data){
+ const root=document.getElementById('cuxploreProcessingCoverage'),p=data.processing_coverage,c=data.coverage;if(!root||!p||!c)return;
+ root.replaceChildren();const heading=el('div','cx-heading');heading.append(el('h3','','From source files to research evidence'),el('p','fine','All counts below refer to the same DOI-deduplicated literature catalog. MAIN and SI coverage overlap; they are not additive.'));root.append(heading);
+ const grid=el('div','cx-coverage-grid');
+ const rows=[['MAIN text indexed',p.main_text_articles,'Native text from main articles'],['SI text indexed',p.si_text_articles,'Supporting-information text'],['MAIN or SI indexed',p.any_prose_articles,`${count(p.prose_passages)} stored prose passages; reference-only material is excluded from matching`],['Source-review notes',c.source_review_notes,'Authored reviews, not whole-library field verification']];
+ for(const [label,value,note]of rows){const card=el('div','cx-coverage-card');card.append(el('span','',label),el('strong','',`${count(value)} / ${count(c.catalog_articles)}`));const track=el('span','cx-progress');track.setAttribute('aria-hidden','true');const bar=el('i');bar.style.width=Math.max(0,Math.min(100,100*Number(value||0)/Math.max(1,Number(c.catalog_articles))))+'%';track.append(bar);card.append(track,el('small','',note));grid.append(card)}root.append(grid);
+ const d=el('details','cx-coverage-details');d.append(el('summary','','Source availability and structured-data coverage'));const dl=el('dl','cx-record-stats');for(const [label,value]of [['Registered MAIN sources',p.registered_main_articles],['Registered SI sources',p.registered_si_articles],['Registered CIF sources',p.registered_cif_articles],['Articles with parsed CIF files',p.cif_text_articles],['Scanned / sparse-text articles',p.sparse_scan_articles],['Articles with linked core structures',p.articles_with_structures],['Articles with curated photophysics',p.photophysics_reviewed_articles],['Reviewed articles without reported photophysics',p.photophysics_no_data_articles]])dl.append(el('dt','',label),el('dd','',count(value)));d.append(dl,el('p','fine','Registered means an entry in the source inventory or a stored file. Indexed means native source text is searchable. Curated structure and sample records remain governed by their own review. These are not interchangeable completion percentages.'));root.append(d);
+}
+function init(){
+ const standalone=document.getElementById('cuxploreStandalone');
+ if(standalone){const source=[...document.querySelectorAll('a[href]')].find(a=>{try{return new URL(a.href).hostname==='doi.org'}catch{return false}});if(source){const doi=decodeURIComponent(new URL(source.href).pathname.slice(1));if(/^10\.\d{4,9}\/[^\s<>]+$/i.test(doi)){fetch('/api/knowledge?action=retrieve&limit=1&q='+encodeURIComponent(doi),{cache:'no-store',signal:AbortSignal.timeout(24000)}).then(r=>r.ok?r.json():null).then(x=>{const item=x?.items?.find(i=>i.doi.toLowerCase()===doi.toLowerCase());if(!item?.processing)return;standalone.append(el('h2','','Source coverage and extraction'));standalone.append(sourceProcessing(item,true));if(item.review)standalone.append(el('p','cx-review',item.review.statement),el('p','fine',item.review.qualification));}).catch(()=>{standalone.append(el('p','fine','Source-processing details are temporarily unavailable. The curated record above remains accessible.'))})}}}
+ const about=document.querySelector('[data-view="citation"] .availability');if(about&&!document.getElementById('cuxploreIdentity')){const p=el('p','fine','CuXplore is the research interface and assistant. CuHalide Atlas remains the underlying dataset name: DOI mappings, record identifiers, crystallographic releases and citation metadata are preserved.');p.id='cuxploreIdentity';about.append(p)}
+ const methods=document.querySelector('[data-view="methods"] .detail');if(methods&&!document.getElementById('cuxploreMethods')){const d=el('details');d.id='cuxploreMethods';d.append(el('summary','','Native source text and processing coverage'),el('p','fine','Native MAIN / SI passages are indexed privately with file hashes, document identity and page locations. The retrieval interface shows matching locations, not the raw publication text. Scans remain explicitly unindexed; CIF text is not counted as prose. Existing semantic embeddings represent the curated article/structure index, not an embedding of every catalog full text.'),el('p','fine','The expanded catalog, the source inventory, the native-text index and the curated scientific dataset are separately versioned. A processing update never backdates a scientific review or silently promotes an additional reference into a validated material record.'));methods.append(d)}
+}
+window.CuXplore={sourceProcessing,renderCoverage};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();

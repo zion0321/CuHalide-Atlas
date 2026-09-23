@@ -7,6 +7,7 @@ on:
       - 'lib/**'
       - 'public/**'
       - 'tests/integrated-knowledge.test.mjs'
+      - 'tests/cuxplore-coverage.test.mjs'
       - 'scripts/qa-integrated-knowledge.mjs'
       - '.github/workflows/integrated-knowledge-qa.yml'
 permissions:
@@ -25,7 +26,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npx playwright install chromium
-      - run: node --test tests/integrated-knowledge.test.mjs
+      - run: node --test tests/integrated-knowledge.test.mjs tests/cuxplore-coverage.test.mjs
       - run: node scripts/qa-integrated-knowledge.mjs
       - name: Preserve implementation without dependencies or secrets
         if: always()
