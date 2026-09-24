@@ -32,7 +32,7 @@
     const hero=document.querySelector('.view[data-view="home"] .hero');if(!hero)return;
     const h1=hero.querySelector('h1'),copy=hero.querySelector('.hero-copy');
     if(h1)h1.textContent='Evidence-grounded Cu(I) halide knowledge, from structure to photophysics.';
-    if(copy)copy.textContent='Search curated literature, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or ask the Research Assistant for evidence-linked scientific synthesis.';
+    if(copy)copy.textContent='Search curated literature, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or use CuXplore to search and connect source-linked evidence.';
     if(hero.querySelector('.ux-hero-search'))return;
     const actions=hero.querySelector('.actions');if(!actions)return;
     actions.insertAdjacentHTML('afterend','<form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search" autocomplete="off" placeholder="Search title, DOI, formula, space group…"><button type="submit">Search</button></form><small class="ux-hero-search-hint">Searches the curated literature and Core-Included structure register.</small>');
@@ -40,13 +40,13 @@
 
   function addStartGrid(){
     const kpis=document.querySelector('.view[data-view="home"] .kpis');if(!kpis||document.querySelector('.ux-start'))return;
-    const section=document.createElement('section');section.className='shell ux-start';section.innerHTML='<div class="ux-start-head"><div><p class="eyebrow">Research paths</p><h2>Start with the evidence layer you need.</h2></div><p>Each route preserves its own scientific grain. Article evidence, structure identity and sample-resolved photophysics are not silently merged.</p></div><div class="ux-start-grid"><a class="ux-start-card" href="#articles"><span>01 · Literature</span><strong>Find the source article</strong><small>Search DOI, title, compound families and curated article-level evidence.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#structures"><span>02 · Structures</span><strong>Resolve crystallography</strong><small>Inspect formula, phase, dimensionality, space group, confidence and source mapping.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#photophysics"><span>03 · Photophysics</span><strong>Inspect measurements</strong><small>Keep crystal, powder, composite, film and device measurements at the correct sample grain.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#rag"><span>04 · Research Assistant</span><strong>Ask across evidence</strong><small>Use conversational LLM synthesis with automatic retrieval when Atlas evidence is required.</small><i aria-hidden="true">→</i></a></div>';
+    const section=document.createElement('section');section.className='shell ux-start';section.innerHTML='<div class="ux-start-head"><div><p class="eyebrow">Research paths</p><h2>Start with the evidence layer you need.</h2></div><p>Each route preserves its own scientific grain. Article evidence, structure identity and sample-resolved photophysics are not silently merged.</p></div><div class="ux-start-grid"><a class="ux-start-card" href="#articles"><span>01 · Literature</span><strong>Find the source article</strong><small>Search DOI, title, compound families and curated article-level evidence.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#structures"><span>02 · Structures</span><strong>Resolve crystallography</strong><small>Inspect formula, phase, dimensionality, space group, confidence and source mapping.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#photophysics"><span>03 · Photophysics</span><strong>Inspect measurements</strong><small>Keep crystal, powder, composite, film and device measurements at the correct sample grain.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#rag"><span>04 · CuXplore</span><strong>Ask across evidence</strong><small>Search and connect literature, structures and source-linked measurements.</small><i aria-hidden="true">→</i></a></div>';
     const wrap=kpis.closest('.section');wrap?.insertAdjacentElement('afterend',section);
   }
 
   function addFooterLinks(){
     const n=document.querySelector('.footer-links');if(!n)return;
-    const items=[['#photophysics','Photophysics'],['#rag','Research Assistant']];
+    const items=[['#photophysics','Photophysics'],['#rag','CuXplore']];
     for(const[href,label]of items)if(!n.querySelector(`a[href="${href}"]`)){const a=document.createElement('a');a.href=href;a.textContent=label;a.className='ux-footer-link';n.appendChild(a)}
   }
 
@@ -57,7 +57,7 @@
   function syncRouteA11y(){
     const raw=(location.hash||'#home').slice(1).split('?')[0],base=raw.split('/')[0]||'home';
     document.querySelectorAll('[data-route]').forEach(a=>{if(a.dataset.route===base)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
-    const names={home:'Overview',articles:'Literature',structures:'Structures',photophysics:'Photophysics',polar:'Polar structures',rag:'Research Assistant',watch:'Literature Watch',methods:'Methods',citation:'Data provenance'};
+    const names={home:'Overview',articles:'Literature',structures:'Structures',photophysics:'Photophysics',polar:'Polar structures',rag:'CuXplore',watch:'Literature Watch',methods:'Methods',citation:'Data provenance'};
     const status=$('uxRouteStatus');if(status&&names[base])status.textContent=`${names[base]} view opened`;
   }
 
@@ -69,7 +69,7 @@
 
   function renderSearchShortcuts(){
     const body=$('uxSearchBody');if(!body)return;
-    body.innerHTML='<div class="ux-search-shortcuts"><button type="button" data-ux-route="articles"><strong>Literature</strong><span>Find papers, DOI and compounds</span></button><button type="button" data-ux-route="structures"><strong>Structures</strong><span>Formula, phase and space group</span></button><button type="button" data-ux-route="photophysics"><strong>Photophysics</strong><span>Sample-resolved measurements</span></button><button type="button" data-ux-route="rag"><strong>Research Assistant</strong><span>Ask an evidence-linked question</span></button></div>';
+    body.innerHTML='<div class="ux-search-shortcuts"><button type="button" data-ux-route="articles"><strong>Literature</strong><span>Find papers, DOI and compounds</span></button><button type="button" data-ux-route="structures"><strong>Structures</strong><span>Formula, phase and space group</span></button><button type="button" data-ux-route="photophysics"><strong>Photophysics</strong><span>Sample-resolved measurements</span></button><button type="button" data-ux-route="rag"><strong>CuXplore</strong><span>Ask an evidence-linked question</span></button></div>';
   }
 
   function openSearch(initial=''){
@@ -169,7 +169,7 @@
 
   function init(){
     document.documentElement.classList.add('ui-ux-v1');addReviewChip();addSearchTrigger();refineHero();addStartGrid();addFooterLinks();addRouteAnnouncer();dialogMarkup();observeDynamicUi();bind();syncRouteA11y();
-    const rag=document.querySelector('#nav [data-route="rag"]');if(rag)rag.title='Conversational Research Assistant with evidence-grounded retrieval';
+    const rag=document.querySelector('#nav [data-route="rag"]');if(rag)rag.title='CuXplore · source-linked literature and evidence search';
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();

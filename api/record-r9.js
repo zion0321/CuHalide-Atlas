@@ -17,6 +17,8 @@ function patch(body,kind){
   x=all(x,'Contract 1.1.0','Contract 1.2.0');
   x=all(x,'src="/organic-components-v1.js"','src="/organic-components-v1.js?v=1.2.0"');
   const validRecord=!x.includes('Record not found')&&!x.includes('Record temporarily unavailable')&&!x.includes('Invalid record identifier');
+  x=all(x,'Current Curated rev.10 context · core article record inherited from immutable Frozen Release 3.0.2 baseline','Curated through 14 Sep 2026 · source-linked article record');
+  x=all(x,'Current Curated rev.10 · primary-evidence reviewed through 14 Sep 2026','Curated through 14 Sep 2026');
   if(kind==='structure'&&validRecord){
     x=all(x,'Motif confidence','Motif adjudication confidence');
     x=all(x,'Normalized reported identity','Machine-normalized identity key');

@@ -2,7 +2,7 @@
    Public projection only. Parent-article verification and structure mapping remain separate. */
 (() => {
   'use strict';
-  const DATA='/api/public-data',CONTRACT='1.4.0',CURRENT_REVISION=9;
+  const DATA='/api/public-data',CONTRACT='1.4.0',CURRENT_REVISION=10;
   const $=id=>document.getElementById(id);
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const unit=u=>String(u||'').replace(/^us$/,'μs').replace(/^degC$/,'°C').replace(/MeV-1/g,'MeV⁻¹').replace(/mm-1/g,'mm⁻¹').replace(/s-1/g,'s⁻¹');

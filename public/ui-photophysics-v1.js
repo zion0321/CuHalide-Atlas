@@ -4,7 +4,7 @@
 
   const DATA='/api/public-data';
   const PHOTOPHYSICS_CONTRACT='1.4.0';
-  const CURRENT_REVISION=9;
+  const CURRENT_REVISION=10;
   const PUBLICATION_POLICY='two_pass_verified_or_verified_no_reported_data';
   const $=id=>document.getElementById(id);
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

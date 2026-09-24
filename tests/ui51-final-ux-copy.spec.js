@@ -31,7 +31,7 @@ test('home research paths describe the Site 52 public experience without interna
   await expectClean(errors,page);
 });
 
-test('literature, structures, assistant and methods use direct researcher-facing explanations',async({page})=>{
+test('literature, structures, CuXplore and methods use direct researcher-facing explanations',async({page})=>{
   const errors=captureBrowserErrors(page);
   await page.goto(`${BASE}/#articles`,{waitUntil:'domcontentloaded'});
   await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Search curated articles by title, DOI, year, halogen or category',{timeout:15000});
@@ -43,8 +43,11 @@ test('literature, structures, assistant and methods use direct researcher-facing
 
   await page.goto(`${BASE}/#rag`,{waitUntil:'domcontentloaded'});
   const ragHead=page.locator('.view[data-view="rag"] .page-head');
-  await expect(ragHead).toContainText('Evidence-linked scientific assistant',{timeout:15000});
-  await expect(ragHead).toContainText('retrieves source-linked evidence automatically');
+  await expect(ragHead).toContainText('Literature-grounded research',{timeout:15000});
+  await expect(ragHead).toContainText('CuXplore retrieves source-linked Atlas evidence');
+  await expect(page.locator('[data-view="rag"]')).not.toContainText('Research Assistant');
+  await expect(page.locator('[data-view="rag"]')).not.toContainText('Smart RAG');
+  await expect(page.locator('[data-view="rag"]')).not.toContainText('Conversational LLM');
 
   await page.goto(`${BASE}/#methods`,{waitUntil:'domcontentloaded'});
   const methods=page.locator('.view[data-view="methods"]');

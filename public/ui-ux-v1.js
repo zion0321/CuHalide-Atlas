@@ -16,7 +16,7 @@
     const photo=cards.find(x=>x.getAttribute('href')==='#photophysics');
     if(photo){text(photo.querySelector('strong'),'Compare measurements');text(photo.querySelector('small'),'Compare crystal, powder, composite, film and device measurements without mixing sample states.');}
     const assistant=cards.find(x=>x.getAttribute('href')==='#rag');
-    if(assistant){text(assistant.querySelector('strong'),'Ask across the Atlas');text(assistant.querySelector('small'),'Get conversational answers with source-linked retrieval when Atlas evidence is needed.');}
+    if(assistant){text(assistant.querySelector('strong'),'Ask across the Atlas');text(assistant.querySelector('small'),'Search and connect source-linked Atlas evidence across literature, structures and measurements.');}
   }
 
   function polishStaticCopy(){
@@ -31,10 +31,10 @@
 
     pageCopy('articles','Search curated articles by title, DOI, year, halogen or category, then open a record for related structures and reported measurements.');
     pageCopy('structures','Browse curated structure and phase determinations. Search by formula, phase, dimensionality or space group; local motifs are available in Motifs, and photophysics is linked only where the evidence supports it.');
-    pageCopy('rag','Ask naturally about Cu(I) halide materials, structures, literature or photophysics. When a question depends on Atlas data, the assistant retrieves source-linked evidence automatically.');
+    pageCopy('rag','Ask about Cu(I) halide materials, structures, literature or photophysics. CuXplore retrieves source-linked Atlas evidence and keeps supporting records visible.');
     pageCopy('methods','See how the Atlas separates article, structure, motif and measurement evidence, and how unresolved or conflicting source information is handled.');
 
-    text(document.querySelector('.view[data-view="rag"] .page-head .eyebrow'),'Evidence-linked scientific assistant');
+    text(document.querySelector('.view[data-view="rag"] .page-head .eyebrow'),'Literature-grounded research');
     text(document.getElementById('sreset'),'Reset filters');
 
     const polar=document.querySelector('.view[data-view="polar"] .polar-intro p:not(.eyebrow)');

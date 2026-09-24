@@ -32,7 +32,7 @@ test('UI 52 rev.10 wrapper patches all user-visible current-state denominators',
 
 test('metadata manifest is synchronized to the rev.10 scientific counts',()=>{
   const meta=read('api/meta-r9.js');
-  has(meta,["SITE='52'","UI='52.0'","META='52.0'","PUBLIC_DATA='2.18.0'","PH='1.4.0'","OC='1.2.0'","RAG='10.0.0'","ASSISTANT='10.6.0'","REV='10'",'canonical_verified_articles:372','structure_phase_rows:939','core_included_structure_rows:901','resolved_space_group_rows:761','verified_space_group_rows:734','verified_polar_rows:101','strict_polar_rows:94','strict_polar_articles:60','rag_documents:1322','taxonomy_rows:939','motif_resolved_rows:677','motif_unresolved_rows:262','motif_geometry_resolved_rows:286','publishable_samples:941','publishable_measurements:2278','representation_rows:968','represented_structures:911','unresolved_rows:897'],'meta token');
+  has(meta,["SITE='52'","UI='52.0'","META='52.1'","PUBLIC_DATA='2.18.0'","PH='1.4.0'","OC='1.2.0'","SEMANTIC='10.0.0'","CUXPLORE='10.6.0'","KNOWLEDGE='1.3.0'","REV='10'",'canonical_verified_articles:372','structure_phase_rows:939','core_included_structure_rows:901','resolved_space_group_rows:761','verified_space_group_rows:734','verified_polar_rows:101','strict_polar_rows:94','strict_polar_articles:60','taxonomy_rows:939','motif_resolved_rows:677','motif_unresolved_rows:262','motif_geometry_resolved_rows:286','semantic_records:1322','doi_records:403','documents:727','text_blocks:6275','registered_files:114','parsed_files:114','cu_structure_blocks:237','authority_overwritten:false','publishable_samples:941','publishable_measurements:2278','representation_rows:968','represented_structures:911','unresolved_rows:897'],'meta token');
   lacks(meta,['canonical_verified_articles:370','structure_phase_rows:947','core_included_structure_rows:890','rag_documents:1330'],'stale meta count');
 });
 
@@ -47,12 +47,12 @@ test('public-data, record, motif and assistant adapters agree on rev.10 contract
   has(motifs,["REV='10'","SITE='52'","UI='52.0'",'939-row taxonomy','Source-resolved Cu–X motif families by material class','unresolved QA state remains promoted as a Motif Atlas category'],'motif token');
 
   const agent=read('api/agent.js');
-  has(agent,["SITE_VERSION='52'","UI_VERSION='52.0'","PUBLIC_DATA_VERSION='2.18.0'","ASSISTANT_VERSION='10.6.0'","EVIDENCE_VERSION='10.0.0'","PHOTOPHYSICS_CONTRACT='1.4.0'","ORGANIC_COMPONENTS_CONTRACT='1.2.0'","CURRENT_REVISION='10'",'cuhalide-v52-evidence-v10.6.0','cuhalide-v52-conversation-v10.6.0'],'agent token');
+  has(agent,["SITE_VERSION='52'","UI_VERSION='52.0'","PUBLIC_DATA_VERSION='2.18.0'","CUXPLORE_VERSION='10.6.0'","SEMANTIC_INDEX_VERSION='10.0.0'","KNOWLEDGE_CONTRACT='1.3.0'","PHOTOPHYSICS_CONTRACT='1.4.0'","ORGANIC_COMPONENTS_CONTRACT='1.2.0'","CURRENT_REVISION='10'",'service=\'CuXplore\'','knowledge_contract=KNOWLEDGE_CONTRACT'],'agent token');
 });
 
 test('rev.10 browser compatibility assets are patched at runtime without weakening fail-closed semantics',()=>{
   const assets=read('api/assets-r10.js');
-  has(assets,['ui-photophysics-v1.js','ui-structure-photophysics-v1.js','organic-components-v1.js','CURRENT_REVISION=9','CURRENT_REVISION=10',"SITE='52'","UI='52.0'"],'asset adapter token');
+  has(assets,['ui-photophysics-v1.js','ui-structure-photophysics-v1.js','organic-components-v1.js','CURRENT_REVISION=10',"SITE='52'","UI='52.0'"],'asset adapter token');
   const vercel=JSON.parse(read('vercel.json'));
   const rewrites=new Map(vercel.rewrites.map(x=>[x.source,x.destination]));
   assert.match(rewrites.get('/ui-photophysics-v1.js'),/assets-r10\?asset=photophysics/);
@@ -60,10 +60,10 @@ test('rev.10 browser compatibility assets are patched at runtime without weakeni
   assert.match(rewrites.get('/organic-components-v1.js'),/assets-r10\?asset=organic_components/);
 
   const ph=read('public/ui-photophysics-v1.js');
-  has(ph,["PHOTOPHYSICS_CONTRACT='1.4.0'",'Pass A-only articles must not be published','Sample-resolved photophysics','Reviewed · no reported data','Source discrepancy'],'Photophysics token');
+  has(ph,["PHOTOPHYSICS_CONTRACT='1.4.0'","CURRENT_REVISION=10",'Pass A-only articles must not be published','Sample-resolved photophysics','Reviewed · no reported data','Source discrepancy'],'Photophysics token');lacks(ph,['CURRENT_REVISION=9'],'stale Photophysics revision');
   const oc=read('public/organic-components-v1.js');
-  has(oc,["CONTRACT='1.2.0'",'Expected Organic Components','2D structures are shown only when molecular connectivity is uniquely established from source evidence.'],'Organic Components token');
-  lacks(oc,['Contract 1.1.0','Organic Components 1.1 projection','normalization_confidence'],'stale Organic Components token');
+  has(oc,["CONTRACT='1.2.0'","CURRENT_REVISION=10",'Expected Organic Components','2D structures are shown only when molecular connectivity is uniquely established from source evidence.'],'Organic Components token');
+  lacks(oc,['CURRENT_REVISION=9','Contract 1.1.0','Organic Components 1.1 projection','normalization_confidence'],'stale Organic Components token');
 });
 
 test('citation, CodeMeta and prepublication privacy boundaries are rev.10',()=>{
