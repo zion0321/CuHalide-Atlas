@@ -13,7 +13,7 @@ const allowed=new Map([['/research-design.html','text/html; charset=utf-8'],['/r
 const server=http.createServer(async(req,res)=>{const p=new URL(req.url,'http://localhost').pathname;if(!allowed.has(p)){res.writeHead(404);return res.end('Not found');}try{const body=await fs.readFile(path.join(root,'public',p.slice(1)));res.writeHead(200,{'Content-Type':allowed.get(p),'X-Robots-Tag':'noindex, nofollow, noarchive'});res.end(body);}catch{res.writeHead(404);res.end();}});
 await new Promise(resolve=>server.listen(4178,'127.0.0.1',resolve));
 const browser=await chromium.launch({headless:true});
-const report={release:'ipa-pip-design-20260923-r2',commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),viewports:[],tests:[]};
+const report={release:'ipa-pip-design-20260924-r3',commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),viewports:[],tests:[]};
 try{
  for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]]){
   const context=await browser.newContext({viewport:{width,height}});
@@ -23,7 +23,7 @@ try{
   assert.equal(response.status(),200);assert.match(response.headers()['x-robots-tag'],/noindex/);
   assert.equal(await page.locator('meta[name="research-design-release"]').getAttribute('content'),report.release);
   assert.equal(await page.locator('#questions details').count(),4);
-  assert.deepEqual(await page.locator('.metric b').allTextContents(),['402','41','33']);
+  assert.deepEqual(await page.locator('.metric b').allTextContents(),['402','41','33']);assert((await page.textContent('body')).includes('6,275 reproducible text blocks'));assert((await page.textContent('body')).includes('114/114 CIF reconciliation'));
   await page.screenshot({path:path.join(out,`${name}-overview.png`),fullPage:false});
   await page.locator('details').evaluateAll(nodes=>nodes.forEach(n=>n.open=true));
   const size=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
