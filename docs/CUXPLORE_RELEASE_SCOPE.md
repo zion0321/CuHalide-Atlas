@@ -61,3 +61,10 @@ bounded locator metadata; raw copyrighted text is not returned.
 Source registration, native-text extraction, CIF parsing, authored review,
 crystallographic identity, photophysical review and semantic embedding are independent
 states and must not be collapsed into one completion metric.
+
+
+## Website synchronization, 24 September 2026
+
+The production website now exposes the full-text v2 source-corpus denominators separately from the scientific and semantic denominators. The public coverage contract reports 403 source DOI records, 727 source documents, 21,421,324 extracted characters, 6,275 actual v2 blocks, 384 active-catalog DOI records with native v2 text, and the independently retained 1,322 semantic article/structure records. CIF reconciliation is surfaced separately: 114/114 registered files parsed, 237 Cu-containing structure blocks, 29 identity-review rows adjudicated (26 resolved and 3 quarantined), and 10/10 dimensionality flags adjudicated without overwriting the 939-row structural authority.
+
+The interface distinguishes three update dates: Current Curated scientific curation through 14 September 2026; authored source-review overlay through 23 September 2026; full-text source index through 24 September 2026. v2 source matches are rendered as indexed text block plus bounded character range. Legacy matches retain page locators. The recorded iPA–PIP design companion is restored at `/research-design.html` as a read-only, separately versioned display; it does not execute RAG or expose private source material.
