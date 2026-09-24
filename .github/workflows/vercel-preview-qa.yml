@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: vercel-preview-qa-${{ github.event.pull_request.head.sha }}
+  group: vercel-preview-qa-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
