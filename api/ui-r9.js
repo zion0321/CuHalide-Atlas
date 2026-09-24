@@ -45,8 +45,8 @@ function simplifyPublicUi(input){
   x=x.replace(/<section class="block"><h3>Evidence<\/h3><dl class="kv"><dt>SG confidence<\/dt><dd>\$\{esc\(x\.sg_confidence\)\}<\/dd><dt>Mapping<\/dt><dd>\$\{esc\(x\.mapping_confidence\)\}<\/dd><dt>Method<\/dt><dd>\$\{esc\(x\.determination_method\)\}<\/dd><dt>CCDC \/ CIF ID<\/dt><dd>\$\{esc\(x\.ccdc_cif\|\|\'Not recorded\'\)\}<\/dd><\/dl><\/section>/,'<section class="block"><h3>Crystallographic record</h3><dl class="kv"><dt>CCDC / CIF ID</dt><dd>${esc(x.ccdc_cif||\'Not recorded\')}</dd></dl></section>');
   x=all(x,"esc(x.emission_assignment||'No independently mapped structure-grain photophysics is exposed.')","esc(x.emission_assignment||'No measurement is linked uniquely to this structure.')");
 
-  // Research Assistant: expose the scientific function, not routing implementation.
-  x=x.replace(/<aside class="panel rag-side assistant-guide">[\s\S]*?<\/aside><section class="panel rag-work">/,'<aside class="panel rag-side assistant-guide"><p class="eyebrow">Research Assistant</p><h2>Ask about the Atlas</h2><p class="fine">Ask about materials, structures, literature or photophysical properties. Source-linked records appear when the answer uses Atlas evidence.</p><p class="eyebrow assistant-examples-title">Examples</p><div class="prompts"><button data-prompt="Explain self-trapped excitons in simple terms.">Explain STEs simply</button><button data-prompt="Compare evidence for isolated 0D Cu2I4 units and STE emission, keeping structure-grain and article-grain evidence separate.">Cu₂I₄ · STE evidence</button></div><button class="btn secondary" id="newchat" type="button">New chat</button></aside><section class="panel rag-work">');
+  // CuXplore: expose the scientific function, not routing implementation.
+  x=x.replace(/<aside class="panel rag-side assistant-guide">[\s\S]*?<\/aside><section class="panel rag-work">/,'<aside class="panel rag-side assistant-guide"><p class="eyebrow">CuXplore</p><h2>Ask across the Atlas</h2><p class="fine">Search materials, structures, literature and photophysical evidence while keeping source records visible.</p><p class="eyebrow assistant-examples-title">Examples</p><div class="prompts"><button data-prompt="Explain self-trapped excitons in simple terms.">Explain STEs simply</button><button data-prompt="Compare evidence for isolated 0D Cu2I4 units and STE emission, keeping structure-grain and article-grain evidence separate.">Cu₂I₄ · STE evidence</button></div><button class="btn secondary" id="newchat" type="button">New chat</button></aside><section class="panel rag-work">');
   x=all(x,'Auto evidence routing · read-only · private primary files are never exposed','Source-linked scientific answers');
   for(const [a,b] of [
     ['Conversation + evidence tools ready','Ready'],
@@ -117,7 +117,7 @@ function patch(input){
   x=all(x,'1329-document','1330-document');
   x=all(x,'1329 documents','1330 documents');
   x=all(x,'Smart RAG 9.19.0','Smart RAG 9.20.0');
-  x=all(x,'Research Assistant 10.4.1','Research Assistant 10.5.0');
+  x=all(x,'CuXplore 10.4.1','CuXplore 10.5.0');
   x=all(x,'Public Data 2.16.0','Public Data 2.17.1');
   for(const v of ['1.3.0','1.3.1','1.3.2','1.3.3']){x=all(x,`Structured Photophysics ${v}`,'Structured Photophysics 1.4.0');x=all(x,`Photophysics ${v}`,'Photophysics 1.4.0')}
   x=all(x,'Organic Components 1.1.0','Organic Components 1.2.0');
