@@ -10,8 +10,8 @@ export default function handler(req,res){
   const u=new URL(req.url,'https://cuhalide-atlas-v3.vercel.app'),key=String(u.searchParams.get('asset')||''),file=ASSETS[key];
   if(!file){res.statusCode=404;res.setHeader('Content-Type','text/plain; charset=utf-8');return res.end('Not Found')}
   try{
-    let body=fs.readFileSync(path.join(process.cwd(),'public',file),'utf8').replace(/CURRENT_REVISION=9/g,'CURRENT_REVISION=10');
-    if(/CURRENT_REVISION=9/.test(body))throw new Error('stale revision token');
+    const body=fs.readFileSync(path.join(process.cwd(),'public',file),'utf8');
+    if(/CURRENT_REVISION=9/.test(body)||!/CURRENT_REVISION=10/.test(body))throw new Error('asset is not natively synchronized to rev.10');
     res.statusCode=200;
     res.setHeader('Content-Type','text/javascript; charset=utf-8');
     res.setHeader('Cache-Control','public, max-age=300, must-revalidate');
