@@ -1,7 +1,7 @@
 /* CuHalide Atlas Organic Components 1.2.0. Deterministic verified-connectivity layouts -> browser SVG. */
 (() => {
 'use strict';
-const DATA='/api/public-data',CONTRACT='1.2.0',CURRENT_REVISION=9,CHUNKS=10,cache=new Map(),pending=new Map();
+const DATA='/api/public-data',CONTRACT='1.2.0',CURRENT_REVISION=10,CHUNKS=10,cache=new Map(),pending=new Map();
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const roleLabel=r=>({counter_cation:'Counter-cation',coordinating_ligand:'Coordinating ligand',ancillary_ligand:'Ancillary ligand',mixed_role:'Mixed role',reported_organic_token:'Organic component'}[r]||String(r||'Organic component').replaceAll('_',' '));
 function load(src,key){return new Promise((resolve,reject)=>{if(document.querySelector(`script[data-oc-chunk="${key}"]`)){resolve();return}const s=document.createElement('script');s.src=src;s.defer=true;s.dataset.ocChunk=key;s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}
