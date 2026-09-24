@@ -1,6 +1,6 @@
 # CuXplore
 
-CuXplore names the literature-grounded research assistant and retrieval interface within CuHalide Atlas. Cu denotes copper, X the halide (Cl, Br, or I), and explore the task. It is not a new foundation model or an autonomous synthesis agent. Dataset citations, CUH identifiers, domain, repository, and scientific revision 10 remain unchanged.
+CuXplore names the literature-grounded research and retrieval interface within CuHalide Atlas. Cu denotes copper, X the halide (Cl, Br, or I), and explore the task. It is not a new foundation model or an autonomous synthesis agent. Dataset citations, CUH identifiers, domain, repository, and scientific revision 10 remain unchanged.
 
 ## Source processing
 
@@ -29,4 +29,4 @@ Run `npm run qa:preflight`, `node --test tests/cuxplore-contract.test.mjs`, and 
 
 ## Website synchronization
 
-The main Atlas and CuXplore interface now present the 24 September 2026 full-text v2 corpus directly: 403 DOI records, 727 source documents and 6,275 reproducible text blocks. Coverage copy distinguishes that source corpus from the 410-DOI knowledge catalog, the 939-row structural authority / 901 Core-Included structures, and the 1,322 semantic article/structure records. CIF reconciliation and the three independent update dates are shown explicitly. The read-only iPA–PIP research-design companion remains available at `/research-design.html` and is versioned independently from both the scientific release and the source index.
+The main Atlas and CuXplore interface now present the 24 September 2026 full-text v2 corpus directly: 403 DOI records, 727 source documents and 6,275 reproducible text blocks. Coverage copy distinguishes that source corpus from the 410-DOI knowledge catalog, the 939-row structural authority / 901 Core-Included structures, and the 1,322 semantic article/structure records. CIF reconciliation and the three independent update dates are shown explicitly. The former project-specific research-design route is retired and redirects to CuXplore; project-specific recommendations are not part of the Atlas website.
