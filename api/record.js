@@ -3,18 +3,18 @@ import crypto from 'node:crypto';
 const PUBLIC_ORIGIN='https://cuhalide-atlas-v3.vercel.app';
 const DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3';
 const RELEASE='3.0.2',SITE_VERSION='50',CURRENT_REVISION='6',CURRENT_DATE='2026-08-18';
-const RETRIES=3,ATTEMPT_TIMEOUT_MS=7000,RETRY_DELAY_MS=180;
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const RETRIES=3,ATTEMPT_TIMEOUT_MS=7000,RETRY_DELAY_MS=180,RECORD_TTL_MS=60000,MAX_RECORD_CACHE=96;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));const recordCache=new Map();function trimRecordCache(){while(recordCache.size>MAX_RECORD_CACHE)recordCache.delete(recordCache.keys().next().value)}
 const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sha=(v)=>`'sha256-${crypto.createHash('sha256').update(v).digest('base64')}'`;
 const curationStatus=(v)=>['Core - Verified','Current Curated - Verified'].includes(v)?'Curated':v==='Context - Boundary'?'Boundary context':v==='Excluded - Curated Audit'?'Excluded':v==='Pending - Primary Evidence Unavailable'?'Evidence pending':v||'Unresolved';
 
-async function getRecord(kind,id){
+async function getRecordUncached(kind,id){
   const u=new URL(DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);
   let lastError=null;
   for(let attempt=0;attempt<RETRIES;attempt++){
     try{
-      const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Page/50.1'},signal:AbortSignal.timeout(ATTEMPT_TIMEOUT_MS)}),raw=await r.text();
+      const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Page/50.1'},signal:AbortSignal.timeout(attempt===0?6000:attempt===1?8000:10000)}),raw=await r.text();
       let data;try{data=JSON.parse(raw)}catch{data=null}
       if(r.status===404)return{state:'not-found',status:404};
       if(r.ok&&data?.item)return{state:'ok',item:data.item,status:r.status};
@@ -24,6 +24,11 @@ async function getRecord(kind,id){
     if(attempt<RETRIES-1)await sleep(RETRY_DELAY_MS*(attempt+1));
   }
   throw lastError||Error('record backend unavailable');
+}
+async function getRecord(kind,id){
+ const key=`${kind}:${id}`,now=Date.now(),hit=recordCache.get(key);if(hit?.value&&hit.expiresAt>now)return hit.value;if(hit?.promise)return hit.promise;
+ const promise=getRecordUncached(kind,id).then(value=>{if(value.state==='ok'||value.state==='not-found'){recordCache.set(key,{value,expiresAt:Date.now()+RECORD_TTL_MS});trimRecordCache()}else recordCache.delete(key);return value}).catch(error=>{if(recordCache.get(key)?.promise===promise)recordCache.delete(key);throw error});
+ recordCache.set(key,{promise,expiresAt:0});trimRecordCache();return promise
 }
 
 async function resolveRecord(req,kind,id){

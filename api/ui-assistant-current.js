@@ -54,7 +54,7 @@ function injectPortalUxShell(body){
   if(out.includes(oldHero))out=out.replace(oldHero,newHero);
   else if(!out.includes('from structure to photophysics.'))throw new Error('portal UX shell: hero copy anchor missing');
 
-  out=out.split('<a data-route="rag" href="#rag">Smart RAG</a>').join('<a data-route="rag" href="#rag">Research Assistant</a>');
+  out=out.split('<a data-route="rag" href="#rag">Smart RAG</a>').join('<a data-route="rag" href="#rag">Research Assistant</a>');out=out.split('<a data-route="rag" href="#rag">CuXplore</a>').join('<a data-route="rag" href="#rag">Research Assistant</a>');
   if(!out.includes('data-route="photophysics"')){
     const polar='<a data-route="polar" href="#polar">Polar</a>';
     const count=out.split(polar).length-1;

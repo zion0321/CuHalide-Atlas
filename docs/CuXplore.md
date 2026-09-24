@@ -25,3 +25,8 @@ The v2 health contract requires exactly 727 source documents, 403 DOI records, 2
 Scientific revision 10, Frozen Release 3.0.2, structured photophysics and the 1,322 semantic retrieval records remain unchanged by this text-index cutover. Native text supports evidence retrieval but does not independently certify a compound identity, topology, photophysical value or mechanism.
 
 Run `npm run qa:preflight`, `node --test tests/cuxplore-contract.test.mjs`, and `node scripts/qa-cuxplore.mjs`. CI preserves the inherited browser/Lighthouse gates and the CuXplore source-processing checks.
+
+
+## Website synchronization
+
+The main Atlas and CuXplore interface now present the 24 September 2026 full-text v2 corpus directly: 403 DOI records, 727 source documents and 6,275 reproducible text blocks. Coverage copy distinguishes that source corpus from the 410-DOI knowledge catalog, the 939-row structural authority / 901 Core-Included structures, and the 1,322 semantic article/structure records. CIF reconciliation and the three independent update dates are shown explicitly. The read-only iPA–PIP research-design companion remains available at `/research-design.html` and is versioned independently from both the scientific release and the source index.

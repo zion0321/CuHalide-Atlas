@@ -16,7 +16,8 @@ function patch(body,kind){
   x=all(x,'Organic Components 1.1','Organic Components 1.2');
   x=all(x,'Contract 1.1.0','Contract 1.2.0');
   x=all(x,'src="/organic-components-v1.js"','src="/organic-components-v1.js?v=1.2.0"');
-  if(kind==='structure'&&!x.includes('Record not found')){
+  const validRecord=!x.includes('Record not found')&&!x.includes('Record temporarily unavailable')&&!x.includes('Invalid record identifier');
+  if(kind==='structure'&&validRecord){
     x=all(x,'Motif confidence','Motif adjudication confidence');
     x=all(x,'Normalized reported identity','Machine-normalized identity key');
     x=x.replace(/<dt>Motif adjudication confidence<\/dt><dd>[\s\S]*?<\/dd>/i,'');
@@ -28,13 +29,13 @@ function patch(body,kind){
     const ocRe=/<script\b(?=[^>]*\bsrc=["']\/organic-components-v1\.js\?v=1\.2\.0["'])[^>]*><\/script>/i;
     if(!x.includes('/organic-components-graphs-11.js?v=1.2.0')&&ocRe.test(x))x=x.replace(ocRe,m=>`${graphs}${m}`);
   }
-  if(kind==='article'&&!x.includes('Record not found')){
+  if(kind==='article'&&validRecord){
     x=x.replace(/<dt>Dimensionality<\/dt><dd>[\s\S]*?<\/dd>/i,'');
     x=x.replace(/<dt>Article index class<\/dt><dd>[\s\S]*?<\/dd>/i,'');
     x=x.replace(/<p class="fine"><strong>Grain note:<\/strong>[\s\S]*?<\/p>/i,'');
   }
   for(const stale of ['Contract 1.1.0','Organic Components 1.1','Photophysics 1.3.','src="/organic-components-v1.js"'])if(x.includes(stale))throw new Error(`stale record browser contract: ${stale}`);
-  if(kind==='structure'&&!x.includes('Record not found')){
+  if(kind==='structure'&&validRecord){
     if(!x.includes('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic Components 1.2.0 asset missing');
     if(!x.includes('/organic-components-graphs-11.js?v=1.2.0'))throw new Error('structure record rev.10 Organic renderer layer missing');
     if(x.indexOf('/organic-components-graphs-11.js?v=1.2.0')>x.indexOf('/organic-components-v1.js?v=1.2.0'))throw new Error('structure record Organic renderer must load before Organic Components runtime');

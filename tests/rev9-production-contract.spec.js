@@ -24,7 +24,7 @@ test('Site 52 portal exposes rev.10 scope while hiding internal curation control
   expect(html).toContain('cc.core_included_structure_rows||901');
   expect(html).toContain('cc.resolved_space_group_rows||761');
   expect(html).toContain('cc.strict_polar_rows||94');
-  expect(html).toContain('1,322-document Current Curated rev.10');
+  expect(html).not.toContain('1,322-document Current Curated rev.10');
   expect(html).not.toContain('<span>Article index class</span><select id="adim">');
   expect(html).not.toContain('Article index · ${esc(a.dimensionality_class)}');
   for(const stale of ['Core-Included · n=890','cc.canonical_verified_articles||370','cc.core_included_structure_rows||890','cc.resolved_space_group_rows||747','cc.verified_space_group_rows||720','cc.structure_phase_rows||947','1,330-document Current Curated rev.10','Current Curated rev.9','CUHALIDE_SITE_V51_CURRENT_CURATED_R9'])expect(html).not.toContain(stale);
