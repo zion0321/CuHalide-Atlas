@@ -33,3 +33,19 @@ test('invalid credentials and invalid JSON fail without synthetic success',async
 test('read-only transport has a strict retry bound and no stale fallback',async()=>{
  let calls=0;await assert.rejects(fetchReadOnlyJson('https://example.invalid',{}, {sleep:async()=>{},fetcher:async()=>{calls++;return new Response('unavailable',{status:503})}}));assert.equal(calls,3);
 });
+
+
+test('full-text v2 UI uses character-range locators without exposing raw text',()=>{
+ const js=fs.readFileSync('public/cuxplore-v1.js','utf8');
+ for(const k of ['matchLocator','char_range','indexed text block','char_start','char_end','v2_chunks_all_status','v2_source_files'])assert(js.includes(k));
+ assert(!js.includes('extracted_text'));
+});
+test('full-text v2 migration preserves separate semantic and lexical indexes',()=>{
+ const s=fs.readFileSync('supabase/migrations/20260924_cuxplore_fulltext_v2_cutover.sql','utf8');
+ for(const k of ['cuxplore_source_document_v2','cuxplore_text_chunk_v2','enable row level security','v2_fulltext_20260924','legacy_v1_fallback','cuxplore_fulltext_v2_health','semantic_index_separate','raw_source_text_exposed'])assert(s.includes(k));
+ assert(s.includes('d.documents=727'));
+ assert(s.includes('d.dois=403'));
+ assert(s.includes('d.characters=21421324'));
+ assert(s.includes('d.declared_chunks=6275'));
+ assert(!/grant\s+(?:select|execute)[^;]+to\s+anon/i.test(s));
+});
