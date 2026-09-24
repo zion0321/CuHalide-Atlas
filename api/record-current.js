@@ -9,6 +9,7 @@ const ROBOTS_META='<meta name="robots" content="noindex,nofollow,noarchive">';
 const PUBLIC_DATA='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3';
 const PHOTOPHYSICS_CONTRACT='1.3.2';
 const ORGANIC_COMPONENTS_CONTRACT='1.1.0';
+const OVERLAY_TTL_MS=60000,OVERLAY_RETRIES=3;const overlayCache=new Map();const overlaySleep=ms=>new Promise(r=>setTimeout(r,ms));function trimOverlayCache(){while(overlayCache.size>96)overlayCache.delete(overlayCache.keys().next().value)}
 
 const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -35,18 +36,28 @@ function inlineScriptHashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\
 function addSelfDirective(csp,name){const target=String(name).toLowerCase(),parts=String(csp).split(';').map(x=>x.trim()).filter(Boolean);let found=false;const next=parts.map(part=>{const first=part.split(/\s+/,1)[0].toLowerCase();if(first!==target)return part;found=true;const sources=part.slice(name.length).trim().replace(/'self'\s*/gi,'').trim();return `${name} 'self'${sources?` ${sources}`:''}`});if(!found)next.push(`${name} 'self'`);return `${next.join('; ')};`}
 function syncCsp(html,res,{allowSelf=false}={}){const current=String(res.getHeader?.('Content-Security-Policy')||'');if(!current)return;const hashes=inlineScriptHashes(html);if(!hashes.length)return;let next=current.replace(/\bscript-src\s+[^;]*;/i,`script-src ${allowSelf?"'self' ":''}${hashes.join(' ')};`);if(allowSelf){next=addSelfDirective(next,'style-src');next=addSelfDirective(next,'connect-src')}if(/script-src[^;]*'unsafe-inline'/i.test(next)||/style-src[^;]*'unsafe-inline'/i.test(next))throw new Error('unsafe-inline is forbidden');res.setHeader('Content-Security-Policy',next)}
 
-async function fetchRecordOverlay(req){
-  const {kind,id}=requestTarget(req),base={kind,id,available:false,photophysics:null,organic_components:null,record_result:null};
-  if(!['article','structure'].includes(kind)||!id)return base;
+async function fetchRecordOverlayUncached(req){
+ const {kind,id}=requestTarget(req),base={kind,id,available:false,photophysics:null,organic_components:null,record_result:null};
+ if(!['article','structure'].includes(kind)||!id)return base;
+ const u=new URL(PUBLIC_DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);let lastError=null;
+ for(let attempt=0;attempt<OVERLAY_RETRIES;attempt++){
   try{
-    const u=new URL(PUBLIC_DATA);u.searchParams.set('action',kind);u.searchParams.set('id',id);
-    const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Overlay/1.2.0'},signal:AbortSignal.timeout(6500)}),raw=await r.text();
-    let x;try{x=raw?JSON.parse(raw):null}catch{x=null}
-    if(r.status===404)return{...base,record_result:{state:'not-found',status:404}};
-    if(!r.ok||!x?.item)return{...base,record_result:r.status<500&&r.status!==429?{state:'error',status:r.status}:null};
-    const items=kind==='structure'?(Array.isArray(x?.organic_components)?x.organic_components:Array.isArray(x?.item?.organic_components)?x.item.organic_components:[]):[];
-    return{kind,id,available:true,photophysics:x?.photophysics&&typeof x.photophysics==='object'?x.photophysics:null,organic_components:items,record_result:{state:'ok',item:x.item,status:r.status}};
-  }catch(error){console.info('[record-overlay-fallback]',error?.name||error?.message||'unavailable');return base}
+   const r=await fetch(u,{headers:{accept:'application/json','user-agent':'CuHalide-Atlas-Record-Overlay/1.2.0'},signal:AbortSignal.timeout(attempt===0?5500:attempt===1?7500:9500)}),raw=await r.text();
+   let x;try{x=raw?JSON.parse(raw):null}catch{x=null}
+   if(r.status===404)return{...base,record_result:{state:'not-found',status:404}};
+   if(r.ok&&x?.item){const items=kind==='structure'?(Array.isArray(x?.organic_components)?x.organic_components:Array.isArray(x?.item?.organic_components)?x.item.organic_components:[]):[];return{kind,id,available:true,photophysics:x?.photophysics&&typeof x.photophysics==='object'?x.photophysics:null,organic_components:items,record_result:{state:'ok',item:x.item,status:r.status}}}
+   if(r.status<500&&r.status!==429)return{...base,record_result:{state:'error',status:r.status}};
+   lastError=Error(`record overlay backend ${r.status}`);
+  }catch(error){lastError=error}
+  if(attempt<OVERLAY_RETRIES-1)await overlaySleep(160*(attempt+1));
+ }
+ console.info('[record-overlay-fallback]',lastError?.name||lastError?.message||'unavailable');return base
+}
+function fetchRecordOverlay(req){
+ const {kind,id}=requestTarget(req),key=`${kind}:${id}`,now=Date.now(),hit=overlayCache.get(key);
+ if(hit?.value&&hit.expiresAt>now)return Promise.resolve(hit.value);if(hit?.promise)return hit.promise;
+ const promise=fetchRecordOverlayUncached(req).then(value=>{if(value?.record_result?.state==='ok'||value?.record_result?.state==='not-found'){overlayCache.set(key,{value,expiresAt:Date.now()+OVERLAY_TTL_MS});trimOverlayCache()}else overlayCache.delete(key);return value}).catch(error=>{if(overlayCache.get(key)?.promise===promise)overlayCache.delete(key);throw error});
+ overlayCache.set(key,{promise,expiresAt:0});trimOverlayCache();return promise
 }
 
 const propertyLabels={
