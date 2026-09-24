@@ -4,6 +4,10 @@ on:
     branches: [main]
 permissions:
   contents: read
+
+concurrency:
+  group: cuxplore-qa-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 jobs:
   cuxplore-source-coverage:
     runs-on: ubuntu-latest
