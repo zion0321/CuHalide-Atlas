@@ -20,6 +20,7 @@ jobs:
       - run: npx playwright install chromium
       - run: node --test tests/cuxplore-contract.test.mjs tests/integrated-knowledge.test.mjs
       - run: node scripts/qa-cuxplore.mjs
+      - run: node scripts/qa-research-design.mjs
       - name: Preserve tested implementation
         if: always()
         run: git archive HEAD -o cuxplore-qa/source.zip
@@ -27,5 +28,7 @@ jobs:
         if: always()
         with:
           name: cuxplore-source-coverage-${{ github.event.pull_request.head.sha }}
-          path: cuxplore-qa/
+          path: |
+            cuxplore-qa/
+            research-design-qa/
           retention-days: 30
