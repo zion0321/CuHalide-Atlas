@@ -50,18 +50,18 @@ function injectPortalUxShell(body){
   if(body.includes(PORTAL_UX_SHELL_MARKER))return body;
   let out=body;
   const oldHero='<h1>Evidence-grounded Cu(I) halide literature and structures.</h1><p class="hero-copy">Search primary-evidence-reviewed literature, 946 atomic/context structure records and structure-resolved relationships. Current Curated rev.8 explicitly separates reported composition, local Cu–X motif and global connectivity dimensionality; unresolved values remain unresolved rather than inferred.</p>';
-  const newHero='<h1>Evidence-grounded Cu(I) halide knowledge, from structure to photophysics.</h1><p class="hero-copy">Search curated literature, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or ask the Research Assistant for evidence-linked scientific synthesis.</p>';
+  const newHero='<h1>Evidence-grounded Cu(I) halide knowledge, from structure to photophysics.</h1><p class="hero-copy">Search curated literature, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or use CuXplore to search and connect source-linked evidence.</p>';
   if(out.includes(oldHero))out=out.replace(oldHero,newHero);
   else if(!out.includes('from structure to photophysics.'))throw new Error('portal UX shell: hero copy anchor missing');
 
-  out=out.split('<a data-route="rag" href="#rag">Smart RAG</a>').join('<a data-route="rag" href="#rag">Research Assistant</a>');out=out.split('<a data-route="rag" href="#rag">CuXplore</a>').join('<a data-route="rag" href="#rag">Research Assistant</a>');
+  out=out.split('<a data-route="rag" href="#rag">Smart RAG</a>').join('<a data-route="rag" href="#rag">CuXplore</a>');out=out.split('<a data-route="rag" href="#rag">Research Assistant</a>').join('<a data-route="rag" href="#rag">CuXplore</a>');
   if(!out.includes('data-route="photophysics"')){
     const polar='<a data-route="polar" href="#polar">Polar</a>';
     const count=out.split(polar).length-1;
     if(count!==1)throw new Error(`portal UX shell: expected one Polar navigation anchor, found ${count}`);
     out=out.replace(polar,'<a data-route="photophysics" href="#photophysics">Photophysics</a>'+polar);
   }
-  if(!out.includes('<a data-route="rag" href="#rag">Research Assistant</a>')||!out.includes('<a data-route="photophysics" href="#photophysics">Photophysics</a>'))throw new Error('portal UX shell: primary navigation normalization failed');
+  if(!out.includes('<a data-route="rag" href="#rag">CuXplore</a>')||!out.includes('<a data-route="photophysics" href="#photophysics">Photophysics</a>'))throw new Error('portal UX shell: primary navigation normalization failed');
 
   if(!out.includes('id="uxHeroSearch"')){
     const tag='<div class="tags">';
@@ -74,7 +74,7 @@ function injectPortalUxShell(body){
     const dashboard='<div class="shell dashboard section">';
     const count=out.split(dashboard).length-1;
     if(count!==1)throw new Error(`portal UX shell: expected one home dashboard anchor, found ${count}`);
-    const paths='<section class="shell ux-start"><div class="ux-start-head"><div><p class="eyebrow">Research paths</p><h2>Start with the evidence layer you need.</h2></div><p>Each route preserves its own scientific grain. Article evidence, structure identity and sample-resolved photophysics are not silently merged.</p></div><div class="ux-start-grid"><a class="ux-start-card" href="#articles"><span>01 · Literature</span><strong>Find the source article</strong><small>Search DOI, title, compound families and curated article-level evidence.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#structures"><span>02 · Structures</span><strong>Resolve crystallography</strong><small>Inspect formula, phase, dimensionality, space group, confidence and source mapping.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#photophysics"><span>03 · Photophysics</span><strong>Inspect measurements</strong><small>Keep crystal, powder, composite, film and device measurements at the correct sample grain.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#rag"><span>04 · Research Assistant</span><strong>Ask across evidence</strong><small>Use conversational LLM synthesis with automatic retrieval when Atlas evidence is required.</small><i aria-hidden="true">→</i></a></div></section>';
+    const paths='<section class="shell ux-start"><div class="ux-start-head"><div><p class="eyebrow">Research paths</p><h2>Start with the evidence layer you need.</h2></div><p>Each route preserves its own scientific grain. Article evidence, structure identity and sample-resolved photophysics are not silently merged.</p></div><div class="ux-start-grid"><a class="ux-start-card" href="#articles"><span>01 · Literature</span><strong>Find the source article</strong><small>Search DOI, title, compound families and curated article-level evidence.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#structures"><span>02 · Structures</span><strong>Resolve crystallography</strong><small>Inspect formula, phase, dimensionality, space group, confidence and source mapping.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#photophysics"><span>03 · Photophysics</span><strong>Inspect measurements</strong><small>Keep crystal, powder, composite, film and device measurements at the correct sample grain.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#rag"><span>04 · CuXplore</span><strong>Ask across evidence</strong><small>Search and connect literature, structures and source-linked measurements.</small><i aria-hidden="true">→</i></a></div></section>';
     out=out.replace(dashboard,paths+dashboard);
   }
   out=out.replace('</main>',`<!-- ${PORTAL_UX_SHELL_MARKER} -->\n</main>`);
