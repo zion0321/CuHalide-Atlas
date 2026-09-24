@@ -49,3 +49,19 @@ test('full-text v2 migration preserves separate semantic and lexical indexes',()
  assert(s.includes('d.declared_chunks=6275'));
  assert(!/grant\s+(?:select|execute)[^;]+to\s+anon/i.test(s));
 });
+
+
+test('site synchronization exposes v2 coverage, CIF reconciliation and research design without page-locator regression',()=>{
+ const ui=fs.readFileSync('public/ui-knowledge-v1.js','utf8');
+ const cx=fs.readFileSync('public/cuxplore-v1.js','utf8');
+ const design=fs.readFileSync('public/research-design.html','utf8');
+ const migration=fs.readFileSync('supabase/migrations/20260924_cuxplore_site_sync_coverage.sql','utf8');
+ assert(ui.includes('Source matches locate indexed text'));
+ assert(ui.includes('window.CuXplore?.locator'));
+ assert(!ui.includes('PDF page ${hit.page_start'));
+ for(const k of ['fulltext_v2','cif_reconciliation','source_indexed_through'])assert(migration.includes(k));
+ for(const k of ['Source corpus DOI','Full-text blocks','CIF reconciliation'])assert(cx.includes(k));
+ assert(design.includes('ipa-pip-design-20260924-r3'));
+ assert(design.includes('6,275 reproducible text blocks'));
+ assert(!/http-equiv="refresh"/i.test(design));
+});
