@@ -4,23 +4,25 @@ CuHalide Atlas integrates literature discovery, structure-resolved records, orga
 
 ## Current website
 
-The original portal remains the single interface: Overview, Literature, Structures, Motifs, Photophysics, Polar, Research Assistant and About data. The former project-specific companion has been retired; its URL returns users to the main Research Assistant. No project-specific recommended pair is a fixed website result.
+The original portal remains the single interface: Overview, Literature, Structures, Motifs, Photophysics, Polar, CuXplore and About data. The former project-specific companion is retired; its legacy URL returns users to CuXplore. No project-specific recommended pair is a fixed website result.
 
 The integrated knowledge layer adds broader DOI discovery and authored source-review notes to the existing structure and sample records. It does not relabel bibliographic references as verified structures or promote a reported chemical name to a verified molecular graph.
 
 ## CuXplore and source-processing coverage
 
-**CuXplore** is the literature-grounded research assistant within CuHalide Atlas: Cu for copper, X for Cl/Br/I, and explore for the research task. It names the assistant and retrieval interface, not a new foundation model. The website address and dataset citation identity remain unchanged.
+**CuXplore** is the literature-grounded research and retrieval interface within CuHalide Atlas: Cu for copper, X for Cl/Br/I, and explore for the task. It connects the curated scientific register to source-linked literature without changing the dataset identity or scientific release.
 
-The 23 September native-source import contains 75 original PDFs (48 MAIN and 21 SI files with native text, plus six scan/sparse MAIN files) and adds 1,450 page-bounded passages. Combined with the existing private index, **78 distinct catalog articles have MAIN or SI prose indexed**, comprising 48 MAIN and 46 SI article sets with overlap and **1,984 prose passages**. These are not extra semantic embeddings or newly verified experimental measurements.
+The full-text v2 source layer synchronized on **2026-09-24** contains **403 DOI records, 727 source documents, 21,421,324 extracted characters and 6,275 reproducible text blocks**. The source states are 664 native-text files, six sparse-text files and 57 empty/unreadable files. Within the active 410-DOI knowledge catalog, 384 DOI records contribute 6,175 native v2 blocks. The **1,322 article/structure semantic records remain a separate index**.
 
-Every catalog article has a processing view separating source registration, MAIN/SI extraction, CIF parsing, authored source review, linked structures and photophysics review. The Literature and CuXplore scope menus include **Indexed MAIN / SI text**. Retrieval can match actual private MAIN/SI text and return page-match metadata, while original passages remain private. Registered-but-unindexed sources, sparse scans, unpublished SI, inapplicable CIF, reviewed no-data results and unreviewed fields are distinguished.
+CIF processing is independent of prose retrieval. All **114/114 registered CIF files** have been parsed; the reconciliation layer contains 237 Cu-containing structure blocks, 29 identity-review rows (26 resolved, three quarantined) and 10/10 adjudicated dimensionality flags. Parsed CIF results do not automatically overwrite the 939-row curated structural authority.
 
-See [CuXplore release scope](docs/CUXPLORE_RELEASE_SCOPE.md) for import provenance, coverage definitions and reproducibility limits. These are actual partial processing states across the full catalog, not a claim that all 410 original papers have been re-extracted or independently revalidated.
+Literature and CuXplore expose source availability and bounded retrieval locators while keeping original source files private. v2 matches use indexed text-block and character-range locators; older page-bounded text is used only as DOI-level fallback where v2 text is absent. Retrieval does not promote a text mention into a verified chemical, crystallographic or photophysical assignment.
+
+See [CuXplore release scope](docs/CUXPLORE_RELEASE_SCOPE.md) for provenance, coverage definitions and reproducibility limits.
 
 ## Scientific and interface versions
 
-The scientific current release remains **Current Curated rev.10**, curated through **2026-09-14**. The integrated knowledge interface and source-review overlay were updated on **2026-09-23**. These dates describe different operations.
+The scientific current release remains **Current Curated rev.10**, curated through **2026-09-14**. The authored source-review overlay is dated **2026-09-23**, while the full-text source index and website synchronization are dated **2026-09-24**. These dates describe different operations.
 
 | Current scientific denominator | Value |
 |---|---:|
@@ -40,12 +42,12 @@ The semantic corpus contains 383 article and 939 structure documents. It is dist
 
 - **Literature:** keep the Curated collection for compound-level filters, or choose All indexed literature / Source-reviewed literature / Indexed MAIN / SI text / Additional literature. Additional references are separately labeled and do not receive fabricated structure or measurement mappings.
 - **Article and structure details:** follow existing one-to-one structure links, sample-resolved measurements and organic-component resolution states. The source-review panel supplies an authored source statement and its qualification, not a publisher quotation.
-- **Research Assistant:** inspect ranked evidence first, select up to six references, prepare a source-supported question, or save the selected context record. These retrieval and preparation actions make no model calls. Sending a question is a separate explicit action using the existing assistant.
+- **CuXplore:** search ranked evidence, inspect source-linked records, select references and ask across literature, structures and photophysics while preserving evidence grain.
 - **Retrieval provenance:** distinguish exact structured lookup, hybrid article/structure retrieval and lexical discovery/source-review context. Scores are relevance signals, not truth probabilities. Supplemental references are not silently added to the semantic-embedding count.
 
 ## Retrieval implementation
 
-The core semantic index retains BGE-M3 embeddings and its existing hybrid search/reranking contract. The knowledge catalog adds deterministic lexical retrieval over weighted titles, authored source-review notes and curated descriptions, with term coverage and exact DOI priority. A server-side, field-whitelisted projection joins linked structures. Both interfaces use the same knowledge RPC.
+The semantic layer retains 1,322 current-curated article/structure records. The source layer adds full-text lexical retrieval over indexed MAIN/SI text alongside titles, authored source-review notes and curated descriptions, with exact DOI priority. A server-side, field-whitelisted projection joins linked scientific records.
 
 The integrated RAG layer returns source-reviewed findings and separate supplemental-literature records. It records which retrieval method ran, whether a fallback occurred, and whether any new generation was performed. No benchmark improvement, independent discovery or new embedding coverage is inferred from catalog size. Existing exact-count and historical-snapshot routes remain authoritative.
 
