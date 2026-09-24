@@ -17,7 +17,9 @@ test('Site 52 final polish uses researcher-facing public language',()=>{
     'Local Cu–X motif',
     'Linked photophysics',
     'Keep evidence at the right level',
-    'Reset filters'
+    'Reset filters',
+    'Literature-grounded research',
+    'CuXplore retrieves source-linked Atlas evidence'
   ])assert.ok(ux.includes(token),`missing final public-copy token: ${token}`);
 });
 
@@ -26,7 +28,7 @@ test('final-copy observers are idempotent and preserve privacy boundaries',()=>{
   assert.match(ux,/MutationObserver/);
   assert.match(ux,/queueMicrotask\(polishArticleCards\)/);
   assert.match(ux,/queueMicrotask\(polishModal\)/);
-  for(const forbidden of ['atlas_internal','source_file','evidence_locator','internal_sample_id','/api/export'])assert.ok(!ux.includes(forbidden),`private/internal surface leaked into UX bootstrap: ${forbidden}`);
+  for(const forbidden of ['atlas_internal','source_file','evidence_locator','internal_sample_id','/api/export','Research Assistant','Smart RAG','Conversational LLM'])assert.ok(!ux.includes(forbidden),`private/internal surface leaked into UX bootstrap: ${forbidden}`);
 });
 
 test('scientific boundary language remains explicit after simplification',()=>{
