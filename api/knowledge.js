@@ -7,7 +7,7 @@ export function parameters(raw){
  const target=new URL(UPSTREAM);Object.entries({action:'knowledge-'+action,q,scope,limit,offset}).forEach(([k,v])=>target.searchParams.set(k,String(v)));return target;
 }
 export default async function handler(req,res){
- res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');res.setHeader('X-CuHalide-Knowledge-Contract','1.2.0');res.setHeader('X-CuHalide-Public-Access','query-and-view');
+ res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');res.setHeader('X-CuHalide-Knowledge-Contract','1.3.0');res.setHeader('X-CuHalide-Public-Access','query-and-view');
  if(!['GET','HEAD'].includes(req.method)){res.statusCode=405;res.setHeader('Allow','GET, HEAD');return res.end(JSON.stringify({ok:false,error:'Read-only endpoint.'}))}
  let target;try{target=parameters(req.url)}catch{res.statusCode=400;return res.end(req.method==='HEAD'?'':JSON.stringify({ok:false,error:'Invalid query parameters.'}))}
  try{const response=await fetch(target,{headers:{accept:'application/json'},signal:AbortSignal.timeout(20000)});const data=await response.json();res.statusCode=response.status;if(response.status>=500)res.setHeader('Retry-After','30');return res.end(req.method==='HEAD'?'':JSON.stringify(data))}catch{res.statusCode=503;res.setHeader('Retry-After','30');return res.end(req.method==='HEAD'?'':JSON.stringify({ok:false,error:'The knowledge service is temporarily unavailable.'}))}
