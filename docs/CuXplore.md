@@ -3,14 +3,25 @@
 CuXplore names the literature-grounded research assistant and retrieval interface within CuHalide Atlas. Cu denotes copper, X the halide (Cl, Br, or I), and explore the task. It is not a new foundation model or an autonomous synthesis agent. Dataset citations, CUH identifiers, domain, repository, and scientific revision 10 remain unchanged.
 
 ## Source processing
-The private native-text import of 23 September 2026 contains 75 identity-mapped PDFs: 48 MAIN files with native text, 21 SI files with native text, and six scan/sparse-text MAIN files. These yield 1,450 page-bounded passages. Combined with earlier private MAIN/SI indices, the live catalog has searchable prose for 78 distinct articles (48 MAIN, 46 SI, with overlap), with 1,984 passages. These counts are not claims of full scientific extraction or independent validation.
 
-The 410-DOI catalog (372 included and 38 additional/boundary references), 901 Core-Included structural determinations and 1,322 article/structure embeddings remain separate denominators. Registration, native text, authored review, structure identity and photophysical review are independent per-source states. CIF text is not counted as prose. Missing, sparse, unreviewed and reviewed-no-data states are never merged.
+The full-text v2 corpus recovered on 24 September 2026 contains 727 source documents mapped to 403 distinct DOI records, with 21,421,324 extracted characters and 6,275 reproducible overlapping blocks. The block rule is fixed at a 4,000-character window with a 3,600-character step. The source states are 664 native-text files, six sparse-text files and 57 empty/unreadable files.
+
+The current knowledge catalog contains 410 DOI records (372 curated and 38 additional/boundary references). Of these, 384 have searchable native v2 text, contributing 6,175 active v2 blocks. Six v2 DOI records are excluded/out-of-scope records and are not promoted into active catalog retrieval. When a catalog DOI has no v2 source document, the previous private page-bounded index remains available as a fallback where real legacy text exists.
+
+The 901 Core-Included structure determinations and 1,322 current-curated article/structure embeddings remain separate denominators. The v2 full-text cutover changes the private lexical source layer; it does not convert raw text blocks into semantic embeddings and does not replace the structured scientific authority.
+
+CIF text is not counted as prose. The 114 registered CIF files are handled by a crystallographic parsing and reconciliation workflow separate from MAIN/SI lexical retrieval.
 
 ## Access
-Use the existing Literature scope selector or Research Assistant. `Indexed MAIN / SI text` filters to sources with real stored passages. Results expose bounded page-match metadata and processing coverage, not raw copyrighted passages, file identifiers or hashes. Saving selected context and preparing a question do not invoke a model.
+
+Use the existing Literature scope selector or CuXplore. `Indexed MAIN / SI text` filters to sources with actual indexed prose. v2 matches return an indexed block number and bounded character range; legacy fallback matches return PDF page locators. The interface never labels a character range as a PDF page.
+
+Results expose processing coverage and match metadata, not raw copyrighted passages, private file identifiers, hashes or Drive URLs. Saving selected context and preparing a question do not invoke a model.
 
 ## Reproducibility and security
-Apply native-source schema before processing views/RPC. Primary data import requires a private authenticated transport and SHA-256 checks; raw payloads and temporary URLs are not part of this repository. All new raw tables use RLS and service-only grants. Existing curated fields, protected record/count queries and Frozen 3.0.2 routes are unchanged.
 
-Run `npm run qa:preflight`, `node --test tests/cuxplore-contract.test.mjs`, and `node scripts/qa-cuxplore.mjs`. CI preserves both the inherited browser/Lighthouse gates and added source-processing checks.
+The v2 health contract requires exactly 727 source documents, 403 DOI records, 21,421,324 extracted characters, 6,275 declared blocks, 6,275 actual blocks and zero block-count mismatches. Raw v2 source and chunk tables have RLS enabled and are restricted to the service role.
+
+Scientific revision 10, Frozen Release 3.0.2, structured photophysics and the 1,322 semantic retrieval records remain unchanged by this text-index cutover. Native text supports evidence retrieval but does not independently certify a compound identity, topology, photophysical value or mechanism.
+
+Run `npm run qa:preflight`, `node --test tests/cuxplore-contract.test.mjs`, and `node scripts/qa-cuxplore.mjs`. CI preserves the inherited browser/Lighthouse gates and the CuXplore source-processing checks.
