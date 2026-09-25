@@ -5,13 +5,13 @@ test.describe.configure({mode:'serial'});
 test('rev.10 deterministic health is ready',async({request})=>{
   const r=await request.get(`${BASE}/health.json`);expect(r.status()).toBe(200);const x=await r.json();
   expect(x).toMatchObject({ok:true,status:'PASS',site_readiness:'PASS',publication_state:'prepublication-review',current_curated_revision:10,site_version:'52',ui_version:'52.0',meta_version:'52.1',public_data_version:'2.18.0',photophysics_contract_version:'1.4.0',organic_components_contract_version:'1.2.0'});
-  expect(x.literature).toMatchObject({articles:410,fulltext_articles:403,source_documents:727,text_blocks:6275,denominator:'DOI-deduplicated literature corpus'});
+  expect(x.literature).toMatchObject({articles:410,catalog_searchable_v2_articles:384,fulltext_v2_doi_records:403,source_documents:727,text_blocks:6275,denominator:'DOI-deduplicated literature corpus'});
   expect(x.current_curated.live_revision).toBe(10);
   expect(x.current_curated.current_curated_through).toBe('2026-09-14');
   expect(x.current_curated.counts).toMatchObject({structure_phase_rows:939,core_included_structure_rows:901,resolved_space_group_rows:761,verified_space_group_rows:734,verified_polar_rows:101,strict_polar_rows:94,strict_polar_articles:60,rag_documents:1322,rag_embedded:1322,taxonomy_rows:939});
   expect(x.current_curated.counts.article_audit_records).toBeUndefined();expect(x.current_curated.counts.canonical_verified_articles).toBeUndefined();expect(x.current_curated.counts.chemically_included_articles).toBeUndefined();
   expect(x.cuxplore).toMatchObject({ok:true,version:'10.6.0',knowledge_contract:'1.3.0',semantic_index_version:'10.0.0',semantic_records:1322,semantic_embedded:1322});
-  expect(x.cuxplore.source_index).toMatchObject({release:'cuxplore-fulltext-v2-20260924',indexed_through:'2026-09-24',doi_records:403,documents:727,characters:21421324,text_blocks:6275,native_text_files:664,sparse_text_files:6,empty_or_unreadable_files:57,active_catalog_dois:384,active_catalog_blocks:6175,raw_source_text_exposed:false,semantic_index_separate:true});
+  expect(x.cuxplore.source_index).toMatchObject({release:'cuxplore-fulltext-v2-20260924',indexed_through:'2026-09-24',doi_records:403,documents:727,characters:21421324,text_blocks:6275,native_text_files:664,sparse_text_files:6,empty_or_unreadable_files:57,catalog_searchable_v2_dois:384,catalog_searchable_v2_blocks:6175,raw_source_text_exposed:false,semantic_index_separate:true});
   expect(x.cif_reconciliation).toMatchObject({release:'cif-reconciliation-20260924',registered_files:114,parsed_files:114,cu_structure_blocks:237,identity_review_rows:29,identity_resolved_rows:26,quarantined_rows:3,dimensionality_flags:10,dimensionality_adjudicated:10,authority_rows:939,core_included_rows:901,authority_overwritten:false});
   expect(x.smart_rag).toBeUndefined();expect(x.research_assistant).toBeUndefined();
   expect(x.photophysics).toMatchObject({ok:true,version:'1.4.0',publication_policy:'two_pass_verified_or_verified_no_reported_data'});
@@ -53,7 +53,7 @@ test('Site 52 portal exposes rev.10 scope while hiding internal curation control
 test('manifest and public Motif Atlas agree with rev.10 without promoting unknowns',async({request,page})=>{
   const m=await request.get(`${BASE}/release-manifest.json`);expect(m.status()).toBe(200);const j=await m.json();
   expect(j.schema_version).toBe('2.6');
-  expect(j.literature).toMatchObject({articles:410,fulltext_articles:403,source_documents:727,text_blocks:6275,denominator:'DOI-deduplicated literature corpus'});
+  expect(j.literature).toMatchObject({articles:410,catalog_searchable_v2_articles:384,fulltext_v2_doi_records:403,source_documents:727,text_blocks:6275,denominator:'DOI-deduplicated literature corpus'});
   expect(j.current_curated).toMatchObject({revision:10,structure_phase_rows:939,core_included_structure_rows:901,resolved_space_group_rows:761,verified_space_group_rows:734,verified_polar_rows:101,strict_polar_rows:94,strict_polar_articles:60,taxonomy_rows:939,motif_resolved_rows:677,motif_unresolved_rows:262,motif_geometry_resolved_rows:286});
   expect(j.current_curated.article_audit_records).toBeUndefined();expect(j.current_curated.canonical_verified_articles).toBeUndefined();expect(j.current_curated.chemically_included_articles).toBeUndefined();
   expect(j.cuxplore).toMatchObject({version:'10.6.0',knowledge_contract:'1.3.0',semantic_index_version:'10.0.0',semantic_records:1322,semantic_embedded:1322});
@@ -82,7 +82,7 @@ test('manifest and public Motif Atlas agree with rev.10 without promoting unknow
 
 test('public bootstrap exposes one article denominator',async({request})=>{
   const r=await request.get(`${BASE}/api/public-data?action=bootstrap`);expect(r.status()).toBe(200);const x=await r.json();
-  expect(x.literature).toMatchObject({articles:410,fulltext_articles:403,source_documents:727,text_blocks:6275,denominator:'DOI-deduplicated literature corpus'});
+  expect(x.literature).toMatchObject({articles:410,catalog_searchable_v2_articles:384,fulltext_v2_doi_records:403,source_documents:727,text_blocks:6275,denominator:'DOI-deduplicated literature corpus'});
   expect(x.current_curated.article_audit_records).toBeUndefined();
   expect(x.current_curated.canonical_verified_articles).toBeUndefined();
   expect(x.current_curated.chemically_included_articles).toBeUndefined();
