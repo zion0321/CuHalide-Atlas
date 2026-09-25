@@ -18,7 +18,8 @@ test('Polar page avoids repeating the same ferroelectric disclaimer',async({page
   await expect(view.locator('.polar-intro')).toContainText('Polar does not mean ferroelectric.');
   await expect(view.locator('#pcount').locator('..')).toContainText('Strict-polar subset · highest evidence level only.');
   const exact=await view.getByText('Polar symmetry does not by itself establish ferroelectric switching.',{exact:true}).count();
-  expect(exact).toBe(0);
+  expect(exact).toBe(1);
+  await expect(view.locator('caption')).toHaveText('Polar symmetry does not by itself establish ferroelectric switching.');
 });
 
 test('footer and CuXplore navigation use concise consistent naming',async({page})=>{
