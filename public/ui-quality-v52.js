@@ -1,4 +1,4 @@
-/* CuHalide Atlas comprehensive quality layer v52.1 */
+/* CuHalide Atlas comprehensive quality layer v52.2 */
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
@@ -137,7 +137,7 @@ function enhanceCopyAndLabels(){
 }
 
 function init(){
-  document.documentElement.dataset.cuhalideQuality='52.1';
+  document.documentElement.dataset.cuhalideQuality='52.2';
   ensureLiteratureCoverage();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceRouteTitle();enhanceCopyAndLabels();
   const body=new MutationObserver(()=>{enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
   body.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',enhanceRouteTitle);
