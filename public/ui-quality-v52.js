@@ -17,10 +17,10 @@ function ensureLiteratureCoverage(){
   const placeholder=el('div','ui-cov-item ui-cov-primary');placeholder.append(el('strong','','410 articles'),el('span','','One DOI-deduplicated literature corpus'),el('small','','Loading source coverage…'));box.append(placeholder);head.insertAdjacentElement('afterend',box);
   coverage().then(x=>{
     const c=x.coverage||{},f=x.fulltext_v2||{};
-    const articleCount=Number(c.articles??c.catalog_articles??410),fulltext=Number(f.dois||0),docs=Number(f.documents||0),blocks=Number(f.actual_chunks||0);
+    const articleCount=Number(c.articles??c.catalog_articles??410),fulltext=Number(f.dois||0),chunked=Number(f.chunked_dois||0),docs=Number(f.documents||0),blocks=Number(f.actual_chunks||0);
     const items=[
       [`${fmt(articleCount)} articles`,'Literature corpus','Single DOI-deduplicated article denominator','ui-cov-primary'],
-      [`${fmt(fulltext)} / ${fmt(articleCount)}`,'Full-text v2 coverage','Source-layer coverage; not a second article corpus',''],
+      [`${fmt(fulltext)} / ${fmt(articleCount)}`,'Full-text v2 source coverage',`${fmt(chunked)} articles have indexed text chunks; source coverage is not a second article corpus`,''],
       [fmt(docs),'Source documents','Registered MAIN / SI source files',''],
       [fmt(blocks),'Indexed text blocks','Retrieval blocks across registered source text','']
     ];
@@ -85,7 +85,7 @@ function enhanceVersionTimeline(){
 }
 
 function addPhotoDensity(section){
-  if(!section||section.querySelector('.ui-photo-density'))return;
+  if(!section||section.querySelector('.ui-photo-density')||!section.querySelector('.photo-facts'))return;
   const title=section.querySelector('.photo-modal-title');if(!title)return;
   const controls=el('div','ui-photo-density');controls.append(el('span','','Measurement display'));
   const compact=el('button','','Compact'),full=el('button','','Full');
