@@ -4,9 +4,9 @@ test.describe.configure({mode:'serial'});
 
 test('Overview labels structured-data chart subsets separately from the 410-article corpus',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
-  const halogen=page.locator('#halogenDist').closest('.panel');
+  const halogen=page.locator('#halogenDist').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " panel ")][1]');
   await expect(halogen.locator('.denom')).toHaveText('Structured-data article subset · n = 372');
-  const growth=page.locator('#yearChart').closest('.panel');
+  const growth=page.locator('#yearChart').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " panel ")][1]');
   await expect(growth.locator('.denom')).toContainText('Structured-data article subset');
 });
 
