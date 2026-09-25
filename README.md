@@ -22,7 +22,7 @@ See [CuXplore release scope](docs/CUXPLORE_RELEASE_SCOPE.md) for provenance, cov
 
 ## Scientific and interface versions
 
-The scientific current release remains **Current Curated rev.10**, curated through **2026-09-14**. The authored source-review overlay is dated **2026-09-23**, while the full-text source index and website synchronization are dated **2026-09-24**. These dates describe different operations.
+The scientific current release remains **Current Curated rev.10**, curated through **2026-09-14**. The authored source-review overlay is dated **2026-09-23**; the full-text source index was synchronized on **2026-09-24**; the site-wide denominator, provenance and interface-metadata synchronization was completed on **2026-09-25**. These dates describe different operations and do not change the scientific curation cutoff.
 
 | Current scientific denominator | Value |
 |---|---:|
@@ -65,7 +65,7 @@ The portal remains **prepublication-review** with noindex/nofollow/noarchive. Di
 
 ## Immutable archive
 
-**Frozen Release 3.0.2** remains unchanged: 346 article-audit records, 332 canonical verified articles, 878 structure records, 816 Core-Included structures and 1,224 embedded documents; verified through 2026-06-30. This historical cutoff does not restrict living literature discovery.
+**Frozen Release 3.0.2** remains unchanged: 346 article-audit records, 332 canonical verified articles, 878 structure records, 816 Core-Included structures and 1,224 embedded documents. Its scientific cutoff is **2026-06-30**; the archived release was issued on **2026-08-11**. This historical cutoff does not restrict living literature discovery.
 
 ## Release safeguards
 
