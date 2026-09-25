@@ -9,9 +9,11 @@ test('residual public copy is synchronized',()=>{
   const ux=read('public/ui-ux-core-v1.js');
   const ui=read('api/ui-r10.js');
   const photo=read('public/ui-photophysics-v1.js');
-  assert.match(knowledge,/Searchable full text/);
+  assert.match(knowledge,/Searchable source text/);
+  assert.match(knowledge,/processing_coverage\?\.any_prose_articles/);
   assert.match(knowledge,/catalog_searchable_dois/);
-  assert.match(knowledge,/subset of \$\{Number\(\(c\.articles\?\?c\.catalog_articles\)\|\|0\)/);
+  assert.match(knowledge,/current-catalog articles have searchable source prose/);
+  assert.match(knowledge,/v2 source layer contains/);
   assert.match(ux,/rag\.title='CuXplore'/);
   assert.doesNotMatch(ux,/source-linked literature and evidence search/);
   assert.match(ui,/Strict-polar subset · highest evidence level only\./);
