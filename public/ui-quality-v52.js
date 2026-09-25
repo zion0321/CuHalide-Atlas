@@ -101,6 +101,12 @@ function observePhotoDensity(){
   new MutationObserver(()=>queueMicrotask(run)).observe(modal,{childList:true,subtree:true});run();
 }
 
+function enhanceDashboardA11y(){
+  const year=$('yearChart');if(year){year.setAttribute('role','list');year.setAttribute('aria-label','Structured-data publications by year');year.querySelectorAll('.bar').forEach(b=>{b.setAttribute('role','listitem');const label=b.getAttribute('title')||[b.querySelector('span')?.textContent,b.querySelector('b')?.textContent].filter(Boolean).join(': ');if(label)b.setAttribute('aria-label',label)})}
+  for(const id of ['halogenDist','dimDist']){const root=$(id);if(!root)continue;root.setAttribute('role','list');root.querySelectorAll('.dist-row').forEach(row=>row.setAttribute('role','listitem'))}
+  const sg=$('sgGrid');if(sg){sg.setAttribute('role','list');sg.querySelectorAll('.sg').forEach(x=>x.setAttribute('role','listitem'))}
+}
+
 function enhanceCopyAndLabels(){
   const articles=document.querySelector('.view[data-view="articles"] .page-head .eyebrow');if(articles)articles.textContent='Literature corpus';
   const hero=document.querySelector('.view[data-view="home"] .actions');if(hero){
@@ -111,8 +117,8 @@ function enhanceCopyAndLabels(){
 
 function init(){
   document.documentElement.dataset.cuhalideQuality='52.1';
-  ensureLiteratureCoverage();enhanceKnowledgeBusy();enhanceChatBusy();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceCopyAndLabels();
-  const body=new MutationObserver(()=>{enhanceKnowledgeBusy();enhanceChatBusy();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceCopyAndLabels()});
+  ensureLiteratureCoverage();enhanceKnowledgeBusy();enhanceChatBusy();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels();
+  const body=new MutationObserver(()=>{enhanceKnowledgeBusy();enhanceChatBusy();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
   body.observe(document.body,{childList:true,subtree:true});
 }
 ready(init);
