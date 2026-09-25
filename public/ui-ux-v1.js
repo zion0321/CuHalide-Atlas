@@ -21,15 +21,15 @@
 
   function polishStaticCopy(){
     const chip=document.querySelector('.ux-review-chip');if(chip)chip.title='Review version · not indexed or formally released yet.';
-    text(document.querySelector('.ux-hero-search-hint'),'Searches curated literature and the curated structure register.');
+    text(document.querySelector('.ux-hero-search-hint'),'Searches the 410-article literature corpus and the curated structure register.');
     polishStartGrid();
     const growth=document.querySelector('.view[data-view="home"] #yearChart')?.closest('.panel');
-    if(growth)text(growth.querySelector('h2'),'Curated publications by year');
+    if(growth)text(growth.querySelector('h2'),'Structured-data publications by year');
     const dim=document.querySelector('.view[data-view="home"] #dimDist')?.closest('.panel');
     if(dim)text(dim.querySelector('.denom'),'Curated structure records · n = 901');
-    text(document.querySelector('.ux-search-footer'),'Search covers curated literature and structures; source publications remain linked by DOI.');
+    text(document.querySelector('.ux-search-footer'),'Search covers the literature corpus and structures; source publications remain linked by DOI.');
 
-    pageCopy('articles','Search curated articles by title, DOI, year, halogen or category, then open a record for related structures and reported measurements.');
+    pageCopy('articles','Search the 410-article literature corpus by title or DOI. Source coverage and linked structured data are shown per article.');
     pageCopy('structures','Browse curated structure and phase determinations. Search by formula, phase, dimensionality or space group; local motifs are available in Motifs, and photophysics is linked only where the evidence supports it.');
     pageCopy('rag','Ask about Cu(I) halide materials, structures, literature or photophysics. CuXplore retrieves source-linked Atlas evidence and keeps supporting records visible.');
     pageCopy('methods','See how the Atlas separates article, structure, motif and measurement evidence, and how unresolved or conflicting source information is handled.');
@@ -46,7 +46,7 @@
   }
 
   function polishArticleCards(){
-    document.querySelectorAll('.ux-article-footer small').forEach(n=>text(n,'Open the curated record for related structures and reported measurements.'));
+    document.querySelectorAll('.ux-article-footer small').forEach(n=>text(n,'Open the article record for related structures and reported measurements.'));
   }
 
   function polishModal(){
