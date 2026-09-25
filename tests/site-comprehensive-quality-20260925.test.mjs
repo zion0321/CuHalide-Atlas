@@ -25,6 +25,14 @@ test('quality layer covers focus, reduced motion, corpus coverage and busy state
   assert.match(js,/How the current review state was assembled/);
 });
 
+test('global search uses the unified literature endpoint',()=>{
+  const ux=read('public/ui-ux-core-v1.js');
+  assert.match(ux,/new URL\('\/api\/knowledge'/);
+  assert.match(ux,/searchParams\.set\('scope','all'\)/);
+  assert.match(ux,/Literature article · no linked structured record/);
+  assert.doesNotMatch(ux,/release_status:'Current canonical'/);
+});
+
 test('versioned UI assets have immutable browser caching',()=>{
   const v=JSON.parse(read('vercel.json'));
   const h=new Map(v.headers.map(x=>[x.source,x.headers]));
