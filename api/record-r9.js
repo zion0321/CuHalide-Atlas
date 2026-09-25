@@ -11,6 +11,7 @@ function patch(body,kind){
   for(const a of ['current-r9','current-r8','current-r7','current-r6'])x=all(x,a,'current-r10');
   x=all(x,'content="9"','content="10"');x=all(x,'content="8"','content="10"');
   x=all(x,'2026-08-19','2026-09-14');x=all(x,'19 Aug 2026','14 Sep 2026');
+  x=all(x,'CuHalide Research Assistant','CuXplore');x=all(x,'CuXplore Research Assistant','CuXplore');x=all(x,'Research Assistant','CuXplore');
   for(const v of ['1.3.0','1.3.1','1.3.2','1.3.3']){x=all(x,`Structured Photophysics ${v}`,'Structured Photophysics 1.4.0');x=all(x,`Photophysics ${v}`,'Photophysics 1.4.0')}
   x=all(x,'Organic Components 1.1.0','Organic Components 1.2.0');
   x=all(x,'Organic Components 1.1','Organic Components 1.2');
