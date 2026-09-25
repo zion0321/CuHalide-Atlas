@@ -12,6 +12,16 @@ test('current portal exposes the quality layer and one visible article denominat
   await expect(page.locator('body')).not.toContainText('Additional literature');
 });
 
+test('global search reaches literature records without a linked structured record',async({page})=>{
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  await page.locator('#uxSearchTrigger').click();
+  const q=page.locator('#uxSearchInput');await q.fill('Fluorescence Thermochromism');
+  const result=page.locator('.ux-search-results .ux-search-result').first();
+  await expect(result).toContainText('Fluorescence Thermochromism',{timeout:20000});
+  await expect(result).toContainText('no linked structured record');
+  await expect(result).toHaveAttribute('href',/doi\.org\/10\.1002\/zaac\.19734020113/);
+});
+
 test('literature makes source coverage explicit without creating a second corpus',async({page})=>{
   await page.goto(`${BASE}/#articles`,{waitUntil:'networkidle'});
   const cov=page.locator('.ui-literature-coverage');
