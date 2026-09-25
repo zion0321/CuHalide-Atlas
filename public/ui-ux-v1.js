@@ -66,7 +66,7 @@
     const modal=document.getElementById('modalBody');if(modal)new MutationObserver(()=>queueMicrotask(polishModal)).observe(modal,{childList:true,subtree:true});
   }
 
-  load('/ui-ux-core-v1.js?v=52.1','portal-ux-core-v52.1').then(()=>ready(installPolishObservers)).catch(e=>console.warn('[ui52 ux]',e));
+  load('/ui-ux-core-v1.js?v=52.2','portal-ux-core-v52.2').then(()=>ready(installPolishObservers)).catch(e=>console.warn('[ui52 ux]',e));
   load('/organic-components-graphs-11.js?v=1.2.0','organic-components-r10-graphs').then(()=>load('/organic-components-v1.js?v=1.2.0','organic-components-v1.2.0')).catch(e=>console.warn('[organic-components bootstrap]',e));
   load('/ui-structure-photophysics-v1.js?v=1.4.0','structure-photophysics-v1.4.0').catch(e=>console.warn('[structure-photophysics bootstrap]',e));
 })();

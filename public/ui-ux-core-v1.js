@@ -178,7 +178,7 @@
 
   function init(){
     document.documentElement.classList.add('ui-ux-v1');addReviewChip();addSearchTrigger();refineHero();addStartGrid();addFooterLinks();addRouteAnnouncer();dialogMarkup();observeDynamicUi();bind();syncRouteA11y();
-    const rag=document.querySelector('#nav [data-route="rag"]');if(rag)rag.title='CuXplore · source-linked literature and evidence search';
+    const rag=document.querySelector('#nav [data-route="rag"]');if(rag)rag.title='CuXplore';
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();

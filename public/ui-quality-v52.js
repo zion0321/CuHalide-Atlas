@@ -1,4 +1,4 @@
-/* CuHalide Atlas comprehensive quality layer v52.1 */
+/* CuHalide Atlas comprehensive quality layer v52.2 */
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
@@ -11,10 +11,10 @@ async function fallbackCoverage(){
   const x=await r.json().catch(()=>({}));if(!r.ok||x.ok!==true)throw new Error(x.error||'Coverage unavailable');return x;
 }
 function renderLiteratureCoverage(box,x){
-  const c=x?.coverage||{},f=x?.fulltext_v2||{},articleCount=Number(c.articles??c.catalog_articles??410),fulltext=Number(f.dois||0),chunked=Number(f.chunked_dois||0),docs=Number(f.documents||0),blocks=Number(f.actual_chunks||0);
+  const c=x?.coverage||{},f=x?.fulltext_v2||{},p=x?.processing_coverage||{},articleCount=Number(c.articles??c.catalog_articles??410),fulltext=Number(f.dois||0),native=Number(f.catalog_searchable_dois||0),searchable=Number(p.any_prose_articles??native),docs=Number(f.documents||0),blocks=Number(f.actual_chunks||0);
   const items=[
     [`${fmt(articleCount)} articles`,'Literature corpus','Single DOI-deduplicated article denominator','ui-cov-primary'],
-    [`${fmt(fulltext)} / ${fmt(articleCount)}`,'Full-text v2 source coverage',`${fmt(chunked)} articles have indexed text chunks; source coverage is not a second article corpus`,''],
+    [`${fmt(searchable)} / ${fmt(articleCount)}`,'Searchable source text',`${fmt(native)} current-catalog articles have native v2 text; the v2 source layer contains ${fmt(fulltext)} DOI records overall`,''],
     [fmt(docs),'Source documents','Registered MAIN / SI source files',''],
     [fmt(blocks),'Indexed text blocks','Retrieval blocks across registered source text','']
   ];
@@ -137,7 +137,7 @@ function enhanceCopyAndLabels(){
 }
 
 function init(){
-  document.documentElement.dataset.cuhalideQuality='52.1';
+  document.documentElement.dataset.cuhalideQuality='52.2';
   ensureLiteratureCoverage();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceRouteTitle();enhanceCopyAndLabels();
   const body=new MutationObserver(()=>{enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
   body.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',enhanceRouteTitle);

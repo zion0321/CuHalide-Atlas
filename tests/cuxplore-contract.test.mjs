@@ -60,7 +60,7 @@ test('site synchronization exposes concise v2 coverage without page-locator regr
  assert(ui.includes('window.CuXplore?.locator'));
  assert(!ui.includes('PDF page ${hit.page_start'));
  for(const k of ['fulltext_v2','cif_reconciliation','source_indexed_through'])assert(migration.includes(k));
- for(const k of ['Coverage notes','source index contains','Crystallographic source processing'])assert(cx.includes(k));
+ for(const k of ['Coverage notes','Searchable source prose is available','full-text v2 source layer contains','Crystallographic source processing'])assert(cx.includes(k));
  assert(retired.includes('url=/#rag'));
  assert(!retired.includes('iPA'));
 });
