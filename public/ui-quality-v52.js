@@ -101,6 +101,27 @@ function observePhotoDensity(){
   new MutationObserver(()=>queueMicrotask(run)).observe(modal,{childList:true,subtree:true});run();
 }
 
+function enhanceRouteTitle(){
+  const base=(location.hash||'#home').slice(1).split('?')[0].split('/')[0]||'home';
+  const names={home:'CuHalide Atlas',articles:'Literature — CuHalide Atlas',structures:'Structures — CuHalide Atlas',photophysics:'Photophysics — CuHalide Atlas',polar:'Polar structures — CuHalide Atlas',rag:'CuXplore — CuHalide Atlas',watch:'Literature Watch — CuHalide Atlas',methods:'Methods — CuHalide Atlas',citation:'About data — CuHalide Atlas'};
+  if(names[base])document.title=names[base];
+}
+
+function installCollectionBusyStates(){
+  const configs=[
+    {root:$('articles'),ids:['aq','ayf','ayt','ahal','adim','acat','aev','ascope','asort']},
+    {root:$('srows'),ids:['sq','shal','sdim','ssg','sconf','spolar']},
+    {root:$('prows'),ids:['pq','phal','psg']}
+  ];
+  for(const cfg of configs){
+    if(!cfg.root||cfg.root.dataset.qualityLoading==='1')continue;cfg.root.dataset.qualityLoading='1';
+    const set=()=>cfg.root.setAttribute('aria-busy','true');
+    for(const id of cfg.ids){const n=$(id);if(n){n.addEventListener(id==='aq'||id==='sq'||id==='pq'?'input':'change',set,{passive:true})}}
+    new MutationObserver(()=>{if(!cfg.root.querySelector('.loading'))cfg.root.setAttribute('aria-busy','false')}).observe(cfg.root,{childList:true,subtree:true});
+    cfg.root.setAttribute('aria-busy',cfg.root.querySelector('.loading')?'true':'false');
+  }
+}
+
 function enhanceDashboardA11y(){
   const year=$('yearChart');if(year){year.setAttribute('role','list');year.setAttribute('aria-label','Structured-data publications by year');year.querySelectorAll('.bar').forEach(b=>{b.setAttribute('role','listitem');const label=b.getAttribute('title')||[b.querySelector('span')?.textContent,b.querySelector('b')?.textContent].filter(Boolean).join(': ');if(label)b.setAttribute('aria-label',label)})}
   for(const id of ['halogenDist','dimDist']){const root=$(id);if(!root)continue;root.setAttribute('role','list');root.querySelectorAll('.dist-row').forEach(row=>row.setAttribute('role','listitem'))}
@@ -117,9 +138,9 @@ function enhanceCopyAndLabels(){
 
 function init(){
   document.documentElement.dataset.cuhalideQuality='52.1';
-  ensureLiteratureCoverage();enhanceKnowledgeBusy();enhanceChatBusy();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels();
-  const body=new MutationObserver(()=>{enhanceKnowledgeBusy();enhanceChatBusy();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
-  body.observe(document.body,{childList:true,subtree:true});
+  ensureLiteratureCoverage();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceRouteTitle();enhanceCopyAndLabels();
+  const body=new MutationObserver(()=>{enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
+  body.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',enhanceRouteTitle);
 }
 ready(init);
 })();
