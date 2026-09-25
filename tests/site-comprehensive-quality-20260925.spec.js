@@ -27,7 +27,7 @@ test('literature makes source coverage explicit without creating a second corpus
   const cov=page.locator('.ui-literature-coverage');
   await expect(cov).toBeVisible();
   await expect(cov).toContainText('410 articles');
-  await expect(cov).toContainText('384 / 410');
+  await expect(cov).toContainText('387 / 410');
   await expect(cov).toContainText('727');
   await expect(cov).toContainText('6,275');
   await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Literature corpus');
