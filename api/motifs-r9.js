@@ -15,7 +15,7 @@ function patch(body){
   for(const a of ['946-row Current Curated snapshot','947-row Current Curated snapshot'])x=all(x,a,'939-row Current Curated snapshot');
   x=all(x,'19 Aug 2026','14 Sep 2026');x=all(x,'2026-08-19','2026-09-14');x=all(x,'>Research Assistant</a>','>CuXplore</a>');x=x.replace(/"dateModified":"\d{4}-\d{2}-\d{2}"/g,'"dateModified":"'+CONTENT_DATE+'"');
 
-  x=all(x,'grid-template-columns:repeat(4,1fr)','grid-template-columns:repeat(2,1fr)');
+  x=all(x,'grid-template-columns:repeat(4,1fr)','grid-template-columns:repeat(3,1fr)');
   x=x.replace(/<option value="Unresolved legacy mapping"[^>]*>Unresolved legacy mapping<\/option>/g,'');
   x=x.replace(/<p>Explore normalized Cu–halide building units across Current Curated rev\.10\.[\s\S]*?<\/p>/,'<p>Explore source-resolved Cu–halide building units across all 939 structure/phase authority rows. The public curated Structure register contains the 901 Core-Included rows; the two counts intentionally use different denominators.</p>');
   x=x.replace(/<span class="status">Prepublication review · Curated through [^<]* · rev\.10<\/span>/,'<span class="status">Curated through 14 Sep 2026</span>');
