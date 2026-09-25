@@ -2,59 +2,408 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "node scripts/vercel-production-gate.mjs",
   "crons": [
-    { "path": "/health.json", "schedule": "43 3 * * *" }
+    {
+      "path": "/health.json",
+      "schedule": "43 3 * * *"
+    }
   ],
   "functions": {
-    "api/ui-r10.js": { "includeFiles": "public/index.html" },
-    "api/ui-r9.js": { "includeFiles": "public/index.html" },
-    "api/assets-r10.js": { "includeFiles": "public/{ui-photophysics-v1.js,ui-structure-photophysics-v1.js,organic-components-v1.js}" },
-    "api/ui-assistant-current.js": { "includeFiles": "public/index.html" },
-    "api/ui-site.js": { "includeFiles": "public/index.html" },
-    "api/meta-r9.js": { "includeFiles": "CITATION.cff" },
-    "api/meta.js": { "includeFiles": "CITATION.cff" }
+    "api/ui-r10.js": {
+      "includeFiles": "public/index.html"
+    },
+    "api/ui-r9.js": {
+      "includeFiles": "public/index.html"
+    },
+    "api/assets-r10.js": {
+      "includeFiles": "public/{ui-photophysics-v1.js,ui-structure-photophysics-v1.js,organic-components-v1.js}"
+    },
+    "api/ui-assistant-current.js": {
+      "includeFiles": "public/index.html"
+    },
+    "api/ui-site.js": {
+      "includeFiles": "public/index.html"
+    },
+    "api/meta-r9.js": {
+      "includeFiles": "CITATION.cff"
+    },
+    "api/meta.js": {
+      "includeFiles": "CITATION.cff"
+    }
   },
   "rewrites": [
-    { "source": "/", "destination": "/api/ui-r10" },
-    { "source": "/index.html", "destination": "/api/ui-r10" },
-    { "source": "/api/site", "destination": "/api/ui-r10" },
-    { "source": "/api/ui-site", "destination": "/api/ui-r10" },
-    { "source": "/api/ui-site.js", "destination": "/api/ui-r10" },
-    { "source": "/api/ui-assistant", "destination": "/api/ui-r10" },
-    { "source": "/api/ui-assistant.js", "destination": "/api/ui-r10" },
-    { "source": "/api/ui-assistant-current", "destination": "/api/ui-r10" },
-    { "source": "/api/ui-assistant-current.js", "destination": "/api/ui-r10" },
-    { "source": "/ui-photophysics-v1.js", "destination": "/api/assets-r10?asset=photophysics" },
-    { "source": "/ui-structure-photophysics-v1.js", "destination": "/api/assets-r10?asset=structure_photophysics" },
-    { "source": "/organic-components-v1.js", "destination": "/api/assets-r10?asset=organic_components" },
-    { "source": "/api/public-data", "destination": "/api/public-data-r9" },
-    { "source": "/api/public-data.js", "destination": "/api/public-data-r9" },
-    { "source": "/api/record", "destination": "/api/record-r9" },
-    { "source": "/api/record.js", "destination": "/api/record-r9" },
-    { "source": "/api/record-current", "destination": "/api/record-r9" },
-    { "source": "/api/record-current.js", "destination": "/api/record-r9" },
-    { "source": "/api/record-evidence-current", "destination": "/api/record-r9" },
-    { "source": "/api/record-evidence-current.js", "destination": "/api/record-r9" },
-    { "source": "/motifs", "destination": "/api/motifs-r9" },
-    { "source": "/article/:id", "destination": "/api/record-r9?kind=article&id=:id" },
-    { "source": "/structure/:id", "destination": "/api/record-r9?kind=structure&id=:id" },
-    { "source": "/robots.txt", "destination": "/api/meta-r9?asset=robots" },
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/release-manifest.json", "destination": "/api/meta-r9?asset=manifest" },
-    { "source": "/citation.txt", "destination": "/api/meta-r9?asset=citation" },
-    { "source": "/citation.cff", "destination": "/api/meta-r9?asset=citation" },
-    { "source": "/CITATION.cff", "destination": "/api/meta-r9?asset=citation" },
-    { "source": "/health.json", "destination": "/api/meta-r9?asset=health" },
-    { "source": "/api/meta", "destination": "/api/meta-r9" },
-    { "source": "/api/meta.js", "destination": "/api/meta-r9" }
+    {
+      "source": "/",
+      "destination": "/api/ui-r10"
+    },
+    {
+      "source": "/index.html",
+      "destination": "/api/ui-r10"
+    },
+    {
+      "source": "/api/site",
+      "destination": "/api/ui-r10"
+    },
+    {
+      "source": "/api/ui-site",
+      "destination": "/api/ui-r10"
+    },
+    {
+      "source": "/api/ui-site.js",
+      "destination": "/api/ui-r10"
+    },
+    {
+      "source": "/api/ui-assistant",
+      "destination": "/api/ui-r10"
+    },
+    {
+      "source": "/api/ui-assistant.js",
+      "destination": "/api/ui-r10"
+    },
+    {
+      "source": "/api/ui-assistant-current",
+      "destination": "/api/ui-r10"
+    },
+    {
+      "source": "/api/ui-assistant-current.js",
+      "destination": "/api/ui-r10"
+    },
+    {
+      "source": "/ui-photophysics-v1.js",
+      "destination": "/api/assets-r10?asset=photophysics"
+    },
+    {
+      "source": "/ui-structure-photophysics-v1.js",
+      "destination": "/api/assets-r10?asset=structure_photophysics"
+    },
+    {
+      "source": "/organic-components-v1.js",
+      "destination": "/api/assets-r10?asset=organic_components"
+    },
+    {
+      "source": "/api/public-data",
+      "destination": "/api/public-data-r9"
+    },
+    {
+      "source": "/api/public-data.js",
+      "destination": "/api/public-data-r9"
+    },
+    {
+      "source": "/api/record",
+      "destination": "/api/record-r9"
+    },
+    {
+      "source": "/api/record.js",
+      "destination": "/api/record-r9"
+    },
+    {
+      "source": "/api/record-current",
+      "destination": "/api/record-r9"
+    },
+    {
+      "source": "/api/record-current.js",
+      "destination": "/api/record-r9"
+    },
+    {
+      "source": "/api/record-evidence-current",
+      "destination": "/api/record-r9"
+    },
+    {
+      "source": "/api/record-evidence-current.js",
+      "destination": "/api/record-r9"
+    },
+    {
+      "source": "/motifs",
+      "destination": "/api/motifs-r9"
+    },
+    {
+      "source": "/article/:id",
+      "destination": "/api/record-r9?kind=article&id=:id"
+    },
+    {
+      "source": "/structure/:id",
+      "destination": "/api/record-r9?kind=structure&id=:id"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/api/meta-r9?asset=robots"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/release-manifest.json",
+      "destination": "/api/meta-r9?asset=manifest"
+    },
+    {
+      "source": "/citation.txt",
+      "destination": "/api/meta-r9?asset=citation"
+    },
+    {
+      "source": "/citation.cff",
+      "destination": "/api/meta-r9?asset=citation"
+    },
+    {
+      "source": "/CITATION.cff",
+      "destination": "/api/meta-r9?asset=citation"
+    },
+    {
+      "source": "/health.json",
+      "destination": "/api/meta-r9?asset=health"
+    },
+    {
+      "source": "/api/meta",
+      "destination": "/api/meta-r9"
+    },
+    {
+      "source": "/api/meta.js",
+      "destination": "/api/meta-r9"
+    }
   ],
   "headers": [
-    { "source": "/", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" },{ "key": "Content-Disposition", "value": "inline; filename=\"index.html\"" },{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" },{ "key": "Pragma", "value": "no-cache" },{ "key": "Expires", "value": "0" }] },
-    { "source": "/index.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" },{ "key": "Content-Disposition", "value": "inline; filename=\"index.html\"" },{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" },{ "key": "Pragma", "value": "no-cache" },{ "key": "Expires", "value": "0" }] },
-    { "source": "/motifs", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
-    { "source": "/robots.txt", "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }] },
-    { "source": "/sitemap.xml", "headers": [{ "key": "Content-Type", "value": "application/xml; charset=utf-8" }] },
-    { "source": "/release-manifest.json", "headers": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }] },
-    { "source": "/citation.cff", "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }] },
-    { "source": "/(.*)", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },{ "key": "X-CuHalide-Publication-State", "value": "prepublication-review" },{ "key": "X-Content-Type-Options", "value": "nosniff" },{ "key": "X-Frame-Options", "value": "DENY" },{ "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },{ "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },{ "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },{ "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },{ "key": "Cross-Origin-Resource-Policy", "value": "same-origin" }] }
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "inline; filename=\"index.html\""
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "inline; filename=\"index.html\""
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "source": "/motifs",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/release-manifest.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/citation.cff",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "X-CuHalide-Publication-State",
+          "value": "prepublication-review"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/ui-v51-core.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/ui-v51-core.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/ui-assistant-v51.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/ui-ux-v1.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/ui-ux-v1.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/ui-ux-core-v1.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/ui-knowledge-v1.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/ui-knowledge-v1.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/cuxplore-v1.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/cuxplore-v1.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/ui-quality-v52.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/ui-quality-v52.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
   ]
 }

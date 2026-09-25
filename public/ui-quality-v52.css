@@ -1,0 +1,110 @@
+/* CuHalide Atlas comprehensive quality layer v52.1
+   Presentation/accessibility only. Scientific data semantics remain in authoritative APIs. */
+
+:root{--focus-ring:#9b6a20;--focus-halo:rgba(155,106,32,.22);--quality-soft:#f5f9f9}
+
+/* Keyboard access: one unmistakable focus treatment across every surface. */
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
+  outline:3px solid var(--focus-ring)!important;
+  outline-offset:3px!important;
+  box-shadow:0 0 0 5px var(--focus-halo)!important
+}
+.skip:focus{z-index:1000}
+:where(button,.btn,.nav a,.footer-links a,.linkbtn,.ki-pager button,.ux-search-result){touch-action:manipulation}
+
+/* Improve microcopy legibility without making expert-facing pages visually heavy. */
+.fine,.denom,.release-note,.meta,.source,.scope,.cx-note,.ki-source small,.ki-ref{line-height:1.58}
+.ki-source small,.cx-note,.photo-mechanisms,.photo-sample summary,.photo-count{font-size:max(10px,.68rem)}
+.photo-fact span,.photo-fact small{font-size:max(9px,.62rem)}
+@media(max-width:780px){
+  .fine,.denom,.release-note,.meta,.source,.scope,.cx-note{font-size:max(11px,.72rem)}
+  .photo-fact span,.photo-fact small,.photo-count,.photo-sample summary{font-size:max(10px,.68rem)}
+}
+
+/* Explicit corpus/source coverage: one article denominator, one coverage ratio. */
+.ui-literature-coverage{
+  display:grid;grid-template-columns:minmax(170px,1.2fr) repeat(3,minmax(130px,1fr));
+  gap:10px;margin-top:-8px;margin-bottom:18px;padding:12px;
+  border:1px solid var(--line);border-radius:14px;background:var(--quality-soft)
+}
+.ui-literature-coverage .ui-cov-item{min-width:0;padding:10px 12px;border-right:1px solid #dce7e8}
+.ui-literature-coverage .ui-cov-item:last-child{border-right:0}
+.ui-literature-coverage strong,.ui-literature-coverage span,.ui-literature-coverage small{display:block}
+.ui-literature-coverage strong{font:22px/1.2 Georgia,"Times New Roman",serif;color:var(--navy)}
+.ui-literature-coverage span{margin-top:3px;font-size:10px;font-weight:850;color:#355867}
+.ui-literature-coverage small{margin-top:3px;font-size:9.5px;line-height:1.45;color:var(--muted)}
+.ui-literature-coverage .ui-cov-primary strong{font-size:25px}
+.ui-literature-coverage[aria-busy="true"]{opacity:.72}
+@media(max-width:900px){.ui-literature-coverage{grid-template-columns:repeat(2,minmax(0,1fr))}.ui-literature-coverage .ui-cov-item{border-right:0}}
+@media(max-width:520px){.ui-literature-coverage{grid-template-columns:1fr}.ui-literature-coverage .ui-cov-item{padding:8px 9px}}
+
+/* Loading feedback for retrieval and answer generation. */
+.ui-busy-bar{height:3px;overflow:hidden;border-radius:999px;background:#dce9e8;margin:9px 0 0}
+.ui-busy-bar::before{content:"";display:block;width:38%;height:100%;background:var(--teal);animation:ui-busy-slide 1.15s ease-in-out infinite}
+[aria-busy="true"].ki-retrieval,[aria-busy="true"].rag-work{border-color:#bad7d3}
+[aria-busy="true"] .ui-busy-bar{display:block}
+.ui-retrieval-progress{margin-top:7px}
+#knowledgeRetrieve[aria-busy="true"],#rsend[aria-busy="true"]{cursor:progress}
+@keyframes ui-busy-slide{0%{transform:translateX(-105%)}50%{transform:translateX(120%)}100%{transform:translateX(275%)}}
+
+/* Denominator/provenance help is visible without adding another permanent card. */
+.ui-denominator-help{
+  margin:12px auto 20px;padding:12px 14px;border:1px solid #d5e2e4;border-radius:11px;
+  background:#f8fbfb;color:#31525f;max-width:1280px
+}
+.ui-denominator-help summary{cursor:pointer;font-size:11px;font-weight:850;color:var(--navy)}
+.ui-denominator-help p{margin:8px 0 2px;font-size:11px;line-height:1.6;color:var(--muted)}
+
+/* Update history in About data. */
+.ui-version-timeline{grid-column:1/-1}
+.ui-version-timeline h2{margin-bottom:13px}
+.ui-version-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:13px}
+.ui-version-step{padding:11px;border:1px solid #dbe5e8;border-radius:10px;background:#fafcfc;min-width:0}
+.ui-version-step time,.ui-version-step strong,.ui-version-step small{display:block}
+.ui-version-step time{font-size:9px;font-weight:900;letter-spacing:.05em;color:var(--teal);text-transform:uppercase}
+.ui-version-step strong{margin-top:4px;font-size:11px;color:var(--navy)}
+.ui-version-step small{margin-top:4px;font-size:9.5px;line-height:1.45;color:var(--muted)}
+@media(max-width:900px){.ui-version-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.ui-version-list{grid-template-columns:1fr}}
+
+/* Structure/source links: larger click/focus affordances while tables stay compact. */
+#srows .linkbtn,#prows .linkbtn{min-height:28px;padding:2px 3px}
+#srows a,#prows a{display:inline-flex;align-items:center;min-height:28px}
+@media(hover:hover) and (pointer:fine){
+  #srows tr:hover,#prows tr:hover{background:#f8fbfb}
+}
+
+/* Photophysics density control: compact is opt-in on desktop and default on narrow screens. */
+.ui-photo-density{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:10px 0 2px}
+.ui-photo-density span{font-size:10px;color:var(--muted);font-weight:750}
+.ui-photo-density button{min-height:34px;border:1px solid #c8d8dc;border-radius:8px;background:#fff;color:var(--navy);padding:6px 9px;font:inherit;font-size:10px;font-weight:850;cursor:pointer}
+.ui-photo-density button[aria-pressed="true"]{background:#eaf4f2;border-color:#9ecac2;color:#165e56}
+.photo-modal-section.ui-photo-compact .photo-fact:nth-child(n+7){display:none}
+.photo-modal-section.ui-photo-compact .photo-mechanisms{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media(max-width:780px){
+  .photo-facts{gap:8px}
+  .photo-fact{padding:10px}
+  .photo-sample{padding:14px}
+}
+
+/* Cleaner scientific tables and captions. */
+.table-wrap caption{line-height:1.5}
+.table-wrap th{position:sticky;top:0;z-index:1}
+@media(max-width:780px){.table-wrap th{position:static}}
+
+/* Standalone record/error pages also receive consistent keyboard affordances. */
+.topnav a{min-height:32px;display:inline-flex;align-items:center}
+.error-card .actions .btn{min-height:42px}
+
+/* Respect users who disable animation. */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+
+/* Print: make scientific provenance readable and remove interactive chrome. */
+@media print{
+  header,.footer,.ux-search-trigger,.ui-backtop,.composer,.prompts,.mobile-filter-toggle,.mobile-filter-done{display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .panel,.card,.release,.kpi{box-shadow:none!important;border-color:#bbb!important;break-inside:avoid}
+  a{color:#000!important;text-decoration:underline}
+}

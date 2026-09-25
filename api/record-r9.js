@@ -11,6 +11,7 @@ function patch(body,kind){
   for(const a of ['current-r9','current-r8','current-r7','current-r6'])x=all(x,a,'current-r10');
   x=all(x,'content="9"','content="10"');x=all(x,'content="8"','content="10"');
   x=all(x,'2026-08-19','2026-09-14');x=all(x,'19 Aug 2026','14 Sep 2026');
+  x=all(x,'CuHalide Research Assistant','CuXplore');x=all(x,'CuXplore Research Assistant','CuXplore');x=all(x,'Research Assistant','CuXplore');
   for(const v of ['1.3.0','1.3.1','1.3.2','1.3.3']){x=all(x,`Structured Photophysics ${v}`,'Structured Photophysics 1.4.0');x=all(x,`Photophysics ${v}`,'Photophysics 1.4.0')}
   x=all(x,'Organic Components 1.1.0','Organic Components 1.2.0');
   x=all(x,'Organic Components 1.1','Organic Components 1.2');
@@ -44,7 +45,7 @@ function patch(body,kind){
     for(const hidden of ['Motif adjudication confidence','Machine-normalized identity key','SG / mapping confidence'])if(x.includes(hidden))throw new Error(`internal standalone structure field remains visible: ${hidden}`);
   }
   if(/Current Curated rev\.9|current-curated-r9|current-r9/.test(x))throw new Error('stale rev.9 record browser state');
-  if(x.includes('</body>')&&!x.includes('Record not found'))x=x.replace('</head>','<link rel="stylesheet" href="/cuxplore-v1.css"></head>').replace('</body>','<script src="/cuxplore-v1.js" defer></script></body>');
+  if(x.includes('</body>')){x=x.replace('</head>','<link rel="stylesheet" href="/ui-quality-v52.css?v=52.1"><link rel="stylesheet" href="/cuxplore-v1.css?v=52.1"></head>');if(!x.includes('Record not found')&&!x.includes('Invalid record identifier'))x=x.replace('</body>','<script src="/cuxplore-v1.js?v=52.1" defer></script><script src="/ui-quality-v52.js?v=52.1" defer></script></body>');}
   return x
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}

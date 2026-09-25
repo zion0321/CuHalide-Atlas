@@ -1,4 +1,4 @@
-/* CuHalide Atlas portal UX layer for UI 51.
+/* CuHalide Atlas portal UX core for UI 52.1.
    Uses only existing public query-and-view endpoints. */
 (() => {
   'use strict';
@@ -14,6 +14,11 @@
     for(const[k,v]of Object.entries(params))if(v!==''&&v!==null&&v!==undefined)u.searchParams.set(k,String(v));
     const r=await fetch(u,{cache:'no-store',headers:{accept:'application/json'},signal});
     const x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.error||`HTTP ${r.status}`);return x;
+  }
+  async function literature(q,signal){
+    const u=new URL('/api/knowledge',location.origin);u.searchParams.set('action','articles');u.searchParams.set('scope','all');u.searchParams.set('q',q);u.searchParams.set('limit','6');u.searchParams.set('offset','0');
+    const r=await fetch(u,{cache:'no-store',headers:{accept:'application/json'},signal});
+    const x=await r.json().catch(()=>({}));if(!r.ok||x.ok!==true)throw new Error(x.error||`HTTP ${r.status}`);return x;
   }
 
   function addReviewChip(){
@@ -32,15 +37,15 @@
     const hero=document.querySelector('.view[data-view="home"] .hero');if(!hero)return;
     const h1=hero.querySelector('h1'),copy=hero.querySelector('.hero-copy');
     if(h1)h1.textContent='Evidence-grounded Cu(I) halide knowledge, from structure to photophysics.';
-    if(copy)copy.textContent='Search curated literature, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or use CuXplore to search and connect source-linked evidence.';
+    if(copy)copy.textContent='Search the literature corpus, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or use CuXplore to connect source-linked evidence.';
     if(hero.querySelector('.ux-hero-search'))return;
     const actions=hero.querySelector('.actions');if(!actions)return;
-    actions.insertAdjacentHTML('afterend','<form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search" autocomplete="off" placeholder="Search title, DOI, formula, space group…"><button type="submit">Search</button></form><small class="ux-hero-search-hint">Searches the curated literature and Core-Included structure register.</small>');
+    actions.insertAdjacentHTML('afterend','<form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search" autocomplete="off" placeholder="Search title, DOI, formula, space group…"><button type="submit">Search</button></form><small class="ux-hero-search-hint">Searches the 410-article literature corpus and Core-Included structure register.</small>');
   }
 
   function addStartGrid(){
     const kpis=document.querySelector('.view[data-view="home"] .kpis');if(!kpis||document.querySelector('.ux-start'))return;
-    const section=document.createElement('section');section.className='shell ux-start';section.innerHTML='<div class="ux-start-head"><div><p class="eyebrow">Research paths</p><h2>Start with the evidence layer you need.</h2></div><p>Each route preserves its own scientific grain. Article evidence, structure identity and sample-resolved photophysics are not silently merged.</p></div><div class="ux-start-grid"><a class="ux-start-card" href="#articles"><span>01 · Literature</span><strong>Find the source article</strong><small>Search DOI, title, compound families and curated article-level evidence.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#structures"><span>02 · Structures</span><strong>Resolve crystallography</strong><small>Inspect formula, phase, dimensionality, space group, confidence and source mapping.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#photophysics"><span>03 · Photophysics</span><strong>Inspect measurements</strong><small>Keep crystal, powder, composite, film and device measurements at the correct sample grain.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#rag"><span>04 · CuXplore</span><strong>Ask across evidence</strong><small>Search and connect literature, structures and source-linked measurements.</small><i aria-hidden="true">→</i></a></div>';
+    const section=document.createElement('section');section.className='shell ux-start';section.innerHTML='<div class="ux-start-head"><div><p class="eyebrow">Research paths</p><h2>Start with the evidence layer you need.</h2></div><p>Each route preserves its own scientific grain. Article evidence, structure identity and sample-resolved photophysics are not silently merged.</p></div><div class="ux-start-grid"><a class="ux-start-card" href="#articles"><span>01 · Literature</span><strong>Find the source article</strong><small>Search DOI, title, compound families and article-level evidence.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#structures"><span>02 · Structures</span><strong>Resolve crystallography</strong><small>Inspect formula, phase, dimensionality, space group, confidence and source mapping.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#photophysics"><span>03 · Photophysics</span><strong>Inspect measurements</strong><small>Keep crystal, powder, composite, film and device measurements at the correct sample grain.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#rag"><span>04 · CuXplore</span><strong>Ask across evidence</strong><small>Search and connect literature, structures and source-linked measurements.</small><i aria-hidden="true">→</i></a></div>';
     const wrap=kpis.closest('.section');wrap?.insertAdjacentElement('afterend',section);
   }
 
@@ -86,8 +91,12 @@
 
   function resultButton(type,x){
     if(type==='article'){
-      const meta=[x.journal,x.year,x.doi].filter(Boolean).join(' · ');
-      return `<button type="button" class="ux-search-result" data-ux-open-article="${esc(x.record_id)}"><strong>${esc(x.title||`Article record ${x.record_id}`)}</strong><span>${esc(meta)}</span></button>`;
+      const meta=[x.journal,x.year,x.doi].filter(Boolean).join(' · '),title=esc(x.title||x.doi||'Literature article');
+      if(!x.record_id){
+        let href='#articles';try{const u=new URL(x.url||`https://doi.org/${x.doi||''}`);if(u.protocol==='https:'&&u.hostname==='doi.org')href=u.href}catch{}
+        const external=href.startsWith('https://doi.org/');return `<a class="ux-search-result" href="${esc(href)}"${external?' target="_blank" rel="noreferrer"':''}><strong>${title}</strong><span>${esc(meta)}</span><small>Literature article · no linked structured record</small></a>`;
+      }
+      return `<button type="button" class="ux-search-result" data-ux-open-article="${esc(x.record_id)}"><strong>${title}</strong><span>${esc(meta)}</span><small>Literature article · linked structured record</small></button>`;
     }
     const meta=[x.formula,x.dimensionality_class||x.dimensionality,x.space_group].filter(Boolean).join(' · ');
     return `<button type="button" class="ux-search-result" data-ux-open-structure="${esc(x.structure_id)}"><strong>${esc(x.structure_id)} · ${esc(compact(x.label||x.formula||'Curated structure'))}</strong><span>${esc(meta)}</span></button>`;
@@ -95,18 +104,18 @@
 
   function groupHtml(title,total,items,type){
     const shown=Array.isArray(items)?items:[];
-    return `<section class="ux-search-group"><div class="ux-search-group-head"><strong>${esc(title)}</strong><span>${esc(total??shown.length)} matching records</span></div><div class="ux-search-results">${shown.length?shown.map(x=>resultButton(type,x)).join(''):'<div class="ux-search-empty">No matching curated records in this layer.</div>'}</div></section>`;
+    return `<section class="ux-search-group"><div class="ux-search-group-head"><strong>${esc(title)}</strong><span>${esc(total??shown.length)} matching records</span></div><div class="ux-search-results">${shown.length?shown.map(x=>resultButton(type,x)).join(''):'<div class="ux-search-empty">No matching records in this layer.</div>'}</div></section>`;
   }
 
   async function runSearch(q){
-    const body=$('uxSearchBody');if(!body)return;state.searchAbort?.abort();const ctrl=new AbortController();state.searchAbort=ctrl;body.innerHTML='<div class="ux-search-state">Searching curated literature and structures…</div>';
+    const body=$('uxSearchBody');if(!body)return;state.searchAbort?.abort();const ctrl=new AbortController();state.searchAbort=ctrl;body.innerHTML='<div class="ux-search-state">Searching the literature corpus and Core-Included structures…</div>';
     try{
       const [a,s]=await Promise.all([
-        api('articles',{q,page:1,page_size:5,release_status:'Current canonical'},ctrl.signal),
+        literature(q,ctrl.signal),
         api('structures',{q,page:1,page_size:5,eligibility:'Core - Included'},ctrl.signal)
       ]);
       if(ctrl.signal.aborted)return;
-      body.innerHTML=groupHtml('Literature',a.pagination?.total,a.items,'article')+groupHtml('Structures',s.pagination?.total,s.items,'structure');
+      body.innerHTML=groupHtml('Literature',a.total,a.items,'article')+groupHtml('Structures',s.pagination?.total,s.items,'structure');
     }catch(e){if(e.name!=='AbortError')body.innerHTML=`<div class="error">Search is temporarily unavailable: ${esc(e.message)}</div>`}
   }
 
