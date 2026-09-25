@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import currentMotifs from './motifs.js';
-const REV='10',SITE='52',UI='52.0',STATE='prepublication-review';
+const REV='10',SITE='52',UI='52.0',STATE='prepublication-review',CONTENT_DATE='2026-09-25';
 const all=(s,a,b)=>String(s).split(a).join(b);
 function patch(body){
   if(typeof body!=='string')return body;
@@ -13,13 +13,13 @@ function patch(body){
   for(const a of ['946-row taxonomy','947-row taxonomy'])x=all(x,a,'939-row taxonomy');
   for(const a of ['946 structure rows','947 structure rows'])x=all(x,a,'939 structure rows');
   for(const a of ['946-row Current Curated snapshot','947-row Current Curated snapshot'])x=all(x,a,'939-row Current Curated snapshot');
-  x=all(x,'19 Aug 2026','14 Sep 2026');x=all(x,'2026-08-19','2026-09-14');
+  x=all(x,'19 Aug 2026','14 Sep 2026');x=all(x,'2026-08-19','2026-09-14');x=all(x,'>Research Assistant</a>','>CuXplore</a>');x=x.replace(/"dateModified":"\d{4}-\d{2}-\d{2}"/g,'"dateModified":"'+CONTENT_DATE+'"');
 
   x=all(x,'grid-template-columns:repeat(4,1fr)','grid-template-columns:repeat(2,1fr)');
   x=x.replace(/<option value="Unresolved legacy mapping"[^>]*>Unresolved legacy mapping<\/option>/g,'');
-  x=x.replace(/<p>Explore normalized Cu–halide building units across Current Curated rev\.10\.[\s\S]*?<\/p>/,'<p>Explore source-resolved Cu–halide building units and compare their local motif with the dimensionality of the extended structure.</p>');
+  x=x.replace(/<p>Explore normalized Cu–halide building units across Current Curated rev\.10\.[\s\S]*?<\/p>/,'<p>Explore source-resolved Cu–halide building units across all 939 structure/phase authority rows. The public curated Structure register contains the 901 Core-Included rows; the two counts intentionally use different denominators.</p>');
   x=x.replace(/<span class="status">Prepublication review · Curated through [^<]* · rev\.10<\/span>/,'<span class="status">Curated through 14 Sep 2026</span>');
-  x=x.replace(/<div class="overview"><article class="stat"><span>Taxonomy rows<\/span><strong>(\d+)<\/strong><p class="fine">[\s\S]*?<\/article><article class="stat"><span>Motif resolved<\/span><strong>(\d+)<\/strong><p class="fine">[\s\S]*?<\/article><article class="stat"><span>Motif unresolved<\/span><strong>\d+<\/strong><p class="fine">[\s\S]*?<\/article><article class="stat"><span>Legacy category unresolved<\/span><strong>\d+<\/strong><p class="fine">[\s\S]*?<\/article><\/div>/,(_m,total,resolved)=>`<div class="overview"><article class="stat"><span>Structures</span><strong>${total}</strong><p class="fine">taxonomy coverage</p></article><article class="stat"><span>Source-resolved motifs</span><strong>${resolved}</strong><p class="fine">local Cu–X units</p></article></div>`);
+  x=x.replace(/<div class="overview"><article class="stat"><span>Taxonomy rows<\/span><strong>(\d+)<\/strong><p class="fine">[\s\S]*?<\/article><article class="stat"><span>Motif resolved<\/span><strong>(\d+)<\/strong><p class="fine">[\s\S]*?<\/article><article class="stat"><span>Motif unresolved<\/span><strong>\d+<\/strong><p class="fine">[\s\S]*?<\/article><article class="stat"><span>Legacy category unresolved<\/span><strong>\d+<\/strong><p class="fine">[\s\S]*?<\/article><\/div>/,(_m,total,resolved)=>`<div class="overview"><article class="stat"><span>All structure / phase rows</span><strong>${total}</strong><p class="fine">authority denominator</p></article><article class="stat"><span>Core-Included structures</span><strong>901</strong><p class="fine">public curated subset</p></article><article class="stat"><span>Source-resolved motifs</span><strong>${resolved}</strong><p class="fine">local Cu–X units</p></article></div>`);
   x=x.replace(/<div class="notice"><strong>Conservative motif rule:<\/strong>[\s\S]*?<\/div>/,'<div class="notice"><strong>How to read motifs:</strong> a local Cu–X motif and the dimensionality of the extended inorganic structure are different properties. A motif is shown only when it is established from structure-level evidence.</div>');
   x=x.replace(/<article class="card"><strong>Unresolved legacy mapping<\/strong><p class="fine">[\s\S]*?<\/p><\/article>/g,'');
   x=x.replace(/<tr><td>[^<]*<\/td><td>Unresolved<\/td><td>[^<]*<\/td><td>[^<]*<\/td><td>[^<]*<\/td><\/tr>/g,'');
@@ -34,7 +34,7 @@ function patch(body){
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}
 function syncCsp(html,res){const c=String(res.getHeader?.('Content-Security-Policy')||'');if(!c)return;const hs=hashes(html);if(!hs.length)return;let next=c;if(/script-src\s+[^;]*;/i.test(next))next=next.replace(/script-src\s+[^;]*;/i,`script-src ${hs.join(' ')};`);if(/style-src\s+[^;]*;/i.test(next)){const style=String(html).match(/<style>([\s\S]*?)<\/style>/i)?.[1];if(style){const h=`'sha256-${crypto.createHash('sha256').update(style).digest('base64')}'`;next=next.replace(/style-src\s+[^;]*;/i,`style-src ${h};`)}}res.setHeader('Content-Security-Policy',next)}
 export default async function handler(req,res){
-  res.setHeader('X-CuHalide-Current-Curated-Revision',REV);res.setHeader('X-CuHalide-Site-Version',SITE);res.setHeader('X-CuHalide-UI-Version',UI);res.setHeader('X-CuHalide-Publication-State',STATE);
-  const bridge={setHeader:(k,v)=>{const n=String(k).toLowerCase();if(n==='x-cuhalide-current-curated-revision')v=REV;if(n==='x-cuhalide-site-version')v=SITE;if(n==='x-cuhalide-ui-version')v=UI;if(n==='x-cuhalide-publication-state')v=STATE;return res.setHeader(k,v)},getHeader:k=>res.getHeader?.(k),removeHeader:k=>res.removeHeader?.(k),end:body=>{const out=patch(body);if(typeof out==='string'&&out.includes('</html>'))syncCsp(out,res);res.removeHeader?.('Content-Length');return res.end(out)}};
+  res.setHeader('X-CuHalide-Current-Curated-Revision',REV);res.setHeader('X-CuHalide-Site-Version',SITE);res.setHeader('X-CuHalide-UI-Version',UI);res.setHeader('X-CuHalide-Publication-State',STATE);res.setHeader('Last-Modified',new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString());
+  const bridge={setHeader:(k,v)=>{const n=String(k).toLowerCase();if(n==='x-cuhalide-current-curated-revision')v=REV;if(n==='x-cuhalide-site-version')v=SITE;if(n==='x-cuhalide-ui-version')v=UI;if(n==='x-cuhalide-publication-state')v=STATE;if(n==='last-modified')v=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();return res.setHeader(k,v)},getHeader:k=>res.getHeader?.(k),removeHeader:k=>res.removeHeader?.(k),end:body=>{const out=patch(body);if(typeof out==='string'&&out.includes('</html>'))syncCsp(out,res);res.removeHeader?.('Content-Length');return res.end(out)}};
   Object.defineProperty(bridge,'statusCode',{get:()=>res.statusCode,set:v=>{res.statusCode=v}});return currentMotifs(req,bridge)
 }
