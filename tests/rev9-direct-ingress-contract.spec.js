@@ -26,7 +26,7 @@ test('legacy data ingress is minimized rev.10 public data with deprecation warni
 
 test('direct sitemap is rev.10, canonical, and remains non-enumerating',async({request})=>{
   const r=await request.get(`${BASE}/api/sitemap.js`);expect(r.status()).toBe(200);const xml=await r.text();
-  expect(xml).toContain(`<loc>${CANONICAL}/</loc>`);expect(xml).toContain(`<loc>${CANONICAL}/motifs</loc>`);expect(xml).not.toContain(`http://127.0.0.1:4173`);expect(xml).not.toContain('/article/');expect(xml).not.toContain('/structure/');expect(xml).toContain('<lastmod>2026-09-24</lastmod>');expect((xml.match(/<url>/g)||[]).length).toBe(2);currentHeaders(r.headers());expect(r.headers()['x-cuhalide-sitemap-scope']).toBe('prepublication-non-enumerating');
+  expect(xml).toContain(`<loc>${CANONICAL}/</loc>`);expect(xml).toContain(`<loc>${CANONICAL}/motifs</loc>`);expect(xml).not.toContain(`http://127.0.0.1:4173`);expect(xml).not.toContain('/article/');expect(xml).not.toContain('/structure/');expect(xml).toContain('<lastmod>2026-09-25</lastmod>');expect((xml.match(/<url>/g)||[]).length).toBe(2);currentHeaders(r.headers());expect(r.headers()['x-cuhalide-sitemap-scope']).toBe('prepublication-non-enumerating');
 });
 
 test('direct public-data and record compatibility paths stay on rev.10 contracts',async({request})=>{
