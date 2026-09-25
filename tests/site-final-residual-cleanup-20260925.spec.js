@@ -15,10 +15,10 @@ test('Overview distinguishes searchable catalog text from the broader v2 source 
   const coverage=page.locator('#knowledgeCoverage');
   await expect(coverage).toContainText('Articles');
   await expect(coverage).toContainText('410');
-  await expect(coverage).toContainText('Searchable full text');
-  await expect(coverage).toContainText('384');
-  await expect(coverage).toContainText('source layer: 403 DOI records');
-  await expect(coverage).toContainText('subset of 410 literature articles');
+  await expect(coverage).toContainText('Searchable source text');
+  await expect(coverage).toContainText('387');
+  await expect(coverage).toContainText('384 current-catalog articles have native v2 text');
+  await expect(coverage).toContainText('v2 source layer: 403 DOI records');
 });
 
 test('Polar page avoids repeating the same ferroelectric disclaimer',async({page})=>{
