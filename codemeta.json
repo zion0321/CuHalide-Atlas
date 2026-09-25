@@ -6,7 +6,7 @@
   "codeRepository": "https://github.com/zion0321/CuHalide-Atlas",
   "url": "https://cuhalide-atlas-v3.vercel.app/",
   "applicationCategory": "Scientific database and evidence-grounded retrieval system",
-  "description": "Prepublication review implementation for an evidence-grounded, structure-resolved Cu(I) chloride, bromide and iodide knowledge portal. Current Curated rev.10 is reviewed through 2026-09-14; CuXplore source indexing was synchronized on 2026-09-24; site-wide denominator and provenance metadata were synchronized on 2026-09-25. The active runtime includes Structured Photophysics 1.4.0, Organic Components 1.2.0, a 1,322-record semantic layer and a 403-DOI / 727-document / 6,275-block source index. Direct-link access is query-and-view, search-engine indexing is disabled, and no permanent DOI, blanket license or formal public-release date is asserted until owner approval.",
+  "description": "Prepublication review implementation for an evidence-grounded, structure-resolved Cu(I) chloride, bromide and iodide knowledge portal. Current Curated rev.10 is reviewed through 2026-09-14; CuXplore source indexing was synchronized on 2026-09-24; site-wide denominator and provenance metadata were synchronized on 2026-09-25. The active runtime includes Structured Photophysics 1.4.0, Organic Components 1.2.0, a 410-article DOI-deduplicated literature corpus, a 1,322-record semantic layer and a full-text v2 source index covering 403 articles across 727 documents and 6,275 text blocks. Direct-link access is query-and-view, search-engine indexing is disabled, and no permanent DOI, blanket license or formal public-release date is asserted until owner approval.",
   "programmingLanguage": [
     "TypeScript",
     "JavaScript",
