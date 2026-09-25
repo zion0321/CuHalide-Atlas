@@ -6,7 +6,7 @@ test.describe.configure({mode:'serial'});
 
 test('current portal exposes the quality layer and one visible article denominator',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
-  await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.1');
+  await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.2');
   await expect(page.locator('.view[data-view="home"]')).toContainText('410');
   await expect(page.locator('body')).not.toContainText('Boundary context');
   await expect(page.locator('body')).not.toContainText('Additional literature');
