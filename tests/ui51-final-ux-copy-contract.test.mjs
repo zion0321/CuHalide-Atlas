@@ -11,7 +11,7 @@ test('Site 52 final polish uses researcher-facing public language',()=>{
     'Compare formula, phase, dimensionality and space group with source-linked records.',
     'Compare measurements',
     'Ask across the Atlas',
-    'Search covers curated literature and structures; source publications remain linked by DOI.',
+    'Search covers the literature corpus and structures; source publications remain linked by DOI.',
     'Curated structure records · n = 901',
     'Reported photophysics',
     'Local Cu–X motif',
@@ -19,7 +19,8 @@ test('Site 52 final polish uses researcher-facing public language',()=>{
     'Keep evidence at the right level',
     'Reset filters',
     'Literature-grounded research',
-    'CuXplore retrieves source-linked Atlas evidence'
+    'CuXplore retrieves source-linked Atlas evidence',
+    'Search the 410-article literature corpus by title or DOI'
   ])assert.ok(ux.includes(token),`missing final public-copy token: ${token}`);
 });
 
