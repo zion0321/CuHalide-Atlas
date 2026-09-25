@@ -24,7 +24,7 @@ test('rev.10 production adapters expose the validated runtime identity',()=>{
 
 test('UI 52 rev.10 wrapper patches all user-visible current-state denominators',()=>{
   const ui=read('api/ui-r10.js');
-  has(ui,["REV='10'","UI='52.0'","SITE='52'",'Current Curated rev.10','cc.canonical_verified_articles||372','cc.core_included_structure_rows||901','cc.verified_space_group_rows||734','cc.strict_polar_rows||94','cc.strict_polar_articles||60','cc.structure_phase_rows||939','cc.resolved_space_group_rows||761','2026-09-14'],'UI rev10 token');
+  has(ui,["REV='10'","UI='52.0'","SITE='52'",'Current Curated rev.10','S.boot.literature?.articles||410','cc.core_included_structure_rows||901','cc.verified_space_group_rows||734','cc.strict_polar_rows||94','cc.strict_polar_articles||60','cc.structure_phase_rows||939','cc.resolved_space_group_rows||761','2026-09-14'],'UI rev10 token');
   assert.match(ui,/replace\(\/Current Curated rev\\\.9\/gi,'Current Curated rev\.10'\)/);
   assert.match(ui,/unsafe-inline forbidden/);
   assert.ok(!ui.includes("throw new Error('stale rev.9 UI state after rev.10 patch')"),'compatibility wrapper must not turn harmless lexical remnants into a 500 response');
@@ -74,6 +74,7 @@ test('citation, CodeMeta and prepublication privacy boundaries are rev.10',()=>{
 
   const meta=read('api/meta-r9.js'),vercel=read('vercel.json');
   assert.match(meta,/prepublication-review/);
+  assert.match(meta,/const LITERATURE=\{articles:410,fulltext_articles:403,source_documents:727,text_blocks:6275/);
   assert.match(meta,/bulk_export:false/);
   assert.match(meta,/primary_pdf_si_cif:false/);
   assert.match(meta,/raw_evidence_locators:false/);
