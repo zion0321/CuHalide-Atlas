@@ -34,8 +34,8 @@ test('home research paths describe the Site 52 public experience without interna
 test('literature, structures, CuXplore and methods use direct researcher-facing explanations',async({page})=>{
   const errors=captureBrowserErrors(page);
   await page.goto(`${BASE}/#articles`,{waitUntil:'domcontentloaded'});
-  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Search curated articles by title, DOI, year, halogen or category',{timeout:15000});
-  await expect(page.locator('.ux-article-footer').first()).toContainText('related structures and reported measurements',{timeout:15000});
+  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Search the 410-article literature corpus by title or DOI',{timeout:15000});
+  await expect(page.locator('#knowledgeArticles .ki-source').first()).toContainText('Literature article',{timeout:15000});
 
   await page.goto(`${BASE}/#structures`,{waitUntil:'domcontentloaded'});
   await expect(page.locator('.view[data-view="structures"] .page-head')).toContainText('Browse curated structure and phase determinations.',{timeout:15000});

@@ -36,11 +36,11 @@ The scientific current release remains **Current Curated rev.10**, curated throu
 | Articles with strict-polar structures | 60 |
 | Current semantic documents / embeddings | 1,322 / 1,322 |
 
-The semantic corpus contains 383 article and 939 structure documents. It is distinct from the expanded literature catalog. Catalog coverage is read live from `/api/knowledge?action=coverage`; it is not maintained by a hardcoded headline number. At this integration, the catalog joins the 372 included articles, 5 explicitly labeled boundary references, 32 historical/supplemental references and one newly linked reviewed reference (410 distinct DOI records). Forty-one authored source-review notes are linked by DOI. The earlier 402-record research collection is an older overlapping source collection, not the current website denominator.
+The public literature corpus contains **410 DOI-deduplicated articles**. This is the single article denominator used by the website. Some articles have linked structured scientific records and some do not; that is represented as per-article data availability rather than as a separate literature class. The semantic layer still contains 383 article documents plus 939 structure documents because semantic indexing and structured-data revision coverage are separate processing layers, not alternative article totals. Forty-one authored source-review notes are linked by DOI. The earlier 402-record research collection is an older overlapping source collection, not the current website denominator.
 
 ## Integrated use
 
-- **Literature:** keep the Curated collection for compound-level filters, or choose All indexed literature / Source-reviewed literature / Indexed MAIN / SI text / Additional literature. Additional references are separately labeled and do not receive fabricated structure or measurement mappings.
+- **Literature:** the website uses one 410-article DOI-deduplicated corpus. Filters may show articles with linked structured data, source-reviewed articles, or articles with indexed MAIN/SI text, but these are coverage subsets of the same corpus rather than separate literature classes.
 - **Article and structure details:** follow existing one-to-one structure links, sample-resolved measurements and organic-component resolution states. The source-review panel supplies an authored source statement and its qualification, not a publisher quotation.
 - **CuXplore:** search ranked evidence, inspect source-linked records, select references and ask across literature, structures and photophysics while preserving evidence grain.
 - **Retrieval provenance:** distinguish exact structured lookup, hybrid article/structure retrieval and lexical discovery/source-review context. Scores are relevance signals, not truth probabilities. Supplemental references are not silently added to the semantic-embedding count.
@@ -49,7 +49,7 @@ The semantic corpus contains 383 article and 939 structure documents. It is dist
 
 The semantic layer retains 1,322 current-curated article/structure records. The source layer adds full-text lexical retrieval over indexed MAIN/SI text alongside titles, authored source-review notes and curated descriptions, with exact DOI priority. A server-side, field-whitelisted projection joins linked scientific records.
 
-The integrated RAG layer returns source-reviewed findings and separate supplemental-literature records. It records which retrieval method ran, whether a fallback occurred, and whether any new generation was performed. No benchmark improvement, independent discovery or new embedding coverage is inferred from catalog size. Existing exact-count and historical-snapshot routes remain authoritative.
+The integrated RAG layer returns source-reviewed findings from the same literature corpus while preserving per-article source and structured-data availability. It records which retrieval method ran, whether a fallback occurred, and whether any new generation was performed. No benchmark improvement, independent discovery or new embedding coverage is inferred from catalog size. Existing exact-count and historical-snapshot routes remain authoritative.
 
 ## Evidence boundaries
 
