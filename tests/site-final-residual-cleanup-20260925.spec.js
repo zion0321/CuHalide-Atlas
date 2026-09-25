@@ -2,13 +2,14 @@ import {test,expect} from '@playwright/test';
 const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
 test.describe.configure({mode:'serial'});
 
-test('Overview makes full-text indexing an explicit subset of the 410-article corpus',async({page})=>{
+test('Overview distinguishes searchable catalog text from the broader v2 source layer',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
   const coverage=page.locator('#knowledgeCoverage');
   await expect(coverage).toContainText('Articles');
   await expect(coverage).toContainText('410');
-  await expect(coverage).toContainText('Articles with full-text indexing');
-  await expect(coverage).toContainText('403');
+  await expect(coverage).toContainText('Searchable full text');
+  await expect(coverage).toContainText('384');
+  await expect(coverage).toContainText('source layer: 403 DOI records');
   await expect(coverage).toContainText('subset of 410 literature articles');
 });
 
