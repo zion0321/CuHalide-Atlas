@@ -18,6 +18,14 @@ test('residual public copy is synchronized',()=>{
   assert.match(photo,/normalized values reported in sources/);
 });
 
+test('updated literature and UX presentation use fresh immutable asset keys',()=>{
+  const integrated=read('lib/integrated-ui.mjs'),ux=read('public/ui-ux-v1.js'),ui=read('api/ui-r10.js');
+  assert.match(integrated,/ui-knowledge-v1\.js\?v=52\.2/);
+  assert.match(ux,/ui-ux-core-v1\.js\?v=52\.2/);
+  assert.match(ui,/ui-ux-v1\.css\?v=52\.2/);
+  assert.match(ui,/ui-ux-v1\.js\?v=52\.2/);
+});
+
 test('updated photophysics presentation uses a fresh immutable asset key',()=>{
   const ui=read('api/ui-r10.js');
   assert.match(ui,/ui-photophysics-v1\.css\?v=1\.4\.0-ui52\.2/);
