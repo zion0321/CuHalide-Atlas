@@ -9,7 +9,8 @@ test('residual public copy is synchronized',()=>{
   const ux=read('public/ui-ux-core-v1.js');
   const ui=read('api/ui-r10.js');
   const photo=read('public/ui-photophysics-v1.js');
-  assert.match(knowledge,/Articles with full-text indexing/);
+  assert.match(knowledge,/Searchable full text/);
+  assert.match(knowledge,/catalog_searchable_dois/);
   assert.match(knowledge,/subset of \$\{Number\(\(c\.articles\?\?c\.catalog_articles\)\|\|0\)/);
   assert.match(ux,/rag\.title='CuXplore'/);
   assert.doesNotMatch(ux,/source-linked literature and evidence search/);
