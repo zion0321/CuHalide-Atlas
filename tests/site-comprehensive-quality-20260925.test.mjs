@@ -18,8 +18,8 @@ test('quality layer covers focus, reduced motion, corpus coverage and busy state
   assert.match(css,/prefers-reduced-motion:reduce/);
   assert.match(css,/ui-literature-coverage/);
   assert.match(css,/ui-busy-bar/);
-  assert.match(js,/403/);
-  assert.match(js,/410/);
+  assert.match(js,/fulltext=Number\(f\.dois\|\|0\)/);
+  assert.match(js,/catalog_articles\?\?410/);
   assert.match(js,/aria-busy/);
   assert.match(js,/What do 939 authority rows and 901 Core-Included structures mean/);
   assert.match(js,/How the current review state was assembled/);
