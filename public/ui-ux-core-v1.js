@@ -1,4 +1,4 @@
-/* CuHalide Atlas portal UX layer for UI 51.
+/* CuHalide Atlas portal UX core for UI 52.1.
    Uses only existing public query-and-view endpoints. */
 (() => {
   'use strict';
