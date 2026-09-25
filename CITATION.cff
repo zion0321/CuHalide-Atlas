@@ -22,7 +22,7 @@ abstract: >-
   not uniquely verified. CuXplore combines the 1,322-record semantic layer with
   a source index updated on 2026-09-24 (403 DOI records, 727 source documents
   and 6,275 indexed text blocks); source retrieval does not change the
-  2026-09-14 scientific curation cutoff. Direct-link review access is query-and-view;
+  2026-09-14 scientific curation cutoff. Site-wide denominator and provenance metadata were synchronized on 2026-09-25. Direct-link review access is query-and-view;
   search-engine indexing, bulk normalized exports, exact stored publisher
   abstracts, primary PDF/SI/CIF files and internal curation/audit artifacts
   remain outside the public release boundary. No permanent DOI, blanket license

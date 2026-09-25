@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import rev9Ui from './ui-r9.js';
 import { integrateKnowledge } from '../lib/integrated-ui.mjs';
-const REV='10',UI='52.0',SITE='52',STATE='prepublication-review';
+const REV='10',UI='52.0',SITE='52',STATE='prepublication-review',CONTENT_DATE='2026-09-25';
 const all=(s,a,b)=>String(s).split(a).join(b);
 function patch(body){
  if(typeof body!=='string')return body;let x=body;
@@ -9,6 +9,11 @@ function patch(body){
  x=all(x,'19 Aug 2026','14 Sep 2026');x=all(x,'2026-08-19','2026-09-14');x=all(x,'CUHALIDE_UI_V51_0_CURRENT_R9','CUHALIDE_UI_V52_0_CURRENT_R10');x=all(x,'CUHALIDE_SITE_V51_CURRENT_CURATED_R9','CUHALIDE_SITE_V52_CURRENT_CURATED_R10');x=all(x,'<meta name="cuhalide-site-version" content="51">','<meta name="cuhalide-site-version" content="52">');
  x=all(x,'cc.canonical_verified_articles||370','cc.canonical_verified_articles||372');x=all(x,'cc.core_included_structure_rows||890','cc.core_included_structure_rows||901');x=all(x,'cc.verified_space_group_rows||720','cc.verified_space_group_rows||734');x=all(x,'cc.strict_polar_rows||91','cc.strict_polar_rows||94');x=all(x,'cc.strict_polar_articles||57','cc.strict_polar_articles||60');x=all(x,'cc.structure_phase_rows||947','cc.structure_phase_rows||939');x=all(x,'cc.resolved_space_group_rows||747','cc.resolved_space_group_rows||761');x=all(x,'all 947 structure/phase rows','all 939 structure/phase rows');x=all(x,'947 structure/phase rows','939 structure/phase rows');x=all(x,'1,330-document Current Curated rev.10','1,322-document Current Curated rev.10');x=all(x,'1,330 / 1,330','1,322 / 1,322');x=all(x,'Smart RAG 9.20.0','Smart RAG 10.0.0');x=all(x,'Research Assistant 10.5.0','Research Assistant 10.6.0');x=all(x,'Public Data 2.17.1','Public Data 2.18.0');
  x=integrateKnowledge(x);
+ x=x.replace(/"dateModified":"\d{4}-\d{2}-\d{2}"/g,'"dateModified":"'+CONTENT_DATE+'"');
+ x=all(x,'<!-- CUHALIDE_UI_V51_0_CONVERSATIONAL_RESEARCH_ASSISTANT -->','<!-- CUHALIDE_UI_V52_0_CUXPLORE -->');
+ x=all(x,'/ui-living-knowledge.css?v=20260819','/ui-living-knowledge.css?v=20260925');
+ x=all(x,'Archived scientific snapshot 3.0.2 remains the immutable historical baseline, verified through 2026-06-30.','Archived scientific snapshot 3.0.2 remains the immutable historical baseline. Scientific cutoff: 30 June 2026; archived release issued: 11 August 2026.');
+ x=all(x,'Known release erratum:','Archived-release erratum:');
  x=all(x,'CuHalide Research Assistant','CuXplore');
  x=all(x,'CuXplore Research Assistant','CuXplore');
  x=all(x,'Research Assistant','CuXplore');
