@@ -15,6 +15,11 @@
     const r=await fetch(u,{cache:'no-store',headers:{accept:'application/json'},signal});
     const x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.error||`HTTP ${r.status}`);return x;
   }
+  async function literature(q,signal){
+    const u=new URL('/api/knowledge',location.origin);u.searchParams.set('action','articles');u.searchParams.set('scope','all');u.searchParams.set('q',q);u.searchParams.set('limit','6');u.searchParams.set('offset','0');
+    const r=await fetch(u,{cache:'no-store',headers:{accept:'application/json'},signal});
+    const x=await r.json().catch(()=>({}));if(!r.ok||x.ok!==true)throw new Error(x.error||`HTTP ${r.status}`);return x;
+  }
 
   function addReviewChip(){
     const brand=document.querySelector('.brand');if(!brand||brand.querySelector('.ux-review-chip'))return;
@@ -86,8 +91,12 @@
 
   function resultButton(type,x){
     if(type==='article'){
-      const meta=[x.journal,x.year,x.doi].filter(Boolean).join(' · ');
-      return `<button type="button" class="ux-search-result" data-ux-open-article="${esc(x.record_id)}"><strong>${esc(x.title||`Article record ${x.record_id}`)}</strong><span>${esc(meta)}</span></button>`;
+      const meta=[x.journal,x.year,x.doi].filter(Boolean).join(' · '),title=esc(x.title||x.doi||'Literature article');
+      if(!x.record_id){
+        let href='#articles';try{const u=new URL(x.url||`https://doi.org/${x.doi||''}`);if(u.protocol==='https:'&&u.hostname==='doi.org')href=u.href}catch{}
+        const external=href.startsWith('https://doi.org/');return `<a class="ux-search-result" href="${esc(href)}"${external?' target="_blank" rel="noreferrer"':''}><strong>${title}</strong><span>${esc(meta)}</span><small>Literature article · no linked structured record</small></a>`;
+      }
+      return `<button type="button" class="ux-search-result" data-ux-open-article="${esc(x.record_id)}"><strong>${title}</strong><span>${esc(meta)}</span><small>Literature article · linked structured record</small></button>`;
     }
     const meta=[x.formula,x.dimensionality_class||x.dimensionality,x.space_group].filter(Boolean).join(' · ');
     return `<button type="button" class="ux-search-result" data-ux-open-structure="${esc(x.structure_id)}"><strong>${esc(x.structure_id)} · ${esc(compact(x.label||x.formula||'Curated structure'))}</strong><span>${esc(meta)}</span></button>`;
@@ -95,18 +104,18 @@
 
   function groupHtml(title,total,items,type){
     const shown=Array.isArray(items)?items:[];
-    return `<section class="ux-search-group"><div class="ux-search-group-head"><strong>${esc(title)}</strong><span>${esc(total??shown.length)} matching records</span></div><div class="ux-search-results">${shown.length?shown.map(x=>resultButton(type,x)).join(''):'<div class="ux-search-empty">No matching curated records in this layer.</div>'}</div></section>`;
+    return `<section class="ux-search-group"><div class="ux-search-group-head"><strong>${esc(title)}</strong><span>${esc(total??shown.length)} matching records</span></div><div class="ux-search-results">${shown.length?shown.map(x=>resultButton(type,x)).join(''):'<div class="ux-search-empty">No matching records in this layer.</div>'}</div></section>`;
   }
 
   async function runSearch(q){
-    const body=$('uxSearchBody');if(!body)return;state.searchAbort?.abort();const ctrl=new AbortController();state.searchAbort=ctrl;body.innerHTML='<div class="ux-search-state">Searching curated literature and structures…</div>';
+    const body=$('uxSearchBody');if(!body)return;state.searchAbort?.abort();const ctrl=new AbortController();state.searchAbort=ctrl;body.innerHTML='<div class="ux-search-state">Searching the literature corpus and Core-Included structures…</div>';
     try{
       const [a,s]=await Promise.all([
-        api('articles',{q,page:1,page_size:5,release_status:'Current canonical'},ctrl.signal),
+        literature(q,ctrl.signal),
         api('structures',{q,page:1,page_size:5,eligibility:'Core - Included'},ctrl.signal)
       ]);
       if(ctrl.signal.aborted)return;
-      body.innerHTML=groupHtml('Literature',a.pagination?.total,a.items,'article')+groupHtml('Structures',s.pagination?.total,s.items,'structure');
+      body.innerHTML=groupHtml('Literature',a.total,a.items,'article')+groupHtml('Structures',s.pagination?.total,s.items,'structure');
     }catch(e){if(e.name!=='AbortError')body.innerHTML=`<div class="error">Search is temporarily unavailable: ${esc(e.message)}</div>`}
   }
 
