@@ -10,7 +10,7 @@ test('residual public copy is synchronized',()=>{
   const ui=read('api/ui-r10.js');
   const photo=read('public/ui-photophysics-v1.js');
   assert.match(knowledge,/Articles with full-text indexing/);
-  assert.match(knowledge,/subset of \$\{Number\(c\.articles\?\?c\.catalog_articles\|\|0\)/);
+  assert.match(knowledge,/subset of \$\{Number\(\(c\.articles\?\?c\.catalog_articles\)\|\|0\)/);
   assert.match(ux,/rag\.title='CuXplore'/);
   assert.doesNotMatch(ux,/source-linked literature and evidence search/);
   assert.match(ui,/Strict-polar subset · highest evidence level only\./);
