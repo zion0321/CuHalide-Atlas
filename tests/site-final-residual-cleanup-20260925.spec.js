@@ -2,6 +2,14 @@ import {test,expect} from '@playwright/test';
 const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
 test.describe.configure({mode:'serial'});
 
+test('Overview labels structured-data chart subsets separately from the 410-article corpus',async({page})=>{
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  const halogen=page.locator('#halogenDist').closest('.panel');
+  await expect(halogen.locator('.denom')).toHaveText('Structured-data article subset · n = 372');
+  const growth=page.locator('#yearChart').closest('.panel');
+  await expect(growth.locator('.denom')).toContainText('Structured-data article subset');
+});
+
 test('Overview distinguishes searchable catalog text from the broader v2 source layer',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
   const coverage=page.locator('#knowledgeCoverage');
