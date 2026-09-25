@@ -92,7 +92,7 @@
     if(status)status.innerHTML=[
       ['Sample states',h.publishable_samples,'reported material states'],
       ['Measurements',h.publishable_measurements,'condition-aware records'],
-      ['Values',h.publishable_values,'normalized reported values'],
+      ['Values',h.publishable_values,'normalized values reported in sources'],
       ['Quantitative values',h.analysis_eligible_values,'ready for strict comparison'],
       ['Mechanism assignments',h.publishable_mechanism_claims,'curated source assignments']
     ].map(([a,b,c])=>`<article class="photo-stat"><span>${esc(a)}</span><strong>${esc(b)}</strong><small>${esc(c)}</small></article>`).join('');
