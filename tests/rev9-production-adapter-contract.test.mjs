@@ -74,7 +74,7 @@ test('citation, CodeMeta and prepublication privacy boundaries are rev.10',()=>{
 
   const meta=read('api/meta-r9.js'),vercel=read('vercel.json');
   assert.match(meta,/prepublication-review/);
-  assert.match(meta,/const LITERATURE=\{articles:410,fulltext_articles:403,source_documents:727,text_blocks:6275/);
+  assert.match(meta,/const LITERATURE=\{articles:410,catalog_searchable_v2_articles:384,fulltext_v2_doi_records:403,source_documents:727,text_blocks:6275/);
   assert.match(meta,/bulk_export:false/);
   assert.match(meta,/primary_pdf_si_cif:false/);
   assert.match(meta,/raw_evidence_locators:false/);
