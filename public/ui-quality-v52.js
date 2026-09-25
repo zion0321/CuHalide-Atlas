@@ -56,7 +56,7 @@ function enhanceStructureRows(){
 function observeStructureRows(){const root=$('srows');if(!root||root.dataset.qualityObserver==='1')return;root.dataset.qualityObserver='1';new MutationObserver(enhanceStructureRows).observe(root,{childList:true,subtree:true});enhanceStructureRows()}
 
 function enhancePolar(){
-  const table=document.querySelector('.view[data-view="polar"] table'),caption=table?.querySelector('caption');if(caption)caption.textContent='Polar symmetry does not by itself establish ferroelectric switching.';
+  const table=document.querySelector('.view[data-view="polar"] table'),caption=table?.querySelector('caption'),captionText='Polar symmetry does not by itself establish ferroelectric switching.';if(caption&&caption.textContent!==captionText)caption.textContent=captionText;
   const root=$('prows');if(root&&!root.dataset.qualityObserver){root.dataset.qualityObserver='1';new MutationObserver(()=>{
     root.querySelectorAll('tr').forEach(row=>{const b=row.querySelector('button[data-structure]');if(b)b.setAttribute('aria-label',`Open polar structure ${b.dataset.structure||b.textContent.trim()}`)})
   }).observe(root,{childList:true,subtree:true})}
@@ -129,7 +129,7 @@ function enhanceDashboardA11y(){
 }
 
 function enhanceCopyAndLabels(){
-  const articles=document.querySelector('.view[data-view="articles"] .page-head .eyebrow');if(articles)articles.textContent='Literature corpus';
+  const articles=document.querySelector('.view[data-view="articles"] .page-head .eyebrow');if(articles&&articles.textContent!=='Literature corpus')articles.textContent='Literature corpus';
   const hero=document.querySelector('.view[data-view="home"] .actions');if(hero){
     const photo=hero.querySelector('.photo-hero-link');photo?.remove();
   }
