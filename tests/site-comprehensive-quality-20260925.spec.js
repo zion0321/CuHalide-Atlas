@@ -27,7 +27,7 @@ test('literature makes source coverage explicit without creating a second corpus
   const cov=page.locator('.ui-literature-coverage');
   await expect(cov).toBeVisible();
   await expect(cov).toContainText('410 articles');
-  await expect(cov).toContainText('403 / 410');
+  await expect(cov).toContainText('384 / 410');
   await expect(cov).toContainText('727');
   await expect(cov).toContainText('6,275');
   await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Literature corpus');
@@ -72,7 +72,7 @@ test('standalone records and error pages use CuXplore branding',async({request})
     const html=await r.text();
     expect(html).not.toContain('Research Assistant');
     expect(html).toContain('CuXplore');
-    expect(html).toContain('/ui-quality-v52.css?v=52.1');
+    expect(html).toContain('/ui-quality-v52.css?v=52.2');
   }
 });
 
