@@ -6,26 +6,27 @@ const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMCo
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n};
 const fmt=n=>Number(n||0).toLocaleString('en-US');
 
-async function coverage(){
+async function fallbackCoverage(){
   const r=await fetch('/api/knowledge?action=coverage',{cache:'no-store',headers:{accept:'application/json'}});
   const x=await r.json().catch(()=>({}));if(!r.ok||x.ok!==true)throw new Error(x.error||'Coverage unavailable');return x;
 }
-
+function renderLiteratureCoverage(box,x){
+  const c=x?.coverage||{},f=x?.fulltext_v2||{},articleCount=Number(c.articles??c.catalog_articles??410),fulltext=Number(f.dois||0),chunked=Number(f.chunked_dois||0),docs=Number(f.documents||0),blocks=Number(f.actual_chunks||0);
+  const items=[
+    [`${fmt(articleCount)} articles`,'Literature corpus','Single DOI-deduplicated article denominator','ui-cov-primary'],
+    [`${fmt(fulltext)} / ${fmt(articleCount)}`,'Full-text v2 source coverage',`${fmt(chunked)} articles have indexed text chunks; source coverage is not a second article corpus`,''],
+    [fmt(docs),'Source documents','Registered MAIN / SI source files',''],
+    [fmt(blocks),'Indexed text blocks','Retrieval blocks across registered source text','']
+  ];
+  box.replaceChildren(...items.map(([a,b,c2,cls])=>{const d=el('div',`ui-cov-item ${cls}`.trim());d.append(el('strong','',a),el('span','',b),el('small','',c2));return d}));box.setAttribute('aria-busy','false');
+}
 function ensureLiteratureCoverage(){
   const view=document.querySelector('.view[data-view="articles"]'),head=view?.querySelector('.page-head');if(!view||!head||view.querySelector('.ui-literature-coverage'))return;
   const box=el('section','shell ui-literature-coverage');box.setAttribute('aria-label','Literature corpus and source coverage');box.setAttribute('aria-live','polite');box.setAttribute('aria-busy','true');
   const placeholder=el('div','ui-cov-item ui-cov-primary');placeholder.append(el('strong','','410 articles'),el('span','','One DOI-deduplicated literature corpus'),el('small','','Loading source coverage…'));box.append(placeholder);head.insertAdjacentElement('afterend',box);
-  coverage().then(x=>{
-    const c=x.coverage||{},f=x.fulltext_v2||{};
-    const articleCount=Number(c.articles??c.catalog_articles??410),fulltext=Number(f.dois||0),chunked=Number(f.chunked_dois||0),docs=Number(f.documents||0),blocks=Number(f.actual_chunks||0);
-    const items=[
-      [`${fmt(articleCount)} articles`,'Literature corpus','Single DOI-deduplicated article denominator','ui-cov-primary'],
-      [`${fmt(fulltext)} / ${fmt(articleCount)}`,'Full-text v2 source coverage',`${fmt(chunked)} articles have indexed text chunks; source coverage is not a second article corpus`,''],
-      [fmt(docs),'Source documents','Registered MAIN / SI source files',''],
-      [fmt(blocks),'Indexed text blocks','Retrieval blocks across registered source text','']
-    ];
-    box.replaceChildren(...items.map(([a,b,c2,cls])=>{const d=el('div',`ui-cov-item ${cls}`.trim());d.append(el('strong','',a),el('span','',b),el('small','',c2));return d}));box.setAttribute('aria-busy','false');
-  }).catch(()=>{placeholder.querySelector('small').textContent='Source coverage is temporarily unavailable; the literature corpus remains 410 DOI-deduplicated articles.';box.setAttribute('aria-busy','false')});
+  if(window.CuHalideKnowledgeCoverage){renderLiteratureCoverage(box,window.CuHalideKnowledgeCoverage);return}
+  let resolved=false;const onCoverage=e=>{if(resolved)return;resolved=true;renderLiteratureCoverage(box,e.detail);window.removeEventListener('cuhalide:coverage',onCoverage)};window.addEventListener('cuhalide:coverage',onCoverage);
+  setTimeout(()=>{if(resolved)return;fallbackCoverage().then(x=>{if(resolved)return;resolved=true;renderLiteratureCoverage(box,x)}).catch(()=>{placeholder.querySelector('small').textContent='Source coverage is temporarily unavailable; the literature corpus remains 410 DOI-deduplicated articles.';box.setAttribute('aria-busy','false')})},1800);
 }
 
 function enhanceKnowledgeBusy(){
