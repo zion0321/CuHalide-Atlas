@@ -1,7 +1,8 @@
-/* CuHalide Atlas portal UX layer v1.0
+/* CuHalide Atlas portal UX layer 52.3
    Interaction/presentation only; no scientific or access-policy semantics. */
 
-.ux-review-chip{display:inline-flex;align-items:center;min-height:24px;margin-left:8px;padding:3px 8px;border:1px solid #d5e1e5;border-radius:999px;background:#fff;color:#56707a;font-size:8.5px;font-weight:850;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap}
+.ux-review-chip{display:inline-flex;align-items:center;min-height:24px;margin-left:8px;padding:3px 8px;border:1px solid #d5e1e5;border-radius:999px;background:#fff;color:#56707a;font-size:8.5px;font-weight:850;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap;text-decoration:none;cursor:pointer;transition:border-color .16s ease,background .16s ease,color .16s ease}
+@media(hover:hover) and (pointer:fine){.ux-review-chip:hover{border-color:#9fc9c2;background:#f2f8f7;color:#245d59}}
 .ux-search-trigger{display:inline-flex;align-items:center;gap:9px;min-height:40px;padding:7px 10px;border:1px solid #cbd9df;border-radius:10px;background:#fff;color:var(--navy);font:inherit;font-size:10.5px;font-weight:850;cursor:pointer;box-shadow:0 4px 14px rgba(9,40,60,.045)}
 .ux-search-trigger:hover{border-color:#9fbec3;box-shadow:0 7px 18px rgba(9,40,60,.08)}
 .ux-search-trigger kbd{border:1px solid #d3dfe3;border-bottom-width:2px;border-radius:5px;background:#f5f8f9;padding:1px 5px;color:#465c65;font:700 8.5px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
