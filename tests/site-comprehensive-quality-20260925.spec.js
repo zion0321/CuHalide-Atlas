@@ -35,6 +35,7 @@ test('homepage and literature results keep secondary detail collapsed',async({pa
   await expect(page.locator('.ux-start-card').first()).not.toContainText('01 ·');
 
   await page.goto(`${BASE}/#articles`,{waitUntil:'networkidle'});
+  const articleToggle=page.locator('.view[data-view="articles"] .mobile-filter-toggle');if(await articleToggle.isVisible())await articleToggle.click();
   await page.selectOption('#knowledgeScope','reviewed');
   const card=page.locator('#knowledgeArticles .ki-source').first();
   await expect(card).toBeVisible();
@@ -69,9 +70,9 @@ test('review status, hero search and filters expose clear interaction state',asy
   await expect(page.locator('.view[data-view="structures"] .ui-collection-progress')).toBeAttached();
   await page.locator('#sq').fill('P21');
   await expect(state).toContainText('1 active filter');
-  const clear=state.locator('.ui-filter-clear');
-  await expect(clear).toBeVisible();
-  await clear.click();
+  const reset=page.locator('#sreset');
+  await expect(reset).toBeVisible();
+  await reset.click();
   await expect(page.locator('#sq')).toHaveValue('');
   await expect(state).toContainText('Default view');
 });
