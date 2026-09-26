@@ -19,8 +19,8 @@ and 3,600-character step. The document states are 664 native-text files, six
 sparse-text files and 57 empty/unreadable files. The sparse-text blocks are preserved
 for provenance but excluded from primary lexical retrieval.
 
-Within the current 410-DOI knowledge catalog, 384 DOI records have searchable native
-v2 text, contributing 6,175 v2 lexical blocks. Six additional v2 DOI records belong
+Within the current 410-DOI knowledge catalog, 387 articles have searchable source prose.
+Of these, 384 DOI records have searchable native v2 text, contributing 6,175 v2 lexical blocks. Six additional v2 DOI records belong
 to excluded/out-of-scope article records and remain outside active catalog retrieval.
 For catalog records that have no v2 source document, the older page-bounded private
 index remains a fallback when available. As a result, coverage denominators for the
@@ -65,6 +65,6 @@ states and must not be collapsed into one completion metric.
 
 ## Website synchronization, 24 September 2026
 
-The production website now exposes the full-text v2 source-corpus denominators separately from the scientific and semantic denominators. The public coverage contract reports 403 source DOI records, 727 source documents, 21,421,324 extracted characters, 6,275 actual v2 blocks, 384 active-catalog DOI records with native v2 text, and the independently retained 1,322 semantic article/structure records. CIF reconciliation is surfaced separately: 114/114 registered files parsed, 237 Cu-containing structure blocks, 29 identity-review rows adjudicated (26 resolved and 3 quarantined), and 10/10 dimensionality flags adjudicated without overwriting the 939-row structural authority.
+The production website now exposes the full-text v2 source-corpus denominators separately from the scientific and semantic denominators. The public coverage contract reports 403 source-layer DOI records, 727 source documents, 21,421,324 extracted characters, 6,275 actual v2 blocks, 387 active-catalog articles with searchable source prose, 384 active-catalog DOI records with native v2 text, and the independently retained 1,322 semantic article/structure records. CIF reconciliation is surfaced separately: 114/114 registered files parsed, 237 Cu-containing structure blocks, 29 identity-review rows adjudicated (26 resolved and 3 quarantined), and 10/10 dimensionality flags adjudicated without overwriting the 939-row structural authority.
 
 The interface distinguishes three update dates: Current Curated scientific curation through 14 September 2026; authored source-review overlay through 23 September 2026; full-text source index through 24 September 2026. v2 source matches are rendered as indexed text block plus bounded character range. Legacy matches retain page locators. The former project-specific research-design route is retired and redirects to CuXplore; project-specific recommendations are not part of the Atlas website.
