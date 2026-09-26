@@ -1,4 +1,4 @@
-/* CuHalide Atlas comprehensive quality layer v52.2 */
+/* CuHalide Atlas comprehensive quality layer v52.3 */
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
@@ -109,16 +109,19 @@ function enhanceRouteTitle(){
 
 function installCollectionBusyStates(){
   const configs=[
-    {root:$('articles'),ids:['aq','ayf','ayt','ahal','adim','acat','aev','ascope','asort']},
-    {root:$('srows'),ids:['sq','shal','sdim','ssg','sconf','spolar']},
-    {root:$('prows'),ids:['pq','phal','psg']}
+    {root:$('srows'),ids:['sq','shal','sdim','ssg','sconf','spolar'],count:'scount',pager:'spager'},
+    {root:$('prows'),ids:['pq','phal','psg'],count:'pcount',pager:'ppager',empty:'No matching polar structures. Adjust or clear the filters.',colspan:8}
   ];
   for(const cfg of configs){
     if(!cfg.root||cfg.root.dataset.qualityLoading==='1')continue;cfg.root.dataset.qualityLoading='1';
-    const set=()=>cfg.root.setAttribute('aria-busy','true');
+    const toolbar=$(cfg.count)?.closest('.toolbar');let progress=toolbar?.parentElement?.querySelector(':scope > .ui-collection-progress');
+    if(toolbar&&!progress){progress=el('div','ui-collection-progress');progress.setAttribute('role','status');progress.setAttribute('aria-live','polite');progress.hidden=true;const bar=el('div','ui-busy-bar');bar.setAttribute('aria-hidden','true');progress.append(bar,el('span','','Updating results…'));toolbar.insertAdjacentElement('afterend',progress)}
+    const set=()=>{cfg.root.setAttribute('aria-busy','true');if(progress)progress.hidden=false};
+    const settle=()=>{if(cfg.empty&&cfg.root.tagName==='TBODY'&&!cfg.root.children.length){const row=document.createElement('tr');row.className='ui-empty-row';const cell=document.createElement('td');cell.colSpan=cfg.colspan||1;cell.textContent=cfg.empty;row.append(cell);cfg.root.append(row)}if(!cfg.root.querySelector('.loading')){cfg.root.setAttribute('aria-busy','false');if(progress)progress.hidden=true}};
     for(const id of cfg.ids){const n=$(id);if(n){n.addEventListener(id==='aq'||id==='sq'||id==='pq'?'input':'change',set,{passive:true})}}
-    new MutationObserver(()=>{if(!cfg.root.querySelector('.loading'))cfg.root.setAttribute('aria-busy','false')}).observe(cfg.root,{childList:true,subtree:true});
-    cfg.root.setAttribute('aria-busy',cfg.root.querySelector('.loading')?'true':'false');
+    $(cfg.pager)?.addEventListener('click',e=>{if(e.target.closest('button:not(:disabled)'))set()});
+    new MutationObserver(settle).observe(cfg.root,{childList:true,subtree:true});
+    cfg.root.setAttribute('aria-busy',cfg.root.querySelector('.loading')?'true':'false');if(cfg.root.getAttribute('aria-busy')==='true'&&progress)progress.hidden=false;
   }
 }
 
@@ -133,11 +136,11 @@ function enhanceCopyAndLabels(){
   const hero=document.querySelector('.view[data-view="home"] .actions');if(hero){
     const photo=hero.querySelector('.photo-hero-link');photo?.remove();
   }
-  const review=document.querySelector('.ux-review-chip');if(review)review.title='Prepublication review interface · search-engine indexing disabled until formal release.';
+  const review=document.querySelector('.ux-review-chip');if(review){review.title='Review status, release boundaries and data provenance';review.setAttribute('aria-label','Prepublication review — learn how to interpret the current data state')};
 }
 
 function init(){
-  document.documentElement.dataset.cuhalideQuality='52.2';
+  document.documentElement.dataset.cuhalideQuality='52.3';
   ensureLiteratureCoverage();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceRouteTitle();enhanceCopyAndLabels();
   const body=new MutationObserver(()=>{enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
   body.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',enhanceRouteTitle);

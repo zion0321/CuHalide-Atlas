@@ -1,4 +1,4 @@
-/* CuHalide Atlas portal UX core for UI 52.1.
+/* CuHalide Atlas portal UX core for UI 52.3.
    Uses only existing public query-and-view endpoints. */
 (() => {
   'use strict';
@@ -22,8 +22,8 @@
   }
 
   function addReviewChip(){
-    const brand=document.querySelector('.brand');if(!brand||brand.querySelector('.ux-review-chip'))return;
-    const chip=document.createElement('span');chip.className='ux-review-chip';chip.textContent='Prepublication review';chip.title='Search-engine indexing remains disabled until the formal public release is authorized.';brand.appendChild(chip);
+    const brand=document.querySelector('.brand');if(!brand||document.querySelector('.ux-review-chip'))return;
+    const chip=document.createElement('a');chip.className='ux-review-chip';chip.href='#citation';chip.textContent='Prepublication review';chip.title='Review status, release boundaries and data provenance';chip.setAttribute('aria-label','Prepublication review — learn how to interpret the current data state');brand.insertAdjacentElement('afterend',chip);
   }
 
   function addSearchTrigger(){
@@ -38,9 +38,14 @@
     const h1=hero.querySelector('h1'),copy=hero.querySelector('.hero-copy');
     if(h1)h1.textContent='Evidence-grounded Cu(I) halide knowledge, from structure to photophysics.';
     if(copy)copy.textContent='Search the literature corpus, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or use CuXplore to connect source-linked evidence.';
-    if(hero.querySelector('.ux-hero-search'))return;
-    const actions=hero.querySelector('.actions');if(!actions)return;
-    actions.insertAdjacentHTML('afterend','<form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search" autocomplete="off" placeholder="Search title, DOI, formula, space group…"><button type="submit">Search</button></form><small class="ux-hero-search-hint">Searches the 410-article literature corpus and Core-Included structure register.</small>');
+    let form=hero.querySelector('.ux-hero-search');
+    if(!form){
+      const actions=hero.querySelector('.actions');if(!actions)return;
+      actions.insertAdjacentHTML('afterend','<form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search" autocomplete="off" placeholder="Search title, DOI, formula…"><button type="submit">Search</button></form><small class="ux-hero-search-hint" id="uxHeroSearchHint">Search by title, DOI, formula or space group across the 410-article literature corpus and Core-Included structure register.</small>');
+      form=hero.querySelector('.ux-hero-search');
+    }
+    const input=form?.querySelector('#uxHeroSearchInput')||form?.querySelector('input[type="search"]');if(input){input.id='uxHeroSearchInput';input.setAttribute('placeholder','Search title, DOI, formula…');input.setAttribute('aria-describedby','uxHeroSearchHint')}
+    let hint=hero.querySelector('#uxHeroSearchHint')||hero.querySelector('.ux-hero-search-hint');if(!hint&&form){hint=document.createElement('small');hint.className='ux-hero-search-hint';form.insertAdjacentElement('afterend',hint)}if(hint){hint.id='uxHeroSearchHint';hint.textContent='Search by title, DOI, formula or space group across the 410-article literature corpus and Core-Included structure register.'}
   }
 
   function addStartGrid(){

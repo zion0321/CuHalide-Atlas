@@ -6,7 +6,7 @@ test.describe.configure({mode:'serial'});
 
 test('current portal exposes the quality layer and one visible article denominator',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
-  await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.2');
+  await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.3');
   await expect(page.locator('.view[data-view="home"]')).toContainText('410');
   await expect(page.locator('body')).not.toContainText('Boundary context');
   await expect(page.locator('body')).not.toContainText('Additional literature');
@@ -42,6 +42,38 @@ test('structure and polar tables provide descriptive navigation and non-redundan
   await expect(page.locator('.view[data-view="polar"] caption')).toHaveText('Polar symmetry does not by itself establish ferroelectric switching.');
 });
 
+
+test('review status, hero search and filters expose clear interaction state',async({page})=>{
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  const review=page.locator('.ux-review-chip');
+  await expect(review).toHaveAttribute('href','#citation');
+  await expect(review).toHaveAttribute('aria-label',/learn how to interpret the current data state/);
+  await expect(page.locator('#uxHeroSearchInput')).toHaveAttribute('aria-describedby','uxHeroSearchHint');
+  await expect(page.locator('#uxHeroSearchHint')).toContainText('410-article literature corpus');
+
+  await page.goto(`${BASE}/#structures`,{waitUntil:'networkidle'});
+  const structureToggle=page.locator('.view[data-view="structures"] .mobile-filter-toggle');if(await structureToggle.isVisible())await structureToggle.click();
+  const state=page.locator('.view[data-view="structures"] .ui-filter-status');
+  await expect(state).toContainText('Default view');
+  await expect(page.locator('.view[data-view="structures"] .ui-collection-progress')).toBeAttached();
+  await page.locator('#sq').fill('P21');
+  await expect(state).toContainText('1 active filter');
+  const clear=state.locator('.ui-filter-clear');
+  await expect(clear).toBeVisible();
+  await clear.click();
+  await expect(page.locator('#sq')).toHaveValue('');
+  await expect(state).toContainText('Default view');
+});
+
+test('polar filtering has a visible no-result state instead of a blank table',async({page})=>{
+  await page.goto(`${BASE}/#polar`,{waitUntil:'networkidle'});
+  const polarToggle=page.locator('.view[data-view="polar"] .mobile-filter-toggle');if(await polarToggle.isVisible())await polarToggle.click();
+  await expect(page.locator('.view[data-view="polar"] .ui-collection-progress')).toBeAttached();
+  await page.locator('#pq').fill('zzzzzz-no-such-polar-structure-2026');
+  await expect(page.locator('#pcount')).toContainText('0 rows',{timeout:20000});
+  await expect(page.locator('#prows .ui-empty-row')).toContainText('No matching polar structures. Adjust or clear the filters.');
+});
+
 test('CuXplore has explicit idle/busy semantics without submitting a model request',async({page})=>{
   await page.goto(`${BASE}/#rag`,{waitUntil:'networkidle'});
   await expect(page.locator('.rag-work')).toHaveAttribute('aria-busy','false');
@@ -72,7 +104,7 @@ test('standalone records and error pages use CuXplore branding',async({request})
     const html=await r.text();
     expect(html).not.toContain('Research Assistant');
     expect(html).toContain('CuXplore');
-    expect(html).toContain('/ui-quality-v52.css?v=52.2');
+    expect(html).toContain('/ui-quality-v52.css?v=52.3');
   }
 });
 
