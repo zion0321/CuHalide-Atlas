@@ -13,7 +13,7 @@ function patch(body){
  x=all(x,'<span class="denom">Literature corpus · n = 410</span>','<span class="denom">Structured-data article subset · n = 372</span>');
  x=all(x,'<span class="denom">Display window 2006–2026 · 2026 is a partial year and updates as newly curated literature is added</span>','<span class="denom">DOI-deduplicated literature corpus · 2006–2026 · 2026 partial</span>');
  x=all(x,'/ui-ux-v1.css?v=51.0','/ui-ux-v1.css?v=52.3');
- x=all(x,'/ui-ux-v1.js?v=51.0','/ui-ux-v1.js?v=52.3');
+ x=all(x,'/ui-ux-v1.js?v=51.0','/ui-ux-v1.js?v=52.4');
  x=all(x,'/ui-v51-core.css?v=51.0','/ui-v51-core.css?v=52.3');
  x=all(x,'/ui-v51-core.js?v=51.0','/ui-v51-core.js?v=52.3');
  x=all(x,'/ui-photophysics-v1.css?v=1.4.0','/ui-photophysics-v1.css?v=1.4.0-ui52.2');
