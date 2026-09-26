@@ -27,7 +27,7 @@ function patch(body){
   x=all(x,'Resolved and unresolved Cu–X motif families by material class','Source-resolved Cu–X motif families by material class');
   x=x.replace(/<article class="card"><strong><a href="\/structure\/[^\"]+">[\s\S]*?<\/a><\/strong><p class="fine">[^<]* · [^<]* · Unresolved · [^<]*<\/p><\/article>/g,'');
   x=x.replace(/<div class="provenance"><strong>Evidence boundary\.<\/strong>[\s\S]*?<\/div>/,'<div class="provenance">Motifs are shown only when supported at the structure level. Open an individual structure record for crystallographic context and source links.</div>');
-  if(!x.includes('/ui-quality-v52.css'))x=x.replace('</head>','<link rel="stylesheet" href="/ui-quality-v52.css?v=52.3"></head>');if(!x.includes('/ui-quality-v52.js'))x=x.replace('</body>','<script src="/ui-quality-v52.js?v=52.3" defer></script></body>');
+  if(!x.includes('/ui-quality-v52.css'))x=x.replace('</head>','<link rel="stylesheet" href="/ui-quality-v52.css?v=52.4"></head>');if(!x.includes('/ui-quality-v52.js'))x=x.replace('</body>','<script src="/ui-quality-v52.js?v=52.4" defer></script></body>');
   if(/\brev\.[6789]\b/i.test(x))throw new Error('stale current-curated revision in Motif Atlas');
   if(x.includes('<td>Unresolved</td>')||x.includes('Unresolved legacy mapping')||x.includes('Legacy category unresolved')||x.includes('Motif unresolved'))throw new Error('unresolved QA state remains promoted as a Motif Atlas category');
   return x
