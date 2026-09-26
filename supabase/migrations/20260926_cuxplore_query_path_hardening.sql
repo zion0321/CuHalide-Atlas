@@ -1,6 +1,7 @@
 -- CuXplore query-path hardening and reproducible acceleration snapshots.
 -- Applied to production on 2026-09-26 after semantic-equivalence probes.
--- Refresh the two materialized snapshots whenever the literature catalog or source-processing registry changes.
+-- Refresh these materialized snapshots whenever literature membership, source-processing state,
+-- or authored source-review notes change.
 
 create materialized view if not exists atlas_internal.cuxplore_catalog_doi_snapshot_v1 as
 select distinct lower(doi) as doi
@@ -37,8 +38,35 @@ from atlas_internal.cuxplore_processing_v1;
 comment on materialized view atlas_internal.cuxplore_processing_coverage_snapshot_v1 is
 'One-row CuXplore processing-coverage snapshot used to avoid recomputing source inventory joins on every public retrieval request. Refresh with the source-index/catalog synchronization workflow.';
 
+create materialized view if not exists atlas_internal.cuxplore_search_document_snapshot_v1 as
+select
+  c.source_id,c.record_id,c.doi,c.title,c.year,c.journal,c.evidence_scope,c.source_layer,
+  c.category,c.halogen,c.summary,c.search_text,
+  n.statement,n.qualification,n.reviewed_at,
+  to_jsonb(p)-'doi'-'record_id'-'source_id' as processing,
+  p.prose_passages,p.structure_records,
+  setweight(to_tsvector('english',coalesce(c.title,'')),'A')
+  ||setweight(to_tsvector('english',coalesce(n.statement,'')||' '||coalesce(n.qualification,'')),'B')
+  ||setweight(to_tsvector('english',c.search_text),'C') as vec
+from atlas_internal.cuhalide_knowledge_catalog_v1 c
+join atlas_internal.cuxplore_processing_v1 p on p.source_id=c.source_id
+left join atlas_internal.cuhalide_source_review_notes_v1 n on c.doi=n.doi;
+
+create unique index if not exists cuxplore_search_document_snapshot_v1_source_uidx
+  on atlas_internal.cuxplore_search_document_snapshot_v1(source_id);
+create index if not exists cuxplore_search_document_snapshot_v1_doi_idx
+  on atlas_internal.cuxplore_search_document_snapshot_v1(lower(doi));
+create index if not exists cuxplore_search_document_snapshot_v1_scope_idx
+  on atlas_internal.cuxplore_search_document_snapshot_v1(evidence_scope);
+create index if not exists cuxplore_search_document_snapshot_v1_vec_gin
+  on atlas_internal.cuxplore_search_document_snapshot_v1 using gin(vec);
+
+comment on materialized view atlas_internal.cuxplore_search_document_snapshot_v1 is
+'Service-only search projection for CuXplore. Precomputes document vectors and processing metadata from authoritative catalog, processing and source-review layers; refresh with cuxplore_refresh_query_snapshots_v1 whenever those layers change.';
+
 revoke all on atlas_internal.cuxplore_catalog_doi_snapshot_v1 from public, anon, authenticated;
 revoke all on atlas_internal.cuxplore_processing_coverage_snapshot_v1 from public, anon, authenticated;
+revoke all on atlas_internal.cuxplore_search_document_snapshot_v1 from public, anon, authenticated;
 
 CREATE OR REPLACE FUNCTION public.cuxplore_primary_matches_v1(p_query text, p_limit integer DEFAULT 12)
  RETURNS jsonb
@@ -235,22 +263,14 @@ begin
   lex:=tsvector_to_array(to_tsvector('english',q));
 
   with docs as (
-    select c.*,n.statement,n.qualification,n.reviewed_at,
-           to_jsonb(p)-'doi'-'record_id'-'source_id' as processing,
-           p.prose_passages,p.structure_records,
-           setweight(to_tsvector('english',coalesce(c.title,'')),'A')
-           ||setweight(to_tsvector('english',coalesce(n.statement,'')||' '||coalesce(n.qualification,'')),'B')
-           ||setweight(to_tsvector('english',c.search_text),'C') as vec,
-           m.value as primary_match
-    from atlas_internal.cuhalide_knowledge_catalog_v1 c
-    join atlas_internal.cuxplore_processing_v1 p on p.source_id=c.source_id
-    left join atlas_internal.cuhalide_source_review_notes_v1 n on c.doi=n.doi
-    left join jsonb_array_elements(matches) m on m.value->>'doi'=c.doi
+    select d.*,m.value as primary_match
+    from atlas_internal.cuxplore_search_document_snapshot_v1 d
+    left join jsonb_array_elements(matches) m on m.value->>'doi'=d.doi
     where p_scope='all'
-       or p_scope='curated' and c.evidence_scope='curated_article'
-       or p_scope='context' and c.evidence_scope='bibliographic_context'
-       or p_scope='reviewed' and n.doi is not null
-       or p_scope='text' and p.prose_passages>0
+       or p_scope='curated' and d.evidence_scope='curated_article'
+       or p_scope='context' and d.evidence_scope='bibliographic_context'
+       or p_scope='reviewed' and d.statement is not null
+       or p_scope='text' and d.prose_passages>0
   ),
   scored as (
     select d.*,
@@ -330,21 +350,25 @@ CREATE OR REPLACE FUNCTION atlas_internal.cuxplore_refresh_query_snapshots_v1()
 AS $function$
 declare
   catalog_count integer;
+  search_document_count integer;
   coverage jsonb;
 begin
   refresh materialized view atlas_internal.cuxplore_catalog_doi_snapshot_v1;
   refresh materialized view atlas_internal.cuxplore_processing_coverage_snapshot_v1;
+  refresh materialized view atlas_internal.cuxplore_search_document_snapshot_v1;
 
   select count(*)::int into catalog_count
   from atlas_internal.cuxplore_catalog_doi_snapshot_v1;
-
+  select count(*)::int into search_document_count
+  from atlas_internal.cuxplore_search_document_snapshot_v1;
   select processing_coverage into coverage
   from atlas_internal.cuxplore_processing_coverage_snapshot_v1
   limit 1;
 
   return jsonb_build_object(
-    'ok',catalog_count>0 and coverage is not null,
+    'ok',catalog_count>0 and search_document_count=catalog_count and coverage is not null,
     'catalog_articles',catalog_count,
+    'search_documents',search_document_count,
     'processing_coverage',coverage,
     'refreshed_at',clock_timestamp()
   );
