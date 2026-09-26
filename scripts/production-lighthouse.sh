@@ -34,9 +34,9 @@ COMMON=(
   --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage"
 )
 
-is_trace_capture_failure() {
+is_retryable_capture_failure() {
   local log_file="$1"
-  grep -Eqi 'NO_NAVSTART|recording the trace|trace.*navigation start|navigation start.*trace' "$log_file"
+  grep -Eqi 'NO_NAVSTART|recording the trace|trace.*navigation start|navigation start.*trace|ERR_CONTENT_DECODING_FAILED' "$log_file"
 }
 
 run_measurement() {
@@ -66,17 +66,17 @@ run_measurement() {
     fi
 
     cat "$log_path" >&2
-    if is_trace_capture_failure "$log_path" && [ "$attempt" -lt "$max_attempts" ]; then
-      echo "Transient Lighthouse trace-capture failure detected; retrying the same measurement without changing any quality threshold." >&2
+    if is_retryable_capture_failure "$log_path" && [ "$attempt" -lt "$max_attempts" ]; then
+      echo "Transient Lighthouse capture/network failure detected; retrying the same measurement without changing any quality threshold." >&2
       attempt=$((attempt + 1))
       sleep 1
       continue
     fi
 
-    if is_trace_capture_failure "$log_path"; then
-      echo "Lighthouse trace capture failed after ${max_attempts} attempts." >&2
+    if is_retryable_capture_failure "$log_path"; then
+      echo "Lighthouse capture/navigation failed after ${max_attempts} attempts." >&2
     else
-      echo "Lighthouse failed for a non-trace reason; refusing to retry or weaken the quality gate." >&2
+      echo "Lighthouse failed for a non-retryable reason; refusing to retry or weaken the quality gate." >&2
     fi
     return 1
   done
@@ -85,8 +85,8 @@ run_measurement() {
 # Lab performance scores are inherently noisy on shared CI runners. Three independent
 # measurements are retained and the unchanged performance thresholds are evaluated on
 # their median. Accessibility, best-practice and SEO floors remain mandatory on every
-# valid report in assert-lighthouse.mjs. Only Lighthouse's own trace-capture failures
-# (for example NO_NAVSTART) may be retried before a valid report exists.
+# valid report in assert-lighthouse.mjs. Only pre-report Lighthouse capture/navigation failures
+# (for example NO_NAVSTART or ERR_CONTENT_DECODING_FAILED) may be retried before a valid report exists.
 for i in $(seq 1 "$RUNS"); do
   run_measurement mobile "$i"
   run_measurement desktop "$i"
