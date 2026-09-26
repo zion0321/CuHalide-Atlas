@@ -23,7 +23,7 @@ select jsonb_build_object(
   'sparse_scan_articles',count(*) filter(where sparse_scan_files>0),
   'registered_main_articles',count(*) filter(where main_source_registered),
   'registered_si_articles',count(*) filter(where si_source_registered),
-  'registered_cif_articles',count(*) filter(where registered_cif_articles is not null and registered_cif_articles>0),
+  'registered_cif_articles',count(*) filter(where cif_source_registered),
   'articles_with_structures',count(*) filter(where structure_records>0),
   'photophysics_reviewed_articles',count(*) filter(where photophysics_status='reviewed_measurements'),
   'photophysics_no_data_articles',count(*) filter(where photophysics_status='reviewed_no_reported_data'),
