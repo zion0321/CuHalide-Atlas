@@ -75,3 +75,16 @@ test('Lighthouse retries only pre-report capture/navigation failures without wea
   assert.match(script,/non-retryable reason; refusing to retry or weaken the quality gate/);
   assert.match(script,/node scripts\/assert-lighthouse\.mjs/);
 });
+
+test('portal HTML disables intermediary representation transforms across rewrite boundaries',()=>{
+  const ui=read('api/ui-r10.js');
+  const vercel=JSON.parse(read('vercel.json'));
+  assert.match(ui,/Cache-Control','no-store, no-transform, max-age=0, must-revalidate'/);
+  assert.match(ui,/if\(n==='cache-control'\)v='no-store, no-transform, max-age=0, must-revalidate'/);
+  for(const source of ['/','/index.html']){
+    const rule=vercel.headers.find(x=>x.source===source);
+    assert.ok(rule,source+' header rule missing');
+    const cc=rule.headers.find(h=>String(h.key).toLowerCase()==='cache-control');
+    assert.equal(cc?.value,'no-store, no-transform, max-age=0, must-revalidate');
+  }
+});
