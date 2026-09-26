@@ -156,3 +156,34 @@ test('public knowledge and retired export endpoints expose the same Site 52 revi
   assert.match(knowledge,/REV='10',SITE='52',UI='52\.0',STATE='prepublication-review'/);
   assert.match(exp,/REV='10',SITE='52',UI='52\.0'/);
 });
+
+test('Site 52.3 UX polish keeps evidence browsing clear and stateful',()=>{
+  const ux=read('public/ui-ux-core-v1.js');
+  const uxBoot=read('public/ui-ux-v1.js');
+  const filters=read('public/ui-v51-core.js');
+  const quality=read('public/ui-quality-v52.js');
+  const ui=read('api/ui-r10.js');
+
+  assert.match(ux,/document\.createElement\('a'\).*chip\.href='#citation'/s);
+  assert.match(ux,/aria-label','Prepublication review — learn how to interpret the current data state'/);
+  assert.match(ux,/id="uxHeroSearchInput"[^>]*placeholder="Search title, DOI, formula…"[^>]*aria-describedby="uxHeroSearchHint"/);
+  assert.match(ux,/id="uxHeroSearchHint"/);
+
+  assert.match(filters,/\['Current canonical','Core - Verified'\]\.includes\(release\)/);
+  assert.match(filters,/className='ui-filter-status'/);
+  assert.match(filters,/class="ui-filter-clear"/);
+  assert.match(filters,/ui-has-active-filters/);
+
+  assert.match(quality,/ui-collection-progress/);
+  assert.match(quality,/Updating results…/);
+  assert.match(quality,/No matching polar structures\. Adjust or clear the filters\./);
+  assert.match(quality,/cuhalideQuality='52\.3'/);
+
+  assert.match(uxBoot,/ui-ux-core-v1\.js\?v=52\.3/);
+  assert.match(ui,/ui-ux-v1\.css\?v=52\.3/);
+  assert.match(ui,/ui-ux-v1\.js\?v=52\.3/);
+  assert.match(ui,/ui-v51-core\.css\?v=52\.3/);
+  assert.match(ui,/ui-v51-core\.js\?v=52\.3/);
+  assert.match(ui,/ui-quality-v52\.css\?v=52\.3/);
+  assert.match(ui,/ui-quality-v52\.js\?v=52\.3/);
+});
