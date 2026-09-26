@@ -52,6 +52,7 @@ test('review status, hero search and filters expose clear interaction state',asy
   await expect(page.locator('#uxHeroSearchHint')).toContainText('410-article literature corpus');
 
   await page.goto(`${BASE}/#structures`,{waitUntil:'networkidle'});
+  const structureToggle=page.locator('.view[data-view="structures"] .mobile-filter-toggle');if(await structureToggle.isVisible())await structureToggle.click();
   const state=page.locator('.view[data-view="structures"] .ui-filter-status');
   await expect(state).toContainText('Default view');
   await expect(page.locator('.view[data-view="structures"] .ui-collection-progress')).toBeAttached();
@@ -66,6 +67,7 @@ test('review status, hero search and filters expose clear interaction state',asy
 
 test('polar filtering has a visible no-result state instead of a blank table',async({page})=>{
   await page.goto(`${BASE}/#polar`,{waitUntil:'networkidle'});
+  const polarToggle=page.locator('.view[data-view="polar"] .mobile-filter-toggle');if(await polarToggle.isVisible())await polarToggle.click();
   await expect(page.locator('.view[data-view="polar"] .ui-collection-progress')).toBeAttached();
   await page.locator('#pq').fill('zzzzzz-no-such-polar-structure-2026');
   await expect(page.locator('#pcount')).toContainText('0 rows',{timeout:20000});
