@@ -157,7 +157,7 @@ test('public knowledge and retired export endpoints expose the same Site 52 revi
   assert.match(exp,/REV='10',SITE='52',UI='52\.0'/);
 });
 
-test('Site 52.3 UX polish keeps evidence browsing clear and stateful',()=>{
+test('Site 52.4 UX polish keeps evidence browsing clear and stateful',()=>{
   const ux=read('public/ui-ux-core-v1.js');
   const uxBoot=read('public/ui-ux-v1.js');
   const filters=read('public/ui-v51-core.js');
@@ -177,13 +177,28 @@ test('Site 52.3 UX polish keeps evidence browsing clear and stateful',()=>{
   assert.match(quality,/ui-collection-progress/);
   assert.match(quality,/Updating results…/);
   assert.match(quality,/No matching polar structures\. Adjust or clear the filters\./);
-  assert.match(quality,/cuhalideQuality='52\.3'/);
+  assert.match(quality,/cuhalideQuality='52\.4'/);
 
   assert.match(uxBoot,/ui-ux-core-v1\.js\?v=52\.3/);
   assert.match(ui,/ui-ux-v1\.css\?v=52\.3/);
   assert.match(ui,/ui-ux-v1\.js\?v=52\.3/);
   assert.match(ui,/ui-v51-core\.css\?v=52\.3/);
   assert.match(ui,/ui-v51-core\.js\?v=52\.3/);
-  assert.match(ui,/ui-quality-v52\.css\?v=52\.3/);
-  assert.match(ui,/ui-quality-v52\.js\?v=52\.3/);
+  assert.match(ui,/ui-quality-v52\.css\?v=52\.4/);
+  assert.match(ui,/ui-quality-v52\.js\?v=52\.4/);
+});
+
+test('homepage uses the 410-article literature timeline and hides secondary audit dashboards',()=>{
+  const html=read('public/index.html');
+  const quality=read('public/ui-quality-v52.js');
+  const css=read('public/ui-quality-v52.css');
+  const ui=read('api/ui-r10.js');
+  assert.match(html,/o\.literature_years\|\|o\.years/);
+  assert.match(ui,/Literature publications by year/);
+  assert.match(ui,/DOI-deduplicated literature corpus · 2006–2026 · 2026 partial/);
+  assert.match(quality,/ui-home-secondary-hidden/);
+  assert.match(quality,/Current curated data/);
+  assert.match(quality,/Updated 14 Sep 2026/);
+  assert.match(css,/\.ui-home-timeline \.bar b\{display:none\}/);
+  assert.match(css,/\.ui-home-secondary-hidden\{display:none!important\}/);
 });
