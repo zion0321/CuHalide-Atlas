@@ -88,3 +88,11 @@ test('portal HTML disables intermediary representation transforms across rewrite
     assert.equal(cc?.value,'no-store, no-transform, max-age=0, must-revalidate');
   }
 });
+
+test('middleware strips stale transfer metadata after fetch decodes upstream bodies',()=>{
+  const middleware=read('middleware.js');
+  assert.match(middleware,/const headers=new Headers\(response\.headers\)/);
+  assert.match(middleware,/\['content-encoding','content-length','transfer-encoding'\]/);
+  assert.match(middleware,/headers\.delete\(h\)/);
+  assert.match(middleware,/new Response\(request\.method==='HEAD'\?null:response\.body/);
+});
