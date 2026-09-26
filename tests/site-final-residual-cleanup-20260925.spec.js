@@ -2,23 +2,23 @@ import {test,expect} from '@playwright/test';
 const BASE=process.env.CUHALIDE_BASE_URL||'http://127.0.0.1:4173';
 test.describe.configure({mode:'serial'});
 
-test('Overview labels structured-data chart subsets separately from the 410-article corpus',async({page})=>{
+test('Overview foregrounds one literature timeline and hides secondary audit panels',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
-  const halogen=page.locator('#halogenDist').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " panel ")][1]');
-  await expect(halogen.locator('.denom')).toHaveText('Structured-data article subset · n = 372');
   const growth=page.locator('#yearChart').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " panel ")][1]');
-  await expect(growth.locator('.denom')).toContainText('Structured-data article subset');
+  await expect(growth).toBeVisible();
+  await expect(growth.locator('.denom')).toContainText('DOI-deduplicated literature corpus');
+  await expect(page.locator('#yearChart .bar[title="2025: 61"]')).toHaveCount(1);
+  await expect(page.locator('#yearChart .bar[title="2026: 86"]')).toHaveCount(1);
+  const halogen=page.locator('#halogenDist').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " panel ")][1]');
+  await expect(halogen).toBeHidden();
 });
 
-test('Overview distinguishes searchable catalog text from the broader v2 source layer',async({page})=>{
+test('Overview keeps processing coverage out of the primary discovery surface',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
-  const coverage=page.locator('#knowledgeCoverage');
-  await expect(coverage).toContainText('Articles');
-  await expect(coverage).toContainText('410');
-  await expect(coverage).toContainText('Searchable source text');
-  await expect(coverage).toContainText('387');
-  await expect(coverage).toContainText('384 current-catalog articles have native v2 text');
-  await expect(coverage).toContainText('v2 source layer: 403 DOI records');
+  await expect(page.locator('.view[data-view="home"] .ki-overview')).toBeHidden();
+  await expect(page.locator('.view[data-view="home"] #kpis').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " section ")][1]')).toBeHidden();
+  await page.goto(`${BASE}/#citation`,{waitUntil:'networkidle'});
+  await expect(page.locator('.view[data-view="citation"]')).toContainText('CuXplore source coverage');
 });
 
 test('Polar page avoids repeating the same ferroelectric disclaimer',async({page})=>{
