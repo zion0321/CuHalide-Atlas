@@ -18,7 +18,9 @@ test('Overview keeps processing coverage out of the primary discovery surface',a
   await expect(page.locator('.view[data-view="home"] .ki-overview')).toBeHidden();
   await expect(page.locator('.view[data-view="home"] #kpis').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " section ")][1]')).toBeHidden();
   await page.goto(`${BASE}/#citation`,{waitUntil:'networkidle'});
-  await expect(page.locator('.view[data-view="citation"]')).toContainText('CuXplore source coverage');
+  const about=page.locator('.view[data-view="citation"]');
+  await expect(about).toContainText('Detailed methods and provenance');
+  await expect(about).toContainText('Source review and indexing');
 });
 
 test('Polar page avoids repeating the same ferroelectric disclaimer',async({page})=>{
@@ -39,11 +41,17 @@ test('footer and CuXplore navigation use concise consistent naming',async({page}
   await expect(rag).toHaveAttribute('title','CuXplore');
 });
 
-test('Photophysics summary cards are readable and balanced',async({page})=>{
+test('Photophysics coverage stays compact until requested',async({page})=>{
   await page.goto(`${BASE}/#photophysics`,{waitUntil:'networkidle'});
+  const coverage=page.locator('.ui-photo-coverage');
   const grid=page.locator('#photoStatusGrid');
-  await expect(grid).toContainText('normalized values reported in sources');
+  await expect(coverage.locator('summary')).toBeVisible();
+  await expect(coverage).not.toHaveAttribute('open','');
   await expect(grid.locator('.photo-stat')).toHaveCount(5);
+  await expect(grid).toContainText('normalized values reported in sources');
+  await coverage.locator('summary').click();
+  await expect(coverage).toHaveAttribute('open','');
+  await expect(grid.locator('.photo-stat').first()).toBeVisible();
   for(const card of await grid.locator('.photo-stat').all()){
     const box=await card.boundingBox();
     expect(box?.width||0).toBeGreaterThan(150);
