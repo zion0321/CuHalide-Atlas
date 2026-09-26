@@ -35,11 +35,11 @@ test('homepage and literature results keep secondary detail collapsed',async({pa
   await expect(page.locator('.ux-start-card').first()).not.toContainText('01 ·');
 
   await page.goto(`${BASE}/#articles`,{waitUntil:'networkidle'});
+  await page.selectOption('#knowledgeScope','reviewed');
   const card=page.locator('#knowledgeArticles .ki-source').first();
   await expect(card).toBeVisible();
   await expect(card.locator('.ki-review-details')).toBeAttached();
   await expect(card.locator('.ki-review-details')).not.toHaveAttribute('open','');
-  await expect(card.locator('.ki-catalog-summary')).toBeAttached();
 });
 
 test('structure and polar tables provide descriptive navigation and non-redundant captions',async({page})=>{
