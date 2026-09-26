@@ -129,3 +129,9 @@ test('middleware rewraps decoded upstream bodies without stale compression metad
     globalThis.fetch=originalFetch;
   }
 });
+
+test('local candidate runtime matches the production response metadata date',()=>{
+  const local=read('scripts/local-candidate-server.mjs');
+  assert.match(local,/new Date\('2026-09-25T00:00:00Z'\)\.toUTCString\(\)/);
+  assert.doesNotMatch(local,/new Date\('2026-09-14T00:00:00Z'\)\.toUTCString\(\)/);
+});
