@@ -20,7 +20,7 @@ test('Site 52 final polish uses researcher-facing public language',()=>{
     'Reset filters',
     'Literature-grounded research',
     'CuXplore retrieves source-linked Atlas evidence',
-    'Search the 410-article literature corpus by title or DOI'
+    'Search 410 DOI-deduplicated articles by title or DOI.'
   ])assert.ok(ux.includes(token),`missing final public-copy token: ${token}`);
 });
 
