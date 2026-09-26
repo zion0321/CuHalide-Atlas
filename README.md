@@ -12,7 +12,7 @@ The integrated knowledge layer adds broader DOI discovery and authored source-re
 
 **CuXplore** is the literature-grounded research and retrieval interface within CuHalide Atlas: Cu for copper, X for Cl/Br/I, and explore for the task. It connects the curated scientific register to source-linked literature without changing the dataset identity or scientific release.
 
-The full-text v2 source layer synchronized on **2026-09-24** contains **403 DOI records, 727 source documents, 21,421,324 extracted characters and 6,275 reproducible text blocks**. The source states are 664 native-text files, six sparse-text files and 57 empty/unreadable files. Within the active 410-DOI knowledge catalog, 384 DOI records contribute 6,175 native v2 blocks. The **1,322 article/structure semantic records remain a separate index**.
+The full-text v2 source layer synchronized on **2026-09-24** contains **403 DOI records, 727 source documents, 21,421,324 extracted characters and 6,275 reproducible text blocks**. The source states are 664 native-text files, six sparse-text files and 57 empty/unreadable files. Within the active 410-DOI knowledge catalog, 387 articles have searchable source prose; 384 DOI records have native searchable v2 text and contribute 6,175 native v2 blocks. The **1,322 article/structure semantic records remain a separate index**.
 
 CIF processing is independent of prose retrieval. All **114/114 registered CIF files** have been parsed; the reconciliation layer contains 237 Cu-containing structure blocks, 29 identity-review rows (26 resolved, three quarantined) and 10/10 adjudicated dimensionality flags. Parsed CIF results do not automatically overwrite the 939-row curated structural authority.
 
@@ -24,7 +24,7 @@ See [CuXplore release scope](docs/CUXPLORE_RELEASE_SCOPE.md) for provenance, cov
 
 The scientific current release remains **Current Curated rev.10**, curated through **2026-09-14**. The authored source-review overlay is dated **2026-09-23**; the full-text source index was synchronized on **2026-09-24**; the site-wide denominator, provenance and interface-metadata synchronization was completed on **2026-09-25**. These dates describe different operations and do not change the scientific curation cutoff.
 
-| Current scientific denominator | Value |
+| Current Curated structured-data revision metric | Value |
 |---|---:|
 | Article audit records | 383 |
 | Included / canonical verified articles | 372 |

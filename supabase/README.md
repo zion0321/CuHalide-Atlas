@@ -111,10 +111,10 @@ The Vercel compatibility filenames `public-data-r9.js`, `record-r9.js`, `motifs-
 
 Historical Public Data v2 is retired with HTTP **410 Gone**.
 
-### Research Assistant
+### CuXplore
 
 `Vercel /api/agent`
-→ `cuhalide-atlas-research-assistant-v1-public` (**10.6.0**)
+→ `cuhalide-atlas-research-assistant-v1-public` (**10.6.0**, historical function slug retained for compatibility)
 → Smart RAG **10.0.0**
 → protected rev.10 Current/Frozen RAG internals and service-role-only retrieval RPCs.
 
@@ -122,7 +122,7 @@ Both ingress layers whitelist request content. Caller-controlled top-level field
 
 ### Runtime contract
 
-`cuhalide-atlas-runtime-contract-v1-public` is the anonymous deterministic health/bootstrap contract. Its active identity is Site **52**, UI **52.0**, Public Data **2.18.0**, Smart RAG **10.0.0**, Research Assistant **10.6.0**, Current Curated **rev.10**. During prepublication review, sitemap exposure remains limited to `/` and `/motifs`; record identifiers are not enumerated.
+`cuhalide-atlas-runtime-contract-v1-public` is the anonymous deterministic health/bootstrap contract. Its active identity is Site **52**, UI **52.0**, Public Data **2.18.0**, Smart RAG **10.0.0**, CuXplore **10.6.0**, Current Curated **rev.10**. During prepublication review, sitemap exposure remains limited to `/` and `/motifs`; record identifiers are not enumerated.
 
 ## Prepublication indexing and redistribution boundary
 
@@ -140,6 +140,8 @@ Protected raw/current/taxonomy/component/photophysics tables remain behind schem
 
 The production project has a longer historical migration ledger than the public-safe migration subset in this repository. `supabase/migrations/` is therefore **not** a complete replayable clone of production history. Private corpus rows, credentials and evidence payloads must not be copied into the public repository merely to reconstruct history. Public-safe runtime source drift from production is treated as a defect.
 
+CuXplore query acceleration uses two service-only materialized snapshots: `cuxplore_catalog_doi_snapshot_v1` and `cuxplore_processing_coverage_snapshot_v1`. They must be refreshed with `atlas_internal.cuxplore_refresh_query_snapshots_v1()` whenever catalog membership or source-processing state changes; retrieval correctness continues to come from the authoritative catalog/source tables rather than from user-writable cache state.
+
 Temporary indexing/debug/export/re-embedding functions must be either synchronized narrow compatibility aliases, service-role-only internal endpoints, or inert HTTP 410 retirement stubs. The one-time rev.10 re-embedding function used to refresh changed RAG cards is retired after completion and must not remain an open write surface.
 
 ## Operational validation
@@ -148,6 +150,6 @@ Canonical production health:
 
 `https://cuhalide-atlas-v3.vercel.app/health.json`
 
-A synchronized rev.10 state requires Site **52**, UI **52.0**, Public Data **2.18.0**, Photophysics **1.4.0**, Organic Components **1.2.0**, Smart RAG **10.0.0**, Research Assistant **10.6.0**, Current Curated **rev.10**, the denominators above, complete **1,322 / 1,322** RAG embeddings with valid hashes, frozen-release guards intact, scientific-grain safeguards true, indexing disabled, and no public bulk normalized export.
+A synchronized rev.10 state requires Site **52**, UI **52.0**, Public Data **2.18.0**, Photophysics **1.4.0**, Organic Components **1.2.0**, Smart RAG **10.0.0**, CuXplore **10.6.0**, Current Curated **rev.10**, the denominators above, complete **1,322 / 1,322** RAG embeddings with valid hashes, frozen-release guards intact, scientific-grain safeguards true, indexing disabled, and no public bulk normalized export.
 
 The repository `main` branch is protected by PR-only production governance and required Chromium, Lighthouse, Preview and Vercel checks. Formal public release remains a separate governance decision; technical readiness does not imply public launch, DOI assignment, licensing, or removal of prepublication indexing restrictions.

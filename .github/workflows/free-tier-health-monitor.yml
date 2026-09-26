@@ -53,7 +53,7 @@ jobs:
           print('CUH-384: PASS')
           PY
 
-      - name: Check Research Assistant contract
+      - name: Check CuXplore contract
         shell: bash
         run: |
           set -euo pipefail
@@ -66,5 +66,5 @@ jobs:
           with open('/tmp/agent.json', encoding='utf-8') as f:
               data = json.load(f)
           assert int(data.get('current_curated_revision', data.get('current_curated', {}).get('live_revision', 0))) == 10, data
-          print('assistant contract: PASS')
+          print('CuXplore contract: PASS')
           PY

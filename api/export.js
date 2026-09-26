@@ -26,6 +26,6 @@ export default async function handler(req,res){
     publication_state:PUBLICATION_STATE,
     release_state:'prepublication',
     public_access:'query-and-view',
-    guidance:'Use the CuHalide Atlas search, record pages, Research Assistant, citation metadata and manuscript-specific data-availability process.'
+    guidance:'Use the CuHalide Atlas search, record pages, CuXplore, citation metadata and manuscript-specific data-availability process.'
   }));
 }
