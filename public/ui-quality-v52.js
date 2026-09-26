@@ -137,12 +137,12 @@ function simplifyHomepage(){
   const year=$('yearChart');if(year){
     const panel=year.closest('.panel'),head=panel?.querySelector('.panel-head');
     const title=head?.querySelector('h2'),denom=head?.querySelector('.denom');
-    if(title)title.textContent='Literature publications by year';
-    if(denom)denom.textContent='DOI-deduplicated literature corpus · 2006–2026 · 2026 partial';
+    if(title&&title.textContent!=='Literature publications by year')title.textContent='Literature publications by year';
+    if(denom&&denom.textContent!=='DOI-deduplicated literature corpus · 2006–2026 · 2026 partial')denom.textContent='DOI-deduplicated literature corpus · 2006–2026 · 2026 partial';
   }
   const release=home.querySelector('.release');if(release){
     const ver=release.querySelector('.ver'),dl=release.querySelector('dl'),note=release.querySelector('.release-note');
-    if(ver)ver.textContent='Current curated data';
+    if(ver&&ver.textContent!=='Current curated data')ver.textContent='Current curated data';
     dl?.classList.add('ui-home-secondary-hidden');
     if(note&&!note.dataset.uiSimplified){note.dataset.uiSimplified='1';note.replaceChildren(document.createTextNode('Updated 14 Sep 2026 · '));const a=document.createElement('a');a.href='#citation';a.textContent='methods and provenance';note.append(a)}
   }
