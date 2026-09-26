@@ -41,11 +41,11 @@
     let form=hero.querySelector('.ux-hero-search');
     if(!form){
       const actions=hero.querySelector('.actions');if(!actions)return;
-      actions.insertAdjacentHTML('afterend','<form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search" autocomplete="off" placeholder="Search title, DOI, formula…"><button type="submit">Search</button></form><small class="ux-hero-search-hint" id="uxHeroSearchHint">Search by title, DOI, formula or space group across the 410-article literature corpus and Core-Included structure register.</small>');
+      actions.insertAdjacentHTML('afterend','<form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search" autocomplete="off" placeholder="Search title, DOI, formula…"><button type="submit">Search</button></form><small class="ux-hero-search-hint" id="uxHeroSearchHint">Search by title, DOI, formula or space group.</small>');
       form=hero.querySelector('.ux-hero-search');
     }
     const input=form?.querySelector('#uxHeroSearchInput')||form?.querySelector('input[type="search"]');if(input){input.id='uxHeroSearchInput';input.setAttribute('placeholder','Search title, DOI, formula…');input.setAttribute('aria-describedby','uxHeroSearchHint')}
-    let hint=hero.querySelector('#uxHeroSearchHint')||hero.querySelector('.ux-hero-search-hint');if(!hint&&form){hint=document.createElement('small');hint.className='ux-hero-search-hint';form.insertAdjacentElement('afterend',hint)}if(hint){hint.id='uxHeroSearchHint';hint.textContent='Search by title, DOI, formula or space group across the 410-article literature corpus and Core-Included structure register.'}
+    let hint=hero.querySelector('#uxHeroSearchHint')||hero.querySelector('.ux-hero-search-hint');if(!hint&&form){hint=document.createElement('small');hint.className='ux-hero-search-hint';form.insertAdjacentElement('afterend',hint)}if(hint){hint.id='uxHeroSearchHint';hint.textContent='Search by title, DOI, formula or space group.'}
   }
 
   function addStartGrid(){
