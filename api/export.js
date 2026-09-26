@@ -1,5 +1,6 @@
 const RELEASE='3.0.2';
 const PUBLICATION_STATE='prepublication-review';
+const REV='10',SITE='52',UI='52.0';
 
 function commonHeaders(res){
   res.setHeader('Cache-Control','no-store');
@@ -8,6 +9,9 @@ function commonHeaders(res){
   res.setHeader('X-CuHalide-Release',RELEASE);
   res.setHeader('X-CuHalide-Publication-State',PUBLICATION_STATE);
   res.setHeader('X-CuHalide-Public-Access','query-and-view');
+  res.setHeader('X-CuHalide-Current-Curated-Revision',REV);
+  res.setHeader('X-CuHalide-Site-Version',SITE);
+  res.setHeader('X-CuHalide-UI-Version',UI);
 }
 
 export default async function handler(req,res){
