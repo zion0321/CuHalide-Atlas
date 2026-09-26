@@ -21,7 +21,7 @@ abstract: >-
   Organic Components 1.2.0 remains fail-closed when molecular connectivity is
   not uniquely verified. CuXplore combines the 1,322-record semantic layer with
   one DOI-deduplicated literature corpus of 410 articles and a source index
-  updated on 2026-09-24 covering 403 articles, 727 source documents and 6,275
+  updated on 2026-09-24 containing 403 DOI records in the v2 source layer, 727 source documents and 6,275
   indexed text blocks; source retrieval does not change the
   2026-09-14 scientific curation cutoff. Site-wide denominator and provenance metadata were synchronized on 2026-09-25. Direct-link review access is query-and-view;
   search-engine indexing, bulk normalized exports, exact stored publisher
