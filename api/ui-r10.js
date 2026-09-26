@@ -12,8 +12,10 @@ function patch(body){
  x=integrateKnowledge(x);
  x=all(x,'<span class="denom">Literature corpus · n = 410</span>','<span class="denom">Structured-data article subset · n = 372</span>');
  x=all(x,'<span class="denom">Display window 2006–2026 · 2026 is a partial year and updates as newly curated literature is added</span>','<span class="denom">Structured-data article subset · display window 2006–2026 · 2026 is partial</span>');
- x=all(x,'/ui-ux-v1.css?v=51.0','/ui-ux-v1.css?v=52.2');
- x=all(x,'/ui-ux-v1.js?v=51.0','/ui-ux-v1.js?v=52.2');
+ x=all(x,'/ui-ux-v1.css?v=51.0','/ui-ux-v1.css?v=52.3');
+ x=all(x,'/ui-ux-v1.js?v=51.0','/ui-ux-v1.js?v=52.3');
+ x=all(x,'/ui-v51-core.css?v=51.0','/ui-v51-core.css?v=52.3');
+ x=all(x,'/ui-v51-core.js?v=51.0','/ui-v51-core.js?v=52.3');
  x=all(x,'/ui-photophysics-v1.css?v=1.4.0','/ui-photophysics-v1.css?v=1.4.0-ui52.2');
  x=all(x,'/ui-photophysics-v1.js?v=1.4.0','/ui-photophysics-v1.js?v=1.4.0-ui52.2');
  x=all(x,'Latest strict-polar subset. Polar symmetry does not by itself establish ferroelectric switching.','Strict-polar subset · highest evidence level only.');
@@ -24,8 +26,8 @@ function patch(body){
  x=all(x,'Search the latest curated literature, structures and measurements. Detailed provenance remains available under About data.','Search the current literature corpus, structures and measurements. Detailed provenance remains available under About data.');
  x=all(x,'<p class="eyebrow">Curated literature</p><h1>Explore articles</h1><p>Search the latest primary-evidence-reviewed literature. Archived snapshots are retained for reproducibility rather than exposed as a routine browsing mode.</p>','<p class="eyebrow">Literature corpus</p><h1>Explore articles</h1><p>Search the 410-article DOI-deduplicated corpus. Full-text, structured-data and source-review coverage are shown as article-level attributes rather than separate article totals.</p>');
  x=all(x,'Search curated literature, structures and measurements; source publications remain linked by DOI.','Search the literature corpus, structures and measurements; source publications remain linked by DOI.');
- if(!x.includes('/ui-quality-v52.css'))x=x.replace('</head>','<link rel="stylesheet" href="/ui-quality-v52.css?v=52.2"></head>');
- if(!x.includes('/ui-quality-v52.js'))x=x.replace('</body>','<script src="/ui-quality-v52.js?v=52.2" defer></script></body>');
+ if(!x.includes('/ui-quality-v52.css'))x=x.replace('</head>','<link rel="stylesheet" href="/ui-quality-v52.css?v=52.3"></head>');
+ if(!x.includes('/ui-quality-v52.js'))x=x.replace('</body>','<script src="/ui-quality-v52.js?v=52.3" defer></script></body>');
  x=all(x,"['Publications',cc.canonical_verified_articles||372]","['Articles',S.boot.literature?.articles||410]");
  x=all(x,"['Publications',cc.canonical_verified_articles||372,'curated articles']","['Articles',S.boot.literature?.articles||410,'DOI-deduplicated literature corpus']");
  x=all(x,"['Canonical articles',r.canonical_verified_articles]","['Articles',410]");
