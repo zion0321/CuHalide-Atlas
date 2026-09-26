@@ -1,4 +1,4 @@
-/* CuHalide Atlas UI 52.3 portal UX bootstrap. */
+/* CuHalide Atlas UI 52.4 portal UX bootstrap. */
 (() => {
   'use strict';
   const load=(src,key)=>new Promise((resolve,reject)=>{const existing=document.querySelector(`script[data-cuhalide-layer="${key}"]`);if(existing){if(existing.dataset.loaded==='1')resolve();else existing.addEventListener('load',resolve,{once:true});return}const s=document.createElement('script');s.src=src;s.async=false;s.dataset.cuhalideLayer=key;s.onload=()=>{s.dataset.loaded='1';resolve()};s.onerror=reject;document.head.appendChild(s)});
@@ -21,15 +21,15 @@
 
   function polishStaticCopy(){
     const chip=document.querySelector('.ux-review-chip');if(chip)chip.title='Review version · not indexed or formally released yet.';
-    text(document.querySelector('.ux-hero-search-hint'),'Searches the 410-article literature corpus and the curated structure register.');
+    text(document.querySelector('.ux-hero-search-hint'),'Search by title, DOI, formula or space group.');
     polishStartGrid();
     const growth=document.querySelector('.view[data-view="home"] #yearChart')?.closest('.panel');
-    if(growth)text(growth.querySelector('h2'),'Structured-data publications by year');
+    if(growth)text(growth.querySelector('h2'),'Literature publications by year');
     const dim=document.querySelector('.view[data-view="home"] #dimDist')?.closest('.panel');
     if(dim)text(dim.querySelector('.denom'),'Curated structure records · n = 901');
     text(document.querySelector('.ux-search-footer'),'Search covers the literature corpus and structures; source publications remain linked by DOI.');
 
-    pageCopy('articles','Search the 410-article literature corpus by title or DOI. Source coverage and linked structured data are shown per article.');
+    pageCopy('articles','Search 410 DOI-deduplicated articles by title or DOI. Source and structured-data coverage remain on individual records.');
     pageCopy('structures','Browse curated structure and phase determinations. Search by formula, phase, dimensionality or space group; local motifs are available in Motifs, and photophysics is linked only where the evidence supports it.');
     pageCopy('rag','Ask about Cu(I) halide materials, structures, literature or photophysics. CuXplore retrieves source-linked Atlas evidence and keeps supporting records visible.');
     pageCopy('methods','See how the Atlas separates article, structure, motif and measurement evidence, and how unresolved or conflicting source information is handled.');
@@ -66,7 +66,7 @@
     const modal=document.getElementById('modalBody');if(modal)new MutationObserver(()=>queueMicrotask(polishModal)).observe(modal,{childList:true,subtree:true});
   }
 
-  load('/ui-ux-core-v1.js?v=52.3','portal-ux-core-v52.3').then(()=>ready(installPolishObservers)).catch(e=>console.warn('[ui52 ux]',e));
+  load('/ui-ux-core-v1.js?v=52.4','portal-ux-core-v52.4').then(()=>ready(installPolishObservers)).catch(e=>console.warn('[ui52 ux]',e));
   load('/organic-components-graphs-11.js?v=1.2.0','organic-components-r10-graphs').then(()=>load('/organic-components-v1.js?v=1.2.0','organic-components-v1.2.0')).catch(e=>console.warn('[organic-components bootstrap]',e));
   load('/ui-structure-photophysics-v1.js?v=1.4.0','structure-photophysics-v1.4.0').catch(e=>console.warn('[structure-photophysics bootstrap]',e));
 })();
