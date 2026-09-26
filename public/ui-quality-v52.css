@@ -135,4 +135,4 @@
 .ki-review-details{margin:9px 0;border-top:1px solid #e2eaed;padding-top:8px}
 .ki-review-details>summary{cursor:pointer;color:#355867;font-size:10.5px;font-weight:850;list-style-position:inside}
 .ki-review-details .ki-review{margin:9px 0 0}
-@media(min-width:781px){.view[data-view="articles"] .ui-filter-status{display:none}}
+@media(min-width:781px){.ui-filter-status{display:none}}
