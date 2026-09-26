@@ -36,7 +36,7 @@ COMMON=(
 
 is_retryable_capture_failure() {
   local log_file="$1"
-  grep -Eqi 'NO_NAVSTART|recording the trace|trace.*navigation start|navigation start.*trace|ERR_CONTENT_DECODING_FAILED' "$log_file"
+  grep -Eqi 'NO_NAVSTART|recording the trace|trace.*navigation start|navigation start.*trace|ERR_CONTENT_DECODING_FAILED|FAILED_DOCUMENT_REQUEST|Lighthouse was unable to reliably load the page|net::ERR_' "$log_file"
 }
 
 run_measurement() {
@@ -86,7 +86,7 @@ run_measurement() {
 # measurements are retained and the unchanged performance thresholds are evaluated on
 # their median. Accessibility, best-practice and SEO floors remain mandatory on every
 # valid report in assert-lighthouse.mjs. Only pre-report Lighthouse capture/navigation failures
-# (for example NO_NAVSTART or ERR_CONTENT_DECODING_FAILED) may be retried before a valid report exists.
+# (for example NO_NAVSTART or a FAILED_DOCUMENT_REQUEST/net::ERR_* navigation failure) may be retried before a valid report exists.
 for i in $(seq 1 "$RUNS"); do
   run_measurement mobile "$i"
   run_measurement desktop "$i"

@@ -68,6 +68,8 @@ test('legacy public-data bridge is hardened while remaining internal-only',()=>{
 test('Lighthouse retries only pre-report capture/navigation failures without weakening thresholds',()=>{
   const script=read('scripts/production-lighthouse.sh');
   assert.match(script,/ERR_CONTENT_DECODING_FAILED/);
+  assert.match(script,/FAILED_DOCUMENT_REQUEST/);
+  assert.match(script,/net::ERR_/);
   assert.match(script,/NO_NAVSTART/);
   assert.match(script,/without changing any quality threshold/);
   assert.match(script,/non-retryable reason; refusing to retry or weaken the quality gate/);
