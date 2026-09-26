@@ -166,8 +166,8 @@ test('Site 52.3 UX polish keeps evidence browsing clear and stateful',()=>{
 
   assert.match(ux,/document\.createElement\('a'\).*chip\.href='#citation'/s);
   assert.match(ux,/aria-label','Prepublication review — learn how to interpret the current data state'/);
-  assert.match(ux,/id="uxHeroSearchInput"[^>]*placeholder="Search title, DOI, formula…"[^>]*aria-describedby="uxHeroSearchHint"/);
-  assert.match(ux,/id="uxHeroSearchHint"/);
+  assert.match(ux,/input\.setAttribute\('aria-describedby','uxHeroSearchHint'\)/);
+  assert.match(ux,/hint\.id='uxHeroSearchHint'/);
 
   assert.match(filters,/\['Current canonical','Core - Verified'\]\.includes\(release\)/);
   assert.match(filters,/className='ui-filter-status'/);
