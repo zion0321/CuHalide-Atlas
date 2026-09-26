@@ -1,4 +1,4 @@
-/* CuHalide Atlas comprehensive quality layer v52.3 */
+/* CuHalide Atlas comprehensive quality layer v52.4 */
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
@@ -125,8 +125,35 @@ function installCollectionBusyStates(){
   }
 }
 
+function simplifyHomepage(){
+  const home=document.querySelector('.view[data-view="home"]');if(!home)return;
+  home.querySelector('.ki-overview')?.classList.add('ui-home-secondary-hidden');
+  const dashboard=home.querySelector('.dashboard');if(dashboard){
+    dashboard.querySelectorAll(':scope > .panel').forEach(panel=>{
+      if(panel.querySelector('#yearChart'))panel.classList.add('ui-home-timeline');
+      else panel.classList.add('ui-home-secondary-hidden');
+    });
+  }
+  const year=$('yearChart');if(year){
+    const panel=year.closest('.panel'),head=panel?.querySelector('.panel-head');
+    const title=head?.querySelector('h2'),denom=head?.querySelector('.denom');
+    if(title)title.textContent='Literature publications by year';
+    if(denom)denom.textContent='DOI-deduplicated literature corpus · 2006–2026 · 2026 partial';
+  }
+  const release=home.querySelector('.release');if(release){
+    const ver=release.querySelector('.ver'),dl=release.querySelector('dl'),note=release.querySelector('.release-note');
+    if(ver)ver.textContent='Current curated data';
+    dl?.classList.add('ui-home-secondary-hidden');
+    if(note&&!note.dataset.uiSimplified){note.dataset.uiSimplified='1';note.replaceChildren(document.createTextNode('Updated 14 Sep 2026 · '));const a=document.createElement('a');a.href='#citation';a.textContent='methods and provenance';note.append(a)}
+  }
+}
+
+function simplifyLiterature(){
+  document.querySelector('.view[data-view="articles"] .ui-literature-coverage')?.remove();
+}
+
 function enhanceDashboardA11y(){
-  const year=$('yearChart');if(year){year.setAttribute('role','list');year.setAttribute('aria-label','Structured-data publications by year');year.querySelectorAll('.bar').forEach(b=>{b.setAttribute('role','listitem');const label=b.getAttribute('title')||[b.querySelector('span')?.textContent,b.querySelector('b')?.textContent].filter(Boolean).join(': ');if(label)b.setAttribute('aria-label',label)})}
+  const year=$('yearChart');if(year){year.setAttribute('role','list');year.setAttribute('aria-label','Literature publications by year in the DOI-deduplicated corpus');year.querySelectorAll('.bar').forEach(b=>{b.setAttribute('role','listitem');const label=b.getAttribute('title')||[b.querySelector('span')?.textContent,b.querySelector('b')?.textContent].filter(Boolean).join(': ');if(label)b.setAttribute('aria-label',label)})}
   for(const id of ['halogenDist','dimDist']){const root=$(id);if(!root)continue;root.setAttribute('role','list');root.querySelectorAll('.dist-row').forEach(row=>row.setAttribute('role','listitem'))}
   const sg=$('sgGrid');if(sg){sg.setAttribute('role','list');sg.querySelectorAll('.sg').forEach(x=>x.setAttribute('role','listitem'))}
 }
@@ -140,9 +167,9 @@ function enhanceCopyAndLabels(){
 }
 
 function init(){
-  document.documentElement.dataset.cuhalideQuality='52.3';
-  ensureLiteratureCoverage();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceRouteTitle();enhanceCopyAndLabels();
-  const body=new MutationObserver(()=>{enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
+  document.documentElement.dataset.cuhalideQuality='52.4';
+  simplifyHomepage();simplifyLiterature();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceRouteTitle();enhanceCopyAndLabels();
+  const body=new MutationObserver(()=>{simplifyHomepage();simplifyLiterature();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
   body.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',enhanceRouteTitle);
 }
 ready(init);
