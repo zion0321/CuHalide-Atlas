@@ -26,6 +26,10 @@ export default async function middleware(request){
   if(isRecord||isPublicData||isMotif||isMeta||isAssistantCompat)target.search=incoming.search;
   const response=await fetch(target,{method:request.method,headers:request.headers,redirect:'follow'});
   const headers=new Headers(response.headers);
+  // fetch() transparently decodes gzip/br response bodies. Once that decoded body is
+  // wrapped in a new Response, upstream transport metadata is no longer valid.
+  // Retaining Content-Encoding would make the client decode the body a second time.
+  for(const h of ['content-encoding','content-length','transfer-encoding'])headers.delete(h);
   headers.set('x-cuhalide-middleware','release-3.0.2-ui-v52.0-current-r10');
   headers.set('x-cuhalide-current-curated-revision',REV);
   headers.set('x-cuhalide-public-data-version',PUBLIC_DATA);

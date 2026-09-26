@@ -88,3 +88,50 @@ test('portal HTML disables intermediary representation transforms across rewrite
     assert.equal(cc?.value,'no-store, no-transform, max-age=0, must-revalidate');
   }
 });
+
+test('middleware strips stale transfer metadata after fetch decodes upstream bodies',()=>{
+  const middleware=read('middleware.js');
+  assert.match(middleware,/const headers=new Headers\(response\.headers\)/);
+  assert.match(middleware,/\['content-encoding','content-length','transfer-encoding'\]/);
+  assert.match(middleware,/headers\.delete\(h\)/);
+  assert.match(middleware,/new Response\(request\.method==='HEAD'\?null:response\.body/);
+});
+
+test('Site 52 response metadata cannot regress behind the rev.10 content date',()=>{
+  const ui=read('api/ui-r10.js');
+  assert.match(ui,/CONTENT_DATE='2026-09-25'/);
+  assert.match(ui,/const LAST_MODIFIED=new Date/);
+  assert.match(ui,/res\.setHeader\('Last-Modified',LAST_MODIFIED\)/);
+  assert.match(ui,/if\(n==='last-modified'\)v=LAST_MODIFIED/);
+});
+
+test('middleware rewraps decoded upstream bodies without stale compression metadata',async()=>{
+  const originalFetch=globalThis.fetch;
+  globalThis.fetch=async()=>new Response('<!doctype html><p>decoded</p>',{
+    status:200,
+    headers:{
+      'content-type':'text/html; charset=utf-8',
+      'content-encoding':'br',
+      'content-length':'999',
+      'transfer-encoding':'chunked'
+    }
+  });
+  try{
+    const {default:middleware}=await import('../middleware.js?decoded-body-contract=1');
+    const response=await middleware(new Request('https://example.test/'));
+    assert.equal(response.status,200);
+    assert.equal(response.headers.get('content-encoding'),null);
+    assert.equal(response.headers.get('content-length'),null);
+    assert.equal(response.headers.get('transfer-encoding'),null);
+    assert.equal(response.headers.get('content-type'),'text/html; charset=utf-8');
+    assert.equal(await response.text(),'<!doctype html><p>decoded</p>');
+  }finally{
+    globalThis.fetch=originalFetch;
+  }
+});
+
+test('local candidate runtime matches the production response metadata date',()=>{
+  const local=read('scripts/local-candidate-server.mjs');
+  assert.match(local,/new Date\('2026-09-25T00:00:00Z'\)\.toUTCString\(\)/);
+  assert.doesNotMatch(local,/new Date\('2026-09-14T00:00:00Z'\)\.toUTCString\(\)/);
+});
