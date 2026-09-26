@@ -6,7 +6,7 @@ test.describe.configure({mode:'serial'});
 
 test('current portal exposes the quality layer and one visible article denominator',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
-  await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.2');
+  await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.3');
   await expect(page.locator('.view[data-view="home"]')).toContainText('410');
   await expect(page.locator('body')).not.toContainText('Boundary context');
   await expect(page.locator('body')).not.toContainText('Additional literature');
@@ -72,7 +72,7 @@ test('standalone records and error pages use CuXplore branding',async({request})
     const html=await r.text();
     expect(html).not.toContain('Research Assistant');
     expect(html).toContain('CuXplore');
-    expect(html).toContain('/ui-quality-v52.css?v=52.2');
+    expect(html).toContain('/ui-quality-v52.css?v=52.3');
   }
 });
 
