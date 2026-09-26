@@ -1,4 +1,4 @@
-/* CuHalide Atlas UI 51 presentation core.
+/* CuHalide Atlas UI 52.3 presentation core.
    Presentation density and accessibility only; scientific/query semantics remain backend-authoritative. */
 (() => {
   'use strict';
@@ -7,16 +7,18 @@
   const byId=id=>document.getElementById(id),value=id=>(byId(id)?.value||'').trim(),nativeFetch=window.fetch.bind(window);
   const sizes=Object.freeze({articles:()=>tablet.matches?12:18,structures:()=>mobile.matches?12:(tablet.matches?20:30),polar:()=>mobile.matches?12:(tablet.matches?20:30)});
   window.fetch=(input,init)=>{try{const raw=input instanceof Request?input.url:String(input),url=new URL(raw,location.href),sizeFor=sizes[url.searchParams.get('action')];if(url.origin===location.origin&&url.pathname==='/api/public-data'&&sizeFor){url.searchParams.set('page_size',String(sizeFor()));if(input instanceof Request)return nativeFetch(new Request(url.href,input),init);if(input instanceof URL)return nativeFetch(url,init);return nativeFetch(url.href,init)}}catch{}return nativeFetch(input,init)};
-  function activeArticleFilters(){let n=0;['aq','ayf','ayt','ahal','adim','acat','aev','ascope'].forEach(id=>{if(value(id))n++});if(value('arel')&&value('arel')!=='Current canonical')n++;if(value('asort')&&value('asort')!=='year_desc')n++;return n}
+  function activeArticleFilters(){let n=0;['aq','ayf','ayt','ahal','adim','acat','aev','ascope'].forEach(id=>{if(value(id))n++});const release=value('arel');if(release&&!['Current canonical','Core - Verified'].includes(release))n++;if(value('asort')&&value('asort')!=='year_desc')n++;return n}
   function activeStructureFilters(){let n=0;['sq','shal','sdim','ssg','sconf','spolar'].forEach(id=>{if(value(id))n++});if(value('selig')&&value('selig')!=='Core - Included')n++;return n}
   function activePolarFilters(){let n=0;['pq','phal','psg'].forEach(id=>{if(value(id))n++});return n}
   function buildFilterToggle(panel,getCount,resultId,fieldIds){
     if(!panel||panel.dataset.uiFilterReady==='1')return;panel.dataset.uiFilterReady='1';panel.classList.add('ui-filter-panel');
     const toggle=document.createElement('button');toggle.type='button';toggle.className='mobile-filter-toggle';toggle.innerHTML='<span>Filters</span><span class="ui-count">Default view</span><span class="ui-chevron" aria-hidden="true">⌄</span>';toggle.setAttribute('aria-expanded','true');panel.insertBefore(toggle,panel.firstChild);
+    const status=document.createElement('div');status.className='ui-filter-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.innerHTML='<span>Filter state</span><strong>Default view</strong><button type="button" class="ui-filter-clear" hidden>Clear</button>';toggle.insertAdjacentElement('afterend',status);
     const done=document.createElement('button');done.type='button';done.className='mobile-filter-done';done.textContent='View results';panel.appendChild(done);
-    const update=()=>{const count=getCount(),node=toggle.querySelector('.ui-count');if(node)node.textContent=count?`${count} active`:'Default view';toggle.setAttribute('aria-expanded',String(!panel.classList.contains('ui-collapsed')))};
+    const update=()=>{const count=getCount(),node=toggle.querySelector('.ui-count'),summary=status.querySelector('strong'),clear=status.querySelector('.ui-filter-clear'),label=count?`${count} active filter${count===1?'':'s'}`:'Default view';if(node)node.textContent=count?`${count} active`:'Default view';if(summary)summary.textContent=label;if(clear)clear.hidden=count===0;panel.classList.toggle('ui-has-active-filters',count>0);toggle.setAttribute('aria-expanded',String(!panel.classList.contains('ui-collapsed')))};
+    const clearFilters=()=>{const reset=[byId('areset'),byId('sreset')].find(el=>el&&panel.contains(el));if(reset){reset.click();return}const fields=fieldIds.map(byId).filter(Boolean);for(const el of fields){if(el.tagName==='SELECT')el.selectedIndex=0;else el.value=''}const trigger=fields[0];if(trigger)trigger.dispatchEvent(new Event(trigger.tagName==='SELECT'?'change':'input',{bubbles:true}));setTimeout(update,0)};
     const setMobileState=()=>{panel.classList.toggle('ui-collapsed',mobile.matches);update()};
-    toggle.addEventListener('click',()=>{panel.classList.toggle('ui-collapsed');update()});done.addEventListener('click',()=>{panel.classList.add('ui-collapsed');update();byId(resultId)?.scrollIntoView({behavior:'smooth',block:'start'})});
+    toggle.addEventListener('click',()=>{panel.classList.toggle('ui-collapsed');update()});status.querySelector('.ui-filter-clear')?.addEventListener('click',clearFilters);done.addEventListener('click',()=>{panel.classList.add('ui-collapsed');update();byId(resultId)?.scrollIntoView({behavior:'smooth',block:'start'})});
     fieldIds.forEach(id=>{const el=byId(id);el?.addEventListener('input',update);el?.addEventListener('change',update)});['areset','sreset'].forEach(id=>{const el=byId(id);if(el&&panel.contains(el))el.addEventListener('click',()=>setTimeout(update,0))});
     setMobileState();mobile.addEventListener?.('change',setMobileState);
   }
