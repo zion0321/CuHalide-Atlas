@@ -25,7 +25,7 @@ test('global search reaches literature records without a linked structured recor
 test('literature keeps one corpus denominator without a dense coverage dashboard',async({page})=>{
   await page.goto(`${BASE}/#articles`,{waitUntil:'networkidle'});
   await expect(page.locator('.ui-literature-coverage')).toHaveCount(0);
-  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('410-article DOI-deduplicated corpus');
+  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('410 DOI-deduplicated articles');
 });
 
 test('structure and polar tables provide descriptive navigation and non-redundant captions',async({page})=>{
@@ -119,6 +119,7 @@ test('homepage timeline is visually simplified and uses literature-corpus counts
   await expect(page.locator('#yearChart .bar[title="2026: 86"]')).toHaveCount(1);
   await expect(page.locator('#yearChart .bar[title="2025: 61"]')).toHaveCount(1);
   await expect(page.locator('.view[data-view="home"] .ki-overview')).toBeHidden();
+  await expect(page.locator('.view[data-view="home"] #kpis').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " section ")][1]')).toBeHidden();
   await expect(page.locator('.view[data-view="home"] .dashboard .panel:visible')).toHaveCount(1);
   await expect(page.locator('.view[data-view="home"] #releaseDl')).toBeHidden();
 });
