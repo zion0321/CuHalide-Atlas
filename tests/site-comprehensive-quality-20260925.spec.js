@@ -28,6 +28,20 @@ test('literature keeps one corpus denominator without a dense coverage dashboard
   await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('410 DOI-deduplicated articles');
 });
 
+test('homepage and literature results keep secondary detail collapsed',async({page})=>{
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  await expect(page.locator('.view[data-view="home"] .hero .tags')).toBeHidden();
+  await expect(page.locator('.ux-start-card').first()).toContainText('Literature');
+  await expect(page.locator('.ux-start-card').first()).not.toContainText('01 ·');
+
+  await page.goto(`${BASE}/#articles`,{waitUntil:'networkidle'});
+  const card=page.locator('#knowledgeArticles .ki-source').first();
+  await expect(card).toBeVisible();
+  await expect(card.locator('.ki-review-details')).toBeAttached();
+  await expect(card.locator('.ki-review-details')).not.toHaveAttribute('open','');
+  await expect(card.locator('.ki-catalog-summary')).toBeAttached();
+});
+
 test('structure and polar tables provide descriptive navigation and non-redundant captions',async({page})=>{
   await page.goto(`${BASE}/#structures`,{waitUntil:'networkidle'});
   const b=page.locator('#srows button[data-structure]').first();
@@ -44,7 +58,7 @@ test('review status, hero search and filters expose clear interaction state',asy
   await expect(review).toHaveAttribute('href','#citation');
   await expect(review).toHaveAttribute('aria-label',/learn how to interpret the current data state/);
   await expect(page.locator('#uxHeroSearchInput')).toHaveAttribute('aria-describedby','uxHeroSearchHint');
-  await expect(page.locator('#uxHeroSearchHint')).toContainText('410-article literature corpus');
+  await expect(page.locator('#uxHeroSearchHint')).toHaveText('Search by title, DOI, formula or space group.');
 
   await page.goto(`${BASE}/#structures`,{waitUntil:'networkidle'});
   const structureToggle=page.locator('.view[data-view="structures"] .mobile-filter-toggle');if(await structureToggle.isVisible())await structureToggle.click();
