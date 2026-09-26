@@ -144,3 +144,15 @@ test('CuXplore query snapshot refresh is recorded as an idempotent hourly mainte
   assert.match(sql,/'37 \* \* \* \*'/);
   assert.match(sql,/atlas_internal\.cuxplore_refresh_query_snapshots_v1\(\)/);
 });
+
+test('public knowledge and retired export endpoints expose the same Site 52 revision headers',()=>{
+  const knowledge=read('api/knowledge.js');
+  const exp=read('api/export.js');
+  for(const src of [knowledge,exp]){
+    assert.match(src,/X-CuHalide-Current-Curated-Revision/);
+    assert.match(src,/X-CuHalide-Site-Version/);
+    assert.match(src,/X-CuHalide-UI-Version/);
+  }
+  assert.match(knowledge,/REV='10',SITE='52',UI='52\.0',STATE='prepublication-review'/);
+  assert.match(exp,/REV='10',SITE='52',UI='52\.0'/);
+});
