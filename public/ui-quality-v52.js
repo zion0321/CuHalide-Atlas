@@ -153,6 +153,13 @@ function simplifyLiterature(){
   document.querySelector('.view[data-view="articles"] .ui-literature-coverage')?.remove();
 }
 
+function simplifyPhotophysicsOverview(){
+  const grid=$('photoStatusGrid');if(!grid||grid.closest('.ui-photo-coverage'))return;
+  const wrap=document.createElement('details');wrap.className='ui-photo-coverage';
+  const summary=document.createElement('summary');summary.innerHTML='<strong>Coverage summary</strong><span>Sample states, measurements and source-derived values</span>';
+  grid.insertAdjacentElement('beforebegin',wrap);wrap.append(summary,grid);
+}
+
 function enhanceDashboardA11y(){
   const year=$('yearChart');if(year){year.setAttribute('role','list');year.setAttribute('aria-label','Literature publications by year in the DOI-deduplicated corpus');year.querySelectorAll('.bar').forEach(b=>{b.setAttribute('role','listitem');const label=b.getAttribute('title')||[b.querySelector('span')?.textContent,b.querySelector('b')?.textContent].filter(Boolean).join(': ');if(label)b.setAttribute('aria-label',label)})}
   for(const id of ['halogenDist','dimDist']){const root=$(id);if(!root)continue;root.setAttribute('role','list');root.querySelectorAll('.dist-row').forEach(row=>row.setAttribute('role','listitem'))}
@@ -169,8 +176,8 @@ function enhanceCopyAndLabels(){
 
 function init(){
   document.documentElement.dataset.cuhalideQuality='52.4';
-  simplifyHomepage();simplifyLiterature();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceRouteTitle();enhanceCopyAndLabels();
-  const body=new MutationObserver(()=>{simplifyHomepage();simplifyLiterature();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
+  simplifyHomepage();simplifyLiterature();simplifyPhotophysicsOverview();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceRouteTitle();enhanceCopyAndLabels();
+  const body=new MutationObserver(()=>{simplifyHomepage();simplifyLiterature();simplifyPhotophysicsOverview();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
   body.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',enhanceRouteTitle);
 }
 ready(init);
