@@ -135,3 +135,12 @@ test('local candidate runtime matches the production response metadata date',()=
   assert.match(local,/new Date\('2026-09-25T00:00:00Z'\)\.toUTCString\(\)/);
   assert.doesNotMatch(local,/new Date\('2026-09-14T00:00:00Z'\)\.toUTCString\(\)/);
 });
+
+test('CuXplore query snapshot refresh is recorded as an idempotent hourly maintenance job',()=>{
+  const sql=read('supabase/migrations/20260926_cuxplore_query_snapshot_refresh_cron.sql');
+  assert.match(sql,/jobname\s*=\s*'cuxplore-query-snapshot-refresh'/);
+  assert.match(sql,/cron\.unschedule\(existing_job\.jobid\)/);
+  assert.match(sql,/cron\.schedule\(/);
+  assert.match(sql,/'37 \* \* \* \*'/);
+  assert.match(sql,/atlas_internal\.cuxplore_refresh_query_snapshots_v1\(\)/);
+});
