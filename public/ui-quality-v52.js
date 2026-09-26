@@ -128,6 +128,7 @@ function installCollectionBusyStates(){
 function simplifyHomepage(){
   const home=document.querySelector('.view[data-view="home"]');if(!home)return;
   home.querySelector('.ki-overview')?.classList.add('ui-home-secondary-hidden');
+  home.querySelector('#kpis')?.closest('.section')?.classList.add('ui-home-secondary-hidden');
   const dashboard=home.querySelector('.dashboard');if(dashboard){
     dashboard.querySelectorAll(':scope > .panel').forEach(panel=>{
       if(panel.querySelector('#yearChart'))panel.classList.add('ui-home-timeline');
