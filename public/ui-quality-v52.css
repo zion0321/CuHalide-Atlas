@@ -1,4 +1,4 @@
-/* CuHalide Atlas comprehensive quality layer v52.2
+/* CuHalide Atlas comprehensive quality layer v52.3
    Presentation/accessibility only. Scientific data semantics remain in authoritative APIs. */
 
 :root{--focus-ring:#9b6a20;--focus-halo:rgba(155,106,32,.22);--quality-soft:#f5f9f9}
@@ -46,6 +46,14 @@
 .ui-retrieval-progress{margin-top:7px}
 #knowledgeRetrieve[aria-busy="true"],#rsend[aria-busy="true"]{cursor:progress}
 @keyframes ui-busy-slide{0%{transform:translateX(-105%)}50%{transform:translateX(120%)}100%{transform:translateX(275%)}}
+
+/* Collection feedback: filtering and pagination stay visibly responsive. */
+.ui-collection-progress{display:flex;align-items:center;gap:9px;min-height:28px;margin:-3px 0 10px;color:#486570;font-size:10px;font-weight:800}
+.ui-collection-progress[hidden]{display:none}
+.ui-collection-progress .ui-busy-bar{flex:0 0 92px;width:92px;margin:0}
+#articles[aria-busy="true"],#srows[aria-busy="true"],#prows[aria-busy="true"]{opacity:.7;transition:opacity .14s ease}
+.ui-empty-row td{padding:16px!important;text-align:center;color:#617782;font-weight:750;background:#fbfdfd}
+@media(max-width:780px){.ui-empty-row td{display:block!important;padding:14px!important}.ui-empty-row td::before{display:none!important}}
 
 /* Denominator/provenance help is visible without adding another permanent card. */
 .ui-denominator-help{
