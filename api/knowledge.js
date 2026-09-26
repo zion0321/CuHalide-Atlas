@@ -1,4 +1,5 @@
 const UPSTREAM='https://tyxnyjyrfzspwcfjpzus.supabase.co/functions/v1/cuhalide-atlas-public-data-v3';
+const REV='10',SITE='52',UI='52.0',STATE='prepublication-review';
 const CACHE_TTL_MS=20000,MAX_CACHE_ENTRIES=96,TOTAL_TIMEOUT_MS=24000;const responseCache=new Map();const sleep=ms=>new Promise(r=>setTimeout(r,ms));function trimCache(){while(responseCache.size>MAX_CACHE_ENTRIES)responseCache.delete(responseCache.keys().next().value)}
 export function parameters(raw){
  const u=new URL(raw,'https://cuhalide-atlas-v3.vercel.app');
@@ -24,7 +25,7 @@ function normalizePublicBody(body){
  }catch{return body}
 }
 export default async function handler(req,res){
- res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');res.setHeader('X-CuHalide-Knowledge-Contract','1.3.0');res.setHeader('X-CuHalide-Public-Access','query-and-view');
+ res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');res.setHeader('X-CuHalide-Knowledge-Contract','1.3.0');res.setHeader('X-CuHalide-Public-Access','query-and-view');res.setHeader('X-CuHalide-Current-Curated-Revision',REV);res.setHeader('X-CuHalide-Site-Version',SITE);res.setHeader('X-CuHalide-UI-Version',UI);res.setHeader('X-CuHalide-Publication-State',STATE);
  if(!['GET','HEAD'].includes(req.method)){res.statusCode=405;res.setHeader('Allow','GET, HEAD');return res.end(JSON.stringify({ok:false,error:'Read-only endpoint.'}))}
  let target;try{target=parameters(req.url)}catch{res.statusCode=400;return res.end(req.method==='HEAD'?'':JSON.stringify({ok:false,error:'Invalid query parameters.'}))}
  const key=`${req.method} ${String(target)}`,now=Date.now(),cached=responseCache.get(key);
