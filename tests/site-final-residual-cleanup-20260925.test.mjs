@@ -24,9 +24,9 @@ test('residual public copy is synchronized',()=>{
 test('updated literature and UX presentation use fresh immutable asset keys',()=>{
   const integrated=read('lib/integrated-ui.mjs'),ux=read('public/ui-ux-v1.js'),ui=read('api/ui-r10.js');
   assert.match(integrated,/ui-knowledge-v1\.js\?v=52\.4/);
-  assert.match(ux,/ui-ux-core-v1\.js\?v=52\.3/);
+  assert.match(ux,/ui-ux-core-v1\.js\?v=52\.4/);
   assert.match(ui,/ui-ux-v1\.css\?v=52\.3/);
-  assert.match(ui,/ui-ux-v1\.js\?v=52\.3/);
+  assert.match(ui,/ui-ux-v1\.js\?v=52\.4/);
 });
 
 test('updated photophysics presentation uses a fresh immutable asset key',()=>{
