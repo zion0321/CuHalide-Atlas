@@ -64,3 +64,12 @@ test('legacy public-data bridge is hardened while remaining internal-only',()=>{
   assert.match(src,/internal upstream requires service authorization/);
   assert.match(src,/Current Curated rev\.10/);
 });
+
+test('Lighthouse retries only pre-report capture/navigation failures without weakening thresholds',()=>{
+  const script=read('scripts/production-lighthouse.sh');
+  assert.match(script,/ERR_CONTENT_DECODING_FAILED/);
+  assert.match(script,/NO_NAVSTART/);
+  assert.match(script,/without changing any quality threshold/);
+  assert.match(script,/non-retryable reason; refusing to retry or weaken the quality gate/);
+  assert.match(script,/node scripts\/assert-lighthouse\.mjs/);
+});
