@@ -96,3 +96,11 @@ test('middleware strips stale transfer metadata after fetch decodes upstream bod
   assert.match(middleware,/headers\.delete\(h\)/);
   assert.match(middleware,/new Response\(request\.method==='HEAD'\?null:response\.body/);
 });
+
+test('Site 52 response metadata cannot regress behind the rev.10 content date',()=>{
+  const ui=read('api/ui-r10.js');
+  assert.match(ui,/CONTENT_DATE='2026-09-25'/);
+  assert.match(ui,/const LAST_MODIFIED=new Date/);
+  assert.match(ui,/res\.setHeader\('Last-Modified',LAST_MODIFIED\)/);
+  assert.match(ui,/if\(n==='last-modified'\)v=LAST_MODIFIED/);
+});
