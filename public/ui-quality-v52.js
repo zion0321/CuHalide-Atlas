@@ -109,7 +109,6 @@ function enhanceRouteTitle(){
 
 function installCollectionBusyStates(){
   const configs=[
-    {root:$('articles'),ids:['aq','ayf','ayt','ahal','adim','acat','aev','ascope','asort'],count:'acount',pager:'apager'},
     {root:$('srows'),ids:['sq','shal','sdim','ssg','sconf','spolar'],count:'scount',pager:'spager'},
     {root:$('prows'),ids:['pq','phal','psg'],count:'pcount',pager:'ppager',empty:'No matching polar structures. Adjust or clear the filters.',colspan:8}
   ];
