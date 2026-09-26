@@ -6,7 +6,7 @@ test.describe.configure({mode:'serial'});
 
 test('current portal exposes the quality layer and one visible article denominator',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
-  await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.3');
+  await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.4');
   await expect(page.locator('.view[data-view="home"]')).toContainText('410');
   await expect(page.locator('body')).not.toContainText('Boundary context');
   await expect(page.locator('body')).not.toContainText('Additional literature');
@@ -22,15 +22,27 @@ test('global search reaches literature records without a linked structured recor
   await expect(result).toHaveAttribute('href',/doi\.org\/10\.1002\/zaac\.19734020113/);
 });
 
-test('literature makes source coverage explicit without creating a second corpus',async({page})=>{
+test('literature keeps one corpus denominator without a dense coverage dashboard',async({page})=>{
   await page.goto(`${BASE}/#articles`,{waitUntil:'networkidle'});
-  const cov=page.locator('.ui-literature-coverage');
-  await expect(cov).toBeVisible();
-  await expect(cov).toContainText('410 articles');
-  await expect(cov).toContainText('387 / 410');
-  await expect(cov).toContainText('727');
-  await expect(cov).toContainText('6,275');
-  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Literature corpus');
+  await expect(page.locator('.ui-literature-coverage')).toHaveCount(0);
+  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('410 DOI-deduplicated articles');
+});
+
+test('homepage and literature results keep secondary detail collapsed',async({page})=>{
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  await expect(page.locator('.view[data-view="home"] .hero .tags')).toBeHidden();
+  await expect(page.locator('.ux-start-card').first()).toContainText('Literature');
+  await expect(page.locator('.ux-start-card').first()).not.toContainText('01 ·');
+
+  await page.goto(`${BASE}/#articles`,{waitUntil:'networkidle'});
+  const articleToggle=page.locator('.view[data-view="articles"] .mobile-filter-toggle');if(await articleToggle.isVisible())await articleToggle.click();
+  await page.selectOption('#knowledgeScope','reviewed');
+  const card=page.locator('#knowledgeArticles .ki-source').first();
+  await expect(card).toBeVisible();
+  await expect(card.locator('.ki-review-details')).toBeAttached();
+  await expect(card.locator('.ki-review-details')).not.toHaveAttribute('open','');
+  await expect(card.locator('.cx-processing')).toHaveCount(0);
+  await expect(card.locator('.ki-scope')).toHaveText(/Linked structured data|Literature only/);
 });
 
 test('structure and polar tables provide descriptive navigation and non-redundant captions',async({page})=>{
@@ -49,7 +61,7 @@ test('review status, hero search and filters expose clear interaction state',asy
   await expect(review).toHaveAttribute('href','#citation');
   await expect(review).toHaveAttribute('aria-label',/learn how to interpret the current data state/);
   await expect(page.locator('#uxHeroSearchInput')).toHaveAttribute('aria-describedby','uxHeroSearchHint');
-  await expect(page.locator('#uxHeroSearchHint')).toContainText('410-article literature corpus');
+  await expect(page.locator('#uxHeroSearchHint')).toHaveText('Search by title, DOI, formula or space group.');
 
   await page.goto(`${BASE}/#structures`,{waitUntil:'networkidle'});
   const structureToggle=page.locator('.view[data-view="structures"] .mobile-filter-toggle');if(await structureToggle.isVisible())await structureToggle.click();
@@ -58,9 +70,9 @@ test('review status, hero search and filters expose clear interaction state',asy
   await expect(page.locator('.view[data-view="structures"] .ui-collection-progress')).toBeAttached();
   await page.locator('#sq').fill('P21');
   await expect(state).toContainText('1 active filter');
-  const clear=state.locator('.ui-filter-clear');
-  await expect(clear).toBeVisible();
-  await clear.click();
+  const reset=page.locator('#sreset');
+  await expect(reset).toBeVisible();
+  await reset.click();
   await expect(page.locator('#sq')).toHaveValue('');
   await expect(state).toContainText('Default view');
 });
@@ -104,7 +116,7 @@ test('standalone records and error pages use CuXplore branding',async({request})
     const html=await r.text();
     expect(html).not.toContain('Research Assistant');
     expect(html).toContain('CuXplore');
-    expect(html).toContain('/ui-quality-v52.css?v=52.3');
+    expect(html).toContain('/ui-quality-v52.css?v=52.4');
   }
 });
 
@@ -115,4 +127,16 @@ test('mobile quality layer does not introduce horizontal overflow',async({page},
     const w=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
     expect(w.scroll).toBeLessThanOrEqual(w.client+1);
   }
+});
+
+test('homepage timeline is visually simplified and uses literature-corpus counts',async({page})=>{
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  await expect(page.locator('#yearChart').locator('xpath=ancestor::article[1]')).toContainText('Literature publications by year');
+  await expect(page.locator('#yearChart').locator('xpath=ancestor::article[1]')).toContainText('DOI-deduplicated literature corpus');
+  await expect(page.locator('#yearChart .bar[title="2026: 86"]')).toHaveCount(1);
+  await expect(page.locator('#yearChart .bar[title="2025: 61"]')).toHaveCount(1);
+  await expect(page.locator('.view[data-view="home"] .ki-overview')).toBeHidden();
+  await expect(page.locator('.view[data-view="home"] #kpis').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " section ")][1]')).toBeHidden();
+  await expect(page.locator('.view[data-view="home"] .dashboard .panel:visible')).toHaveCount(1);
+  await expect(page.locator('.view[data-view="home"] #releaseDl')).toBeHidden();
 });

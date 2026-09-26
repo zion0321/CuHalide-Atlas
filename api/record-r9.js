@@ -45,7 +45,7 @@ function patch(body,kind){
     for(const hidden of ['Motif adjudication confidence','Machine-normalized identity key','SG / mapping confidence'])if(x.includes(hidden))throw new Error(`internal standalone structure field remains visible: ${hidden}`);
   }
   if(/Current Curated rev\.9|current-curated-r9|current-r9/.test(x))throw new Error('stale rev.9 record browser state');
-  if(x.includes('</body>')){x=x.replace('</head>','<link rel="stylesheet" href="/ui-quality-v52.css?v=52.3"><link rel="stylesheet" href="/cuxplore-v1.css?v=52.1"></head>');if(!x.includes('Record not found')&&!x.includes('Invalid record identifier'))x=x.replace('</body>','<script src="/cuxplore-v1.js?v=52.2" defer></script><script src="/ui-quality-v52.js?v=52.3" defer></script></body>');}
+  if(x.includes('</body>')){x=x.replace('</head>','<link rel="stylesheet" href="/ui-quality-v52.css?v=52.4"><link rel="stylesheet" href="/cuxplore-v1.css?v=52.1"></head>');if(!x.includes('Record not found')&&!x.includes('Invalid record identifier'))x=x.replace('</body>','<script src="/cuxplore-v1.js?v=52.2" defer></script><script src="/ui-quality-v52.js?v=52.4" defer></script></body>');}
   return x
 }
 function hashes(html){const out=[],re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(String(html)))){if(/\bsrc\s*=/i.test(m[1]))continue;out.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`)}return[...new Set(out)]}

@@ -39,9 +39,11 @@ test('Site 52 portal exposes rev.10 scope while hiding internal curation control
   expect(r.headers()['x-cuhalide-site-version']).toBe('52');
   expect(r.headers()['x-cuhalide-ui-version']).toBe('52.0');
   const nav=await page.goto(BASE,{waitUntil:'domcontentloaded'});expect(nav?.status()).toBe(200);
-  await expect(page.locator('body')).toContainText('Updated collection');
-  await expect(page.locator('body')).toContainText('Articles');
-  await expect(page.locator('body')).toContainText('410');
+  const release=page.locator('.view[data-view="home"] .release');
+  await expect(release).toContainText('Current curated data');
+  await expect(release).toContainText('Updated 14 Sep 2026');
+  await expect(page.locator('.view[data-view="home"] #kpis').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " section ")][1]')).toBeHidden();
+  await expect(page.locator('.view[data-view="home"]')).toContainText('410');
   await expect(page.locator('body')).not.toContainText('Article audit');
   await expect(page.locator('body')).not.toContainText('Dataset eligibility');
   await expect(page.locator('body')).not.toContainText('Research Assistant');
@@ -83,6 +85,11 @@ test('manifest and public Motif Atlas agree with rev.10 without promoting unknow
 test('public bootstrap exposes one article denominator',async({request})=>{
   const r=await request.get(`${BASE}/api/public-data?action=bootstrap`);expect(r.status()).toBe(200);const x=await r.json();
   expect(x.literature).toMatchObject({articles:410,searchable_source_articles:387,native_v2_searchable_articles:384,fulltext_v2_doi_records:403,source_documents:727,text_blocks:6275,denominator:'DOI-deduplicated literature corpus'});
+  const literatureYears=x.overview.literature_years;
+  expect(Array.isArray(literatureYears)).toBe(true);
+  expect(literatureYears.reduce((sum,row)=>sum+Number(row.count||0),0)).toBe(410);
+  const annual=Object.fromEntries(literatureYears.map(row=>[String(row.year),Number(row.count)]));
+  expect(annual).toMatchObject({'2022':35,'2023':33,'2024':45,'2025':61,'2026':86});
   expect(x.overview.denominators).toMatchObject({article_distributions:{records:372,basis:'Current Curated structured-data article subset'},structure_dimensionality:{rows:901,basis:'Core-Included structure rows'},space_groups:{rows:761,basis:'resolved structure/phase rows'}});
   expect(x.current_curated.article_audit_records).toBeUndefined();
   expect(x.current_curated.canonical_verified_articles).toBeUndefined();
