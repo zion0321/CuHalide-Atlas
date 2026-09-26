@@ -1,4 +1,4 @@
-/* CuHalide Atlas comprehensive quality layer v52.3
+/* CuHalide Atlas comprehensive quality layer v52.4
    Presentation/accessibility only. Scientific data semantics remain in authoritative APIs. */
 
 :root{--focus-ring:#9b6a20;--focus-halo:rgba(155,106,32,.22);--quality-soft:#f5f9f9}
@@ -116,3 +116,14 @@
   .panel,.card,.release,.kpi{box-shadow:none!important;border-color:#bbb!important;break-inside:avoid}
   a{color:#000!important;text-decoration:underline}
 }
+
+
+/* Homepage simplification: keep discovery actions and one trend; move dense audit metrics to About data. */
+.ui-home-secondary-hidden{display:none!important}
+.view[data-view="home"] .dashboard:has(.ui-home-timeline){grid-template-columns:minmax(0,1fr)}
+.ui-home-timeline{grid-column:1/-1!important}
+.ui-home-timeline .bar b{display:none}
+.ui-home-timeline .panel-head{margin-bottom:4px}
+.view[data-view="home"] .release .release-note{margin-bottom:0}
+.view[data-view="home"] .release .release-note a{color:var(--teal);font-weight:850;text-decoration:none}
+.view[data-view="home"] .release .release-note a:hover{text-decoration:underline;text-underline-offset:2px}
