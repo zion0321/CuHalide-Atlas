@@ -6,7 +6,7 @@ test.describe.configure({mode:'serial'});
 
 test('current portal exposes the quality layer and one visible article denominator',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
-  await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.3');
+  await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.4');
   await expect(page.locator('.view[data-view="home"]')).toContainText('410');
   await expect(page.locator('body')).not.toContainText('Boundary context');
   await expect(page.locator('body')).not.toContainText('Additional literature');
@@ -22,15 +22,10 @@ test('global search reaches literature records without a linked structured recor
   await expect(result).toHaveAttribute('href',/doi\.org\/10\.1002\/zaac\.19734020113/);
 });
 
-test('literature makes source coverage explicit without creating a second corpus',async({page})=>{
+test('literature keeps one corpus denominator without a dense coverage dashboard',async({page})=>{
   await page.goto(`${BASE}/#articles`,{waitUntil:'networkidle'});
-  const cov=page.locator('.ui-literature-coverage');
-  await expect(cov).toBeVisible();
-  await expect(cov).toContainText('410 articles');
-  await expect(cov).toContainText('387 / 410');
-  await expect(cov).toContainText('727');
-  await expect(cov).toContainText('6,275');
-  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Literature corpus');
+  await expect(page.locator('.ui-literature-coverage')).toHaveCount(0);
+  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('410-article DOI-deduplicated corpus');
 });
 
 test('structure and polar tables provide descriptive navigation and non-redundant captions',async({page})=>{
@@ -104,7 +99,7 @@ test('standalone records and error pages use CuXplore branding',async({request})
     const html=await r.text();
     expect(html).not.toContain('Research Assistant');
     expect(html).toContain('CuXplore');
-    expect(html).toContain('/ui-quality-v52.css?v=52.3');
+    expect(html).toContain('/ui-quality-v52.css?v=52.4');
   }
 });
 
@@ -115,4 +110,15 @@ test('mobile quality layer does not introduce horizontal overflow',async({page},
     const w=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
     expect(w.scroll).toBeLessThanOrEqual(w.client+1);
   }
+});
+
+test('homepage timeline is visually simplified and uses literature-corpus counts',async({page})=>{
+  await page.goto(BASE,{waitUntil:'networkidle'});
+  await expect(page.locator('#yearChart').locator('xpath=ancestor::article[1]')).toContainText('Literature publications by year');
+  await expect(page.locator('#yearChart').locator('xpath=ancestor::article[1]')).toContainText('DOI-deduplicated literature corpus');
+  await expect(page.locator('#yearChart .bar[title="2026: 86"]')).toHaveCount(1);
+  await expect(page.locator('#yearChart .bar[title="2025: 61"]')).toHaveCount(1);
+  await expect(page.locator('.view[data-view="home"] .ki-overview')).toBeHidden();
+  await expect(page.locator('.view[data-view="home"] .dashboard .panel:visible')).toHaveCount(1);
+  await expect(page.locator('.view[data-view="home"] #releaseDl')).toBeHidden();
 });
