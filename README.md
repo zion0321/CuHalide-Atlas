@@ -24,7 +24,7 @@ See [CuXplore release scope](docs/CUXPLORE_RELEASE_SCOPE.md) for provenance, cov
 
 The scientific current release remains **Current Curated rev.10**, curated through **2026-09-14**. The authored source-review overlay is dated **2026-09-23**; the full-text source index was synchronized on **2026-09-24**; the site-wide denominator, provenance and interface-metadata synchronization was completed on **2026-09-25**. These dates describe different operations and do not change the scientific curation cutoff.
 
-| Current scientific denominator | Value |
+| Current Curated structured-data revision metric | Value |
 |---|---:|
 | Article audit records | 383 |
 | Included / canonical verified articles | 372 |
