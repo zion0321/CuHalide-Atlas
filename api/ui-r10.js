@@ -11,7 +11,7 @@ function patch(body){
  x=all(x,'cc.canonical_verified_articles||370','cc.canonical_verified_articles||372');x=all(x,'cc.core_included_structure_rows||890','cc.core_included_structure_rows||901');x=all(x,'cc.verified_space_group_rows||720','cc.verified_space_group_rows||734');x=all(x,'cc.strict_polar_rows||91','cc.strict_polar_rows||94');x=all(x,'cc.strict_polar_articles||57','cc.strict_polar_articles||60');x=all(x,'cc.structure_phase_rows||947','cc.structure_phase_rows||939');x=all(x,'cc.resolved_space_group_rows||747','cc.resolved_space_group_rows||761');x=all(x,'all 947 structure/phase rows','all 939 structure/phase rows');x=all(x,'947 structure/phase rows','939 structure/phase rows');x=all(x,'1,330-document Current Curated rev.10','1,322-document Current Curated rev.10');x=all(x,'1,330 / 1,330','1,322 / 1,322');x=all(x,'Smart RAG 9.20.0','Smart RAG 10.0.0');x=all(x,'Research Assistant 10.5.0','Research Assistant 10.6.0');x=all(x,'Public Data 2.17.1','Public Data 2.18.0');
  x=integrateKnowledge(x);
  x=all(x,'<span class="denom">Literature corpus · n = 410</span>','<span class="denom">Structured-data article subset · n = 372</span>');
- x=all(x,'<span class="denom">Display window 2006–2026 · 2026 is a partial year and updates as newly curated literature is added</span>','<span class="denom">Structured-data article subset · display window 2006–2026 · 2026 is partial</span>');
+ x=all(x,'<span class="denom">Display window 2006–2026 · 2026 is a partial year and updates as newly curated literature is added</span>','<span class="denom">DOI-deduplicated literature corpus · 2006–2026 · 2026 partial</span>');
  x=all(x,'/ui-ux-v1.css?v=51.0','/ui-ux-v1.css?v=52.3');
  x=all(x,'/ui-ux-v1.js?v=51.0','/ui-ux-v1.js?v=52.3');
  x=all(x,'/ui-v51-core.css?v=51.0','/ui-v51-core.css?v=52.3');
@@ -36,8 +36,8 @@ function patch(body){
  x=all(x,'<label class="field"><span>Dataset view</span><select id="arel"><option value="Core - Verified" selected>Canonical core</option><option value="">All audit records</option><option value="Context - Boundary">Boundary context</option><option value="Excluded - Curated Audit">Excluded audit</option><option value="Pending - Primary Evidence Unavailable">Primary evidence pending</option></select></label>','<input id="arel" type="hidden" value="Core - Verified">');
  x=all(x,'Reset to canonical core','Reset filters');
  x=all(x,'Canonical release status = Core - Verified.','Articles with linked structured scientific records.');
- x=all(x,'Canonical publications by year','Structured-data publications by year');
- x=all(x,'Canonical literature by year','Structured-data literature by year');
+ x=all(x,'Canonical publications by year','Literature publications by year');
+ x=all(x,'Canonical literature by year','Literature publications by year');
  x=x.replace(/"dateModified":"\d{4}-\d{2}-\d{2}"/g,'"dateModified":"'+CONTENT_DATE+'"');
  x=all(x,'<!-- CUHALIDE_UI_V51_0_CONVERSATIONAL_RESEARCH_ASSISTANT -->','<!-- CUHALIDE_UI_V52_0_CUXPLORE -->');
  x=all(x,'/ui-living-knowledge.css?v=20260819','/ui-living-knowledge.css?v=20260925');
