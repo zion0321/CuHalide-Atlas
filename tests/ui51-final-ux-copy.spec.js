@@ -27,15 +27,15 @@ test('home research paths describe the Site 52 public experience without interna
   await expect(start).not.toContainText('confidence and source mapping');
   await expect(start).not.toContainText('evidence layer');
   await expect(page.locator('#dimDist').locator('..')).toContainText('Curated structure records · n = 901');
-  await expect(page.locator('.ux-hero-search-hint')).toContainText('curated structure register');
+  await expect(page.locator('.ux-hero-search-hint')).toHaveText('Search by title, DOI, formula or space group.');
   await expectClean(errors,page);
 });
 
 test('literature, structures, CuXplore and methods use direct researcher-facing explanations',async({page})=>{
   const errors=captureBrowserErrors(page);
   await page.goto(`${BASE}/#articles`,{waitUntil:'domcontentloaded'});
-  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Search the 410-article literature corpus by title or DOI',{timeout:15000});
-  await expect(page.locator('#knowledgeArticles .ki-source').first()).toContainText('Literature article',{timeout:15000});
+  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Search 410 DOI-deduplicated articles by title or DOI.',{timeout:15000});
+  await expect(page.locator('#knowledgeArticles .ki-source').first()).toContainText(/Linked structured data|Literature only/,{timeout:15000});
 
   await page.goto(`${BASE}/#structures`,{waitUntil:'domcontentloaded'});
   await expect(page.locator('.view[data-view="structures"] .page-head')).toContainText('Browse curated structure and phase determinations.',{timeout:15000});
