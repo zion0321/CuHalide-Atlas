@@ -179,9 +179,9 @@ test('Site 52.4 UX polish keeps evidence browsing clear and stateful',()=>{
   assert.match(quality,/No matching polar structures\. Adjust or clear the filters\./);
   assert.match(quality,/cuhalideQuality='52\.4'/);
 
-  assert.match(uxBoot,/ui-ux-core-v1\.js\?v=52\.3/);
+  assert.match(uxBoot,/ui-ux-core-v1\.js\?v=52\.4/);
   assert.match(ui,/ui-ux-v1\.css\?v=52\.3/);
-  assert.match(ui,/ui-ux-v1\.js\?v=52\.3/);
+  assert.match(ui,/ui-ux-v1\.js\?v=52\.4/);
   assert.match(ui,/ui-v51-core\.css\?v=52\.3/);
   assert.match(ui,/ui-v51-core\.js\?v=52\.3/);
   assert.match(ui,/ui-quality-v52\.css\?v=52\.4/);
