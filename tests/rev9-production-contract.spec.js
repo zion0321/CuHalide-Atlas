@@ -85,6 +85,11 @@ test('manifest and public Motif Atlas agree with rev.10 without promoting unknow
 test('public bootstrap exposes one article denominator',async({request})=>{
   const r=await request.get(`${BASE}/api/public-data?action=bootstrap`);expect(r.status()).toBe(200);const x=await r.json();
   expect(x.literature).toMatchObject({articles:410,searchable_source_articles:387,native_v2_searchable_articles:384,fulltext_v2_doi_records:403,source_documents:727,text_blocks:6275,denominator:'DOI-deduplicated literature corpus'});
+  const literatureYears=x.overview.literature_years;
+  expect(Array.isArray(literatureYears)).toBe(true);
+  expect(literatureYears.reduce((sum,row)=>sum+Number(row.count||0),0)).toBe(410);
+  const annual=Object.fromEntries(literatureYears.map(row=>[String(row.year),Number(row.count)]));
+  expect(annual).toMatchObject({'2022':35,'2023':33,'2024':45,'2025':61,'2026':86});
   expect(x.overview.denominators).toMatchObject({article_distributions:{records:372,basis:'Current Curated structured-data article subset'},structure_dimensionality:{rows:901,basis:'Core-Included structure rows'},space_groups:{rows:761,basis:'resolved structure/phase rows'}});
   expect(x.current_curated.article_audit_records).toBeUndefined();
   expect(x.current_curated.canonical_verified_articles).toBeUndefined();
