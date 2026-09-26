@@ -104,3 +104,28 @@ test('Site 52 response metadata cannot regress behind the rev.10 content date',(
   assert.match(ui,/res\.setHeader\('Last-Modified',LAST_MODIFIED\)/);
   assert.match(ui,/if\(n==='last-modified'\)v=LAST_MODIFIED/);
 });
+
+test('middleware rewraps decoded upstream bodies without stale compression metadata',async()=>{
+  const originalFetch=globalThis.fetch;
+  globalThis.fetch=async()=>new Response('<!doctype html><p>decoded</p>',{
+    status:200,
+    headers:{
+      'content-type':'text/html; charset=utf-8',
+      'content-encoding':'br',
+      'content-length':'999',
+      'transfer-encoding':'chunked'
+    }
+  });
+  try{
+    const {default:middleware}=await import('../middleware.js?decoded-body-contract=1');
+    const response=await middleware(new Request('https://example.test/'));
+    assert.equal(response.status,200);
+    assert.equal(response.headers.get('content-encoding'),null);
+    assert.equal(response.headers.get('content-length'),null);
+    assert.equal(response.headers.get('transfer-encoding'),null);
+    assert.equal(response.headers.get('content-type'),'text/html; charset=utf-8');
+    assert.equal(await response.text(),'<!doctype html><p>decoded</p>');
+  }finally{
+    globalThis.fetch=originalFetch;
+  }
+});
