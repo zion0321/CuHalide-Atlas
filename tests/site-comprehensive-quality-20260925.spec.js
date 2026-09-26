@@ -40,6 +40,8 @@ test('homepage and literature results keep secondary detail collapsed',async({pa
   await expect(card).toBeVisible();
   await expect(card.locator('.ki-review-details')).toBeAttached();
   await expect(card.locator('.ki-review-details')).not.toHaveAttribute('open','');
+  await expect(card.locator('.cx-processing')).toHaveCount(0);
+  await expect(card.locator('.ki-scope')).toHaveText(/Linked structured data|Literature only/);
 });
 
 test('structure and polar tables provide descriptive navigation and non-redundant captions',async({page})=>{
