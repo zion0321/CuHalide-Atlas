@@ -116,7 +116,7 @@ test('standalone records and error pages use CuXplore branding',async({request})
     const html=await r.text();
     expect(html).not.toContain('Research Assistant');
     expect(html).toContain('CuXplore');
-    expect(html).toContain('/ui-quality-v52.css?v=52.5');
+    expect(html).toContain('/ui-quality-v52.css?v=52.4');
   }
 });
 
