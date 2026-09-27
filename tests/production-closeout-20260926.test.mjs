@@ -185,7 +185,7 @@ test('Site 52.4 UX polish keeps evidence browsing clear and stateful',()=>{
   assert.match(ui,/ui-v51-core\.css\?v=52\.3/);
   assert.match(ui,/ui-v51-core\.js\?v=52\.3/);
   assert.match(ui,/ui-quality-v52\.css\?v=52\.7/);
-  assert.match(ui,/ui-quality-v52\.js\?v=52\.7/);
+  assert.match(ui,/ui-quality-v52\.js\?v=52\.8/);
 });
 
 test('homepage uses the 410-article literature timeline and hides secondary audit dashboards',()=>{
