@@ -181,11 +181,11 @@ test('Site 52.4 UX polish keeps evidence browsing clear and stateful',()=>{
 
   assert.match(uxBoot,/ui-ux-core-v1\.js\?v=52\.5/);
   assert.match(ui,/ui-ux-v1\.css\?v=52\.5/);
-  assert.match(ui,/ui-ux-v1\.js\?v=52\.5/);
+  assert.match(ui,/ui-ux-v1\.js\?v=52\.6/);
   assert.match(ui,/ui-v51-core\.css\?v=52\.3/);
   assert.match(ui,/ui-v51-core\.js\?v=52\.3/);
-  assert.match(ui,/ui-quality-v52\.css\?v=52\.5/);
-  assert.match(ui,/ui-quality-v52\.js\?v=52\.5/);
+  assert.match(ui,/ui-quality-v52\.css\?v=52\.6/);
+  assert.match(ui,/ui-quality-v52\.js\?v=52\.6/);
 });
 
 test('homepage uses the 410-article literature timeline and hides secondary audit dashboards',()=>{
@@ -194,12 +194,12 @@ test('homepage uses the 410-article literature timeline and hides secondary audi
   const css=read('public/ui-quality-v52.css');
   const ui=read('api/ui-r10.js');
   assert.match(html,/o\.literature_years\|\|o\.years/);
-  assert.match(ui,/Literature publications by year/);
-  assert.match(ui,/DOI-deduplicated literature corpus · 2006–2026 · 2026 partial/);
+  assert.match(ui,/Publications by year/);
+  assert.match(ui,/DOI-deduplicated articles · 2026 partial/);
   assert.match(quality,/ui-home-secondary-hidden/);
   assert.match(quality,/Current curated data/);
   assert.match(quality,/Updated 14 Sep 2026/);
-  assert.match(css,/\.ui-home-timeline \.bar b\{display:block/);
+  assert.match(css,/\.ui-home-timeline \.bar:nth-last-child\(-n\+5\) b\{display:block/);
   assert.match(css,/\.view\[data-view=\"home\"\] \.hero \.release.*display:none/);
   assert.match(css,/\.ui-home-secondary-hidden\{display:none!important\}/);
 });

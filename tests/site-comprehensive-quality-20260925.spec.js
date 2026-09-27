@@ -131,8 +131,8 @@ test('mobile quality layer does not introduce horizontal overflow',async({page},
 
 test('homepage timeline is visually simplified and uses literature-corpus counts',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
-  await expect(page.locator('#yearChart').locator('xpath=ancestor::article[1]')).toContainText('Literature publications by year');
-  await expect(page.locator('#yearChart').locator('xpath=ancestor::article[1]')).toContainText('DOI-deduplicated literature corpus');
+  await expect(page.locator('#yearChart').locator('xpath=ancestor::article[1]')).toContainText('Publications by year');
+  await expect(page.locator('#yearChart').locator('xpath=ancestor::article[1]')).toContainText('DOI-deduplicated articles');
   await expect(page.locator('#yearChart .bar[title="2026: 86"]')).toHaveCount(1);
   await expect(page.locator('#yearChart .bar[title="2025: 61"]')).toHaveCount(1);
   await expect(page.locator('.view[data-view="home"] .ki-overview')).toBeHidden();
