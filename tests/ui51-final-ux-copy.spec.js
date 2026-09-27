@@ -26,8 +26,10 @@ test('home leads from identity to publications and concise research links',async
   await expect(start.locator('.ux-start-card strong')).toHaveText(['Literature','Structures','Photophysics','CuXplore']);
   await expect(page.locator('.ux-hero-search')).toBeHidden();
   await expect(page.locator('.hero .release')).toBeHidden();
-  const order=await page.evaluate(()=>[...document.querySelectorAll('.view[data-view="home"] .hero,.view[data-view="home"] .dashboard,.view[data-view="home"] .ux-start')].map(n=>n.classList.contains('hero')?'identity':n.classList.contains('dashboard')?'chart':'links'));
+  const order=await page.evaluate(()=>[...document.querySelectorAll('.atlas-home > .hero,.atlas-home .atlas-figure-band,.atlas-home > .ux-start')].map(n=>n.classList.contains('hero')?'identity':n.classList.contains('atlas-figure-band')?'chart':'links'));
   expect(order).toEqual(['identity','chart','links']);
+  await expect(page.locator('.atlas-home .photo-home-panel')).toHaveCount(0);
+  await expect(page.locator('.atlas-plot')).toBeVisible();
   await expectClean(errors,page);
 });
 

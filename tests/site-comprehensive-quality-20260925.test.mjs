@@ -6,9 +6,9 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('quality assets are injected into portal, records and Motif Atlas',()=>{
   const ui=read('api/ui-r10.js'),record=read('api/record-r9.js'),motifs=read('api/motifs-r9.js');
-  assert.match(ui,/ui-quality-v52\.css\?v=52\.6/);
+  assert.match(ui,/ui-quality-v52\.css\?v=52\.7/);
   for(const src of [record,motifs])assert.match(src,/ui-quality-v52\.css\?v=52\.4/);
-  assert.match(ui,/ui-quality-v52\.js\?v=52\.6/);
+  assert.match(ui,/ui-quality-v52\.js\?v=52\.7/);
   assert.match(motifs,/ui-quality-v52\.js\?v=52\.4/);
   assert.doesNotMatch(record,/>Research Assistant<\/a>/);
 });

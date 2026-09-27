@@ -32,7 +32,7 @@ test('updated literature and UX presentation use fresh immutable asset keys',()=
 test('updated photophysics presentation uses a fresh immutable asset key',()=>{
   const ui=read('api/ui-r10.js');
   assert.match(ui,/ui-photophysics-v1\.css\?v=1\.4\.0-ui52\.2/);
-  assert.match(ui,/ui-photophysics-v1\.js\?v=1\.4\.0-ui52\.2/);
+  assert.match(ui,/ui-photophysics-v1\.js\?v=1\.4\.0-ui52\.3/);
 });
 
 test('branded 404 assets exist and preserve navigation',()=>{
