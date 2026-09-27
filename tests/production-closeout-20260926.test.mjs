@@ -166,8 +166,8 @@ test('Site 52.4 UX polish keeps evidence browsing clear and stateful',()=>{
 
   assert.match(ux,/document\.createElement\('a'\).*chip\.href='#citation'/s);
   assert.match(ux,/aria-label','Prepublication review — learn how to interpret the current data state'/);
-  assert.match(ux,/input\.setAttribute\('aria-describedby','uxHeroSearchHint'\)/);
-  assert.match(ux,/hint\.id='uxHeroSearchHint'/);
+  assert.match(ux,/h1\.textContent='CuHalide Atlas'/);
+  assert.match(ux,/dashboard\.insertAdjacentElement\('afterend',section\)/);
 
   assert.match(filters,/\['Current canonical','Core - Verified'\]\.includes\(release\)/);
   assert.match(filters,/className='ui-filter-status'/);
@@ -179,13 +179,13 @@ test('Site 52.4 UX polish keeps evidence browsing clear and stateful',()=>{
   assert.match(quality,/No matching polar structures\. Adjust or clear the filters\./);
   assert.match(quality,/cuhalideQuality='52\.4'/);
 
-  assert.match(uxBoot,/ui-ux-core-v1\.js\?v=52\.4/);
-  assert.match(ui,/ui-ux-v1\.css\?v=52\.3/);
-  assert.match(ui,/ui-ux-v1\.js\?v=52\.4/);
+  assert.match(uxBoot,/ui-ux-core-v1\.js\?v=52\.5/);
+  assert.match(ui,/ui-ux-v1\.css\?v=52\.5/);
+  assert.match(ui,/ui-ux-v1\.js\?v=52\.5/);
   assert.match(ui,/ui-v51-core\.css\?v=52\.3/);
   assert.match(ui,/ui-v51-core\.js\?v=52\.3/);
-  assert.match(ui,/ui-quality-v52\.css\?v=52\.4/);
-  assert.match(ui,/ui-quality-v52\.js\?v=52\.4/);
+  assert.match(ui,/ui-quality-v52\.css\?v=52\.5/);
+  assert.match(ui,/ui-quality-v52\.js\?v=52\.5/);
 });
 
 test('homepage uses the 410-article literature timeline and hides secondary audit dashboards',()=>{
@@ -199,6 +199,7 @@ test('homepage uses the 410-article literature timeline and hides secondary audi
   assert.match(quality,/ui-home-secondary-hidden/);
   assert.match(quality,/Current curated data/);
   assert.match(quality,/Updated 14 Sep 2026/);
-  assert.match(css,/\.ui-home-timeline \.bar b\{display:none\}/);
+  assert.match(css,/\.ui-home-timeline \.bar b\{display:block/);
+  assert.match(css,/\.view\[data-view=\"home\"\] \.hero \.release.*display:none/);
   assert.match(css,/\.ui-home-secondary-hidden\{display:none!important\}/);
 });

@@ -36,22 +36,14 @@
   function refineHero(){
     const hero=document.querySelector('.view[data-view="home"] .hero');if(!hero)return;
     const h1=hero.querySelector('h1'),copy=hero.querySelector('.hero-copy');
-    if(h1)h1.textContent='Evidence-grounded Cu(I) halide knowledge, from structure to photophysics.';
-    if(copy)copy.textContent='Search the literature corpus, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or use CuXplore to connect source-linked evidence.';
-    let form=hero.querySelector('.ux-hero-search');
-    if(!form){
-      const actions=hero.querySelector('.actions');if(!actions)return;
-      actions.insertAdjacentHTML('afterend','<form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search" autocomplete="off" placeholder="Search title, DOI, formula…"><button type="submit">Search</button></form><small class="ux-hero-search-hint" id="uxHeroSearchHint">Search by title, DOI, formula or space group.</small>');
-      form=hero.querySelector('.ux-hero-search');
-    }
-    const input=form?.querySelector('#uxHeroSearchInput')||form?.querySelector('input[type="search"]');if(input){input.id='uxHeroSearchInput';input.setAttribute('placeholder','Search title, DOI, formula…');input.setAttribute('aria-describedby','uxHeroSearchHint')}
-    let hint=hero.querySelector('#uxHeroSearchHint')||hero.querySelector('.ux-hero-search-hint');if(!hint&&form){hint=document.createElement('small');hint.className='ux-hero-search-hint';form.insertAdjacentElement('afterend',hint)}if(hint){hint.id='uxHeroSearchHint';hint.textContent='Search by title, DOI, formula or space group.'}
+    if(h1)h1.textContent='CuHalide Atlas';
+    if(copy)copy.textContent='Literature, crystal structures and photophysics of organic-containing Cu(I) halides.';
   }
 
   function addStartGrid(){
-    const kpis=document.querySelector('.view[data-view="home"] .kpis');if(!kpis||document.querySelector('.ux-start'))return;
-    const section=document.createElement('section');section.className='shell ux-start';section.innerHTML='<div class="ux-start-head"><div><p class="eyebrow">Research paths</p><h2>Start with the evidence layer you need.</h2></div><p>Each route preserves its own scientific grain. Article evidence, structure identity and sample-resolved photophysics are not silently merged.</p></div><div class="ux-start-grid"><a class="ux-start-card" href="#articles"><span>Literature</span><strong>Find the source article</strong><small>Search DOI, title, compound families and article-level evidence.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#structures"><span>Structures</span><strong>Resolve crystallography</strong><small>Inspect formula, phase, dimensionality, space group, confidence and source mapping.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#photophysics"><span>Photophysics</span><strong>Inspect measurements</strong><small>Keep crystal, powder, composite, film and device measurements at the correct sample grain.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#rag"><span>CuXplore</span><strong>Ask across evidence</strong><small>Search and connect literature, structures and source-linked measurements.</small><i aria-hidden="true">→</i></a></div>';
-    const wrap=kpis.closest('.section');wrap?.insertAdjacentElement('afterend',section);
+    const dashboard=document.querySelector('.view[data-view="home"] .dashboard');if(!dashboard||document.querySelector('.ux-start'))return;
+    const section=document.createElement('section');section.className='shell ux-start';section.setAttribute('aria-label','Explore the Atlas');section.innerHTML='<div class="ux-start-grid"><a class="ux-start-card" href="#articles"><strong>Literature</strong><i aria-hidden="true">↗</i></a><a class="ux-start-card" href="#structures"><strong>Structures</strong><i aria-hidden="true">↗</i></a><a class="ux-start-card" href="#photophysics"><strong>Photophysics</strong><i aria-hidden="true">↗</i></a><a class="ux-start-card" href="#rag"><strong>CuXplore</strong><i aria-hidden="true">↗</i></a></div>';
+    dashboard.insertAdjacentElement('afterend',section);
   }
 
   function addFooterLinks(){

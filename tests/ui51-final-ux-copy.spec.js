@@ -15,19 +15,19 @@ async function expectClean(errors,page){
   expect(errors.consoleErrors).toEqual([]);
 }
 
-test('home research paths describe the Site 52 public experience without internal eligibility jargon',async({page})=>{
+test('home leads from identity to publications and concise research links',async({page})=>{
   const errors=captureBrowserErrors(page);
   const r=await page.goto(`${BASE}/#home`,{waitUntil:'domcontentloaded'});expect(r?.status()).toBe(200);
   const start=page.locator('.ux-start');
-  await expect(start).toContainText('Start with the type of evidence you need.',{timeout:15000});
-  await expect(start).toContainText('Inspect crystallography');
-  await expect(start).toContainText('Compare formula, phase, dimensionality and space group with source-linked records.');
-  await expect(start).toContainText('Compare measurements');
-  await expect(start).toContainText('Ask across the Atlas');
-  await expect(start).not.toContainText('confidence and source mapping');
-  await expect(start).not.toContainText('evidence layer');
-  await expect(page.locator('#dimDist').locator('..')).toContainText('Curated structure records · n = 901');
-  await expect(page.locator('.ux-hero-search-hint')).toHaveText('Search by title, DOI, formula or space group.');
+  await expect(page.locator('.hero h1')).toHaveText('CuHalide Atlas');
+  await expect(page.locator('.hero-copy')).toContainText('organic-containing Cu(I) halides');
+  await expect(page.locator('#yearChart')).toBeVisible();
+  await expect(start.locator('.ux-start-card')).toHaveCount(4);
+  await expect(start.locator('.ux-start-card strong')).toHaveText(['Literature','Structures','Photophysics','CuXplore']);
+  await expect(page.locator('.ux-hero-search')).toBeHidden();
+  await expect(page.locator('.hero .release')).toBeHidden();
+  const order=await page.evaluate(()=>[...document.querySelectorAll('.view[data-view="home"] .hero,.view[data-view="home"] .dashboard,.view[data-view="home"] .ux-start')].map(n=>n.classList.contains('hero')?'identity':n.classList.contains('dashboard')?'chart':'links'));
+  expect(order).toEqual(['identity','chart','links']);
   await expectClean(errors,page);
 });
 

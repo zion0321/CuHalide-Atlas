@@ -7,7 +7,7 @@ test.describe.configure({mode:'serial'});
 test('current portal exposes the quality layer and one visible article denominator',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
   await expect(page.locator('html')).toHaveAttribute('data-cuhalide-quality','52.4');
-  await expect(page.locator('.view[data-view="home"]')).toContainText('410');
+  await expect(page.locator('.view[data-view="home"] .hero h1')).toHaveText('CuHalide Atlas');
   await expect(page.locator('body')).not.toContainText('Boundary context');
   await expect(page.locator('body')).not.toContainText('Additional literature');
 });
@@ -55,13 +55,13 @@ test('structure and polar tables provide descriptive navigation and non-redundan
 });
 
 
-test('review status, hero search and filters expose clear interaction state',async({page})=>{
+test('review status, global search and filters expose clear interaction state',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
   const review=page.locator('.ux-review-chip');
   await expect(review).toHaveAttribute('href','#citation');
   await expect(review).toHaveAttribute('aria-label',/learn how to interpret the current data state/);
-  await expect(page.locator('#uxHeroSearchInput')).toHaveAttribute('aria-describedby','uxHeroSearchHint');
-  await expect(page.locator('#uxHeroSearchHint')).toHaveText('Search by title, DOI, formula or space group.');
+  await expect(page.locator('#uxSearchTrigger')).toBeVisible();
+  await expect(page.locator('.ux-hero-search')).toBeHidden();
 
   await page.goto(`${BASE}/#structures`,{waitUntil:'networkidle'});
   const structureToggle=page.locator('.view[data-view="structures"] .mobile-filter-toggle');if(await structureToggle.isVisible())await structureToggle.click();
@@ -116,7 +116,7 @@ test('standalone records and error pages use CuXplore branding',async({request})
     const html=await r.text();
     expect(html).not.toContain('Research Assistant');
     expect(html).toContain('CuXplore');
-    expect(html).toContain('/ui-quality-v52.css?v=52.4');
+    expect(html).toContain('/ui-quality-v52.css?v=52.5');
   }
 });
 

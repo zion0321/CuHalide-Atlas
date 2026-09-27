@@ -42,8 +42,9 @@ test('Site 52 portal exposes rev.10 scope while hiding internal curation control
   const release=page.locator('.view[data-view="home"] .release');
   await expect(release).toContainText('Current curated data');
   await expect(release).toContainText('Updated 14 Sep 2026');
+  await expect(release).toBeHidden();
   await expect(page.locator('.view[data-view="home"] #kpis').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " section ")][1]')).toBeHidden();
-  await expect(page.locator('.view[data-view="home"]')).toContainText('410');
+  await expect(page.locator('.view[data-view="home"] .hero h1')).toHaveText('CuHalide Atlas');
   await expect(page.locator('body')).not.toContainText('Article audit');
   await expect(page.locator('body')).not.toContainText('Dataset eligibility');
   await expect(page.locator('body')).not.toContainText('Research Assistant');
