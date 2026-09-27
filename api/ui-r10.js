@@ -60,7 +60,7 @@ function patch(body){
  x=all(x,'Search the 410-article literature corpus by title or DOI. Source coverage and linked structured data are shown per article.','Search 410 DOI-deduplicated articles by title or DOI. Source and structured-data coverage remain on individual records.');
  x=all(x,'<h1>Evidence-grounded Cu(I) halide knowledge, from structure to photophysics.</h1><p class="hero-copy">Search the literature corpus, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or use CuXplore to connect source-linked evidence.</p>','<h1>CuHalide Atlas</h1><p class="hero-copy">Literature, crystal structures and photophysics of organic-containing Cu(I) halides.</p>');
  if(!x.includes('/ui-quality-v52.css'))x=x.replace('</head>','<link rel="stylesheet" href="/ui-quality-v52.css?v=52.7"></head>');
- if(!x.includes('/ui-quality-v52.js'))x=x.replace('</body>','<script src="/ui-quality-v52.js?v=52.7" defer></script></body>');
+ if(!x.includes('/ui-quality-v52.js'))x=x.replace('</body>','<script src="/ui-quality-v52.js?v=52.8" defer></script></body>');
  x=all(x,"['Publications',cc.canonical_verified_articles||372]","['Articles',S.boot.literature?.articles||410]");
  x=all(x,"['Publications',cc.canonical_verified_articles||372,'curated articles']","['Articles',S.boot.literature?.articles||410,'DOI-deduplicated literature corpus']");
  x=all(x,"['Canonical articles',r.canonical_verified_articles]","['Articles',410]");

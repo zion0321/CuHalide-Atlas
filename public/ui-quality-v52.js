@@ -152,6 +152,7 @@ function simplifyHomepage(){
 
 function renderAtlasFigure(){
   const chart=document.querySelector('.atlas-home #yearChart');if(!chart)return;
+  chart.removeAttribute('aria-describedby');chart.removeAttribute('tabindex');document.getElementById('yearChartHint')?.remove();
   const rows=[...chart.querySelectorAll(':scope > .bar')].map(bar=>{
     const match=/^(\d{4}): (\d+)$/.exec(bar.getAttribute('title')||'');
     return match?{year:Number(match[1]),count:Number(match[2])}:null;
