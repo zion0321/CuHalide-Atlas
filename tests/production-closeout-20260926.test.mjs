@@ -184,8 +184,8 @@ test('Site 52.4 UX polish keeps evidence browsing clear and stateful',()=>{
   assert.match(ui,/ui-ux-v1\.js\?v=52\.6/);
   assert.match(ui,/ui-v51-core\.css\?v=52\.3/);
   assert.match(ui,/ui-v51-core\.js\?v=52\.3/);
-  assert.match(ui,/ui-quality-v52\.css\?v=52\.6/);
-  assert.match(ui,/ui-quality-v52\.js\?v=52\.6/);
+  assert.match(ui,/ui-quality-v52\.css\?v=52\.7/);
+  assert.match(ui,/ui-quality-v52\.js\?v=52\.7/);
 });
 
 test('homepage uses the 410-article literature timeline and hides secondary audit dashboards',()=>{
@@ -199,7 +199,8 @@ test('homepage uses the 410-article literature timeline and hides secondary audi
   assert.match(quality,/ui-home-secondary-hidden/);
   assert.match(quality,/Current curated data/);
   assert.match(quality,/Updated 14 Sep 2026/);
-  assert.match(css,/\.ui-home-timeline \.bar:nth-last-child\(-n\+5\) b\{display:block/);
-  assert.match(css,/\.view\[data-view=\"home\"\] \.hero \.release.*display:none/);
-  assert.match(css,/\.ui-home-secondary-hidden\{display:none!important\}/);
+  assert.match(ui,/function reframeHome\(html\)/);
+  assert.match(quality,/function renderAtlasFigure\(\)/);
+  assert.match(css,/\.atlas-home \.atlas-figure/);
+  assert.match(css,/\.atlas-legacy\[hidden\]\{display:none!important\}/);
 });

@@ -4,6 +4,37 @@ import { integrateKnowledge } from '../lib/integrated-ui.mjs';
 const REV='10',UI='52.0',SITE='52',STATE='prepublication-review',CONTENT_DATE='2026-09-25';
 const LAST_MODIFIED=new Date(`${CONTENT_DATE}T00:00:00Z`).toUTCString();
 const all=(s,a,b)=>String(s).split(a).join(b);
+function reframeHome(html){
+ const start='<section class="view active" data-view="home">',end='<section class="view" data-view="articles">';
+ const a=html.indexOf(start),b=html.indexOf(end,a);
+ if(a<0)return html;
+ if(b<0||html.indexOf(start,a+start.length)>=0)throw new Error('homepage boundary is ambiguous');
+ const home=`<section class="view active atlas-home" data-view="home">
+ <div class="hero atlas-hero"><div class="shell hero-grid"><div>
+ <h1>CuHalide Atlas</h1>
+ <p class="hero-copy">Literature, crystal structures and photophysics of organic-containing Cu(I) halides.</p>
+ </div></div></div>
+ <div class="atlas-figure-band"><div class="shell dashboard">
+ <article class="panel wide atlas-figure">
+ <div class="panel-head"><div><h2>Publications by year</h2><span class="denom">DOI-deduplicated articles</span></div><span class="atlas-partial">2026 · partial year</span></div>
+ <div id="yearChart" class="bars atlas-chart" role="list" aria-label="Literature publications by year in the DOI-deduplicated corpus"></div>
+ </article></div></div>
+ <section class="shell ux-start" aria-label="Explore the Atlas"><div class="ux-start-grid">
+ <a class="ux-start-card" href="#articles"><strong>Literature</strong><small>Articles and DOI</small><i aria-hidden="true">↗</i></a>
+ <a class="ux-start-card" href="#structures"><strong>Structures</strong><small>Crystallography</small><i aria-hidden="true">↗</i></a>
+ <a class="ux-start-card" href="#photophysics"><strong>Photophysics</strong><small>Optical measurements</small><i aria-hidden="true">↗</i></a>
+ <a class="ux-start-card" href="#rag"><strong>CuXplore</strong><small>Source-linked answers</small><i aria-hidden="true">↗</i></a>
+ </div></section>
+ <div class="atlas-legacy" hidden>
+ <div class="hero"><form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search"><button type="submit">Search</button></form><aside class="release"><dl id="releaseDl"></dl></aside></div>
+ <div class="shell section"><div class="kpis" id="kpis"></div></div>
+ <section class="shell ki-overview"><div id="knowledgeCoverage"></div><p id="knowledgeDates"></p><p id="knowledgeDenominators"></p></section>
+ <article class="panel"><div id="halogenDist"></div></article><article class="panel"><div id="dimDist"></div></article><article class="panel"><div id="sgGrid"></div><p id="currentCuratedText"></p></article>
+ </div>
+ </section>
+ `;
+ return html.slice(0,a)+home+html.slice(b);
+}
 function patch(body){
  if(typeof body!=='string')return body;let x=body;
  x=x.replace(/Current Curated rev\.9/gi,'Current Curated rev.10').replace(/current-curated-r9/gi,'current-curated-r10').replace(/current-r9/gi,'current-r10').replace(/\brev\.9\b/gi,'rev.10');
@@ -17,7 +48,7 @@ function patch(body){
  x=all(x,'/ui-v51-core.css?v=51.0','/ui-v51-core.css?v=52.3');
  x=all(x,'/ui-v51-core.js?v=51.0','/ui-v51-core.js?v=52.3');
  x=all(x,'/ui-photophysics-v1.css?v=1.4.0','/ui-photophysics-v1.css?v=1.4.0-ui52.2');
- x=all(x,'/ui-photophysics-v1.js?v=1.4.0','/ui-photophysics-v1.js?v=1.4.0-ui52.2');
+ x=all(x,'/ui-photophysics-v1.js?v=1.4.0','/ui-photophysics-v1.js?v=1.4.0-ui52.3');
  x=all(x,'Latest strict-polar subset. Polar symmetry does not by itself establish ferroelectric switching.','Strict-polar subset · highest evidence level only.');
  x=all(x,'<a href="#citation">Data provenance</a>','<a href="#citation">About data</a>');
  x=all(x,'Search curated literature, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or use CuXplore to search and connect source-linked evidence.','Search the literature corpus, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or use CuXplore to connect source-linked evidence.');
@@ -28,8 +59,8 @@ function patch(body){
  x=all(x,'Search curated literature, structures and measurements; source publications remain linked by DOI.','Search the literature corpus, structures and measurements; source publications remain linked by DOI.');
  x=all(x,'Search the 410-article literature corpus by title or DOI. Source coverage and linked structured data are shown per article.','Search 410 DOI-deduplicated articles by title or DOI. Source and structured-data coverage remain on individual records.');
  x=all(x,'<h1>Evidence-grounded Cu(I) halide knowledge, from structure to photophysics.</h1><p class="hero-copy">Search the literature corpus, crystallographic structures, local Cu–X motifs and sample-resolved photophysics, or use CuXplore to connect source-linked evidence.</p>','<h1>CuHalide Atlas</h1><p class="hero-copy">Literature, crystal structures and photophysics of organic-containing Cu(I) halides.</p>');
- if(!x.includes('/ui-quality-v52.css'))x=x.replace('</head>','<link rel="stylesheet" href="/ui-quality-v52.css?v=52.6"></head>');
- if(!x.includes('/ui-quality-v52.js'))x=x.replace('</body>','<script src="/ui-quality-v52.js?v=52.6" defer></script></body>');
+ if(!x.includes('/ui-quality-v52.css'))x=x.replace('</head>','<link rel="stylesheet" href="/ui-quality-v52.css?v=52.7"></head>');
+ if(!x.includes('/ui-quality-v52.js'))x=x.replace('</body>','<script src="/ui-quality-v52.js?v=52.7" defer></script></body>');
  x=all(x,"['Publications',cc.canonical_verified_articles||372]","['Articles',S.boot.literature?.articles||410]");
  x=all(x,"['Publications',cc.canonical_verified_articles||372,'curated articles']","['Articles',S.boot.literature?.articles||410,'DOI-deduplicated literature corpus']");
  x=all(x,"['Canonical articles',r.canonical_verified_articles]","['Articles',410]");
@@ -53,6 +84,7 @@ function patch(body){
  x=all(x,'Conversational LLM','general scientific reasoning');
  x=all(x,'Checking assistant…','Checking CuXplore…');
  x=all(x,'18 Aug 2026','14 Sep 2026');x=all(x,'2026-08-18','2026-09-14');
+ x=reframeHome(x);
  if(/(?:Smart RAG|Research Assistant|Conversational LLM)/i.test(x.replace(/<script[\s\S]*?<\/script>/gi,'')))throw new Error('legacy research-interface branding remains visible');
  return x;
 }

@@ -127,6 +127,7 @@ function installCollectionBusyStates(){
 
 function simplifyHomepage(){
   const home=document.querySelector('.view[data-view="home"]');if(!home)return;
+  if(home.classList.contains('atlas-home'))return;
   home.querySelector('.ki-overview')?.classList.add('ui-home-secondary-hidden');
   home.querySelector('#kpis')?.closest('.section')?.classList.add('ui-home-secondary-hidden');
   const dashboard=home.querySelector('.dashboard');if(dashboard){
@@ -149,6 +150,31 @@ function simplifyHomepage(){
   }
 }
 
+function renderAtlasFigure(){
+  const chart=document.querySelector('.atlas-home #yearChart');if(!chart)return;
+  const rows=[...chart.querySelectorAll(':scope > .bar')].map(bar=>{
+    const match=/^(\d{4}): (\d+)$/.exec(bar.getAttribute('title')||'');
+    return match?{year:Number(match[1]),count:Number(match[2])}:null;
+  }).filter(Boolean);
+  if(!rows.length)return;
+  const W=Math.max(320,Math.round(chart.clientWidth));
+  const stamp=`${W}|`+rows.map(row=>`${row.year}:${row.count}`).join('|');
+  if(chart.dataset.figureStamp===stamp)return;
+  const compact=W<520,H=270,left=compact?31:48,right=compact?5:18,top=17,bottom=34;
+  const plotW=W-left-right,plotH=H-top-bottom;
+  const ceiling=Math.max(20,Math.ceil(Math.max(...rows.map(row=>row.count))/20)*20);
+  const step=plotW/rows.length,barWidth=Math.min(31,step*(compact?.65:.66));
+  const ticks=Array.from({length:5},(_,i)=>i*ceiling/4);
+  const svg=`<svg class="atlas-plot" viewBox="0 0 ${W} ${H}" aria-hidden="true" focusable="false">
+    <defs><pattern id="atlasPartial" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#bc8252"/><rect width="3" height="8" fill="#f2be82"/></pattern></defs>
+    ${ticks.map(t=>{const y=top+plotH-t/ceiling*plotH;return `<line x1="${left}" x2="${W-right}" y1="${y}" y2="${y}" stroke="#42606a" stroke-width="1" opacity="${t===0?'.95':'.55'}"/><text x="${left-12}" y="${y+4}" text-anchor="end" class="atlas-axis-label">${Math.round(t)}</text>`}).join('')}
+    ${rows.map((row,i)=>{const x=left+i*step+(step-barWidth)/2,h=Math.max(2,row.count/ceiling*plotH),y=top+plotH-h,latest=i===rows.length-1,highlight=i>=rows.length-5;return `<g><title>${row.year}: ${row.count} articles${latest?' (partial year)':''}</title><rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${h.toFixed(1)}" fill="${latest?'url(#atlasPartial)':highlight?'#e9a969':'#72989a'}"/>${highlight&&(!compact||i>=rows.length-3)?`<text x="${(x+barWidth/2).toFixed(1)}" y="${Math.max(12,y-8).toFixed(1)}" text-anchor="middle" class="atlas-value">${row.count}</text>`:''}${((row.year-2006)%(compact?5:4)===0||latest)?`<text x="${(x+barWidth/2).toFixed(1)}" y="${H-9}" text-anchor="middle" class="atlas-axis-label">${row.year}</text>`:''}</g>`}).join('')}
+  </svg>`;
+  chart.querySelector('.atlas-plot')?.remove();
+  chart.insertAdjacentHTML('afterbegin',svg);
+  chart.dataset.figureStamp=stamp;
+}
+
 function simplifyLiterature(){
   document.querySelector('.view[data-view="articles"] .ui-literature-coverage')?.remove();
 }
@@ -167,6 +193,7 @@ function enhanceDashboardA11y(){
 }
 
 function enhanceCopyAndLabels(){
+  const search=$('uxSearchTrigger');if(search)search.setAttribute('aria-label','Search Atlas');
   const articles=document.querySelector('.view[data-view="articles"] .page-head .eyebrow');if(articles&&articles.textContent!=='Literature corpus')articles.textContent='Literature corpus';
   const hero=document.querySelector('.view[data-view="home"] .actions');if(hero){
     const photo=hero.querySelector('.photo-hero-link');photo?.remove();
@@ -176,9 +203,10 @@ function enhanceCopyAndLabels(){
 
 function init(){
   document.documentElement.dataset.cuhalideQuality='52.4';
-  simplifyHomepage();simplifyLiterature();simplifyPhotophysicsOverview();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceRouteTitle();enhanceCopyAndLabels();
-  const body=new MutationObserver(()=>{simplifyHomepage();simplifyLiterature();simplifyPhotophysicsOverview();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
-  body.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',enhanceRouteTitle);
+  simplifyHomepage();renderAtlasFigure();simplifyLiterature();simplifyPhotophysicsOverview();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceRouteTitle();enhanceCopyAndLabels();
+  const body=new MutationObserver(()=>{simplifyHomepage();renderAtlasFigure();simplifyLiterature();simplifyPhotophysicsOverview();enhanceKnowledgeBusy();enhanceChatBusy();installCollectionBusyStates();observeStructureRows();enhancePolar();enhanceMotifDenominator();enhanceVersionTimeline();observePhotoDensity();enhanceDashboardA11y();enhanceCopyAndLabels()});
+  body.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',enhanceRouteTitle);window.addEventListener('resize',renderAtlasFigure);
+  const chart=document.querySelector('.atlas-home #yearChart');if(chart&&window.ResizeObserver)new ResizeObserver(renderAtlasFigure).observe(chart);
 }
 ready(init);
 })();

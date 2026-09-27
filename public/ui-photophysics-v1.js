@@ -59,6 +59,7 @@
   }
 
   function injectHero(){
+    if(document.querySelector('.atlas-home'))return;
     const actions=document.querySelector('.view[data-view="home"] .hero .actions');
     if(actions&&!actions.querySelector('[href="#photophysics"]'))actions.insertAdjacentHTML('beforeend','<a class="btn secondary photo-hero-link" href="#photophysics">Explore photophysics</a>');
     const tags=document.querySelector('.view[data-view="home"] .hero .tags');
@@ -66,6 +67,7 @@
   }
 
   function injectHomePanel(){
+    if(document.querySelector('.atlas-home'))return;
     const dashboard=document.querySelector('.view[data-view="home"] .dashboard');if(!dashboard||dashboard.querySelector('.photo-home-panel'))return;
     dashboard.insertAdjacentHTML('afterbegin',`<article class="panel photo-home-panel">
       <div class="photo-home-copy"><p class="eyebrow">Photophysics</p><h2>Measurements stay attached to the material state that was actually tested.</h2><p class="fine">Browse emission, lifetime, PLQY, scintillation and related properties without mixing crystal, powder, film, composite or device measurements.</p><div class="actions"><a class="btn primary" href="#photophysics">Open photophysics</a><button class="btn secondary" type="button" data-article="381">View an example</button></div></div>

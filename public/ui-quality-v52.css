@@ -132,79 +132,87 @@
 /* Low-noise discovery surfaces: detailed evidence remains one click away. */
 .view[data-view="home"] .hero .tags{display:none}
 
-/* Home: a quiet research index, with the publication chart as the focal point. */
-.view[data-view="home"]{background:#f8faf9;min-height:calc(100vh - 70px)}
-.view[data-view="home"] .ki-overview,
-.view[data-view="home"] .section:has(#kpis),
-.view[data-view="home"] .dashboard>.panel:not(:has(#yearChart)){display:none!important}
-body:has(.view[data-view="home"].active) .ux-review-chip,
-body:has(.view[data-view="home"].active) .footer{display:none}
-.view[data-view="home"] .hero{padding:65px 0 49px;background:#f8faf9;color:#112e3a;border-bottom:1px solid #dce5e3}
-.view[data-view="home"] .hero:after{display:none}
-.view[data-view="home"] .hero .shell,
-.view[data-view="home"] .dashboard,
-.view[data-view="home"] .ux-start{width:min(1080px,calc(100% - 48px))}
-.view[data-view="home"] .hero-grid{display:block}
-.view[data-view="home"] .hero .eyebrow,.view[data-view="home"] .hero .actions,.view[data-view="home"] .hero .release,.view[data-view="home"] .ux-hero-search,.view[data-view="home"] .ux-hero-search-hint{display:none}
-.view[data-view="home"] .hero h1{max-width:none;font-size:clamp(48px,5.5vw,68px);line-height:1.05;letter-spacing:-.048em;color:#112e3a}
-.view[data-view="home"] .hero-copy{max-width:760px;margin:15px 0 0;font-size:17px;line-height:1.55;color:#526671}
-.view[data-view="home"] .dashboard{display:block;padding-top:42px;padding-bottom:0}
-.view[data-view="home"] .dashboard>.panel:has(#yearChart){padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
-.ui-home-timeline .panel-head{margin-bottom:23px;align-items:end}
-.ui-home-timeline .eyebrow{display:none}
-.ui-home-timeline h2{font:29px/1.22 Georgia,"Times New Roman",serif;letter-spacing:-.018em;color:#12313e}
-.ui-home-timeline .denom{display:block;margin-top:7px;padding:0;border:0;border-radius:0;background:transparent;color:#647680;font-size:13px;font-weight:500}
-.ui-home-timeline .bars{height:253px;padding:15px 2px 24px;gap:10px;overflow-y:hidden;border-bottom:1px solid #9bb0b6;background:repeating-linear-gradient(to top,transparent 0,transparent 43px,#e2e9e8 44px,#e2e9e8 45px) left 15px top 15px / 100% 190px no-repeat}
-.ui-home-timeline .bar{min-width:25px;gap:6px}
-.ui-home-timeline .bar i{max-width:none;min-height:2px;border-radius:1px 1px 0 0;background:#478a86}
-.ui-home-timeline .bar:nth-last-child(1) i{background:repeating-linear-gradient(135deg,#397d79 0 5px,#65a49d 5px 9px)}
-.ui-home-timeline .bar b{display:none;color:#244854;font-size:12px;font-weight:700;line-height:1}
-.ui-home-timeline .bar:nth-last-child(-n+5) b{display:block}
-.ui-home-timeline .bar span{color:#586f77;font-size:12px;line-height:1.1}
-.view[data-view="home"] .ux-start{padding-top:32px;padding-bottom:67px}
-.view[data-view="home"] .ux-start-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:1px solid #bacacb;border-bottom:1px solid #bacacb}
-.view[data-view="home"] .ux-start-card{display:flex;align-items:center;justify-content:space-between;min-height:91px;padding:20px 22px;border:0;border-left:1px solid #dce5e3;border-radius:0;background:transparent;box-shadow:none;transform:none}
-.view[data-view="home"] .ux-start-card:first-child{border-left:0;padding-left:0}
-.view[data-view="home"] .ux-start-card:last-child{padding-right:0}
-.view[data-view="home"] .ux-start-card strong{font:24px/1.2 Georgia,"Times New Roman",serif;letter-spacing:-.018em}
-.view[data-view="home"] .ux-start-card i{position:static;color:#3a807c;font-size:22px;line-height:1}
-.view[data-view="home"] .ux-start-card:hover{background:#eef5f3;box-shadow:none}
+/* Home is a distinct editorial surface; the other research views keep their own UI. */
+body:has(.atlas-home.active){background:#f7f3ea}
+body:has(.atlas-home.active) header{background:rgba(248,245,238,.97);border-color:#e5dfd3;box-shadow:none}
+body:has(.atlas-home.active) .head{width:min(1180px,calc(100% - 48px))}
+body:has(.atlas-home.active) .brand .mark,body:has(.atlas-home.active) .brand small,body:has(.atlas-home.active) .ux-review-chip,body:has(.atlas-home.active) .footer{display:none}
+body:has(.atlas-home.active) .brand strong{font:22px/1.1 Georgia,"Times New Roman",serif;letter-spacing:-.025em;color:#132d36}
+body:has(.atlas-home.active) .nav{margin-left:auto;gap:5px}
+body:has(.atlas-home.active) .nav a{font-weight:650;color:#48616a;box-shadow:none;background:transparent}
+body:has(.atlas-home.active) .nav a:hover,body:has(.atlas-home.active) .nav a.active{color:#172f38;background:transparent;text-decoration:underline;text-decoration-color:#bd8652;text-underline-offset:6px;text-decoration-thickness:2px}
+body:has(.atlas-home.active) .ux-search-trigger{order:3;border-color:#c9d1cd;box-shadow:none;background:transparent}
+.atlas-home{background:#f7f3ea;min-height:calc(100vh - 70px)}
+.atlas-home .ki-overview,.atlas-home .section:has(#kpis),.atlas-legacy[hidden]{display:none!important}
+.atlas-home .photo-home-panel{display:none!important}
+.atlas-home .atlas-hero{padding:57px 0 55px;background:#f7f3ea;color:#142f39}
+.atlas-home .atlas-hero:after{display:none}
+.atlas-home .atlas-hero .shell,.atlas-home .dashboard,.atlas-home .ux-start{width:min(1180px,calc(100% - 48px))}
+.atlas-home .atlas-hero .hero-grid{display:block}
+.atlas-home .atlas-hero h1{max-width:none;margin:0;font:clamp(58px,6.2vw,88px)/1.02 Georgia,"Times New Roman",serif;letter-spacing:-.055em;color:#142f39}
+.atlas-home .atlas-hero .hero-copy{max-width:740px;margin:18px 0 0;font-size:19px;line-height:1.5;color:#50646a}
+.atlas-figure-band{background:#112e38;color:#f5f0e6}
+.atlas-home .dashboard{display:block;padding:40px 0 46px}
+.atlas-home .dashboard>.panel:has(#yearChart){display:block;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.atlas-home .atlas-figure .panel-head{align-items:end;justify-content:space-between;gap:24px;margin:0 0 20px}
+.atlas-home .atlas-figure h2{margin:0;font:32px/1.2 Georgia,"Times New Roman",serif;letter-spacing:-.025em;color:#f7f1e6}
+.atlas-home .atlas-figure .denom{display:block;margin:7px 0 0;padding:0;background:transparent;border:0;color:#aac0bf;font-size:13px;font-weight:500}
+.atlas-partial{align-self:end;padding-bottom:2px;color:#f0ba82;font-size:13px;font-weight:700;white-space:nowrap}
+.atlas-home .atlas-chart{position:relative;display:block;width:100%;height:270px;padding:0;overflow-x:auto;overflow-y:hidden;border:0;background:transparent;scrollbar-width:thin;scrollbar-color:#718b8d transparent}
+.atlas-home .atlas-chart>.bar{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}
+.atlas-plot{display:block;width:100%;height:270px}
+.atlas-axis-label{font:12px Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#adc0bc}
+.atlas-value{font:700 13px Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#f7e5d1}
+.atlas-home .ux-start{padding:38px 0 68px}
+.atlas-home .ux-start-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:1px solid #c7c4b8;border-bottom:1px solid #c7c4b8}
+.atlas-home .ux-start-card{display:block;min-height:130px;padding:25px 25px 19px;border:0;border-left:1px solid #d8d5c9;border-radius:0;background:transparent;box-shadow:none;transform:none}
+.atlas-home .ux-start-card:first-child{border-left:0;padding-left:0}
+.atlas-home .ux-start-card:last-child{padding-right:0}
+.atlas-home .ux-start-card strong{display:block;padding-right:28px;color:#14323a;font:27px/1.14 Georgia,"Times New Roman",serif;letter-spacing:-.024em}
+.atlas-home .ux-start-card small{display:block;margin-top:10px;color:#586b67;font-size:13px;line-height:1.4}
+.atlas-home .ux-start-card i{position:absolute;top:24px;right:24px;color:#b2713e;font-size:23px;line-height:1}
+.atlas-home .ux-start-card:last-child i{right:0}
+.atlas-home .ux-start-card:hover{background:#efe9dc;box-shadow:none}
 @media(max-width:1000px){
-  .view[data-view="home"] .ux-start-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .view[data-view="home"] .ux-start-card:nth-child(odd){border-left:0;padding-left:0}
-  .view[data-view="home"] .ux-start-card:nth-child(even){padding-right:0}
-  .view[data-view="home"] .ux-start-card:nth-child(n+3){border-top:1px solid #dce5e3}
+  .atlas-home .ux-start-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .atlas-home .ux-start-card:nth-child(odd){border-left:0;padding-left:0}
+  .atlas-home .ux-start-card:nth-child(even){padding-right:0}
+  .atlas-home .ux-start-card:nth-child(even) i{right:0}
+  .atlas-home .ux-start-card:nth-child(n+3){border-top:1px solid #d8d5c9}
 }
 @media(max-width:780px){
-  .view[data-view="home"] .hero{padding:47px 0 38px}
-  .view[data-view="home"] .hero h1{font-size:clamp(44px,8vw,56px)}
-  .view[data-view="home"] .hero-copy{font-size:16px;line-height:1.5}
-  .view[data-view="home"] .dashboard{padding-top:34px}
-  .ui-home-timeline h2{font-size:25px}
-  .ui-home-timeline .bars{height:253px;gap:7px;padding:15px 2px 24px}
-  .ui-home-timeline .bar{min-width:35px}
-  .view[data-view="home"] .ux-start{padding-top:25px;padding-bottom:50px}
-  .view[data-view="home"] .ux-start-card{min-height:79px;padding:17px}
-  .view[data-view="home"] .ux-start-card strong{font-size:22px}
+  body:has(.atlas-home.active) .head{width:calc(100% - 32px)}
+  body:has(.atlas-home.active) .nav{margin-left:0}
+  .atlas-home .atlas-hero{padding:47px 0 44px}
+  .atlas-home .atlas-hero h1{font-size:clamp(48px,9vw,67px)}
+  .atlas-home .atlas-hero .hero-copy{font-size:17px}
+  .atlas-home .dashboard{padding:34px 0 38px}
+  .atlas-home .atlas-figure h2{font-size:29px}
+  .atlas-home .ux-start{padding:28px 0 53px}
+  .atlas-home .ux-start-card{min-height:112px;padding-top:21px}
+  .atlas-home .ux-start-card strong{font-size:24px}
+  .atlas-home .ux-start-card i{top:21px}
 }
-@media(max-width:480px){
-  .view[data-view="home"] .hero .shell,
-  .view[data-view="home"] .dashboard,
-  .view[data-view="home"] .ux-start{width:calc(100% - 36px)}
-  .view[data-view="home"] .hero{padding:37px 0 32px}
-  .view[data-view="home"] .hero h1{font-size:42px}
-  .view[data-view="home"] .hero-copy{font-size:15px;line-height:1.55}
-  .view[data-view="home"] .dashboard{padding-top:28px}
-  .ui-home-timeline .panel-head{margin-bottom:17px}
-  .ui-home-timeline h2{font-size:23px}
-  .ui-home-timeline .denom{font-size:12px;line-height:1.5}
-  .ui-home-timeline .bars{height:235px;gap:7px;background-size:100% 190px;-webkit-mask-image:linear-gradient(to right,transparent,#000 17px);mask-image:linear-gradient(to right,transparent,#000 17px)}
-  .ui-home-timeline .bar{min-width:32px}
-  .ui-home-timeline .bar b{font-size:11px}
-  .ui-home-timeline .bar span{font-size:11px}
-  .view[data-view="home"] .ux-start{padding-top:23px;padding-bottom:41px}
-  .view[data-view="home"] .ux-start-card{min-height:73px;padding:14px 12px}
-  .view[data-view="home"] .ux-start-card strong{font-size:20px}
+@media(max-width:520px){
+  .atlas-home .atlas-hero .shell,.atlas-home .dashboard,.atlas-home .ux-start{width:calc(100% - 36px)}
+  body:has(.atlas-home.active) .brand strong{font-size:20px}
+  .atlas-home .atlas-hero{padding:42px 0 39px}
+  .atlas-home .atlas-hero h1{font-size:clamp(43px,11vw,54px)}
+  .atlas-home .atlas-hero .hero-copy{margin-top:16px;font-size:16px;line-height:1.55}
+  .atlas-home .dashboard{padding:31px 0 35px}
+  .atlas-home .atlas-figure .panel-head{align-items:start;flex-direction:column;gap:5px;margin-bottom:15px}
+  .atlas-home .atlas-figure h2{font-size:27px}
+  .atlas-home .atlas-figure .denom{font-size:12px}
+  .atlas-partial{font-size:12px}
+  .atlas-home .atlas-chart{height:260px}
+  .atlas-plot{height:260px}
+  .atlas-home .ux-start{padding:18px 0 42px}
+  .atlas-home .ux-start-grid{grid-template-columns:1fr}
+  .atlas-home .ux-start-card,.atlas-home .ux-start-card:nth-child(even){min-height:79px;padding:15px 44px 13px 0;border-left:0;border-top:1px solid #d8d5c9}
+  .atlas-home .ux-start-card:first-child{border-top:0}
+  .atlas-home .ux-start-card strong{font-size:23px}
+  .atlas-home .ux-start-card small{margin-top:3px;font-size:12px}
+  .atlas-home .ux-start-card i,.atlas-home .ux-start-card:nth-child(even) i,.atlas-home .ux-start-card:last-child i{top:21px;right:3px}
 }
 .ki-catalog-summary{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-height:3.4em}
 .ki-review-details{margin:9px 0;border-top:1px solid #e2eaed;padding-top:8px}
