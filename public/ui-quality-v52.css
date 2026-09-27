@@ -134,6 +134,8 @@
 
 /* Home: identity, one scientific trend, then four destinations. */
 body:has(.view[data-view="home"].active) .ux-review-chip{display:none}
+body:has(.view[data-view="home"].active) .footer-grid{grid-template-columns:minmax(0,1fr) auto}
+body:has(.view[data-view="home"].active) .footer-grid>p:last-child{display:none}
 .view[data-view="home"] .hero{padding:49px 0 53px;background:linear-gradient(118deg,#082739 0%,#0d3c4e 72%,#12576a 100%)}
 .view[data-view="home"] .hero:after{display:none}
 .view[data-view="home"] .hero-grid{display:block}
@@ -158,6 +160,7 @@ body:has(.view[data-view="home"].active) .ux-review-chip{display:none}
 .view[data-view="home"] .ux-start-card i{position:static;color:var(--teal);font-size:19px;line-height:1}
 .view[data-view="home"] .ux-start-card:hover{background:#f6fbfa}
 @media(max-width:780px){
+  body:has(.view[data-view="home"].active) .footer-grid{grid-template-columns:minmax(0,1fr)}
   .view[data-view="home"] .hero{padding:38px 0 42px}
   .view[data-view="home"] .hero h1{font-size:clamp(42px,9vw,56px)}
   .view[data-view="home"] .hero-copy{font-size:16px;line-height:1.5}
