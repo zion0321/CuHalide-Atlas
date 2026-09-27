@@ -133,6 +133,9 @@
 .view[data-view="home"] .hero .tags{display:none}
 
 /* Home: identity, one scientific trend, then four destinations. */
+.view[data-view="home"] .ki-overview,
+.view[data-view="home"] .section:has(#kpis),
+.view[data-view="home"] .dashboard>.panel:not(:has(#yearChart)){display:none!important}
 body:has(.view[data-view="home"].active) .ux-review-chip{display:none}
 body:has(.view[data-view="home"].active) .footer-grid{grid-template-columns:minmax(0,1fr) auto}
 body:has(.view[data-view="home"].active) .footer-grid>p:last-child{display:none}
@@ -143,7 +146,7 @@ body:has(.view[data-view="home"].active) .footer-grid>p:last-child{display:none}
 .view[data-view="home"] .hero h1{max-width:none;font-size:clamp(46px,5.4vw,72px);line-height:1.06;letter-spacing:-.045em}
 .view[data-view="home"] .hero-copy{max-width:850px;margin:12px 0 0;font-size:clamp(16px,1.45vw,19px);line-height:1.48;color:#d5e8eb}
 .view[data-view="home"] .dashboard{display:block;padding-top:27px;padding-bottom:0}
-.view[data-view="home"] .ui-home-timeline{padding:24px 28px 21px;border-radius:16px;box-shadow:0 9px 25px rgba(9,40,60,.045)}
+.view[data-view="home"] .dashboard>.panel:has(#yearChart){padding:24px 28px 21px;border-radius:16px;box-shadow:0 9px 25px rgba(9,40,60,.045)}
 .ui-home-timeline .panel-head{margin-bottom:10px}
 .ui-home-timeline .eyebrow{display:none}
 .ui-home-timeline h2{font:28px/1.2 Georgia,"Times New Roman",serif;color:var(--navy)}
@@ -165,7 +168,7 @@ body:has(.view[data-view="home"].active) .footer-grid>p:last-child{display:none}
   .view[data-view="home"] .hero h1{font-size:clamp(42px,9vw,56px)}
   .view[data-view="home"] .hero-copy{font-size:16px;line-height:1.5}
   .view[data-view="home"] .dashboard{padding-top:18px}
-  .view[data-view="home"] .ui-home-timeline{padding:19px 17px 17px}
+  .view[data-view="home"] .dashboard>.panel:has(#yearChart){padding:19px 17px 17px}
   .ui-home-timeline h2{font-size:24px}
   .ui-home-timeline .denom{font-size:12px;line-height:1.5}
   .ui-home-timeline .bars{height:265px;gap:5px;padding:13px 2px 25px}
