@@ -70,15 +70,17 @@ function injectPortalUxShell(body){
     out=out.replace(tag,'<form class="ux-hero-search" id="uxHeroSearch"><label class="sr-only" for="uxHeroSearchInput">Search CuHalide Atlas</label><input id="uxHeroSearchInput" type="search" autocomplete="off" placeholder="Search title, DOI, formula, space group…"><button type="submit">Search</button></form><small class="ux-hero-search-hint">Searches the curated literature and Core-Included structure register.</small>'+tag);
   }
 
-  if(!out.includes('<section class="shell ux-start">')){
+  if(!out.includes('<section class="shell ux-start"')){
     const dashboard='<div class="shell dashboard section">';
     const count=out.split(dashboard).length-1;
     if(count!==1)throw new Error(`portal UX shell: expected one home dashboard anchor, found ${count}`);
-    const paths='<section class="shell ux-start"><div class="ux-start-head"><div><p class="eyebrow">Research paths</p><h2>Start with the evidence layer you need.</h2></div><p>Each route preserves its own scientific grain. Article evidence, structure identity and sample-resolved photophysics are not silently merged.</p></div><div class="ux-start-grid"><a class="ux-start-card" href="#articles"><span>Literature</span><strong>Find the source article</strong><small>Search DOI, title, compound families and curated article-level evidence.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#structures"><span>Structures</span><strong>Resolve crystallography</strong><small>Inspect formula, phase, dimensionality, space group, confidence and source mapping.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#photophysics"><span>Photophysics</span><strong>Inspect measurements</strong><small>Keep crystal, powder, composite, film and device measurements at the correct sample grain.</small><i aria-hidden="true">→</i></a><a class="ux-start-card" href="#rag"><span>CuXplore</span><strong>Ask across evidence</strong><small>Search and connect literature, structures and source-linked measurements.</small><i aria-hidden="true">→</i></a></div></section>';
-    out=out.replace(dashboard,paths+dashboard);
+    const paths='<section class="shell ux-start" aria-label="Explore the Atlas"><div class="ux-start-grid"><a class="ux-start-card" href="#articles"><strong>Literature</strong><i aria-hidden="true">↗</i></a><a class="ux-start-card" href="#structures"><strong>Structures</strong><i aria-hidden="true">↗</i></a><a class="ux-start-card" href="#photophysics"><strong>Photophysics</strong><i aria-hidden="true">↗</i></a><a class="ux-start-card" href="#rag"><strong>CuXplore</strong><i aria-hidden="true">↗</i></a></div></section>';
+    const boundary='</div></section>\n<section class="view" data-view="articles">';
+    if(out.split(boundary).length!==2)throw new Error('portal UX shell: expected one home section boundary');
+    out=out.replace(boundary,`</div>${paths}</section>\n<section class="view" data-view="articles">`);
   }
   out=out.replace('</main>',`<!-- ${PORTAL_UX_SHELL_MARKER} -->\n</main>`);
-  if(!out.includes(PORTAL_UX_SHELL_MARKER)||!out.includes('id="uxHeroSearch"')||!out.includes('<section class="shell ux-start">'))throw new Error('portal UX shell injection failed');
+  if(!out.includes(PORTAL_UX_SHELL_MARKER)||!out.includes('id="uxHeroSearch"')||!out.includes('<section class="shell ux-start"'))throw new Error('portal UX shell injection failed');
   return out;
 }
 

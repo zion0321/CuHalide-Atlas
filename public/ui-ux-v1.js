@@ -7,16 +7,7 @@
   const pageCopy=(view,value)=>text(document.querySelector(`.view[data-view="${view}"] .page-head p:not(.eyebrow)`),value);
 
   function polishStartGrid(){
-    const section=document.querySelector('.ux-start');if(!section)return;
-    text(section.querySelector('.ux-start-head h2'),'Start with the type of evidence you need.');
-    text(section.querySelector('.ux-start-head > p'),'Literature, structures and sample-resolved measurements stay separate so comparisons remain scientifically valid.');
-    const cards=[...section.querySelectorAll('.ux-start-card')];
-    const structure=cards.find(x=>x.getAttribute('href')==='#structures');
-    if(structure){text(structure.querySelector('strong'),'Inspect crystallography');text(structure.querySelector('small'),'Compare formula, phase, dimensionality and space group with source-linked records.');}
-    const photo=cards.find(x=>x.getAttribute('href')==='#photophysics');
-    if(photo){text(photo.querySelector('strong'),'Compare measurements');text(photo.querySelector('small'),'Compare crystal, powder, composite, film and device measurements without mixing sample states.');}
-    const assistant=cards.find(x=>x.getAttribute('href')==='#rag');
-    if(assistant){text(assistant.querySelector('strong'),'Ask across the Atlas');text(assistant.querySelector('small'),'Search and connect source-linked Atlas evidence across literature, structures and measurements.');}
+    // The four navigation labels are intentionally the whole card copy.
   }
 
   function polishStaticCopy(){
@@ -66,7 +57,7 @@
     const modal=document.getElementById('modalBody');if(modal)new MutationObserver(()=>queueMicrotask(polishModal)).observe(modal,{childList:true,subtree:true});
   }
 
-  load('/ui-ux-core-v1.js?v=52.4','portal-ux-core-v52.4').then(()=>ready(installPolishObservers)).catch(e=>console.warn('[ui52 ux]',e));
+  load('/ui-ux-core-v1.js?v=52.5','portal-ux-core-v52.5').then(()=>ready(installPolishObservers)).catch(e=>console.warn('[ui52 ux]',e));
   load('/organic-components-graphs-11.js?v=1.2.0','organic-components-r10-graphs').then(()=>load('/organic-components-v1.js?v=1.2.0','organic-components-v1.2.0')).catch(e=>console.warn('[organic-components bootstrap]',e));
   load('/ui-structure-photophysics-v1.js?v=1.4.0','structure-photophysics-v1.4.0').catch(e=>console.warn('[structure-photophysics bootstrap]',e));
 })();

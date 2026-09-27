@@ -131,6 +131,61 @@
 
 /* Low-noise discovery surfaces: detailed evidence remains one click away. */
 .view[data-view="home"] .hero .tags{display:none}
+
+/* Home: identity, one scientific trend, then four destinations. */
+.view[data-view="home"] .ki-overview,
+.view[data-view="home"] .section:has(#kpis),
+.view[data-view="home"] .dashboard>.panel:not(:has(#yearChart)){display:none!important}
+body:has(.view[data-view="home"].active) .ux-review-chip{display:none}
+body:has(.view[data-view="home"].active) .footer-grid{grid-template-columns:minmax(0,1fr) auto}
+body:has(.view[data-view="home"].active) .footer-grid>p:last-child{display:none}
+.view[data-view="home"] .hero{padding:49px 0 53px;background:linear-gradient(118deg,#082739 0%,#0d3c4e 72%,#12576a 100%)}
+.view[data-view="home"] .hero:after{display:none}
+.view[data-view="home"] .hero-grid{display:block}
+.view[data-view="home"] .hero .eyebrow,.view[data-view="home"] .hero .actions,.view[data-view="home"] .hero .release,.view[data-view="home"] .ux-hero-search,.view[data-view="home"] .ux-hero-search-hint{display:none}
+.view[data-view="home"] .hero h1{max-width:none;font-size:clamp(46px,5.4vw,72px);line-height:1.06;letter-spacing:-.045em}
+.view[data-view="home"] .hero-copy{max-width:850px;margin:12px 0 0;font-size:clamp(16px,1.45vw,19px);line-height:1.48;color:#d5e8eb}
+.view[data-view="home"] .dashboard{display:block;padding-top:27px;padding-bottom:0}
+.view[data-view="home"] .dashboard>.panel:has(#yearChart){padding:24px 28px 21px;border-radius:16px;box-shadow:0 9px 25px rgba(9,40,60,.045)}
+.ui-home-timeline .panel-head{margin-bottom:10px}
+.ui-home-timeline .eyebrow{display:none}
+.ui-home-timeline h2{font:28px/1.2 Georgia,"Times New Roman",serif;color:var(--navy)}
+.ui-home-timeline .denom{display:block;margin-top:5px;padding:0;border:0;border-radius:0;background:transparent;color:var(--muted);font-size:13px;font-weight:500}
+.ui-home-timeline .bars{height:265px;padding:12px 2px 25px;gap:7px;overflow-y:hidden;border-bottom:1px solid #cbdadd}
+.ui-home-timeline .bar{min-width:27px;gap:5px}
+.ui-home-timeline .bar i{max-width:none;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#277e78,#54aa9e)}
+.ui-home-timeline .bar b{display:block;color:#31505b;font-size:11px;font-weight:700;line-height:1}
+.ui-home-timeline .bar span{color:#526c75;font-size:11px;line-height:1.1}
+.view[data-view="home"] .ux-start{padding-top:19px;padding-bottom:51px}
+.view[data-view="home"] .ux-start-grid{gap:11px}
+.view[data-view="home"] .ux-start-card{display:flex;align-items:center;justify-content:space-between;min-height:74px;padding:17px 20px;border-radius:13px;box-shadow:none}
+.view[data-view="home"] .ux-start-card strong{font:600 17px/1.3 Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.view[data-view="home"] .ux-start-card i{position:static;color:var(--teal);font-size:19px;line-height:1}
+.view[data-view="home"] .ux-start-card:hover{background:#f6fbfa}
+@media(max-width:780px){
+  body:has(.view[data-view="home"].active) .footer-grid{grid-template-columns:minmax(0,1fr)}
+  .view[data-view="home"] .hero{padding:38px 0 42px}
+  .view[data-view="home"] .hero h1{font-size:clamp(42px,9vw,56px)}
+  .view[data-view="home"] .hero-copy{font-size:16px;line-height:1.5}
+  .view[data-view="home"] .dashboard{padding-top:18px}
+  .view[data-view="home"] .dashboard>.panel:has(#yearChart){padding:19px 17px 17px}
+  .ui-home-timeline h2{font-size:24px}
+  .ui-home-timeline .denom{font-size:12px;line-height:1.5}
+  .ui-home-timeline .bars{height:265px;gap:5px;padding:13px 2px 25px}
+  .ui-home-timeline .bar{min-width:36px}
+  .view[data-view="home"] .ux-start{padding-top:12px;padding-bottom:33px}
+  .view[data-view="home"] .ux-start-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .view[data-view="home"] .ux-start-card{min-height:66px;padding:14px 15px}
+  .view[data-view="home"] .ux-start-card strong{font-size:16px}
+}
+@media(max-width:480px){
+  .view[data-view="home"] .hero{padding:32px 0 36px}
+  .view[data-view="home"] .hero h1{font-size:42px}
+  .ui-home-timeline .bars{height:265px}
+  .ui-home-timeline .bar b{font-size:10px}
+  .ui-home-timeline .bar span{font-size:10px}
+  .view[data-view="home"] .ux-start-card strong{font-size:15px}
+}
 .ki-catalog-summary{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-height:3.4em}
 .ki-review-details{margin:9px 0;border-top:1px solid #e2eaed;padding-top:8px}
 .ki-review-details>summary{cursor:pointer;color:#355867;font-size:10.5px;font-weight:850;list-style-position:inside}
