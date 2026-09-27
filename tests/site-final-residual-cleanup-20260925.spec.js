@@ -6,7 +6,7 @@ test('Overview foregrounds one literature timeline and hides secondary audit pan
   await page.goto(BASE,{waitUntil:'networkidle'});
   const growth=page.locator('#yearChart').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " panel ")][1]');
   await expect(growth).toBeVisible();
-  await expect(growth.locator('.denom')).toContainText('DOI-deduplicated literature corpus');
+  await expect(growth.locator('.denom')).toContainText('DOI-deduplicated articles');
   await expect(page.locator('#yearChart .bar[title="2025: 61"]')).toHaveCount(1);
   await expect(page.locator('#yearChart .bar[title="2026: 86"]')).toHaveCount(1);
   const halogen=page.locator('#halogenDist').locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " panel ")][1]');

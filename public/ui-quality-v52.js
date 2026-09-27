@@ -138,8 +138,8 @@ function simplifyHomepage(){
   const year=$('yearChart');if(year){
     const panel=year.closest('.panel'),head=panel?.querySelector('.panel-head');
     const title=head?.querySelector('h2'),denom=head?.querySelector('.denom');
-    if(title&&title.textContent!=='Literature publications by year')title.textContent='Literature publications by year';
-    if(denom&&denom.textContent!=='DOI-deduplicated literature corpus · 2006–2026 · 2026 partial')denom.textContent='DOI-deduplicated literature corpus · 2006–2026 · 2026 partial';
+    if(title&&title.textContent!=='Publications by year')title.textContent='Publications by year';
+    if(denom&&denom.textContent!=='DOI-deduplicated articles · 2026 partial')denom.textContent='DOI-deduplicated articles · 2026 partial';
   }
   const release=home.querySelector('.release');if(release){
     const ver=release.querySelector('.ver'),dl=release.querySelector('dl'),note=release.querySelector('.release-note');

@@ -26,7 +26,7 @@ test('updated literature and UX presentation use fresh immutable asset keys',()=
   assert.match(integrated,/ui-knowledge-v1\.js\?v=52\.4/);
   assert.match(ux,/ui-ux-core-v1\.js\?v=52\.5/);
   assert.match(ui,/ui-ux-v1\.css\?v=52\.5/);
-  assert.match(ui,/ui-ux-v1\.js\?v=52\.5/);
+  assert.match(ui,/ui-ux-v1\.js\?v=52\.6/);
 });
 
 test('updated photophysics presentation uses a fresh immutable asset key',()=>{

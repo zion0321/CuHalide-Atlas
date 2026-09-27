@@ -15,7 +15,7 @@
     text(document.querySelector('.ux-hero-search-hint'),'Search by title, DOI, formula or space group.');
     polishStartGrid();
     const growth=document.querySelector('.view[data-view="home"] #yearChart')?.closest('.panel');
-    if(growth)text(growth.querySelector('h2'),'Literature publications by year');
+    if(growth)text(growth.querySelector('h2'),'Publications by year');
     const dim=document.querySelector('.view[data-view="home"] #dimDist')?.closest('.panel');
     if(dim)text(dim.querySelector('.denom'),'Curated structure records · n = 901');
     text(document.querySelector('.ux-search-footer'),'Search covers the literature corpus and structures; source publications remain linked by DOI.');
