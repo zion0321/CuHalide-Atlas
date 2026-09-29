@@ -753,3 +753,156 @@ body:has(.atlas-home.active) .footer{display:block!important}
   }
   .ui-version-step:first-child{border-top:0}
 }
+
+
+/* Scholarly literature index: flatten the connected-knowledge catalog as well. */
+.view[data-view="articles"] #knowledgeArticles .ki-summarybar{
+  margin:4px 0 8px;
+  padding:0 2px 10px;
+  border-bottom:1px solid #dfe2de
+}
+.view[data-view="articles"] #knowledgeArticles .ki-summarybar strong{
+  color:#23383e;
+  font:600 17px/1.2 Georgia,"Times New Roman",serif
+}
+.view[data-view="articles"] #knowledgeArticles .ki-list{gap:0}
+.view[data-view="articles"] #knowledgeArticles .ki-source{
+  padding:20px 2px 19px;
+  border:0;
+  border-bottom:1px solid #dde1dd;
+  border-radius:0;
+  background:transparent
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source:first-child{
+  border-top:1px solid #dde1dd
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source .ki-scope{
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#657579;
+  font-size:8.5px;
+  font-weight:700;
+  letter-spacing:.09em;
+  text-transform:uppercase
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source h3{
+  max-width:940px;
+  margin:7px 0 6px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source h3 button{
+  color:#1f343a;
+  font:400 21px/1.3 Georgia,"Times New Roman",serif;
+  letter-spacing:-.012em
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source .ki-ref{
+  color:#66767a;
+  font-size:10.75px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source>p:not(.ki-ref):not(.fine){
+  max-width:960px;
+  color:#596c71;
+  font-size:12.25px;
+  line-height:1.62
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source details{
+  max-width:960px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-detail-toggle{
+  color:#5b6d71;
+  font-size:10px;
+  font-weight:650
+}
+.view[data-view="articles"] #knowledgeArticles .ki-controls{
+  margin-top:8px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-controls .btn{
+  min-height:0;
+  padding:4px 0;
+  border:0;
+  background:transparent;
+  color:#466f6b
+}
+.view[data-view="articles"] #knowledgeArticles .ki-controls .btn:hover{
+  text-decoration:underline;
+  text-underline-offset:3px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-review-details{
+  border-left:2px solid #c7d3cf;
+  padding-left:10px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-pager{
+  justify-content:flex-start;
+  padding:20px 0
+}
+
+/* CuXplore: one primary workspace. Direct retrieval is secondary and collapsed. */
+.academic-source-search{
+  margin-bottom:22px;
+  padding:0;
+  border:0;
+  border-top:1px solid #bcc5c0;
+  border-bottom:1px solid #d9ddd8;
+  border-radius:0;
+  background:transparent
+}
+.academic-source-search>summary{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:20px;
+  padding:13px 0;
+  color:#31484e;
+  cursor:pointer;
+  list-style:none
+}
+.academic-source-search>summary::-webkit-details-marker{display:none}
+.academic-source-search>summary span{
+  font:600 15px/1.2 Georgia,"Times New Roman",serif
+}
+.academic-source-search>summary small{
+  color:#748084;
+  font-size:10px
+}
+.academic-source-search>summary:after{
+  content:"+";
+  margin-left:auto;
+  color:#70807f;
+  font:18px/1 Georgia,"Times New Roman",serif
+}
+.academic-source-search[open]>summary:after{content:"−"}
+.academic-source-search-body{
+  padding:17px 0 24px
+}
+.academic-source-search .ki-heading{margin-bottom:12px}
+.academic-source-search .ki-heading h2{
+  color:#263d43;
+  font:600 20px/1.3 Georgia,"Times New Roman",serif
+}
+.academic-source-search .ki-results{
+  margin-top:14px;
+  gap:10px
+}
+.academic-source-search .ki-source{
+  border-radius:5px;
+  box-shadow:none
+}
+.academic-source-search .ki-chip{display:none}
+
+@media(max-width:780px){
+  .view[data-view="articles"] #knowledgeArticles .ki-source{
+    padding:17px 0 16px
+  }
+  .view[data-view="articles"] #knowledgeArticles .ki-source h3 button{
+    font-size:19px
+  }
+  .academic-source-search>summary{
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:4px 10px
+  }
+  .academic-source-search>summary small{
+    width:100%
+  }
+}
