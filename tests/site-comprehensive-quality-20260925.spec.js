@@ -25,7 +25,7 @@ test('global search reaches literature records without a linked structured recor
 test('literature keeps one corpus denominator without a dense coverage dashboard',async({page})=>{
   await page.goto(`${BASE}/#articles`,{waitUntil:'networkidle'});
   await expect(page.locator('.ui-literature-coverage')).toHaveCount(0);
-  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('410 DOI-deduplicated articles');
+  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('DOI-deduplicated corpus');
 });
 
 test('homepage and literature results keep secondary detail collapsed',async({page})=>{

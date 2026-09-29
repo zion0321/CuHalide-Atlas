@@ -1,0 +1,918 @@
+/* CuHalide Atlas academic refinement layer
+   Visual hierarchy only: restrained, editorial, scientific. */
+
+:root{
+  --bg:#f6f6f2;
+  --card:#ffffff;
+  --ink:#1d2b30;
+  --muted:#687478;
+  --navy:#18343b;
+  --navy2:#274a52;
+  --teal:#4c7773;
+  --teal2:#739792;
+  --soft:#eef1ee;
+  --gold:#a56f3d;
+  --goldsoft:#f6efe5;
+  --line:#d9ddd8;
+  --danger:#8b4148;
+  --shadow:none;
+  --shadow-strong:none;
+  --r:8px;
+  --shell:1220px
+}
+
+html{background:var(--bg)}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-size:15px;
+  line-height:1.62;
+  letter-spacing:.002em
+}
+.shell{width:min(var(--shell),calc(100% - 56px))}
+::selection{background:#dce7e3;color:#17343b}
+
+/* Header: text-first and quiet. */
+header{
+  background:rgba(248,248,244,.96);
+  border-bottom:1px solid #dfe2dd;
+  box-shadow:none;
+  backdrop-filter:blur(10px)
+}
+.head{height:64px}
+.brand{gap:9px}
+.brand .mark{
+  width:28px;height:28px;border-radius:4px;
+  background:#17343b;box-shadow:none
+}
+.brand .mark:before{
+  width:6px;height:6px;left:6px;top:6px;
+  background:#9bb6b1;
+  box-shadow:10px 2px 0 #c7a276,5px 11px 0 #f8f8f4
+}
+.brand strong{
+  font:600 17px/1.1 Georgia,"Times New Roman",serif;
+  letter-spacing:-.018em;color:#17343b
+}
+.brand small,.ux-review-chip{display:none!important}
+.nav{gap:1px}
+.nav a{
+  min-height:36px;
+  padding:8px 9px;
+  border-radius:0;
+  color:#58686d;
+  font-size:11.5px;
+  font-weight:650;
+  letter-spacing:.01em
+}
+.nav a:hover,.nav a.active{
+  background:transparent;
+  color:#172f36;
+  box-shadow:none;
+  text-decoration:underline;
+  text-decoration-color:#a56f3d;
+  text-decoration-thickness:1.5px;
+  text-underline-offset:6px
+}
+.menu{
+  border:1px solid #ccd3cf;
+  border-radius:5px;
+  background:#fff;
+  color:#17343b;
+  font-weight:650
+}
+.ux-search-trigger{
+  min-height:36px;
+  border:1px solid #cfd6d2;
+  border-radius:5px;
+  background:transparent;
+  box-shadow:none;
+  font-weight:650
+}
+.ux-search-trigger:hover{border-color:#9eaaa5;box-shadow:none}
+.ux-search-trigger kbd{background:#f2f3ef;border-color:#d7dad5}
+
+/* Shared editorial hierarchy. */
+.page-head{padding:54px 0 28px}
+.page-head .eyebrow,.eyebrow{
+  margin-bottom:8px;
+  color:#617176;
+  font-size:9px;
+  font-weight:750;
+  letter-spacing:.14em
+}
+.page-head h1{
+  max-width:900px;
+  color:#17343b;
+  font:400 clamp(39px,4.2vw,56px)/1.06 Georgia,"Times New Roman",serif;
+  letter-spacing:-.035em
+}
+.page-head p:not(.eyebrow){
+  max-width:760px;
+  margin-top:15px;
+  color:#667378;
+  font-size:14px;
+  line-height:1.68
+}
+.page-head+.shell{margin-top:2px}
+
+.panel,.card,.kpi,.release,.modal-card,.photo-stat,.photo-metric{
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  background:#fff;
+  box-shadow:none;
+  transition:border-color .15s ease
+}
+@media(hover:hover) and (pointer:fine){
+  .article:hover,.method:hover,.candidate:hover,.kpi:hover{
+    transform:none;
+    border-color:#b8c1bc;
+    box-shadow:none
+  }
+}
+.panel{padding:20px}
+.panel h2{color:#24383e;font-weight:650}
+.fine,.meta,.summary,.source,.scope{color:#5e6f73}
+.denom{
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#788387;
+  font-size:10px;
+  font-weight:500
+}
+
+/* Buttons and controls: utility, not decoration. */
+.btn{
+  min-height:38px;
+  border-radius:5px;
+  padding:9px 13px;
+  font-size:11px;
+  font-weight:700
+}
+.btn.primary{background:#23494f;color:#fff}
+.btn.primary:hover{background:#193c42}
+.btn.secondary{background:#fff;border-color:#cdd4d0;color:#31484e}
+.field{gap:5px;margin-bottom:11px}
+.field span{
+  color:#647276;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.085em
+}
+.field input,.field select,.field textarea{
+  min-height:40px;
+  border:1px solid #cbd2cf;
+  border-radius:5px;
+  background:#fff;
+  color:#24353a;
+  padding:8px 10px
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:#6f918c;
+  box-shadow:0 0 0 2px rgba(77,118,113,.11)
+}
+
+/* Literature: more like a scholarly index, less like a card feed. */
+.layout{
+  grid-template-columns:252px minmax(0,1fr);
+  gap:34px;
+  padding-bottom:72px
+}
+.view[data-view="articles"] .filters{
+  top:78px;
+  padding:18px 0 0;
+  border:0;
+  border-top:1px solid #bfc6c2;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none
+}
+.view[data-view="articles"] .filters .btn{width:100%;margin-top:3px}
+.toolbar{
+  min-height:42px;
+  margin-bottom:8px;
+  border-bottom:1px solid #dfe2de
+}
+.toolbar strong{
+  color:#23383e;
+  font:600 17px/1.2 Georgia,"Times New Roman",serif
+}
+.toolbar small{font-size:10px;color:#7a8487}
+.cards{gap:0}
+.article{
+  padding:22px 3px 20px;
+  border:0;
+  border-bottom:1px solid #dde1dd;
+  border-radius:0;
+  background:transparent
+}
+.article:first-child{border-top:1px solid #dde1dd}
+.article .eyebrow{
+  margin-bottom:6px;
+  color:#778286;
+  letter-spacing:.09em
+}
+.article h2{margin:0 0 7px}
+.article h2 button{
+  color:#1e3339;
+  font:400 22px/1.28 Georgia,"Times New Roman",serif;
+  letter-spacing:-.013em
+}
+.article h2 button:hover{color:#4c7773}
+.article .meta{font-size:11.25px;line-height:1.55}
+.article .meta a{color:#4c7773;text-underline-offset:2px}
+.article .summary{
+  max-width:960px;
+  margin:10px 0 11px;
+  color:#586b70;
+  font-size:12.5px;
+  line-height:1.62
+}
+.badges{gap:5px}
+.badge{
+  border:1px solid #d7dcd8;
+  border-radius:4px;
+  background:transparent;
+  color:#5e6e72;
+  padding:3px 6px;
+  font-size:9px;
+  font-weight:650
+}
+.badge.a,.badge.warn,.badge.audit{
+  background:transparent;
+  border-color:#d7dcd8;
+  color:#5e6e72
+}
+.view[data-view="articles"] .article .badges .badge:last-child{display:none}
+.ux-article-footer{
+  margin-top:11px;
+  border-top:0;
+  padding-top:0
+}
+.ux-open-record{color:#456f6b}
+.pager{margin:24px 0}
+.pager button{
+  border-radius:4px;
+  box-shadow:none;
+  background:transparent
+}
+.pager .current{background:#24494f}
+
+/* Structures and polar subset: publication-style tables. */
+.view[data-view="structures"]>.shell.panel,
+.view[data-view="polar"]>.shell.panel{
+  padding:18px 0 0;
+  border:0;
+  border-top:1px solid #bcc4c0;
+  border-radius:0;
+  background:transparent
+}
+.view[data-view="structures"]>.shell.panel .two,
+.view[data-view="polar"]>.shell.panel .two{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px 12px
+}
+.table-wrap{
+  border:1px solid #d9ddd8;
+  border-radius:4px;
+  background:#fff;
+  box-shadow:none
+}
+table{min-width:920px}
+caption{padding:0 0 10px;color:#7a8588;font-size:10px}
+th{
+  background:#f0f1ed!important;
+  color:#3b4d52!important;
+  border-bottom:1px solid #cfd5d1;
+  padding:10px 11px;
+  font-size:9.5px;
+  font-weight:750;
+  letter-spacing:.055em
+}
+td{
+  border-top:1px solid #eceeeb;
+  padding:11px;
+  color:#344a50;
+  font-size:11.25px
+}
+tbody tr:hover{background:#fafbf8}
+.linkbtn{color:#406c68;font-weight:700}
+.sg-token{
+  background:#f0f2ef;
+  border:1px solid #e0e4e0;
+  border-radius:3px;
+  color:#35494f
+}
+.polar-intro{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:38px;
+  align-items:end;
+  padding:26px 0;
+  border:0;
+  border-top:1px solid #bfc6c2;
+  border-bottom:1px solid #d8ddd8;
+  border-radius:0;
+  background:transparent
+}
+.polar-num{
+  min-width:150px;
+  padding:0 0 2px 28px;
+  border-left:1px solid #c9cfcb;
+  border-radius:0;
+  background:transparent;
+  color:#243d43!important;
+  text-align:left
+}
+.polar-num strong,.polar-num small{color:#243d43!important}
+.polar-num strong{font:400 38px/1 Georgia,"Times New Roman",serif}
+.polar-num small{margin-top:7px;display:block;color:#6f7c80!important}
+.academic-related{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin:13px 0 0!important;
+  font-size:11px!important
+}
+.academic-related a{color:#496f6b;text-decoration:none}
+.academic-related a:hover{text-decoration:underline;text-underline-offset:3px}
+.academic-related span{color:#a3aaa6}
+
+/* Photophysics: data first, metrics secondary. */
+.photo-view{padding-bottom:72px}
+.photo-status-grid{gap:8px}
+.photo-stat{
+  border-radius:6px;
+  padding:15px
+}
+.photo-stat strong{font:400 27px/1.05 Georgia,"Times New Roman",serif}
+.photo-feature-grid{gap:12px}
+.photo-feature-grid .panel{min-height:0}
+.photo-grain-chain span{
+  border-radius:4px;
+  background:#f3f4f1
+}
+.photo-stage{border-radius:4px}
+.photo-example-panel{
+  margin-bottom:72px;
+  border:1px solid #d4d9d5;
+  border-radius:6px;
+  background:#fff;
+  color:#263b41
+}
+.photo-example-panel .eyebrow{color:#6c7b7e}
+.photo-example-panel h2{color:#24383e}
+.photo-example-panel .fine{color:#68777b}
+.photo-example-panel .btn.secondary{
+  background:#fff;
+  color:#31484e;
+  border-color:#cdd4d0
+}
+.ui-photo-coverage{
+  border-radius:6px;
+  box-shadow:none
+}
+.photo-modal-section{
+  border-radius:6px;
+  background:#fbfcfa
+}
+.photo-inline-stats span,.photo-sample,.photo-fact{
+  border-radius:5px
+}
+.photo-fact{background:#f3f4f1}
+
+/* CuXplore: research workspace, not chatbot chrome. */
+.rag-grid{
+  grid-template-columns:235px minmax(0,1fr) 260px;
+  gap:22px;
+  padding-bottom:72px
+}
+.rag-side,.rag-sources{
+  top:78px;
+  padding:17px 0 0;
+  border:0;
+  border-top:1px solid #bdc5c1;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none
+}
+.rag-side .policy{
+  border-radius:4px;
+  background:#eef2ef;
+  color:#4d6365
+}
+.assistant-steps>div,.prompts button,.source,.no-evidence{
+  border-radius:5px;
+  box-shadow:none
+}
+.prompts{gap:5px}
+.prompts button{
+  border-color:#d9ddd8;
+  background:#fff;
+  color:#53676c;
+  padding:9px
+}
+.rag-work{
+  min-height:640px;
+  overflow:hidden;
+  border:1px solid #d2d7d3;
+  border-radius:7px;
+  box-shadow:none
+}
+.rag-top{background:#f7f8f5}
+.status{
+  border-radius:4px;
+  background:#e9efec;
+  color:#466a66
+}
+.thread{
+  max-height:650px;
+  background:#fff
+}
+.bubble{
+  border-radius:6px;
+  padding:13px 14px
+}
+.bubble.assistant{
+  max-width:92%;
+  border-color:#e0e4e1;
+  background:#f4f5f2
+}
+.bubble.user{
+  max-width:86%;
+  background:#24494f
+}
+.assistant-welcome{
+  background:#f3f5f2!important;
+  border-color:#dde2de!important
+}
+.composer{
+  background:#fbfcfa;
+  border-top-color:#dfe3df
+}
+.composer textarea{border-radius:5px}
+.source{background:#fff}
+
+/* Methods and About: text-led, journal-like. */
+.methods{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:28px 34px
+}
+.method{
+  min-height:0;
+  padding:18px 0 20px;
+  border:0;
+  border-top:1px solid #bfc6c2;
+  border-radius:0;
+  background:transparent
+}
+.method .no{
+  top:15px;right:0;
+  color:#a0a9a5;
+  font:400 23px Georgia,"Times New Roman",serif
+}
+.method h2{
+  margin-right:42px;
+  color:#283c42;
+  font:600 18px/1.3 Georgia,"Times New Roman",serif
+}
+.method p{color:#617075;font-size:12px;line-height:1.65}
+.detail{
+  margin-top:18px;
+  margin-bottom:72px;
+  padding:22px 0 0;
+  border:0;
+  border-top:1px solid #bfc6c2;
+  border-radius:0;
+  background:transparent
+}
+.detail details{padding:14px 0}
+.detail summary{color:#31474d;font-weight:650}
+.citation-grid{gap:28px;padding-bottom:72px}
+.citation-grid>.panel{
+  padding:22px 0 0;
+  border:0;
+  border-top:1px solid #bfc6c2;
+  border-radius:0;
+  background:transparent
+}
+.quote{
+  border-left:2px solid #7d9995;
+  border-radius:0;
+  background:transparent;
+  padding:6px 0 6px 16px;
+  color:#35494f;
+  font-size:15px
+}
+.notice{
+  border:1px solid #e5d5bd;
+  border-radius:4px;
+  background:#f7f1e8
+}
+
+/* Modals: flatter scientific record sheets. */
+.backdrop{background:rgba(24,39,44,.64)}
+.modal-card{
+  width:min(1000px,100%);
+  border-radius:8px;
+  padding:30px;
+  box-shadow:0 24px 70px rgba(16,32,38,.22)
+}
+.close{
+  border-radius:4px;
+  background:#f0f2ef;
+  color:#405158
+}
+.modal-title{
+  color:#1f343a;
+  font:400 32px/1.16 Georgia,"Times New Roman",serif
+}
+.block{
+  border:1px solid #e0e4e0;
+  border-radius:5px;
+  background:#fafbf8
+}
+.block h3{color:#59746f}
+
+/* Footer: quiet metadata layer. */
+.footer{
+  padding:28px 0;
+  border-top:1px solid #d4d9d5;
+  background:#efefeb;
+  color:#59686d
+}
+.footer-grid{
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:30px;
+  align-items:start
+}
+.footer strong{
+  color:#243a40;
+  font:600 15px Georgia,"Times New Roman",serif
+}
+.footer p,.footer a{font-size:10.5px}
+.footer-grid>p:last-child{display:none}
+.footer-links{justify-content:flex-end}
+.footer-links a{color:#4d666a;text-decoration:none}
+.footer-links a:hover{text-decoration:underline;text-underline-offset:3px}
+
+/* Homepage remains the editorial focal point; harmonize without flattening it. */
+body:has(.atlas-home.active) header{background:rgba(248,248,244,.97)}
+body:has(.atlas-home.active) .head{width:min(1180px,calc(100% - 56px))}
+body:has(.atlas-home.active) .atlas-hero{
+  padding:62px 0 58px;
+  background:#f6f3eb
+}
+body:has(.atlas-home.active) .atlas-home{background:#f6f3eb}
+body:has(.atlas-home.active) .atlas-home .atlas-hero h1{
+  color:#17333b;
+  font-size:clamp(60px,6vw,86px);
+  letter-spacing:-.052em
+}
+body:has(.atlas-home.active) .atlas-home .atlas-hero .hero-copy{
+  max-width:700px;
+  color:#647075;
+  font-size:18px
+}
+body:has(.atlas-home.active) .atlas-figure-band{background:#17343b}
+body:has(.atlas-home.active) .atlas-home .ux-start-grid{
+  border-color:#c8c8be
+}
+body:has(.atlas-home.active) .atlas-home .ux-start-card{
+  min-height:122px
+}
+body:has(.atlas-home.active) .atlas-home .ux-start-card:hover{background:#ede9df}
+
+/* Responsive refinement. */
+@media(max-width:1120px){
+  .shell{width:min(var(--shell),calc(100% - 40px))}
+  .nav{
+    top:64px;right:20px;
+    border-radius:6px;
+    box-shadow:0 16px 44px rgba(25,42,48,.12)
+  }
+  .nav a{min-height:42px}
+  .layout{grid-template-columns:230px minmax(0,1fr);gap:24px}
+  .rag-grid{grid-template-columns:220px minmax(0,1fr)}
+  .rag-sources{grid-column:1/-1}
+  .view[data-view="structures"]>.shell.panel .two,
+  .view[data-view="polar"]>.shell.panel .two{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:780px){
+  .shell{width:calc(100% - 28px)}
+  .head{height:62px}
+  .brand .mark{width:26px;height:26px}
+  .brand strong{font-size:16px}
+  .nav{top:62px;right:14px;left:14px;padding:6px}
+  .nav a{font-size:12.5px}
+  .page-head{padding:38px 0 21px}
+  .page-head h1{font-size:clamp(35px,10vw,46px)}
+  .page-head p:not(.eyebrow){font-size:13.5px}
+  .layout,.rag-grid{grid-template-columns:1fr;gap:14px}
+  .view[data-view="articles"] .filters,
+  .rag-side,.rag-sources{padding-top:12px}
+  .article{padding:18px 1px}
+  .article h2 button{font-size:20px}
+  .view[data-view="structures"]>.shell.panel .two,
+  .view[data-view="polar"]>.shell.panel .two{grid-template-columns:1fr}
+  .view[data-view="structures"] tr,.view[data-view="polar"] tr{
+    border-radius:6px;
+    box-shadow:none
+  }
+  .polar-intro{grid-template-columns:1fr;gap:20px}
+  .polar-num{
+    min-width:0;
+    margin:0;
+    padding:17px 0 0;
+    border-left:0;
+    border-top:1px solid #d0d5d1
+  }
+  .methods{grid-template-columns:1fr;gap:8px}
+  .citation-grid{grid-template-columns:1fr;gap:18px}
+  .modal-card{border-radius:6px;padding:20px}
+  .footer-grid{grid-template-columns:1fr;gap:12px}
+  .footer-links{justify-content:flex-start}
+  body:has(.atlas-home.active) .head{width:calc(100% - 28px)}
+  body:has(.atlas-home.active) .atlas-home .atlas-hero{padding:48px 0 44px}
+}
+
+@media(max-width:520px){
+  .shell{width:calc(100% - 24px)}
+  .page-head{padding-top:32px}
+  .article h2 button{font-size:19px}
+  .toolbar{align-items:flex-start}
+  .photo-status-grid{grid-template-columns:1fr}
+  body:has(.atlas-home.active) .head{width:calc(100% - 24px)}
+  body:has(.atlas-home.active) .atlas-home .atlas-hero .shell,
+  body:has(.atlas-home.active) .atlas-home .dashboard,
+  body:has(.atlas-home.active) .atlas-home .ux-start{width:calc(100% - 28px)}
+  body:has(.atlas-home.active) .atlas-home .atlas-hero h1{font-size:clamp(44px,12vw,55px)}
+}
+
+@media print{
+  body{background:#fff}
+  .panel,.card,.kpi,.release,.modal-card{border-color:#bbb!important}
+}
+
+
+/* Final de-productization pass after preview review. */
+.atlas-home .ux-start-card{
+  min-height:104px!important;
+  padding-top:22px!important;
+  padding-bottom:18px!important
+}
+.atlas-home .ux-start-card i{display:none!important}
+.atlas-home .ux-start-card strong{padding-right:0!important}
+.atlas-home .ux-start-card:hover{
+  background:transparent!important
+}
+.atlas-home .ux-start-card:hover strong{
+  text-decoration:underline;
+  text-decoration-color:#a56f3d;
+  text-decoration-thickness:1.5px;
+  text-underline-offset:5px
+}
+body:has(.atlas-home.active) .footer{display:block!important}
+
+.photo-feature-grid{
+  gap:30px
+}
+.photo-feature-grid .panel{
+  padding:18px 0 22px;
+  border:0;
+  border-top:1px solid #bcc5c0;
+  border-radius:0;
+  background:transparent
+}
+.photo-feature-grid .panel h2{
+  font:600 19px/1.3 Georgia,"Times New Roman",serif
+}
+.photo-example-panel{
+  padding:22px 0;
+  border-left:0;
+  border-right:0;
+  border-radius:0
+}
+.ui-photo-coverage{
+  border-left:0;
+  border-right:0;
+  border-radius:0
+}
+.ui-photo-coverage>summary{
+  padding-left:0;
+  padding-right:0
+}
+.ui-photo-coverage #photoStatusGrid{
+  padding-left:0;
+  padding-right:0
+}
+
+.view[data-view="citation"] .ui-version-timeline{
+  padding:22px 0 0;
+  border:0;
+  border-top:1px solid #bfc6c2;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none
+}
+.ui-version-list{
+  gap:0
+}
+.ui-version-step{
+  padding:13px 15px;
+  border:0;
+  border-left:1px solid #d8ddd8;
+  border-radius:0;
+  background:transparent
+}
+.ui-version-step:first-child{border-left:0;padding-left:0}
+
+.ui-backtop{
+  border:1px solid #c9d0cc;
+  border-radius:4px;
+  background:#f8f8f4;
+  color:#365057;
+  box-shadow:none
+}
+
+@media(max-width:780px){
+  .atlas-home .ux-start-card,
+  .atlas-home .ux-start-card:nth-child(even){
+    min-height:72px!important;
+    padding-top:14px!important;
+    padding-bottom:12px!important
+  }
+  .photo-feature-grid{gap:8px}
+  .ui-version-step{
+    border-left:0;
+    border-top:1px solid #d8ddd8;
+    padding:13px 0
+  }
+  .ui-version-step:first-child{border-top:0}
+}
+
+
+/* Scholarly literature index: flatten the connected-knowledge catalog as well. */
+.view[data-view="articles"] #knowledgeArticles .ki-summarybar{
+  margin:4px 0 8px;
+  padding:0 2px 10px;
+  border-bottom:1px solid #dfe2de
+}
+.view[data-view="articles"] #knowledgeArticles .ki-summarybar strong{
+  color:#23383e;
+  font:600 17px/1.2 Georgia,"Times New Roman",serif
+}
+.view[data-view="articles"] #knowledgeArticles .ki-list{gap:0}
+.view[data-view="articles"] #knowledgeArticles .ki-source{
+  padding:20px 2px 19px;
+  border:0;
+  border-bottom:1px solid #dde1dd;
+  border-radius:0;
+  background:transparent
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source:first-child{
+  border-top:1px solid #dde1dd
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source .ki-scope{
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#657579;
+  font-size:8.5px;
+  font-weight:700;
+  letter-spacing:.09em;
+  text-transform:uppercase
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source h3{
+  max-width:940px;
+  margin:7px 0 6px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source h3 button{
+  color:#1f343a;
+  font:400 21px/1.3 Georgia,"Times New Roman",serif;
+  letter-spacing:-.012em
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source .ki-ref{
+  color:#66767a;
+  font-size:10.75px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source>p:not(.ki-ref):not(.fine){
+  max-width:960px;
+  color:#596c71;
+  font-size:12.25px;
+  line-height:1.62
+}
+.view[data-view="articles"] #knowledgeArticles .ki-source details{
+  max-width:960px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-detail-toggle{
+  color:#5b6d71;
+  font-size:10px;
+  font-weight:650
+}
+.view[data-view="articles"] #knowledgeArticles .ki-controls{
+  margin-top:8px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-controls .btn{
+  min-height:0;
+  padding:4px 0;
+  border:0;
+  background:transparent;
+  color:#466f6b
+}
+.view[data-view="articles"] #knowledgeArticles .ki-controls .btn:hover{
+  text-decoration:underline;
+  text-underline-offset:3px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-review-details{
+  border-left:2px solid #c7d3cf;
+  padding-left:10px
+}
+.view[data-view="articles"] #knowledgeArticles .ki-pager{
+  justify-content:flex-start;
+  padding:20px 0
+}
+
+/* CuXplore: one primary workspace. Direct retrieval is secondary and collapsed. */
+.academic-source-search{
+  margin-bottom:22px;
+  padding:0;
+  border:0;
+  border-top:1px solid #bcc5c0;
+  border-bottom:1px solid #d9ddd8;
+  border-radius:0;
+  background:transparent
+}
+.academic-source-search>summary{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:20px;
+  padding:13px 0;
+  color:#31484e;
+  cursor:pointer;
+  list-style:none
+}
+.academic-source-search>summary::-webkit-details-marker{display:none}
+.academic-source-search>summary span{
+  font:600 15px/1.2 Georgia,"Times New Roman",serif
+}
+.academic-source-search>summary small{
+  color:#5f7074;
+  font-size:10px
+}
+.academic-source-search>summary:after{
+  content:"+";
+  margin-left:auto;
+  color:#70807f;
+  font:18px/1 Georgia,"Times New Roman",serif
+}
+.academic-source-search[open]>summary:after{content:"−"}
+.academic-source-search-body{
+  padding:17px 0 24px
+}
+.academic-source-search .ki-heading{margin-bottom:12px}
+.academic-source-search .ki-heading h2{
+  color:#263d43;
+  font:600 20px/1.3 Georgia,"Times New Roman",serif
+}
+.academic-source-search .ki-results{
+  margin-top:14px;
+  gap:10px
+}
+.academic-source-search .ki-source{
+  border-radius:5px;
+  box-shadow:none
+}
+.academic-source-search .ki-chip{display:none}
+
+@media(max-width:780px){
+  .view[data-view="articles"] #knowledgeArticles .ki-source{
+    padding:17px 0 16px
+  }
+  .view[data-view="articles"] #knowledgeArticles .ki-source h3 button{
+    font-size:19px
+  }
+  .academic-source-search>summary{
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:4px 10px
+  }
+  .academic-source-search>summary small{
+    width:100%
+  }
+}
+
+
+/* Lighthouse accessibility closeout. */
+.footer p{color:#526267!important}
+
+
+/* Final mobile hierarchy: keep CuXplore focused on the primary workspace. */
+@media(max-width:780px){
+  .view[data-view="rag"] .rag-side{display:none!important}
+}
