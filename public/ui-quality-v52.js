@@ -195,6 +195,8 @@ function enhanceDashboardA11y(){
 
 function enhanceCopyAndLabels(){
   const search=$('uxSearchTrigger');if(search)search.setAttribute('aria-label',String(search.textContent||'Search Atlas').replace(/\s+/g,' ').trim());
+  const articleHead=document.querySelector('.view[data-view="articles"] .page-head');if(articleHead){const h=articleHead.querySelector('h1');if(h)h.textContent='Literature';const p=articleHead.querySelector('p:not(.eyebrow)');if(p)p.textContent='Search the DOI-deduplicated corpus by title, DOI, chemistry, dimensionality and evidence attributes.'}
+  const footer=document.querySelector('.footer-links');if(footer&&!footer.dataset.academicFooter){footer.innerHTML='<a href="#articles">Literature</a><a href="#structures">Structures</a><a href="#photophysics">Photophysics</a><a href="#rag">CuXplore</a><a href="#methods">Methods</a><a href="#citation">About</a>';footer.dataset.academicFooter='1'}
   const articles=document.querySelector('.view[data-view="articles"] .page-head .eyebrow');if(articles&&articles.textContent!=='Literature corpus')articles.textContent='Literature corpus';
   const hero=document.querySelector('.view[data-view="home"] .actions');if(hero){
     const photo=hero.querySelector('.photo-hero-link');photo?.remove();
