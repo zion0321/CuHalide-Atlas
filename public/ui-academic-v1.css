@@ -906,3 +906,7 @@ body:has(.atlas-home.active) .footer{display:block!important}
     width:100%
   }
 }
+
+
+/* Lighthouse accessibility closeout. */
+.footer p{color:#526267!important}
