@@ -35,7 +35,7 @@ test('Polar page avoids repeating the same ferroelectric disclaimer',async({page
 
 test('footer and CuXplore navigation use concise consistent naming',async({page})=>{
   await page.goto(BASE,{waitUntil:'networkidle'});
-  await expect(page.locator('.footer-links a[href="#citation"]')).toHaveText('About data');
+  await expect(page.locator('.footer-links a[href="#citation"]')).toHaveText('About');
   const rag=page.locator('#nav [data-route="rag"]');
   await expect(rag).toHaveText('CuXplore');
   await expect(rag).toHaveAttribute('title','CuXplore');
