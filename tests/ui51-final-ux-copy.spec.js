@@ -36,7 +36,7 @@ test('home leads from identity to publications and concise research links',async
 test('literature, structures, CuXplore and methods use direct researcher-facing explanations',async({page})=>{
   const errors=captureBrowserErrors(page);
   await page.goto(`${BASE}/#articles`,{waitUntil:'domcontentloaded'});
-  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Search 410 DOI-deduplicated articles by title or DOI.',{timeout:15000});
+  await expect(page.locator('.view[data-view="articles"] .page-head')).toContainText('Search the DOI-deduplicated corpus by title, DOI, chemistry, dimensionality and evidence attributes.',{timeout:15000});
   await expect(page.locator('#knowledgeArticles .ki-source').first()).toContainText(/Linked structured data|Literature only/,{timeout:15000});
 
   await page.goto(`${BASE}/#structures`,{waitUntil:'domcontentloaded'});
