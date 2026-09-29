@@ -22,6 +22,7 @@ const STATIC_FILES=new Map([
 ['/ui-photophysics-v1.css',{file:path.join(PUBLIC_DIR,'ui-photophysics-v1.css'),type:'text/css; charset=utf-8'}],
 ['/ui-ux-v1.css',{file:path.join(PUBLIC_DIR,'ui-ux-v1.css'),type:'text/css; charset=utf-8'}],
 ['/ui-quality-v52.css',{file:path.join(PUBLIC_DIR,'ui-quality-v52.css'),type:'text/css; charset=utf-8'}],
+['/ui-academic-v1.css',{file:path.join(PUBLIC_DIR,'ui-academic-v1.css'),type:'text/css; charset=utf-8'}],
 ['/organic-components-v1.css',{file:path.join(PUBLIC_DIR,'organic-components-v1.css'),type:'text/css; charset=utf-8'}],
 ['/cuxplore-v1.css',{file:path.join(PUBLIC_DIR,'cuxplore-v1.css'),type:'text/css; charset=utf-8'}],
 ['/cuxplore-v1.js',{file:path.join(PUBLIC_DIR,'cuxplore-v1.js'),type:'text/javascript; charset=utf-8'}],
