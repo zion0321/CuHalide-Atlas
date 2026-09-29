@@ -194,7 +194,7 @@ function enhanceDashboardA11y(){
 }
 
 function enhanceCopyAndLabels(){
-  const search=$('uxSearchTrigger');if(search)search.removeAttribute('aria-label');
+  const search=$('uxSearchTrigger');if(search)search.setAttribute('aria-label',String(search.textContent||'Search Atlas').replace(/\s+/g,' ').trim());
   const articles=document.querySelector('.view[data-view="articles"] .page-head .eyebrow');if(articles&&articles.textContent!=='Literature corpus')articles.textContent='Literature corpus';
   const hero=document.querySelector('.view[data-view="home"] .actions');if(hero){
     const photo=hero.querySelector('.photo-hero-link');photo?.remove();
