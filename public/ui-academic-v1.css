@@ -910,3 +910,9 @@ body:has(.atlas-home.active) .footer{display:block!important}
 
 /* Lighthouse accessibility closeout. */
 .footer p{color:#526267!important}
+
+
+/* Final mobile hierarchy: keep CuXplore focused on the primary workspace. */
+@media(max-width:780px){
+  .view[data-view="rag"] .rag-side{display:none!important}
+}
